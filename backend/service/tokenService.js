@@ -36,7 +36,6 @@ const validateToken = async (token) => {
   }
 };
 
-
 module.exports = {
   getUserPayload,
   createToken

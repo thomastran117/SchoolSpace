@@ -47,7 +47,6 @@ const signupUser = async (email, password, role) => {
   return user;
 };
 
-
 module.exports = {
   signupUser,
   loginUser
