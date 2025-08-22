@@ -1,8 +1,5 @@
 const express = require("express");
 const { loginUser, signupUser, loginWithGoogle } = require("../service/authService");
-const passport = require("../oauth/googlePassport");
-const { createToken } = require("../service/tokenService");
-const crypto = require("crypto");
 
 const login = async (req, res) => {
   try {
@@ -71,47 +68,5 @@ const validateEmail = (email) => {
 const router = express.Router();
 router.post("/login", login);
 router.post("/signup", signup);
-router.post("/google", loginGoogle);
-
-router.get("/google", (req, res, next) => {
-  const state = crypto.randomBytes(16).toString("hex");
-  res.cookie("oauth_state", state, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 5 * 60 * 1000,
-  });
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-    session: false,
-    state,
-    prompt: "select_account",
-  })(req, res, next);
-});
-
-router.get("/google/callback",
-  (req, res, next) => {
-    const cookieState = req.cookies?.oauth_state;
-    if (!cookieState || cookieState !== req.query.state) {
-      return res.redirect(`${process.env.FRONTEND_CLIENT}/login?error=state`);
-    }
-    res.clearCookie("oauth_state");
-    next();
-  },
-  passport.authenticate("google", {
-    failureRedirect: `${process.env.FRONTEND_CLIENT}/login?error=google`,
-    session: false,
-  }),
-  async (req, res) => {
-    const token = await createToken(req.user.id, req.user.email, req.user.role);
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    res.redirect(`${process.env.FRONTEND_CLIENT}/oauth/callback`);
-  }
-);
 
 module.exports = router;
