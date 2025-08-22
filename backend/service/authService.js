@@ -3,6 +3,7 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const bcrypt = require("bcrypt");
 const prisma = require("../resource/prisma");
 const { createToken } = require("./tokenService");
+const microsoftOAuth = require("./oauth/microsoftService");
 
 const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({
@@ -36,18 +37,53 @@ const signupUser = async (email, password, role) => {
     throw error;
   }
 
-  const user = await prisma.user.create({
+  const hash = await bcrypt.hash(password, 12);
+
+ const user = await prisma.user.create({
     data: {
       email,
-      password,
+      password: hash,
       role,
+      provider: "local",
+      providerId: null,
+      name: "",
     },
   });
 
   return user;
 };
 
+const startMicrosoftOAuth = async () => {
+  return microsoftOAuth.start();
+};
+
+const finishMicrosoftOAuth = async (callbackParams, expected) => {
+  const profile = await microsoftOAuth.finish(callbackParams, expected);
+  if (!profile.email) {
+    const e = new Error("Microsoft account missing email"); e.statusCode = 400; throw e;
+  }
+
+  let user = await prisma.user.findUnique({ where: { email: profile.email } });
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email: profile.email,
+        name: profile.name,
+        role: "user",
+        provider: "microsoft",
+        providerId: profile.sub,
+        password: "",
+      },
+    });
+  }
+
+  const token = await createToken(user.id, user.email, user.role);
+  return { token, role: user.role, user: { id: user.id, email: user.email, name: user.name } };
+};
+
 module.exports = {
   signupUser,
-  loginUser
+  loginUser,
+  startMicrosoftOAuth,
+  finishMicrosoftOAuth,
 };

@@ -1,18 +1,8 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 
-/**
- * AuthPage.jsx — Simple & Clean Auth
- * ----------------------------------
- * - Minimal layout (single centered card)
- * - Email + password only
- * - Two OAuth buttons: Google & Microsoft
- * - Optional toggle Login / Sign Up
- * - No fancy animations; just Bootstrap 5
- */
-
 export default function AuthPage({ onAuth }) {
-  const [mode, setMode] = useState("login"); // 'login' | 'signup'
+  const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,7 +46,11 @@ export default function AuthPage({ onAuth }) {
   };
 
   const handleOAuth = (provider) => {
-    alert(`Start ${provider} OAuth here`);
+    if (provider === "microsoft") {
+      window.location.href = `http://localhost:8040/api/auth/microsoft/start`;
+    } else if (provider === "google") {
+      window.location.href = `http://localhost:8040/api/auth/google/start`;
+    }
   };
 
   return (

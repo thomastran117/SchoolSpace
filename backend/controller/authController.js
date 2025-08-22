@@ -1,5 +1,9 @@
 const express = require("express");
-const { loginUser, signupUser, loginWithGoogle } = require("../service/authService");
+const { loginUser, signupUser, startMicrosoftOAuth, finishMicrosoftOAuth } = require("../service/authService");
+
+const setTemp = (res, key, val) =>
+  res.cookie(key, val, { httpOnly: true, sameSite: "lax", maxAge: 5 * 60 * 1000 });
+const popTemp = (req, res, key) => { const v = req.cookies[key]; res.clearCookie(key); return v; };
 
 const login = async (req, res) => {
   try {
@@ -50,15 +54,30 @@ const signup = async (req, res) => {
   }
 };
 
-const loginGoogle =  async (req, res, next) => {
+const microsoftStart = async (_req, res, next) => {
   try {
-    const { idToken } = req.body
-    if (!idToken) return res.status(400).json({ message: "Missing idToken" });
-
-    const result = await loginWithGoogle(idToken);
-    res.json(result);
+    const { url: authUrl, state, codeVerifier } = await startMicrosoftOAuth();
+    setTemp(res, "ms_state", state);
+    setTemp(res, "ms_code_verifier", codeVerifier);
+    res.redirect(authUrl);
   } catch (e) { next(e); }
 };
+
+const microsoftCallback = async (req, res, next) => {
+  try {
+    const params = url.parse(req.url, true).query;
+    const expected = {
+      state: popTemp(req, res, "ms_state"),
+      codeVerifier: popTemp(req, res, "ms_code_verifier"),
+    };
+    const { token, role } = await finishMicrosoftOAuth(params, expected);
+
+    const redirect = new URL("/auth/signed-in", CLIENT_APP_URL);
+    redirect.hash = `token=${encodeURIComponent(token)}&role=${encodeURIComponent(role)}`;
+    return res.redirect(redirect.toString());
+  } catch (e) { next(e); }
+};
+
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -68,5 +87,7 @@ const validateEmail = (email) => {
 const router = express.Router();
 router.post("/login", login);
 router.post("/signup", signup);
+router.get("/microsoft/start", microsoftStart);
+router.get("/microsoft/callback", microsoftCallback);
 
 module.exports = router;
