@@ -60,19 +60,34 @@ const startMicrosoftOAuth = async () => {
 const finishMicrosoftOAuth = async (callbackParams, expected) => {
   const profile = await microsoftOAuth.finish(callbackParams, expected);
   if (!profile.email) {
-    const e = new Error("Microsoft account missing email"); e.statusCode = 400; throw e;
+    const error = new Error("Microsoft email missing");
+    error.statusCode = 400;
+    throw error;
   }
 
   let user = await prisma.user.findUnique({ where: { email: profile.email } });
+
+  if (!user) {
+    user = await prisma.user.findFirst({ where: { microsoftId: profile.sub } });
+  }
+
   if (!user) {
     user = await prisma.user.create({
       data: {
         email: profile.email,
         name: profile.name,
-        role: "user",
-        provider: "microsoft",
-        providerId: profile.sub,
-        password: "",
+        provider: 'microsoft',
+        password: null,
+        microsoftId: profile.sub,
+      },
+    });
+  } else if (!user.microsoftId) {
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        microsoftId: profile.sub,
+        provider: 'microsoft',
+        name: user.name || profile.name,
       },
     });
   }

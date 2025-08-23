@@ -22,7 +22,7 @@ async function ensureClient() {
   const issuer = await Issuer.discover(`https://login.microsoftonline.com/${MS_TENANT_ID}/v2.0`);
   _client = new issuer.Client({
     client_id: MS_CLIENT_ID,
-    client_secret: MS_CLIENT_SECRET,  // for confidential (server) apps
+    client_secret: MS_CLIENT_SECRET,
     redirect_uris: [MS_REDIRECT_URI],
     response_types: ['code'],
   });

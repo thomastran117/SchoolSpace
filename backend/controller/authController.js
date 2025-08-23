@@ -78,7 +78,6 @@ const microsoftCallback = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
-
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
