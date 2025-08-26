@@ -1,8 +1,11 @@
 const { loginUser, signupUser, startMicrosoftOAuth, finishMicrosoftOAuth } = require("../service/authService");
+const url = require('url');
 
 const setTemp = (res, key, val) =>
   res.cookie(key, val, { httpOnly: true, sameSite: "lax", maxAge: 5 * 60 * 1000 });
+
 const popTemp = (req, res, key) => { const v = req.cookies[key]; res.clearCookie(key); return v; };
+
 
 const login = async (req, res) => {
   try {
@@ -53,11 +56,17 @@ const signup = async (req, res) => {
   }
 };
 
+const wasCodeRedeemed = (req, code) => {
+  if (!req.session) return false;
+  if (req.session.lastMsCode === code) return true;
+  req.session.lastMsCode = code;
+  return false;
+};
+
 const microsoftStart = async (_req, res, next) => {
   try {
     const { url: authUrl, state, codeVerifier } = await startMicrosoftOAuth();
-    setTemp(res, "ms_state", state);
-    setTemp(res, "ms_code_verifier", codeVerifier);
+    setTemp(res, "ms_pkce", JSON.stringify({ state, codeVerifier }));
     res.redirect(authUrl);
   } catch (e) { next(e); }
 };
@@ -65,13 +74,29 @@ const microsoftStart = async (_req, res, next) => {
 const microsoftCallback = async (req, res, next) => {
   try {
     const params = url.parse(req.url, true).query;
-    const expected = {
-      state: popTemp(req, res, "ms_state"),
-      codeVerifier: popTemp(req, res, "ms_code_verifier"),
-    };
-    const { token, role } = await finishMicrosoftOAuth(params, expected);
 
-    const redirect = new URL("/auth/signed-in", CLIENT_APP_URL);
+    if (!params.code) {
+      const e = new Error("missing code");
+      e.statusCode = 400;
+      throw e;
+    }
+    if (wasCodeRedeemed(req, params.code)) {
+      const e = new Error("auth code already used");
+      e.statusCode = 400;
+      throw e;
+    }
+
+    const pkceRaw = popTemp(req, res, "ms_pkce");
+    if (!pkceRaw) {
+      const e = new Error("PKCE data missing (cookie expired?)");
+      e.statusCode = 400;
+      throw e;
+    }
+    const { state, codeVerifier } = JSON.parse(pkceRaw);
+
+    const { token, role } = await finishMicrosoftOAuth(params, { state, codeVerifier });
+
+    const redirect = new URL("/auth/signed-in", process.env.FRONTEND_CLIENT);
     redirect.hash = `token=${encodeURIComponent(token)}&role=${encodeURIComponent(role)}`;
     return res.redirect(redirect.toString());
   } catch (e) { next(e); }
@@ -82,4 +107,4 @@ const validateEmail = (email) => {
   return emailRegex.test(email);
 };
 
-module.exports = { login, signup, microsoftCallback, microsoftStart}
+module.exports = { login, signup, microsoftCallback, microsoftStart };

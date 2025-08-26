@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const corsMiddleware = require("./middleware/corsConfig");
@@ -11,6 +12,7 @@ const port = process.env.PORT || 8040;
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use(corsMiddleware);
 app.use(rateMiddleware);
