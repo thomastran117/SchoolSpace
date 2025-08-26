@@ -4,7 +4,7 @@ require("dotenv").config();
 const corsMiddleware = require("./middleware/corsConfig");
 const { rateMiddleware, authMiddleware } = require("./middleware/rateConfig");
 const requestLogger = require("./middleware/httpLogger");
-const authController = require("./controller/authController");
+const authRoute = require("./routes/authRoute");
 const { requestContext } = require("./middleware/requestContext");
 
 const port = process.env.PORT || 8040;
@@ -16,7 +16,7 @@ app.use(corsMiddleware);
 app.use(rateMiddleware);
 app.use(requestLogger);
 app.use("/api/auth", authMiddleware);
-app.use("/api/auth", authController);
+app.use("/api/auth", authRoute);
 
 app.get("/", (_req, res) => res.send("Server is running!"));
 app.get("/api", (_req, res) => res.send("API is running!"));

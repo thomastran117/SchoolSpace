@@ -1,4 +1,3 @@
-const express = require("express");
 const { loginUser, signupUser, startMicrosoftOAuth, finishMicrosoftOAuth } = require("../service/authService");
 
 const setTemp = (res, key, val) =>
@@ -83,10 +82,4 @@ const validateEmail = (email) => {
   return emailRegex.test(email);
 };
 
-const router = express.Router();
-router.post("/login", login);
-router.post("/signup", signup);
-router.get("/microsoft/start", microsoftStart);
-router.get("/microsoft/callback", microsoftCallback);
-
-module.exports = router;
+module.exports = { login, signup, microsoftCallback, microsoftStart}
