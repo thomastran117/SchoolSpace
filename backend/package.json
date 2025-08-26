@@ -23,6 +23,7 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.0.1",
     "google-auth-library": "^10.2.1",
+    "ioredis": "^5.7.0",
     "jose": "^6.0.12",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.14.1",

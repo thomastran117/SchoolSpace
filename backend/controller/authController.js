@@ -1,11 +1,12 @@
 const { loginUser, signupUser, startMicrosoftOAuth, finishMicrosoftOAuth } = require("../service/authService");
+const { sendEmail } = require("../service/emailService");
+const redis = require("../resource/redis")
 const url = require('url');
 
 const setTemp = (res, key, val) =>
   res.cookie(key, val, { httpOnly: true, sameSite: "lax", maxAge: 5 * 60 * 1000 });
 
 const popTemp = (req, res, key) => { const v = req.cookies[key]; res.clearCookie(key); return v; };
-
 
 const login = async (req, res) => {
   try {
@@ -102,9 +103,18 @@ const microsoftCallback = async (req, res, next) => {
   } catch (e) { next(e); }
 };
 
+const verifyEmail = async (req, res, next) => {
+
+};
+
+const sendVerifyEmail = async (req, res, next) => {
+  await sendEmail("ttranm10134@gmail.com", "test")
+  res.status(200).json({ message: "Email sent successfully."});
+};
+
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-module.exports = { login, signup, microsoftCallback, microsoftStart };
+module.exports = { login, signup, microsoftCallback, microsoftStart, sendVerifyEmail };
