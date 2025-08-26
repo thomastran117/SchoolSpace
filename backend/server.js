@@ -5,7 +5,7 @@ require("dotenv").config();
 const corsMiddleware = require("./middleware/corsConfig");
 const { rateMiddleware, authMiddleware } = require("./middleware/rateConfig");
 const requestLogger = require("./middleware/httpLogger");
-const authRoute = require("./routes/authRoute");
+const authRoute = require("./route/authRoute");
 const { requestContext } = require("./middleware/requestContext");
 
 const port = process.env.PORT || 8040;

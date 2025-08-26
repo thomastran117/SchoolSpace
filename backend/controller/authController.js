@@ -1,6 +1,5 @@
 const { loginUser, signupUser, startMicrosoftOAuth, finishMicrosoftOAuth } = require("../service/authService");
 const { sendEmail } = require("../service/emailService");
-const redis = require("../resource/redis")
 const url = require('url');
 
 const setTemp = (res, key, val) =>
