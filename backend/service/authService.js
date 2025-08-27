@@ -4,6 +4,9 @@ const bcrypt = require("bcrypt");
 const prisma = require("../resource/prisma");
 const { createToken } = require("./tokenService");
 const microsoftOAuth = require("./oauth/microsoftService");
+const redis = require("../resource/redis");
+const sendEmail = require("../service/emailService");
+const randomBytes = require("crypto");
 
 const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({
@@ -28,7 +31,6 @@ const loginUser = async (email, password) => {
 };
 
 const signupUser = async (email, password, role) => {
-
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
   if (existingUser) {
@@ -37,20 +39,52 @@ const signupUser = async (email, password, role) => {
     throw error;
   }
 
-  const hash = await bcrypt.hash(password, 12);
+  const hashedPassword = await bcrypt.hash(password, 10);
 
- const user = await prisma.user.create({
-    data: {
-      email,
-      password: hash,
-      role,
-      provider: "local",
-      providerId: null,
-      name: "",
-    },
-  });
+  const jti = randomBytes(32).toString("base64url");
+  await redis.setEx(`verify:${jti}`, 15 * 60, JSON.stringify({ email, hashedPassword, role }));
 
-  return user;
+  const token = jwt.sign(
+    { sub: email, jti, purpose: "email-verify" },
+    process.env.JWT_SECRET_2,
+    { expiresIn: "15m" }
+  );
+
+  const url = `${process.env.FRONTEND_CLIENT}/verify?token=${token}`;
+  await sendEmail(email, url);
+  return { message: "Verification email sent" };
+};
+
+const verifyUser = async (token) => {
+  const payload = jwt.verify(token, process.env.JWT_SECRET_2);
+
+  const pendingStr = await redis.getDel?.(`verify:${payload.jti}`) 
+                   ?? await getDelFallback(`verify:${payload.jti}`);
+  if (!pendingStr) {
+    const error = new Error("Token missing or used");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const { email, passwordHash, role } = JSON.parse(pendingStr);
+  if (email !== payload.sub) {
+    const error = new Error("Email mismatched");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  try {
+    const user = await prisma.user.create({ data: { email, password: passwordHash, role } });
+  } catch (e) {
+    if (e.code === "P2002") return { message: "Already verified" };
+    const error = new Error("Token unable to be used");
+    error.statusCode = 400;
+    throw error;
+  } finally {
+    await redis.setEx(`used:${payload.jti}`, 24 * 60 * 60, "1");
+  }
+
+  return { message: "User created" };
 };
 
 const startMicrosoftOAuth = async () => {
@@ -99,6 +133,7 @@ const finishMicrosoftOAuth = async (callbackParams, expected) => {
 module.exports = {
   signupUser,
   loginUser,
+  verifyUser,
   startMicrosoftOAuth,
   finishMicrosoftOAuth,
 };
