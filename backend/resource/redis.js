@@ -1,6 +1,6 @@
-import Redis from "ioredis";
+const Redis = require("ioredis");
 
-export const redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379", {
+const redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379", {
   lazyConnect: true,
   maxRetriesPerRequest: 2,
 });
@@ -9,6 +9,8 @@ export const redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379"
   try {
     await redis.ping();
   } catch (e) {
-    console.error("Redis error");
+    console.error("Redis error:", e);
   }
 })();
+
+module.exports = redis;
