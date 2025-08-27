@@ -16,4 +16,4 @@ const authMiddleware = rateLimit({
   message: { error: "Too many attempts. Please wait and try again." },
 });
 
-module.exports = { rateMiddleware, authMiddleware};
+module.exports = { rateMiddleware, authMiddleware };

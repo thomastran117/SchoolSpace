@@ -1,11 +1,25 @@
-const { loginUser, signupUser, verifyUser, startMicrosoftOAuth, finishMicrosoftOAuth } = require("../service/authService");
+const {
+  loginUser,
+  signupUser,
+  verifyUser,
+  startMicrosoftOAuth,
+  finishMicrosoftOAuth,
+} = require("../service/authService");
 const { sendEmail } = require("../service/emailService");
-const url = require('url');
+const url = require("url");
 
 const setTemp = (res, key, val) =>
-  res.cookie(key, val, { httpOnly: true, sameSite: "lax", maxAge: 5 * 60 * 1000 });
+  res.cookie(key, val, {
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 5 * 60 * 1000,
+  });
 
-const popTemp = (req, res, key) => { const v = req.cookies[key]; res.clearCookie(key); return v; };
+const popTemp = (req, res, key) => {
+  const v = req.cookies[key];
+  res.clearCookie(key);
+  return v;
+};
 
 const login = async (req, res) => {
   try {
@@ -23,7 +37,9 @@ const login = async (req, res) => {
     }
 
     const { token, role } = await loginUser(email, password);
-    res.status(200).json({ message: "Login successful", token: token, role: role });
+    res
+      .status(200)
+      .json({ message: "Login successful", token: token, role: role });
   } catch (err) {
     const status = err.statusCode || 500;
     const message = err.message || "User login failed";
@@ -48,7 +64,7 @@ const signup = async (req, res) => {
     }
 
     const { url } = await signupUser(email, password, role);
-    res.status(201).json({ message: "Email sent. Please verify."});
+    res.status(201).json({ message: "Email sent. Please verify." });
   } catch (err) {
     const status = err.statusCode || 500;
     const message = err.message || "User verification failed";
@@ -83,7 +99,9 @@ const microsoftStart = async (_req, res, next) => {
     const { url: authUrl, state, codeVerifier } = await startMicrosoftOAuth();
     setTemp(res, "ms_pkce", JSON.stringify({ state, codeVerifier }));
     res.redirect(authUrl);
-  } catch (e) { next(e); }
+  } catch (e) {
+    next(e);
+  }
 };
 
 const microsoftCallback = async (req, res, next) => {
@@ -109,12 +127,17 @@ const microsoftCallback = async (req, res, next) => {
     }
     const { state, codeVerifier } = JSON.parse(pkceRaw);
 
-    const { token, role } = await finishMicrosoftOAuth(params, { state, codeVerifier });
+    const { token, role } = await finishMicrosoftOAuth(params, {
+      state,
+      codeVerifier,
+    });
 
     const redirect = new URL("/auth/signed-in", process.env.FRONTEND_CLIENT);
     redirect.hash = `token=${encodeURIComponent(token)}&role=${encodeURIComponent(role)}`;
     return res.redirect(redirect.toString());
-  } catch (e) { next(e); }
+  } catch (e) {
+    next(e);
+  }
 };
 
 const validateEmail = (email) => {
@@ -122,4 +145,10 @@ const validateEmail = (email) => {
   return emailRegex.test(email);
 };
 
-module.exports = { login, signup, microsoftCallback, microsoftStart, verify_email };
+module.exports = {
+  login,
+  signup,
+  microsoftCallback,
+  microsoftStart,
+  verify_email,
+};

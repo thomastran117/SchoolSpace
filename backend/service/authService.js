@@ -42,12 +42,17 @@ const signupUser = async (email, password, role) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const jti = randomBytes(32).toString("base64url");
 
- await redis.set(`verify:${jti}`, JSON.stringify({ email, passwordHash: hashedPassword, role }), 'EX', 15 * 60);
+  await redis.set(
+    `verify:${jti}`,
+    JSON.stringify({ email, passwordHash: hashedPassword, role }),
+    "EX",
+    15 * 60,
+  );
 
   const token = jwt.sign(
     { sub: email, jti, purpose: "email-verify" },
     process.env.JWT_SECRET_2,
-    { expiresIn: "15m" }
+    { expiresIn: "15m" },
   );
 
   const url = `${process.env.FRONTEND_CLIENT}/verify?token=${encodeURIComponent(token)}`;
@@ -83,8 +88,9 @@ const verifyUser = async (token) => {
   }
 
   let data;
-  try { data = JSON.parse(pendingStr); } 
-  catch {
+  try {
+    data = JSON.parse(pendingStr);
+  } catch {
     const error = new Error("Corrupted token state");
     error.statusCode = 400;
     throw error;
@@ -98,7 +104,9 @@ const verifyUser = async (token) => {
   }
 
   try {
-    const user = await prisma.user.create({ data: { email, password: passwordHash, role } });
+    const user = await prisma.user.create({
+      data: { email, password: passwordHash, role },
+    });
     return user;
   } catch (e) {
     if (e && e.code === "P2002") return { message: "Already verified" };
@@ -133,7 +141,7 @@ const finishMicrosoftOAuth = async (callbackParams, expected) => {
       data: {
         email: profile.email,
         name: profile.name,
-        provider: 'microsoft',
+        provider: "microsoft",
         password: null,
         microsoftId: profile.sub,
       },
@@ -143,14 +151,18 @@ const finishMicrosoftOAuth = async (callbackParams, expected) => {
       where: { id: user.id },
       data: {
         microsoftId: profile.sub,
-        provider: 'microsoft',
+        provider: "microsoft",
         name: user.name || profile.name,
       },
     });
   }
 
   const token = await createToken(user.id, user.email, user.role);
-  return { token, role: user.role, user: { id: user.id, email: user.email, name: user.name } };
+  return {
+    token,
+    role: user.role,
+    user: { id: user.id, email: user.email, name: user.name },
+  };
 };
 
 module.exports = {

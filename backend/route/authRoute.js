@@ -1,5 +1,11 @@
 const express = require("express");
-const { login, signup, microsoftStart, microsoftCallback, verify_email } = require("../controller/authController");
+const {
+  login,
+  signup,
+  microsoftStart,
+  microsoftCallback,
+  verify_email,
+} = require("../controller/authController");
 
 const router = express.Router();
 router.post("/login", login);

@@ -13,12 +13,17 @@ async function ensureClient() {
   await loadOIDC();
   if (_client) return _client;
 
-  const { MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET, MS_REDIRECT_URI } = process.env;
+  const { MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET, MS_REDIRECT_URI } =
+    process.env;
   if (!MS_TENANT_ID || !MS_CLIENT_ID || !MS_REDIRECT_URI) {
-    throw new Error("Missing MS_TENANT_ID / MS_CLIENT_ID / MS_REDIRECT_URI env vars");
+    throw new Error(
+      "Missing MS_TENANT_ID / MS_CLIENT_ID / MS_REDIRECT_URI env vars",
+    );
   }
 
-  const issuer = await Issuer.discover(`https://login.microsoftonline.com/${MS_TENANT_ID}/v2.0`);
+  const issuer = await Issuer.discover(
+    `https://login.microsoftonline.com/${MS_TENANT_ID}/v2.0`,
+  );
   _client = new issuer.Client({
     client_id: MS_CLIENT_ID,
     client_secret: MS_CLIENT_SECRET,
@@ -62,8 +67,8 @@ module.exports = {
       callbackParams,
       {
         state,
-        code_verifier: codeVerifier
-      }
+        code_verifier: codeVerifier,
+      },
     );
 
     const claims = tokenSet.claims();

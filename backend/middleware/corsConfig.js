@@ -2,7 +2,7 @@ const cors = require("cors");
 
 const whitelist = (process.env.CORS_WHITELIST || "")
   .split(",")
-  .map(s => s.trim())
+  .map((s) => s.trim())
   .filter(Boolean);
 
 if (process.env.FRONTEND_CLIENT && !whitelist.length) {

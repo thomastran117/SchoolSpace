@@ -17,7 +17,8 @@ passport.use(
         const name = profile.displayName;
         const picture = profile.photos?.[0]?.value;
 
-        if (!email) return done(null, false, { message: "No email from Google" });
+        if (!email)
+          return done(null, false, { message: "No email from Google" });
 
         let user = await prisma.user.findUnique({ where: { email } });
 
@@ -48,8 +49,8 @@ passport.use(
       } catch (err) {
         return done(err);
       }
-    }
-  )
+    },
+  ),
 );
 
 module.exports = passport;
