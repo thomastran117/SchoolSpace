@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const path = require('path');
 require("dotenv").config();
 
 const corsMiddleware = require("./middleware/corsConfig");
@@ -13,6 +14,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use(corsMiddleware);
 app.use(rateMiddleware);
@@ -20,7 +22,9 @@ app.use(requestLogger);
 app.use("/api/auth", authMiddleware);
 app.use("/api/auth", authRoute);
 
-app.get("/", (_req, res) => res.send("Server is running!"));
+app.get("/", (_req, res) =>
+  res.sendFile(path.join(__dirname, "public", "index.html")),
+);
 app.get("/api", (_req, res) => res.send("API is running!"));
 
 app.listen(port, () => {
