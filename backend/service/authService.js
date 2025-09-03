@@ -1,9 +1,8 @@
-const { OAuth2Client } = require("google-auth-library");
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const bcrypt = require("bcrypt");
 const prisma = require("../resource/prisma");
 const { createToken } = require("./tokenService");
 const microsoftOAuth = require("./oauth/microsoftService");
+const googleOAuth = require("./oauth/googleService");
 const redis = require("../resource/redis");
 const { sendEmail } = require("../service/emailService");
 const { randomBytes } = require("crypto");
@@ -165,10 +164,56 @@ const finishMicrosoftOAuth = async (callbackParams, expected) => {
   };
 };
 
+const startGoogleOAuth = async () => {
+  return googleOAuth.start();
+};
+
+const finishGoogleOAuth = async (callbackParams, expected) => {
+  const { profile } = await googleOAuth.finish(callbackParams, expected);
+
+  let user = await prisma.user.findUnique({ where: { email: profile.email } });
+
+  if (!user) {
+    user = await prisma.user.findFirst({ where: { googleId: profile.sub } });
+  }
+
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        email: profile.email,
+        name: profile.name,
+        avatar: profile.picture,
+        provider: "google",
+        password: null,
+        googleId: profile.sub,
+      },
+    });
+  } else if (!user.googleId) {
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        googleId: profile.sub,
+        provider: "google",
+        name: user.name || profile.name,
+        avatar: user.avatar || profile.picture,
+      },
+    });
+  }
+
+  const token = await createToken(user.id, user.email, user.role);
+  return {
+    token,
+    role: user.role,
+    user: { id: user.id, email: user.email, name: user.name },
+  };
+};
+
 module.exports = {
   signupUser,
   loginUser,
   verifyUser,
   startMicrosoftOAuth,
   finishMicrosoftOAuth,
+  startGoogleOAuth,
+  finishGoogleOAuth,
 };

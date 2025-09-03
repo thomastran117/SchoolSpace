@@ -4,6 +4,8 @@ const {
   verifyUser,
   startMicrosoftOAuth,
   finishMicrosoftOAuth,
+  startGoogleOAuth,
+  finishGoogleOAuth,
 } = require("../service/authService");
 const { sendEmail } = require("../service/emailService");
 const url = require("url");
@@ -87,13 +89,6 @@ const verify_email = async (req, res) => {
   }
 };
 
-const wasCodeRedeemed = (req, code) => {
-  if (!req.session) return false;
-  if (req.session.lastMsCode === code) return true;
-  req.session.lastMsCode = code;
-  return false;
-};
-
 const microsoftStart = async (_req, res, next) => {
   try {
     const { url: authUrl, state, codeVerifier } = await startMicrosoftOAuth();
@@ -145,10 +140,72 @@ const validateEmail = (email) => {
   return emailRegex.test(email);
 };
 
+const googleStart = async (_req, res, next) => {
+  try {
+    const { url: authUrl, state, codeVerifier } = await startGoogleOAuth();
+    setTemp(res, "g_pkce", JSON.stringify({ state, codeVerifier }));
+    res.redirect(authUrl);
+  } catch (e) {
+    next(e);
+  }
+};
+
+const googleCallback = async (req, res, next) => {
+  try {
+    const params = url.parse(req.url, true).query;
+
+    if (!params.code) {
+      const e = new Error("missing code");
+      e.statusCode = 400;
+      throw e;
+    }
+    if (wasGCodeRedeemed(req, params.code)) {
+      const e = new Error("auth code already used");
+      e.statusCode = 400;
+      throw e;
+    }
+
+    const pkceRaw = popTemp(req, res, "g_pkce");
+    if (!pkceRaw) {
+      const e = new Error("PKCE data missing (cookie expired?)");
+      e.statusCode = 400;
+      throw e;
+    }
+    const { state, codeVerifier } = JSON.parse(pkceRaw);
+
+    const { token, role } = await finishGoogleOAuth(params, {
+      state,
+      codeVerifier,
+    });
+
+    const redirect = new URL("/auth/signed-in", process.env.FRONTEND_CLIENT);
+    redirect.hash = `token=${encodeURIComponent(token)}&role=${encodeURIComponent(role)}`;
+    return res.redirect(redirect.toString());
+  } catch (e) {
+    next(e);
+  }
+};
+
+const wasCodeRedeemed = (req, code) => {
+  if (!req.session) return false;
+  if (req.session.lastMsCode === code) return true;
+  req.session.lastMsCode = code;
+  return false;
+};
+
+const wasGCodeRedeemed = (req, code) => {
+  if (!req.session) return false;
+  if (req.session.lastGCode === code) return true;
+  req.session.lastGCode = code;
+  return false;
+};
+
 module.exports = {
   login,
   signup,
   microsoftCallback,
   microsoftStart,
   verify_email,
+  googleStart,
+  googleCallback,
 };
