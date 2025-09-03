@@ -114,7 +114,7 @@ const verifyUser = async (token) => {
     error.statusCode = 400;
     throw error;
   } finally {
-    await redis.set(`used:${payload.jti}`, "1", 24 * 60 * 60);
+    await redis.setex(`used:${payload.jti}`, 24 * 60 * 60, "1");
   }
 };
 
