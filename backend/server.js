@@ -6,7 +6,7 @@ require("dotenv").config();
 const corsMiddleware = require("./middleware/corsConfig");
 const { rateMiddleware, authMiddleware } = require("./middleware/rateConfig");
 const requestLogger = require("./middleware/httpLogger");
-const authRoute = require("./route/authRoute");
+const serverRoutes = require("./route/route");
 const { requestContext } = require("./middleware/requestContext");
 
 const port = process.env.PORT || 8040;
@@ -20,7 +20,7 @@ app.use(corsMiddleware);
 app.use(rateMiddleware);
 app.use(requestLogger);
 app.use("/api/auth", authMiddleware);
-app.use("/api/auth", authRoute);
+app.use("/api", serverRoutes);
 
 app.get("/", (_req, res) =>
   res.sendFile(path.join(__dirname, "public", "index.html")),

@@ -24,7 +24,6 @@ async function start() {
   const codeVerifier = b64url(crypto.randomBytes(64));
   const codeChallenge = b64url(sha256(Buffer.from(codeVerifier)));
 
-  // Minimal OIDC scopes
   const scope = ["openid", "email", "profile"].join(" ");
 
   const params = new URLSearchParams({
@@ -35,8 +34,8 @@ async function start() {
     state,
     code_challenge: codeChallenge,
     code_challenge_method: "S256",
-    access_type: "offline", // allow refresh_token
-    prompt: "consent", // ensure refresh_token on repeat auths
+    access_type: "offline",
+    prompt: "consent",
   });
 
   const url = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
@@ -56,7 +55,6 @@ async function finish(callbackParams, expected) {
     throw e;
   }
 
-  // Exchange the code using PKCE
   const body = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,
     redirect_uri: GOOGLE_REDIRECT_URI,
@@ -65,7 +63,6 @@ async function finish(callbackParams, expected) {
     code_verifier: expected.codeVerifier,
   });
 
-  // For confidential web apps you can also include client_secret:
   if (process.env.GOOGLE_CLIENT_SECRET) {
     body.set("client_secret", GOOGLE_CLIENT_SECRET);
   }
@@ -91,14 +88,11 @@ async function finish(callbackParams, expected) {
     throw e;
   }
 
-  // Verify the ID Token and extract the user profile
   const ticket = await googleClient.verifyIdToken({
     idToken,
     audience: GOOGLE_CLIENT_ID,
   });
-  const payload = ticket.getPayload(); // https://developers.google.com/identity/openid-connect/openid-connect#obtainuserinfo
-  // payload has: sub, email, email_verified, name, picture, given_name, family_name, etc.
-
+  const payload = ticket.getPayload();
   if (!payload?.email) {
     const e = new Error("Google email missing");
     e.statusCode = 400;

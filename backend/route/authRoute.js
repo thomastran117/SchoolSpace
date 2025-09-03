@@ -10,6 +10,7 @@ const {
 } = require("../controller/authController");
 
 const router = express.Router();
+
 router.post("/login", login);
 router.post("/signup", signup);
 router.get("/verify", verify_email);

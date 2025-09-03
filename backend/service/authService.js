@@ -67,7 +67,6 @@ const verifyUser = async (token) => {
     throw error;
   }
 
-  // Atomically read-and-delete
   let pendingStr;
   if (typeof redis.getdel === "function") {
     pendingStr = await redis.getdel(`verify:${payload.jti}`);
