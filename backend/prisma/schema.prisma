@@ -14,11 +14,18 @@ enum Provider {
   microsoft
 }
 
+enum Role {
+  student
+  teacher
+  assistant
+  admin
+}
+
 model User {
   id        Int       @id @default(autoincrement())
   email     String    @unique
   password  String?
-  role      String    @default("user")
+  role      Role    @default(student)
 
   googleId     String? @unique
   microsoftId  String? @unique
@@ -32,5 +39,36 @@ model User {
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  ownedCourses Course[] @relation("CourseOwner")
+
+  enrollments Enrollment[]
 }
 
+model Course {
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String?
+  
+  ownerId Int
+  owner   User @relation("CourseOwner", fields: [ownerId], references: [id])
+
+  enrollments Enrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Enrollment {
+  id        Int      @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  courseId Int
+  course   Course @relation(fields: [courseId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+}

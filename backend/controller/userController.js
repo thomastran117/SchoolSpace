@@ -8,7 +8,7 @@ const getStudentByCourse = async () => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const getTeacherByCourse = async () => {
   try {
@@ -20,7 +20,7 @@ const getTeacherByCourse = async () => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const getUser = async () => {
   try {
@@ -32,7 +32,7 @@ const getUser = async () => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const updateUser = async () => {
   try {
@@ -44,7 +44,7 @@ const updateUser = async () => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const deleteUser = async () => {
   try {
@@ -56,7 +56,12 @@ const deleteUser = async () => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
-
-module.exports = { updateUser, deleteUser, getStudentByCourse, getTeacherByCourse, getUser };
+module.exports = {
+  updateUser,
+  deleteUser,
+  getStudentByCourse,
+  getTeacherByCourse,
+  getUser,
+};

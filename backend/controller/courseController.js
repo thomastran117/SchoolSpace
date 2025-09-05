@@ -8,7 +8,7 @@ const addCourse = async (req, res) => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const updateCourse = async (req, res) => {
   try {
@@ -20,7 +20,7 @@ const updateCourse = async (req, res) => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const deleteCourse = async (req, res) => {
   try {
@@ -32,7 +32,7 @@ const deleteCourse = async (req, res) => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const getCourse = async (req, res) => {
   try {
@@ -44,7 +44,7 @@ const getCourse = async (req, res) => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const getCourses = async (req, res) => {
   try {
@@ -56,7 +56,7 @@ const getCourses = async (req, res) => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const getCoursesByTeacher = async (req, res) => {
   try {
@@ -68,7 +68,7 @@ const getCoursesByTeacher = async (req, res) => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const getCoursesByStudent = async (req, res) => {
   try {
@@ -80,6 +80,14 @@ const getCoursesByStudent = async (req, res) => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
-module.exports = { getCourse, getCourses, deleteCourse, updateCourse, addCourse, getCoursesByStudent, getCoursesByTeacher }
+module.exports = {
+  getCourse,
+  getCourses,
+  deleteCourse,
+  updateCourse,
+  addCourse,
+  getCoursesByStudent,
+  getCoursesByTeacher,
+};

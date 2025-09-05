@@ -8,7 +8,7 @@ const enrollInCourse = async (req, res) => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 const unenrollInCourse = async (req, res) => {
   try {
@@ -20,6 +20,6 @@ const unenrollInCourse = async (req, res) => {
     const message = err.message || "Endpoint failed";
     res.status(status).json({ error: message });
   }
-}
+};
 
 module.exports = { enrollInCourse, unenrollInCourse };
