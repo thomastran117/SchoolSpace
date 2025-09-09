@@ -18,6 +18,7 @@ const couresRoute = require("./courseRoute");
 const enrollRoute = require("./enrollRoute");
 const userRoute = require("./userRoute");
 const { makeRequireAuth } = require("../middleware/authConfig");
+const { httpError } = require("../utility/httpUtility");
 
 const router = express.Router();
 
@@ -29,28 +30,32 @@ const router = express.Router();
 router.use("/auth", authRoute);
 
 // Protected routes, requires authenication
-router.use(makeRequireAuth);
 
 /**
  * @routse courses
  * @description Handles courses
  * @access Private
  */
-router.use("/courses", couresRoute);
+router.use("/courses", makeRequireAuth, couresRoute);
 
 /**
  * @routse enrollment
  * @description Handles course enrolllment
  * @access Private
  */
-router.use("/course-enroll", enrollRoute);
+router.use("/course-enroll", makeRequireAuth, enrollRoute);
 
 /**
  * @routse user
  * @description Handles user management + deletion
  * @access Private
  */
-router.use("/user", userRoute);
+router.use("/user", makeRequireAuth, userRoute);
+
+// Unknown routes
+router.use((req, res, next) => {
+  httpError(404, `Route '${req.originalUrl}' does not exist`);
+});
 
 // Export the function
 module.exports = router;
