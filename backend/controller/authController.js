@@ -6,9 +6,13 @@ const {
   finishMicrosoftOAuth,
   startGoogleOAuth,
   finishGoogleOAuth,
-  update_role
+  update_role,
 } = require("../service/authService");
-const { requireFields, httpError, assertAllowed } = require("../utility/httpUtility");
+const {
+  requireFields,
+  httpError,
+  assertAllowed,
+} = require("../utility/httpUtility");
 
 const url = require("url");
 
@@ -47,7 +51,7 @@ const signup = async (req, res, next) => {
   try {
     requireFields(["email", "password", "role"], req.body);
     const { email, password, role } = req.body;
-    
+
     assertAllowed(role, ["student", "teacher", "assistant"]);
 
     if (!validateEmail(email)) {
@@ -163,10 +167,10 @@ const updateRole = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     req.user = await getUserPayload(authHeader);
-    
+
     requireFields(["role"], req.body);
     const { role } = req.body;
-    
+
     assertAllowed(role, ["student", "teacher", "assistant"]);
 
     const { token, role: userrole } = await update_role(id, role);

@@ -131,7 +131,7 @@ const finishMicrosoftOAuth = async (callbackParams, expected) => {
         provider: "microsoft",
         password: null,
         microsoftId: profile.sub,
-        role: "notdefined"
+        role: "notdefined",
       },
     });
   } else if (!user.microsoftId) {
@@ -185,7 +185,7 @@ const finishGoogleOAuth = async (callbackParams, expected) => {
         provider: "google",
         name: user.name || profile.name,
         avatar: user.avatar || profile.picture,
-        role: "notdefined"
+        role: "notdefined",
       },
     });
   }

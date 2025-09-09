@@ -83,4 +83,3 @@ router.get("/google/callback", googleCallback);
 
 // Export the router
 module.exports = router;
-

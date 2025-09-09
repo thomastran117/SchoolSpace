@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { httpError } = require("../utility/httpUtility");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_SECRET_2 = process.env.JWT_SECRET_2;
@@ -15,17 +16,13 @@ const validateToken = async (token) => {
   try {
     return jwt.verify(token, JWT_SECRET);
   } catch {
-    const error = new Error("Invalid or expired token");
-    error.statusCode = 401;
-    throw error;
+    httpError(401, "Invalid or expired token");
   }
 };
 
 const getUserPayload = async (authHeader) => {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    const error = new Error("Missing token");
-    error.statusCode = 401;
-    throw error;
+    httpError(401, "Missing token");
   }
   const token = authHeader.split(" ")[1];
   const decoded = await validateToken(token);
