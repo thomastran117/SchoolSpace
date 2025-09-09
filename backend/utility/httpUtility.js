@@ -7,13 +7,17 @@ function requireFields(fields, body) {
         ? `${missing[0]} is required`
         : `${missing.join(", ")} are required`;
 
-    const error = new Error(message);
-    error.statusCode = 400;
-    throw error;
+    httpError(400, message);
   }
 }
 
 function httpError(statusCode, message) {
+  const err = new Error(message);
+  err.statusCode = statusCode;
+  throw err;
+}
+
+function httpResponse(statusCode, message) {
   const err = new Error(message);
   err.statusCode = statusCode;
   return err;

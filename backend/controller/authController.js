@@ -7,8 +7,7 @@ const {
   startGoogleOAuth,
   finishGoogleOAuth,
 } = require("../service/authService");
-const { sendEmail } = require("../service/emailService");
-const { requireFields } = require("../utility/httpUtility");
+const { requireFields, httpError } = require("../utility/httpUtility");
 
 const url = require("url");
 
@@ -25,15 +24,13 @@ const popTemp = (req, res, key) => {
   return v;
 };
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     requireFields(["email", "password"], req.body);
     const { email, password } = req.body;
 
     if (!validateEmail(email)) {
-      const error = new Error("Invalid email format");
-      error.statusCode = 400;
-      throw error;
+      httpError(400, "Invalid email format");
     }
 
     const { token, role } = await loginUser(email, password);
@@ -41,44 +38,36 @@ const login = async (req, res) => {
       .status(200)
       .json({ message: "Login successful", token: token, role: role });
   } catch (err) {
-    const status = err.statusCode || 500;
-    const message = err.message || "User login failed";
-    res.status(status).json({ error: message });
+    next(err);
   }
 };
 
-const signup = async (req, res) => {
+const signup = async (req, res, next) => {
   try {
     requireFields(["email", "password", "role"], req.body);
     const { email, password, role } = req.body;
 
     if (!validateEmail(email)) {
-      const error = new Error("Invalid email format");
-      error.statusCode = 400;
-      throw error;
+      httpError(400, "Invalid email format");
     }
 
     const { url } = await signupUser(email, password, role);
     res.status(201).json({ message: "Email sent. Please verify." });
   } catch (err) {
-    const status = err.statusCode || 500;
-    const message = err.message || "User verification failed";
-    res.status(status).json({ error: message });
+    next(err);
   }
 };
 
-const verify_email = async (req, res) => {
+const verify_email = async (req, res, next) => {
   try {
     const { token } = req.query;
-    if (!token) return res.status(400).send("Missing token");
+    if (!token) httpError(400, "Missing token");
     await verifyUser(token);
     res
       .status(201)
       .json({ message: "User created successfully. Please log in now." });
   } catch (err) {
-    const status = err.statusCode || 500;
-    const message = err.message || "User registration failed";
-    res.status(status).json({ error: message });
+    next(err);
   }
 };
 
@@ -87,8 +76,8 @@ const microsoftStart = async (_req, res, next) => {
     const { url: authUrl, state, codeVerifier } = await startMicrosoftOAuth();
     setTemp(res, "ms_pkce", JSON.stringify({ state, codeVerifier }));
     res.redirect(authUrl);
-  } catch (e) {
-    next(e);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -97,21 +86,15 @@ const microsoftCallback = async (req, res, next) => {
     const params = url.parse(req.url, true).query;
 
     if (!params.code) {
-      const e = new Error("missing code");
-      e.statusCode = 400;
-      throw e;
+      httpError(400, "Missing code");
     }
     if (wasCodeRedeemed(req, params.code)) {
-      const e = new Error("auth code already used");
-      e.statusCode = 400;
-      throw e;
+      httpError(400, "Missing token");
     }
 
     const pkceRaw = popTemp(req, res, "ms_pkce");
     if (!pkceRaw) {
-      const e = new Error("PKCE data missing (cookie expired?)");
-      e.statusCode = 400;
-      throw e;
+      httpError(400, "PKCE data missing (cookie expired?)");
     }
     const { state, codeVerifier } = JSON.parse(pkceRaw);
 
@@ -123,8 +106,8 @@ const microsoftCallback = async (req, res, next) => {
     const redirect = new URL("/auth/signed-in", process.env.FRONTEND_CLIENT);
     redirect.hash = `token=${encodeURIComponent(token)}&role=${encodeURIComponent(role)}`;
     return res.redirect(redirect.toString());
-  } catch (e) {
-    next(e);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -138,8 +121,8 @@ const googleStart = async (_req, res, next) => {
     const { url: authUrl, state, codeVerifier } = await startGoogleOAuth();
     setTemp(res, "g_pkce", JSON.stringify({ state, codeVerifier }));
     res.redirect(authUrl);
-  } catch (e) {
-    next(e);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -148,21 +131,15 @@ const googleCallback = async (req, res, next) => {
     const params = url.parse(req.url, true).query;
 
     if (!params.code) {
-      const e = new Error("missing code");
-      e.statusCode = 400;
-      throw e;
+      httpError(400, "Missing code");
     }
     if (wasGCodeRedeemed(req, params.code)) {
-      const e = new Error("auth code already used");
-      e.statusCode = 400;
-      throw e;
+      httpError(400, "Code already used");
     }
 
     const pkceRaw = popTemp(req, res, "g_pkce");
     if (!pkceRaw) {
-      const e = new Error("PKCE data missing (cookie expired?)");
-      e.statusCode = 400;
-      throw e;
+      httpError(400, "PKCE data missing (cookie expired?)");
     }
     const { state, codeVerifier } = JSON.parse(pkceRaw);
 
@@ -174,8 +151,8 @@ const googleCallback = async (req, res, next) => {
     const redirect = new URL("/auth/signed-in", process.env.FRONTEND_CLIENT);
     redirect.hash = `token=${encodeURIComponent(token)}&role=${encodeURIComponent(role)}`;
     return res.redirect(redirect.toString());
-  } catch (e) {
-    next(e);
+  } catch (err) {
+    next(err);
   }
 };
 

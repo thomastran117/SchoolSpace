@@ -7,6 +7,7 @@ const redis = require("../resource/redis");
 const { sendEmail } = require("../service/emailService");
 const { randomBytes } = require("crypto");
 const jwt = require("jsonwebtoken");
+const { httpError } = require("../utility/httpUtility");
 
 const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({
@@ -14,16 +15,12 @@ const loginUser = async (email, password) => {
   });
 
   if (!user) {
-    const error = new Error("User not found");
-    error.statusCode = 404;
-    throw error;
+    httpError(401, "Invalid credentials");
   }
 
   const passwordMatches = await bcrypt.compare(password, user.password);
   if (!passwordMatches) {
-    const error = new Error("Invalid credentials");
-    error.statusCode = 401;
-    throw error;
+    httpError(401, "Invalid credentials");
   }
 
   const token = await createToken(user.id, user.email, user.role);
@@ -33,9 +30,7 @@ const loginUser = async (email, password) => {
 const signupUser = async (email, password, role) => {
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
-    const error = new Error("User already exists");
-    error.statusCode = 409;
-    throw error;
+    httpError(409, "Email already in use");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -80,25 +75,19 @@ const verifyUser = async (token) => {
   }
 
   if (!pendingStr) {
-    const error = new Error("Token missing or used");
-    error.statusCode = 400;
-    throw error;
+    httpError(400, "Token missing or used");
   }
 
   let data;
   try {
     data = JSON.parse(pendingStr);
   } catch {
-    const error = new Error("Corrupted token state");
-    error.statusCode = 400;
-    throw error;
+    httpError(400, "Corrupted token");
   }
 
   const { email, passwordHash, role } = data;
   if (email !== payload.sub) {
-    const error = new Error("Email mismatched");
-    error.statusCode = 401;
-    throw error;
+    httpError(401, "Email mismatch");
   }
 
   try {
@@ -108,9 +97,7 @@ const verifyUser = async (token) => {
     return user;
   } catch (e) {
     if (e && e.code === "P2002") return { message: "Already verified" };
-    const error = new Error("Token unable to be used");
-    error.statusCode = 400;
-    throw error;
+    httpError(400, "Token unable to be used");
   } finally {
     await redis.setex(`used:${payload.jti}`, 24 * 60 * 60, "1");
   }
@@ -123,9 +110,7 @@ const startMicrosoftOAuth = async () => {
 const finishMicrosoftOAuth = async (callbackParams, expected) => {
   const profile = await microsoftOAuth.finish(callbackParams, expected);
   if (!profile.email) {
-    const error = new Error("Microsoft email missing");
-    error.statusCode = 400;
-    throw error;
+    httpError(400, "Microsoft email missing");
   }
 
   let user = await prisma.user.findUnique({ where: { email: profile.email } });
