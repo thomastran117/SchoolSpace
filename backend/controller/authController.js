@@ -8,6 +8,8 @@ const {
   finishGoogleOAuth,
 } = require("../service/authService");
 const { sendEmail } = require("../service/emailService");
+const { requireFields } = require("../utility/checkRequestBody");
+
 const url = require("url");
 
 const setTemp = (res, key, val) =>
@@ -25,12 +27,8 @@ const popTemp = (req, res, key) => {
 
 const login = async (req, res) => {
   try {
+    requireFields(["email", "password"], req.body);
     const { email, password } = req.body;
-    if (!email || !password) {
-      const error = new Error("Email and password are required");
-      error.statusCode = 400;
-      throw error;
-    }
 
     if (!validateEmail(email)) {
       const error = new Error("Invalid email format");
@@ -51,13 +49,8 @@ const login = async (req, res) => {
 
 const signup = async (req, res) => {
   try {
+    requireFields(["email", "password", "role"], req.body);
     const { email, password, role } = req.body;
-
-    if (!email || !password || !role) {
-      const error = new Error("Email, password and role are required");
-      error.statusCode = 400;
-      throw error;
-    }
 
     if (!validateEmail(email)) {
       const error = new Error("Invalid email format");
