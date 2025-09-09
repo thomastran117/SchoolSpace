@@ -13,4 +13,10 @@ function requireFields(fields, body) {
   }
 }
 
-module.exports = { requireFields };
+function httpError(statusCode, message) {
+  const err = new Error(message);
+  err.statusCode = statusCode;
+  return err;
+}
+
+module.exports = { requireFields, httpError };

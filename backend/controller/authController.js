@@ -8,7 +8,7 @@ const {
   finishGoogleOAuth,
 } = require("../service/authService");
 const { sendEmail } = require("../service/emailService");
-const { requireFields } = require("../utility/checkRequestBody");
+const { requireFields } = require("../utility/httpUtility");
 
 const url = require("url");
 
