@@ -1,3 +1,15 @@
+/**
+ * @file userRoute.js
+ * @description Defines all user profile related routes and user fetching
+ * @module route
+ *
+ * @version 1.0.0
+ * @author Thomas
+ */
+
+/**
+ * Imports
+ */
 const express = require("express");
 const {
   updateUser,
@@ -9,10 +21,40 @@ const {
 
 const router = express.Router();
 
-router.put("/:id", updateUser);
-router.delete("/:id", deleteUser);
-router.get("/course-t/id", getTeacherByCourse);
-router.get("/course-s/:id", getStudentByCourse);
+/**
+ * @route PUT /users/:id
+ * @description Update an user profile information by ID
+ * @access Private
+ */
+router.put("/users/:id", updateUser);
+
+/**
+ * @route DELETE /users/:id
+ * @description Deletes an user by id
+ * @access Private
+ */
+router.delete("/users/:id", deleteUser);
+
+/**
+ * @route POST /users/
+ * @description Get teacher by course id
+ * @access Private
+ */
+router.get("/users/teacher/:id", getTeacherByCourse);
+
+/**
+ * @route GET /users/student/:id
+ * @description Get students/users by course Id
+ * @access Private
+ */
+router.get("/users/student/:id", getStudentByCourse);
+
+/**
+ * @route GET /users/:id
+ * @description Gets an user by id
+ * @access Private
+ */
 router.get("/:id", getUser);
 
+// Export the router
 module.exports = router;
