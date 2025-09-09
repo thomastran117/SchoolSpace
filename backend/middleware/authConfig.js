@@ -1,4 +1,4 @@
-const { getUserPayload } = require("./service/tokenService");
+const { getUserPayload } = require("../service/tokenService");
 
 const makeRequireAuth = async (req, res, next) => {
   try {
