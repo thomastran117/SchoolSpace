@@ -20,6 +20,7 @@ const {
   verify_email,
   googleStart,
   googleCallback,
+  updateRole,
 } = require("../controller/authController");
 
 const router = express.Router();
@@ -37,6 +38,13 @@ router.post("/login", login);
  * @access Public
  */
 router.post("/signup", signup);
+
+/**
+ * @route PUT /auth/role
+ * @description Updates an OAuth user with their designated role
+ * @access Private
+ */
+router.put("/role", updateRole);
 
 /**
  * @route GET /auth/verify

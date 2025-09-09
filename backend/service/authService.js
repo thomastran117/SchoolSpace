@@ -93,8 +93,6 @@ const verifyUser = async (token) => {
     httpError(401, "Email mismatch");
   }
 
-  console.log(email, passwordHash);
-
   try {
     const user = await prisma.user.create({
       data: { email, password: passwordHash, role },
@@ -133,6 +131,7 @@ const finishMicrosoftOAuth = async (callbackParams, expected) => {
         provider: "microsoft",
         password: null,
         microsoftId: profile.sub,
+        role: "notdefined"
       },
     });
   } else if (!user.microsoftId) {
@@ -186,6 +185,7 @@ const finishGoogleOAuth = async (callbackParams, expected) => {
         provider: "google",
         name: user.name || profile.name,
         avatar: user.avatar || profile.picture,
+        role: "notdefined"
       },
     });
   }
@@ -198,10 +198,33 @@ const finishGoogleOAuth = async (callbackParams, expected) => {
   };
 };
 
+const update_role = async (id, role) => {
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!user) {
+    httpError(404, "No user found");
+  }
+
+  const updated = await prisma.user.update({
+    where: { id },
+    role: role,
+  });
+
+  const token = await createToken(updated.id, updated.email, updated.role);
+  return {
+    token,
+    role: updated.role,
+    user: { id: updated.id, email: updated.email, name: updated.name },
+  };
+};
+
 module.exports = {
   signupUser,
   loginUser,
   verifyUser,
+  update_role,
   startMicrosoftOAuth,
   finishMicrosoftOAuth,
   startGoogleOAuth,

@@ -6,6 +6,7 @@ const {
   finishMicrosoftOAuth,
   startGoogleOAuth,
   finishGoogleOAuth,
+  update_role
 } = require("../service/authService");
 const { requireFields, httpError, assertAllowed } = require("../utility/httpUtility");
 
@@ -47,7 +48,7 @@ const signup = async (req, res, next) => {
     requireFields(["email", "password", "role"], req.body);
     const { email, password, role } = req.body;
     
-    assertAllowed(role, ["student", "teacher"]);
+    assertAllowed(role, ["student", "teacher", "assistant"]);
 
     if (!validateEmail(email)) {
       httpError(400, "Invalid email format");
@@ -158,6 +159,25 @@ const googleCallback = async (req, res, next) => {
   }
 };
 
+const updateRole = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    req.user = await getUserPayload(authHeader);
+    
+    requireFields(["role"], req.body);
+    const { role } = req.body;
+    
+    assertAllowed(role, ["student", "teacher", "assistant"]);
+
+    const { token, role: userrole } = await update_role(id, role);
+    res
+      .status(200)
+      .json({ message: "Login successful", token: token, role: userrole });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const wasCodeRedeemed = (req, code) => {
   if (!req.session) return false;
   if (req.session.lastMsCode === code) return true;
@@ -178,6 +198,7 @@ module.exports = {
   microsoftCallback,
   microsoftStart,
   verify_email,
+  updateRole,
   googleStart,
   googleCallback,
 };
