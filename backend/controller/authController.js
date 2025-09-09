@@ -7,7 +7,7 @@ const {
   startGoogleOAuth,
   finishGoogleOAuth,
 } = require("../service/authService");
-const { requireFields, httpError } = require("../utility/httpUtility");
+const { requireFields, httpError, assertAllowed } = require("../utility/httpUtility");
 
 const url = require("url");
 
@@ -46,6 +46,8 @@ const signup = async (req, res, next) => {
   try {
     requireFields(["email", "password", "role"], req.body);
     const { email, password, role } = req.body;
+    
+    assertAllowed(role, ["student", "teacher"]);
 
     if (!validateEmail(email)) {
       httpError(400, "Invalid email format");

@@ -21,6 +21,7 @@ app.use(rateMiddleware);
 app.use(requestLogger);
 app.use("/api/auth", authMiddleware);
 app.use("/api", serverRoutes);
+
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
   const message = err.message || "Server failed to process the data";

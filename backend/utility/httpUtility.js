@@ -11,6 +11,14 @@ function requireFields(fields, body) {
   }
 }
 
+function assertAllowed(value, allowed, fieldName = "field") {
+  if (!allowed.includes(value)) {
+    message = `${fieldName} must be one of: ${allowed.join(", ")}`;
+    httpError(400, message);
+  }
+  return true;
+}
+
 function httpError(statusCode, message) {
   const err = new Error(message);
   err.statusCode = statusCode;
@@ -23,4 +31,4 @@ function httpResponse(statusCode, message) {
   return err;
 }
 
-module.exports = { requireFields, httpError };
+module.exports = { requireFields, httpError, assertAllowed };

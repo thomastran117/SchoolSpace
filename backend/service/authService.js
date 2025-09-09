@@ -4,7 +4,10 @@ const { createToken } = require("./tokenService");
 const microsoftOAuth = require("./oauth/microsoftService");
 const googleOAuth = require("./oauth/googleService");
 const redis = require("../resource/redis");
-const { sendEmail } = require("../service/emailService");
+const {
+  sendVerificationEmail,
+  sendWelcomeEmail,
+} = require("../service/emailService");
 const { randomBytes } = require("crypto");
 const jwt = require("jsonwebtoken");
 const { httpError } = require("../utility/httpUtility");
@@ -50,7 +53,7 @@ const signupUser = async (email, password, role) => {
   );
 
   const url = `${process.env.FRONTEND_CLIENT}/verify?token=${encodeURIComponent(token)}`;
-  await sendEmail(email, url);
+  await sendVerificationEmail(email, url);
   return { message: "Verification email sent" };
 };
 
@@ -90,10 +93,13 @@ const verifyUser = async (token) => {
     httpError(401, "Email mismatch");
   }
 
+  console.log(email, passwordHash);
+
   try {
     const user = await prisma.user.create({
       data: { email, password: passwordHash, role },
     });
+    await sendWelcomeEmail(email);
     return user;
   } catch (e) {
     if (e && e.code === "P2002") return { message: "Already verified" };

@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendEmail(email, verifyUrl) {
+async function sendVerificationEmail(email, verifyUrl) {
   const mailOptions = {
     from: `"SchoolSpace" <${process.env.EMAIL_USER}>`,
     to: email,
@@ -68,6 +68,81 @@ async function sendEmail(email, verifyUrl) {
   }
 }
 
+async function sendWelcomeEmail(email) {
+  const mailOptions = {
+    from: `"SchoolSpace" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Welcome to SchoolSpace 🎉",
+    html: `
+      <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 40px 0; margin:0;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); overflow: hidden;">
+
+          <!-- Header -->
+          <div style="background: linear-gradient(90deg, #2563eb, #4CAF50); padding: 24px; text-align: center;">
+            <h1 style="margin: 0; font-size: 24px; color: #fff; font-weight: 600;">SchoolSpace</h1>
+          </div>
+
+          <!-- Body -->
+          <div style="padding: 32px;">
+            <h2 style="font-size: 20px; color: #111; margin-top: 0;">Welcome Aboard! 🎉</h2>
+            <p style="font-size: 16px; color: #333; line-height: 1.6; margin: 16px 0;">
+              Hi there,
+            </p>
+            <p style="font-size: 16px; color: #333; line-height: 1.6; margin: 16px 0;">
+              We’re excited to have you join <strong>SchoolSpace</strong>! You’re now part of a growing community where students and teachers connect, learn, and grow together.
+            </p>
+
+            <div style="text-align: center; margin: 32px 0;">
+              <a href="${process.env.FRONTEND_CLIENT}" target="_blank"
+                style="background-color: #4CAF50; color: #ffffff; text-decoration: none; 
+                       padding: 14px 28px; font-size: 16px; border-radius: 8px; 
+                       display: inline-block; font-weight: 600; letter-spacing: 0.3px;">
+                Go to SchoolSpace
+              </a>
+            </div>
+
+            <p style="font-size: 14px; color: #666; line-height: 1.6;">
+              Explore your dashboard, connect with peers, and make the most of your learning experience.
+            </p>
+
+            <p style="font-size: 14px; color: #999; margin-top: 32px;">
+              If you ever need help, our support team is just a message away.<br/>
+              Let’s build something great together 🚀
+            </p>
+          </div>
+
+          <!-- Footer -->
+          <div style="background-color: #f9fafb; text-align: center; padding: 20px; font-size: 12px; color: #999;">
+            &copy; ${new Date().getFullYear()} SchoolSpace. All rights reserved.
+          </div>
+        </div>
+      </div>
+    `,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function sendGradeEmail(email, course, grade) {
+  //TO DO
+}
+
+async function sendAnnouncementEmail(email, course) {
+  //TO DO
+}
+
+async function sendAssignmentEmail(email, course) {
+  //TO DO
+}
+
 module.exports = {
-  sendEmail,
+  sendVerificationEmail,
+  sendAnnouncementEmail,
+  sendAssignmentEmail,
+  sendGradeEmail,
+  sendWelcomeEmail,
 };
