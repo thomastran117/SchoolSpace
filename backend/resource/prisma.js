@@ -1,12 +1,16 @@
 const { PrismaClient } = require("@prisma/client");
 
-const globalForPrisma = global;
+const prisma = new PrismaClient();
 
-const prisma = globalForPrisma.prisma || new PrismaClient();
-console.log("Prisma is connected");
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+async function init() {
+  try {
+    await prisma.$connect();
+  } catch (err) {
+    console.error("❌ Failed to connect to DB (Prisma):", err);
+    process.exit(1);
+  }
 }
+
+init();
 
 module.exports = prisma;
