@@ -1,60 +1,46 @@
-const getStudentByCourse = async () => {
+const {
+  requireFields,
+  httpError,
+  assertAllowed,
+} = require("../utility/httpUtility");
+
+const getStudentByCourse = async (req, res, next) => {
   try {
-    const error = new Error("Not implemented");
-    error.statusCode = 501;
-    throw error;
+    httpError(501, "Not implemented yet");
   } catch (err) {
-    const status = err.statusCode || 500;
-    const message = err.message || "Endpoint failed";
-    res.status(status).json({ error: message });
+    next(err);
   }
 };
 
-const getTeacherByCourse = async () => {
+const getTeacherByCourse = async (req, res, next) => {
   try {
-    const error = new Error("Not implemented");
-    error.statusCode = 501;
-    throw error;
+    httpError(501, "Not implemented yet");
   } catch (err) {
-    const status = err.statusCode || 500;
-    const message = err.message || "Endpoint failed";
-    res.status(status).json({ error: message });
+    next(err);
   }
 };
 
-const getUser = async () => {
+const getUser = async (req, res, next) => {
   try {
-    const error = new Error("Not implemented");
-    error.statusCode = 501;
-    throw error;
+    httpError(501, "Not implemented yet");
   } catch (err) {
-    const status = err.statusCode || 500;
-    const message = err.message || "Endpoint failed";
-    res.status(status).json({ error: message });
+    next(err);
   }
 };
 
-const updateUser = async () => {
+const updateUser = async (req, res, next) => {
   try {
-    const error = new Error("Not implemented");
-    error.statusCode = 501;
-    throw error;
+    httpError(501, "Not implemented yet");
   } catch (err) {
-    const status = err.statusCode || 500;
-    const message = err.message || "Endpoint failed";
-    res.status(status).json({ error: message });
+    next(err);
   }
 };
 
-const deleteUser = async () => {
+const deleteUser = async (req, res, next) => {
   try {
-    const error = new Error("Not implemented");
-    error.statusCode = 501;
-    throw error;
+    httpError(501, "Not implemented yet");
   } catch (err) {
-    const status = err.statusCode || 500;
-    const message = err.message || "Endpoint failed";
-    res.status(status).json({ error: message });
+    next(err);
   }
 };
 

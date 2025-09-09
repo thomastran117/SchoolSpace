@@ -3,9 +3,9 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 require("dotenv").config();
 
-const corsMiddleware = require("./middleware/corsConfig");
-const { rateMiddleware, authMiddleware } = require("./middleware/rateConfig");
-const requestLogger = require("./middleware/httpLogger");
+const corsMiddleware = require("./middleware/corsMiddleware");
+const { rateMiddleware, authMiddleware } = require("./middleware/rateLimiterMiddleware");
+const requestLogger = require("./middleware/httpLoggerMiddleware");
 const serverRoutes = require("./route/route");
 const { requestContext } = require("./middleware/requestContext");
 

@@ -17,7 +17,7 @@ const authRoute = require("./authRoute");
 const couresRoute = require("./courseRoute");
 const enrollRoute = require("./enrollRoute");
 const userRoute = require("./userRoute");
-const { makeRequireAuth } = require("../middleware/authConfig");
+const { makeRequireAuth } = require("../middleware/authTokenMiddleware");
 const { httpError } = require("../utility/httpUtility");
 
 const router = express.Router();
