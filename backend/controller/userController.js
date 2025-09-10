@@ -4,8 +4,9 @@ const {
   assertAllowed,
 } = require("../utility/httpUtility");
 
-const getStudentByCourse = async (req, res, next) => {
+const getStudentsByCourse = async (req, res, next) => {
   try {
+    const { id: userId, role } = req.user;
     httpError(501, "Not implemented yet");
   } catch (err) {
     next(err);
@@ -14,6 +15,7 @@ const getStudentByCourse = async (req, res, next) => {
 
 const getTeacherByCourse = async (req, res, next) => {
   try {
+    const { id: userId, role } = req.user;
     httpError(501, "Not implemented yet");
   } catch (err) {
     next(err);
@@ -22,6 +24,7 @@ const getTeacherByCourse = async (req, res, next) => {
 
 const getUser = async (req, res, next) => {
   try {
+    const { id: userId, role } = req.user;
     httpError(501, "Not implemented yet");
   } catch (err) {
     next(err);
@@ -30,6 +33,7 @@ const getUser = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   try {
+    const { id: userId, role } = req.user;
     httpError(501, "Not implemented yet");
   } catch (err) {
     next(err);
@@ -38,6 +42,7 @@ const updateUser = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
   try {
+    const { id: userId, role } = req.user;
     httpError(501, "Not implemented yet");
   } catch (err) {
     next(err);
@@ -47,7 +52,7 @@ const deleteUser = async (req, res, next) => {
 module.exports = {
   updateUser,
   deleteUser,
-  getStudentByCourse,
+  getStudentsByCourse,
   getTeacherByCourse,
   getUser,
 };

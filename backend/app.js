@@ -4,7 +4,10 @@ const path = require("path");
 require("dotenv").config();
 
 const corsMiddleware = require("./middleware/corsMiddleware");
-const { generalRateLimiter, authRateLimiter } = require("./middleware/rateLimiterMiddleware");
+const {
+  generalRateLimiter,
+  authRateLimiter,
+} = require("./middleware/rateLimiterMiddleware");
 const requestLogger = require("./middleware/httpLoggerMiddleware");
 const serverRoutes = require("./route/route");
 const { requestContext } = require("./middleware/requestContext");

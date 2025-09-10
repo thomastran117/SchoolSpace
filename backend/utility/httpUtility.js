@@ -12,7 +12,9 @@ function requireFields(fields, body) {
 }
 
 function requiresAtLeastOneField(fields, body) {
-  const provided = fields.filter((field) => body[field] !== undefined && body[field] !== null);
+  const provided = fields.filter(
+    (field) => body[field] !== undefined && body[field] !== null,
+  );
 
   if (provided.length === 0) {
     const message =
@@ -54,4 +56,10 @@ function httpResponse(statusCode, message) {
   return err;
 }
 
-module.exports = { requireFields, requiresAtLeastOneField, validatePositiveInt, httpError, assertAllowed };
+module.exports = {
+  requireFields,
+  requiresAtLeastOneField,
+  validatePositiveInt,
+  httpError,
+  assertAllowed,
+};

@@ -14,7 +14,7 @@ const express = require("express");
 const {
   updateUser,
   deleteUser,
-  getStudentByCourse,
+  getStudentsByCourse,
   getTeacherByCourse,
   getUser,
 } = require("../controller/userController");
@@ -44,10 +44,10 @@ router.get("/users/teacher/:id", getTeacherByCourse);
 
 /**
  * @route GET /users/student/:id
- * @description Get students/users by course Id
+ * @description Get students by course Id
  * @access Private
  */
-router.get("/users/student/:id", getStudentByCourse);
+router.get("/users/student/:id", getStudentsByCourse);
 
 /**
  * @route GET /users/:id

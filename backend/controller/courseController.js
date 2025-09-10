@@ -11,14 +11,14 @@ const {
   requireFields,
   requiresAtLeastOneField,
   httpError,
-  assertAllowed,
   validatePositiveInt,
 } = require("../utility/httpUtility");
 
 const addCourse = async (req, res, next) => {
   try {
     const { id: userId, role } = req.user;
-    if (role !== "teacher") httpError(403, "The user lacks permissions to add courses");
+    if (role !== "teacher")
+      httpError(403, "The user lacks permissions to add courses");
     requireFields(["title", "description", "code"], req.body);
     const { title, description, code } = req.body;
     const course = await add_course(userId, title, description, code);
@@ -33,11 +33,18 @@ const addCourse = async (req, res, next) => {
 const updateCourse = async (req, res, next) => {
   try {
     const { id: userId, role } = req.user;
-    if (role !== "teacher") httpError(403, "The user lacks permissions to update this course");
+    if (role !== "teacher")
+      httpError(403, "The user lacks permissions to update this course");
     requiresAtLeastOneField(["title", "description", "code"], req.body);
     const { title, description, code } = req.body;
     const courseId = validatePositiveInt(req.params.id, "courseId");
-    const course = await update_course(courseId, userId, title, description, code);
+    const course = await update_course(
+      courseId,
+      userId,
+      title,
+      description,
+      code,
+    );
     res
       .status(201)
       .json({ message: "Course updated successfully", course: course });
@@ -49,12 +56,11 @@ const updateCourse = async (req, res, next) => {
 const deleteCourse = async (req, res, next) => {
   try {
     const { id: userId, role } = req.user;
-    if (role !== "teacher") httpError(403, "The user lacks permissions to update this course");
+    if (role !== "teacher")
+      httpError(403, "The user lacks permissions to update this course");
     const courseId = validatePositiveInt(req.params.id, "courseId");
     await delete_course(courseId, userId);
-    res
-      .status(201)
-      .json({ message: "Course deleted successfully"});
+    res.status(201).json({ message: "Course deleted successfully" });
   } catch (err) {
     next(err);
   }
@@ -63,6 +69,10 @@ const deleteCourse = async (req, res, next) => {
 const getCourse = async (req, res, next) => {
   try {
     const courseId = validatePositiveInt(req.params.id, "courseId");
+    const course = get_course(courseId);
+    res
+      .status(200)
+      .json({ message: "Course fetched successfully", course: course });
     httpError(501, "Not implemented yet");
   } catch (err) {
     next(err);
