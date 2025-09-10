@@ -1,9 +1,9 @@
 const prisma = require("../resource/prisma");
 const { httpError } = require("../utility/httpUtility");
 
-const add_course = async (ownerId, title, description) => {
+const add_course = async (ownerId, title, description, code) => {
   const course = await prisma.course.create({
-    data: { title, description, ownerId },
+    data: { title, description, ownerId, code },
     include: {
       owner: { select: { id: true, name: true, email: true } },
       _count: { select: { enrollments: true } },
@@ -12,7 +12,7 @@ const add_course = async (ownerId, title, description) => {
   return course;
 };
 
-const update_course = async (courseId, ownerId, title, description) => {
+const update_course = async (courseId, ownerId, title, description, code) => {
   const course = await prisma.course.findUnique({ where: { id: courseId } });
   if (!course) throw httpError(404, "Course not found");
   if (course.ownerId !== ownerId) throw httpError(403, "Forbidden");
@@ -20,6 +20,7 @@ const update_course = async (courseId, ownerId, title, description) => {
   const data = {};
   if (typeof title !== "undefined") data.title = title;
   if (typeof description !== "undefined") data.description = description;
+  if (typeof code !== "undefined") data.code = code;
 
   const updated = await prisma.course.update({
     where: { id: courseId },

@@ -4,7 +4,7 @@ const path = require("path");
 require("dotenv").config();
 
 const corsMiddleware = require("./middleware/corsMiddleware");
-const { rateMiddleware, authMiddleware } = require("./middleware/rateLimiterMiddleware");
+const { generalRateLimiter, authRateLimiter } = require("./middleware/rateLimiterMiddleware");
 const requestLogger = require("./middleware/httpLoggerMiddleware");
 const serverRoutes = require("./route/route");
 const { requestContext } = require("./middleware/requestContext");
@@ -17,14 +17,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(corsMiddleware);
-app.use(rateMiddleware);
+app.use(generalRateLimiter);
 app.use(requestLogger);
 
 app.get("/", (_req, res) =>
   res.sendFile(path.join(__dirname, "public", "index.html")),
 );
 app.get("/api", (_req, res) => res.send("API is running!"));
-app.use("/api/auth", authMiddleware);
+app.use("/api/auth", authRateLimiter);
 app.use("/api", serverRoutes);
 
 app.use((err, req, res, next) => {

@@ -50,6 +50,7 @@ model Course {
   id          Int          @id @default(autoincrement())
   title       String
   description String?
+  code        String
   
   ownerId Int
   owner   User @relation("CourseOwner", fields: [ownerId], references: [id])

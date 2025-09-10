@@ -11,12 +11,35 @@ function requireFields(fields, body) {
   }
 }
 
+function requiresAtLeastOneField(fields, body) {
+  const provided = fields.filter((field) => body[field] !== undefined && body[field] !== null);
+
+  if (provided.length === 0) {
+    const message =
+      fields.length === 1
+        ? `At least ${fields[0]} is required`
+        : `At least one of [${fields.join(", ")}] is required`;
+
+    throw httpError(400, message);
+  }
+}
+
 function assertAllowed(value, allowed, fieldName = "field") {
   if (!allowed.includes(value)) {
     message = `${fieldName} must be one of: ${allowed.join(", ")}`;
     httpError(400, message);
   }
   return true;
+}
+
+function validatePositiveInt(value, name = "id") {
+  const num = Number(value);
+
+  if (!Number.isInteger(num) || num <= 0) {
+    throw httpError(400, `${name} must be a positive integer`);
+  }
+
+  return num;
 }
 
 function httpError(statusCode, message) {
@@ -31,4 +54,4 @@ function httpResponse(statusCode, message) {
   return err;
 }
 
-module.exports = { requireFields, httpError, assertAllowed };
+module.exports = { requireFields, requiresAtLeastOneField, validatePositiveInt, httpError, assertAllowed };

@@ -1,6 +1,6 @@
 const rateLimit = require("express-rate-limit");
 
-const rateMiddleware = rateLimit({
+const generalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,
   standardHeaders: true,
@@ -8,7 +8,7 @@ const rateMiddleware = rateLimit({
   message: { error: "Too many requests. Please try again later." },
 });
 
-const authMiddleware = rateLimit({
+const authRateLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 100,
   standardHeaders: true,
@@ -16,4 +16,4 @@ const authMiddleware = rateLimit({
   message: { error: "Too many attempts. Please wait and try again." },
 });
 
-module.exports = { rateMiddleware, authMiddleware };
+module.exports = { generalRateLimiter, authRateLimiter };
