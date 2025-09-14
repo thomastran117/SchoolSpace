@@ -1,4 +1,4 @@
-const config = require("../../config/envManager")
+const config = require("../../config/envManager");
 
 let OIDC;
 let Issuer, generators;
@@ -63,14 +63,10 @@ module.exports = {
       throw e;
     }
 
-    const tokenSet = await client.callback(
-      MS_REDIRECT_URI,
-      callbackParams,
-      {
-        state,
-        code_verifier: codeVerifier,
-      },
-    );
+    const tokenSet = await client.callback(MS_REDIRECT_URI, callbackParams, {
+      state,
+      code_verifier: codeVerifier,
+    });
 
     const claims = tokenSet.claims();
     return {

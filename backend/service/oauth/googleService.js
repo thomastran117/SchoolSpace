@@ -1,6 +1,6 @@
 const { OAuth2Client } = require("google-auth-library");
 const crypto = require("crypto");
-const config = require("../../config/envManager")
+const config = require("../../config/envManager");
 
 const {
   google_client_id: GOOGLE_CLIENT_ID,

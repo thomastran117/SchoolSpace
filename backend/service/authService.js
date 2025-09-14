@@ -11,13 +11,9 @@ const {
 const { randomBytes } = require("crypto");
 const jwt = require("jsonwebtoken");
 const { httpError } = require("../utility/httpUtility");
-const config = require("../config/envManager")
+const config = require("../config/envManager");
 
-const {
-  frontend_client: FRONTEND_CLIENT,
-  jwt_secret_2: JWT_SECRET_2
-} = config;
-
+const { frontend_client: FRONTEND_CLIENT, jwt_secret_2: JWT_SECRET_2 } = config;
 
 const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({

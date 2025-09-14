@@ -32,12 +32,12 @@ const authLimiter = new RateLimiterRedis({
 
 const generalRateLimiter = limiterMiddleware(
   generalLimiter,
-  "Too many requests. Please try again later."
+  "Too many requests. Please try again later.",
 );
 
 const authRateLimiter = limiterMiddleware(
   authLimiter,
-  "Too many attempts. Please wait and try again."
+  "Too many attempts. Please wait and try again.",
 );
 
 module.exports = { generalRateLimiter, authRateLimiter };

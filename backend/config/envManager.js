@@ -9,7 +9,7 @@ const asBool = (v, fallback) =>
 function req(key) {
   const v = process.env[key];
   if (v == null || v === "") {
-    logger.error(`Missing required environment variable: ${key}`)
+    logger.error(`Missing required environment variable: ${key}`);
     process.exit(1);
   }
   return v;
@@ -34,7 +34,7 @@ export const config = {
   ms_redirect_uri: req("MS_REDIRECT_URI"),
   ms_tenant_id: req("MS_TENANT_ID"),
   email_user: opt("EMAIL_USER", ""),
-  email_pass: opt("EMAIL_PASS", "")
+  email_pass: opt("EMAIL_PASS", ""),
 };
 
 Object.freeze(config);
