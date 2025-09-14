@@ -1,7 +1,8 @@
 const Redis = require("ioredis");
 const logger = require("../utility/logger");
+const config = require("../config/envManager")
 
-const redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379", {
+const redis = new Redis(config.redis_url || "redis://127.0.0.1:6379", {
   lazyConnect: true,
   maxRetriesPerRequest: 2,
 });

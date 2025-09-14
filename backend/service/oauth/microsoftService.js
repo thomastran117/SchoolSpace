@@ -1,3 +1,5 @@
+const config = require("../../config/envManager")
+
 let OIDC;
 let Issuer, generators;
 let _client;
@@ -13,13 +15,12 @@ async function ensureClient() {
   await loadOIDC();
   if (_client) return _client;
 
-  const { MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET, MS_REDIRECT_URI } =
-    process.env;
-  if (!MS_TENANT_ID || !MS_CLIENT_ID || !MS_REDIRECT_URI) {
-    throw new Error(
-      "Missing MS_TENANT_ID / MS_CLIENT_ID / MS_REDIRECT_URI env vars",
-    );
-  }
+  const {
+    ms_tenant_id: MS_TENANT_ID,
+    ms_client_id: MS_CLIENT_ID,
+    ms_client_secret: MS_CLIENT_SECRET,
+    ms_redirect_uri: MS_REDIRECT_URI,
+  } = config;
 
   const issuer = await Issuer.discover(
     `https://login.microsoftonline.com/${MS_TENANT_ID}/v2.0`,
@@ -63,7 +64,7 @@ module.exports = {
     }
 
     const tokenSet = await client.callback(
-      process.env.MS_REDIRECT_URI,
+      MS_REDIRECT_URI,
       callbackParams,
       {
         state,

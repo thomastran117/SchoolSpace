@@ -11,6 +11,13 @@ const {
 const { randomBytes } = require("crypto");
 const jwt = require("jsonwebtoken");
 const { httpError } = require("../utility/httpUtility");
+const config = require("../config/envManager")
+
+const {
+  frontend_client: FRONTEND_CLIENT,
+  jwt_secret_2: JWT_SECRET_2
+} = config;
+
 
 const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({
@@ -48,17 +55,17 @@ const signupUser = async (email, password, role) => {
 
   const token = jwt.sign(
     { sub: email, jti, purpose: "email-verify" },
-    process.env.JWT_SECRET_2,
+    JWT_SECRET_2,
     { expiresIn: "15m" },
   );
 
-  const url = `${process.env.FRONTEND_CLIENT}/verify?token=${encodeURIComponent(token)}`;
+  const url = `${FRONTEND_CLIENT}/verify?token=${encodeURIComponent(token)}`;
   await sendVerificationEmail(email, url);
   return { message: "Verification email sent" };
 };
 
 const verifyUser = async (token) => {
-  const payload = jwt.verify(token, process.env.JWT_SECRET_2);
+  const payload = jwt.verify(token, JWT_SECRET_2);
   if (payload.purpose !== "email-verify") {
     const error = new Error("Invalid token purpose");
     error.statusCode = 400;

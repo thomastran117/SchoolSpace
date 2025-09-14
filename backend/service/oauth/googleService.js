@@ -1,12 +1,12 @@
 const { OAuth2Client } = require("google-auth-library");
 const crypto = require("crypto");
-const assert = require("assert");
+const config = require("../../config/envManager")
 
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } =
-  process.env;
-
-assert(GOOGLE_CLIENT_ID, "Missing GOOGLE_CLIENT_ID");
-assert(GOOGLE_REDIRECT_URI, "Missing GOOGLE_REDIRECT_URI");
+const {
+  google_client_id: GOOGLE_CLIENT_ID,
+  google_client_secret: GOOGLE_CLIENT_SECRET,
+  google_redirect_uri: GOOGLE_REDIRECT_URI,
+} = config;
 
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
@@ -63,7 +63,7 @@ async function finish(callbackParams, expected) {
     code_verifier: expected.codeVerifier,
   });
 
-  if (process.env.GOOGLE_CLIENT_SECRET) {
+  if (GOOGLE_CLIENT_SECRET) {
     body.set("client_secret", GOOGLE_CLIENT_SECRET);
   }
 

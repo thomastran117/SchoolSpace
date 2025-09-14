@@ -12,7 +12,6 @@ const requestLogger = require("./middleware/httpLoggerMiddleware");
 const serverRoutes = require("./route/route");
 const { requestContext } = require("./middleware/requestContext");
 
-const port = process.env.PORT || 8040;
 const app = express();
 
 app.use(express.json());
@@ -20,6 +19,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(corsMiddleware);
+app.set("trust proxy", 1);
 app.use(generalRateLimiter);
 app.use(requestLogger);
 

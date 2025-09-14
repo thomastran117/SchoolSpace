@@ -1,8 +1,12 @@
 const jwt = require("jsonwebtoken");
 const { httpError } = require("../utility/httpUtility");
+const config = require("../config/envManager")
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_SECRET_2 = process.env.JWT_SECRET_2;
+const {
+  jwt_secret: JWT_SECRET,
+  jwt_secret_2: JWT_SECRET_2
+} = config;
+
 const JWT_EXPIRY = "6h";
 const JWT_EXPIRY_2 = "30m";
 const VERIFY_EXP_MINUTES = 60;
