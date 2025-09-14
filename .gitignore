@@ -53,7 +53,7 @@ backend/.env.*.local
 # --- Prisma ---
 backend/prisma/generated/
 backend/node_modules/.prisma/
-/prisma/generated/
+prisma/generated/
 
 # --- Docker ---
 *.tar
