@@ -38,33 +38,41 @@ Run
 More indepth information about the .env variables in the backend
 
 ### Database & Cache
-DATABASE_URL=             # Connection string for your database
-REDIS_URL=                # Redis connection string
+-DATABASE_URL=             # Connection string for your database
+-REDIS_URL=                # Redis connection string
 
 ### Authentication
-JWT_SECRET=               # Primary JWT secret key
-JWT_SECRET_2=             # Secondary JWT secret (for rotation)
+-JWT_SECRET=               # Primary JWT secret key
+-JWT_SECRET_2=             # Secondary JWT secret (for rotation)
 
 ### CORS
-CORS_WHITELIST=           # Comma-separated list of allowed origins
+-CORS_WHITELIST=           # Comma-separated list of allowed origins
 
 ### Google OAuth
-GOOGLE_CLIENT_ID=         # Google OAuth client ID
-GOOGLE_CLIENT_SECRET=     # Google OAuth client secret
-GOOGLE_REDIRECT_URI=      # Google OAuth redirect URI
+-GOOGLE_CLIENT_ID=         # Google OAuth client ID
+-GOOGLE_CLIENT_SECRET=     # Google OAuth client secret
+-GOOGLE_REDIRECT_URI=      # Google OAuth redirect URI
+
+Acquire Google OAuth permissions by registering the app at [Google Cloud Console](https://cloud.google.com/cloud-console)
 
 ### Email (SMTP)
-EMAIL_USER=               # Email address used to send mails
-EMAIL_PASS=               # App password or SMTP password
+-EMAIL_USER=               # Email address used to send mails
+-EMAIL_PASS=               # App password or SMTP password
 
 ### Microsoft OAuth
-MS_TENANT_ID=             # Microsoft tenant ID
-MS_CLIENT_ID=             # Microsoft OAuth client ID
-MS_CLIENT_SECRET=         # Microsoft OAuth client secret
-MS_REDIRECT_URI=          # Microsoft OAuth redirect URI
+-MS_TENANT_ID=             # Microsoft tenant ID
+-MS_CLIENT_ID=             # Microsoft OAuth client ID
+-MS_CLIENT_SECRET=         # Microsoft OAuth client secret
+-MS_REDIRECT_URI=          # Microsoft OAuth redirect URI
+
+Acquire Microsoft OAuth Permissions by registering the app at [Azure Entra ID](https://www.microsoft.com/en-ca/security/business/identity-access/microsoft-entra-id)
 
 ### Frontend
-FRONTEND_CLIENT=          # Frontend client URL
+-FRONTEND_CLIENT=          # Frontend client URL
+
+Note: it is required that a database and redis URL is provided. Furthermore, Microsoft OAuth, Google OAuth and email variables are not required, but you will be unable to use those functions (will return 503).
+
+The rest of the .env have defaults.
 
 More information about the .env variables in the frontend
 
