@@ -82,13 +82,9 @@ Deployed webite:
 
 ## Requirements
 
-To run the project locally, you will either need:
+To run the project, you will either need:
 
-- Docker
-
-or
-
-- Node.js
+- Docker (recommended)
 
 Verify Docker is working with:
 
@@ -96,6 +92,19 @@ Verify Docker is working with:
    docker --version
 ```
 
+This is the recommended approach as the docker file will instantiate and install all dependencies
+
+or
+
+Not recommended, setup is rather tedious
+
+- [Node.js](https://nodejs.org/en/download)
+- [MySQL](https://www.mysql.com/downloads/)
+- [Redis](https://redis.io/downloads/)
+
+[Installing Redis on Windows](https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/install-redis-on-windows/)
+
+Alternatively, you can use a cloud instance of MySQL and Redis - however it is a lot for this project
 
 Verify Node is working with:
 
@@ -103,9 +112,20 @@ Verify Node is working with:
   node --version
 ```
 
-NOTE: It is recommened that you use Docker since a full shell script is provided to run the project
+Verify MySQL is working:
 
-You are now ready to install and run the project
+```bash
+mysql -u root -p -e "SELECT VERSION();"
+```
+
+Verify Redis is working:
+```bash
+redis-cli ping
+PONG # Should return pong
+```
+
+You are now ready to install and run SchoolSpace
+
 ## Installation
 
 ### Clone the project
