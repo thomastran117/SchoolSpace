@@ -109,22 +109,21 @@ Not recommended, setup is rather tedious
 
 Alternatively, you can use a cloud instance of MySQL and Redis - however it is a lot for this project
 
-Verify Node is working with:
+Verify your local environment is working with:
 
 ```bash
   node --version
-```
 
-Verify MySQL is working:
+  # Should return the node version
+  v22.16.0
 
-```bash
-mysql -u root -p -e "SELECT VERSION();"
-```
+  mysql -u root -p -e "SELECT VERSION();" # Should succeed, alternatively check if MySQL shell is avaliable
 
-Verify Redis is working:
-```bash
-redis-cli ping
-PONG # Should return pong
+  redis-cli ping
+  
+  # Should return pong
+  PONG
+
 ```
 
 You are now ready to install and run SchoolSpace
@@ -161,7 +160,7 @@ The frontend is avaliable at http://localhost:3040 and the backend is at http://
   npm run dev
 ```
 
-The frontend is avaliable at http://localhost:8040
+The frontend is avaliable at http://localhost:3040
 ### Running the backend
 
 The backend is avaliable at http://localhost:8040
