@@ -69,7 +69,7 @@ const deleteCourse = async (req, res, next) => {
 const getCourse = async (req, res, next) => {
   try {
     const courseId = validatePositiveInt(req.params.id, "courseId");
-    const course = get_course(courseId);
+    const course = await get_course(courseId);
     res
       .status(200)
       .json({ message: "Course fetched successfully", course: course });

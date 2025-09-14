@@ -1,4 +1,5 @@
 const Redis = require("ioredis");
+const logger = require("../utility/logger");
 
 const redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379", {
   lazyConnect: true,
@@ -8,9 +9,9 @@ const redis = new Redis(process.env.REDIS_URL || "redis://127.0.0.1:6379", {
 (async () => {
   try {
     await redis.ping();
-    console.log("Redis is connected");
+    logger.info("Redis is connected");
   } catch (e) {
-    console.error("Redis error:", e);
+    logger.error("Unable to connect to Redis");
     process.exit(1);
   }
 })();

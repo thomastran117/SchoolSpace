@@ -1,43 +1,45 @@
-/**
- * @file logger.js
- * @description Utility function for logging server errors to a txt file
- *
- * @module utility
- *
- * @author Thomas
- * @version 1.0.0
- *
- */
-
-/**
- * Imports
- */
 const fs = require("fs");
 const path = require("path");
+const chalk = require("chalk");
 
-/**
- * Path to find the log file
- * Should be located at the backend root directory (same level as package.json)
- *
- * @constant {string}
- */
-const logFilePath = path.join(__dirname, "..", "error.log.txt");
-
-/**
- * Logs the server error to the text file.
- *
- * @function logServerError
- * @param {error} err - The error message that the service layer has thrown
- * @param {request} req - The request method that has caused the eror
- * @returns {void}
- */
-function logServerError(err, req) {
-  const log = `[${new Date().toISOString()}] ${req.method} ${req.url} - ${err.message}\n`;
-
-  fs.appendFile(logFilePath, log, (fsErr) => {
-    if (fsErr) console.error("Failed to write to log file:", fsErr);
-  });
+const logDir = path.join(__dirname, "logs");
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir);
 }
 
-// Export the function
-module.exports = { logServerError };
+const logFile = path.join(logDir, "error.log");
+
+function getTimestamp() {
+  return new Date().toISOString();
+}
+
+function logToFile(level, message) {
+  const logEntry = `[${getTimestamp()}] [${level.toUpperCase()}] ${message}\n`;
+  fs.appendFileSync(logFile, logEntry, { encoding: "utf8" });
+}
+
+function log(level, message) {
+  const timestamp = chalk.gray(`[${getTimestamp()}]`);
+
+  switch (level) {
+    case "info":
+      console.log(`${timestamp} ${chalk.blue("[INFO]")} ${message}`);
+      break;
+    case "warn":
+      console.log(`${timestamp} ${chalk.yellow("[WARN]")} ${message}`);
+      break;
+    case "error":
+      console.log(`${timestamp} ${chalk.red("[ERROR]")} ${message}`);
+      logToFile(level, message);
+      break;
+    default:
+      console.log(`${timestamp} ${chalk.white("[LOG]")} ${message}`);
+  }
+}
+
+module.exports = {
+  info: (msg) => log("info", msg),
+  warn: (msg) => log("warn", msg),
+  error: (msg) => log("error", msg),
+  log: (msg) => log("log", msg),
+};
