@@ -36,15 +36,24 @@ const config = {
   ms_tenant_id: opt("MS_TENANT_ID", undefined),
   email_user: opt("EMAIL_USER", undefined),
   email_pass: opt("EMAIL_PASS", undefined),
-    isGoogleEnabled() {
-    return !!(this.google_client_id && this.google_client_secret && this.google_redirect_uri);
+  isGoogleEnabled() {
+    return !!(
+      this.google_client_id &&
+      this.google_client_secret &&
+      this.google_redirect_uri
+    );
   },
   isMicrosoftEnabled() {
-    return !!(this.ms_client_id && this.ms_redirect_uri && this.ms_tenant_id && this.ms_client_secret);
+    return !!(
+      this.ms_client_id &&
+      this.ms_redirect_uri &&
+      this.ms_tenant_id &&
+      this.ms_client_secret
+    );
   },
-   isEmailEnabled() {
+  isEmailEnabled() {
     return !!(this.email_user && this.email_pass);
-  }, 
+  },
 };
 
 Object.freeze(config);

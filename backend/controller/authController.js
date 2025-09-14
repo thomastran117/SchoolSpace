@@ -2,6 +2,7 @@ const {
   loginUser,
   signupUser,
   verifyUser,
+  signupUserWOVerify,
   startMicrosoftOAuth,
   finishMicrosoftOAuth,
   startGoogleOAuth,
@@ -60,8 +61,13 @@ const signup = async (req, res, next) => {
       httpError(400, "Invalid email format");
     }
 
-    const { url } = await signupUser(email, password, role);
-    res.status(201).json({ message: "Email sent. Please verify." });
+    if (config.isEmailEnabled()) {
+      const { url } = await signupUser(email, password, role);
+      res.status(201).json({ message: "Email sent. Please verify." });
+    } else {
+      const { url } = await signupUserWOVerify(email, password, role);
+      res.status(201).json({ message: "Verification skip. Please login." });
+    }
   } catch (err) {
     next(err);
   }
@@ -69,6 +75,13 @@ const signup = async (req, res, next) => {
 
 const verify_email = async (req, res, next) => {
   try {
+    if (!config.isEmailEnabled()) {
+      logger.warn("Email verification is not avaliable");
+      httpError(
+        503,
+        "Email verification is not avaliable. You don't need to access this route at the moment.",
+      );
+    }
     const { token } = req.query;
     if (!token) httpError(400, "Missing token");
     await verifyUser(token);
@@ -82,9 +95,12 @@ const verify_email = async (req, res, next) => {
 
 const microsoftStart = async (_req, res, next) => {
   try {
-    if (!config.isMicrosoftEnabled()){
-      logger.warn("Microsoft OAuth is not avaliable")
-      httpError(503, "Microsoft OAuth is not avaliable. Please use another login method")
+    if (!config.isMicrosoftEnabled()) {
+      logger.warn("Microsoft OAuth is not avaliable");
+      httpError(
+        503,
+        "Microsoft OAuth is not avaliable. Please use another login method",
+      );
     }
     const { url: authUrl, state, codeVerifier } = await startMicrosoftOAuth();
     setTemp(res, "ms_pkce", JSON.stringify({ state, codeVerifier }));
@@ -96,9 +112,12 @@ const microsoftStart = async (_req, res, next) => {
 
 const microsoftCallback = async (req, res, next) => {
   try {
-    if (!config.isMicrosoftEnabled()){
-      logger.warn("Microsoft OAuth is not avaliable")
-      httpError(503, "Microsoft OAuth is not avaliable. Please use another login method")
+    if (!config.isMicrosoftEnabled()) {
+      logger.warn("Microsoft OAuth is not avaliable");
+      httpError(
+        503,
+        "Microsoft OAuth is not avaliable. Please use another login method",
+      );
     }
     const params = url.parse(req.url, true).query;
 
@@ -135,9 +154,12 @@ const validateEmail = (email) => {
 
 const googleStart = async (_req, res, next) => {
   try {
-    if (!config.isGoogleEnabled()){
-      logger.warn("Google OAuth is not avaliable")
-      httpError(503, "Google OAuth is not avaliable. Please use another login method")
+    if (!config.isGoogleEnabled()) {
+      logger.warn("Google OAuth is not avaliable");
+      httpError(
+        503,
+        "Google OAuth is not avaliable. Please use another login method",
+      );
     }
     const { url: authUrl, state, codeVerifier } = await startGoogleOAuth();
     setTemp(res, "g_pkce", JSON.stringify({ state, codeVerifier }));
@@ -149,9 +171,12 @@ const googleStart = async (_req, res, next) => {
 
 const googleCallback = async (req, res, next) => {
   try {
-    if (!config.isGoogleEnabled()){
-      logger.warn("Google OAuth is not avaliable")
-      httpError(503, "Google OAuth is not avaliable. Please use another login method")
+    if (!config.isGoogleEnabled()) {
+      logger.warn("Google OAuth is not avaliable");
+      httpError(
+        503,
+        "Google OAuth is not avaliable. Please use another login method",
+      );
     }
     const params = url.parse(req.url, true).query;
 

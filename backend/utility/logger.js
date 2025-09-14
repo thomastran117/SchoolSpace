@@ -27,10 +27,14 @@ function log(level, message) {
       break;
     case "warn":
       console.log(`${timestamp} ${chalk.yellow("[WARN]")} ${message}`);
+      logToFile(level, message);
       break;
     case "error":
       console.log(`${timestamp} ${chalk.red("[ERROR]")} ${message}`);
       logToFile(level, message);
+      break;
+    case "error":
+      console.log(`${timestamp} ${chalk.cyan("[DEBUG]")} ${message}`);
       break;
     default:
       console.log(`${timestamp} ${chalk.white("[LOG]")} ${message}`);

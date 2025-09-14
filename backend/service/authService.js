@@ -223,6 +223,21 @@ const update_role = async (id, role) => {
   };
 };
 
+const signupUserWOVerify = async (email, password, role) => {
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (existingUser) {
+    httpError(409, "Email already in use");
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = await prisma.user.create({
+    data: { email, password: hashedPassword, role },
+  });
+
+  return user;
+};
+
 module.exports = {
   signupUser,
   loginUser,
@@ -232,4 +247,5 @@ module.exports = {
   finishMicrosoftOAuth,
   startGoogleOAuth,
   finishGoogleOAuth,
+  signupUserWOVerify,
 };
