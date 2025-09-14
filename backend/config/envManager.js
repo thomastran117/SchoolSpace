@@ -27,15 +27,24 @@ const config = {
   jwt_secret_2: opt("JWT_SECRET_2", "dev-secret-2"),
   cors_whitelist: opt("CORS_WHITELIST", "http://localhost:3040"),
   frontend_client: opt("FRONTEND_CLIENT", "http://localhost:3040"),
-  google_client_id: req("GOOGLE_CLIENT_ID"),
-  google_client_secret: req("GOOGLE_CLIENT_SECRET"),
-  google_redirect_uri: req("GOOGLE_REDIRECT_URI"),
-  ms_client_id: req("MS_CLIENT_ID"),
-  ms_client_secret: req("MS_CLIENT_SECRET"),
-  ms_redirect_uri: req("MS_REDIRECT_URI"),
-  ms_tenant_id: req("MS_TENANT_ID"),
-  email_user: opt("EMAIL_USER", ""),
-  email_pass: opt("EMAIL_PASS", ""),
+  google_client_id: opt("GOOGLE_CLIENT_ID", undefined),
+  google_client_secret: opt("GOOGLE_CLIENT_SECRET", undefined),
+  google_redirect_uri: opt("GOOGLE_REDIRECT_URI", undefined),
+  ms_client_id: opt("MS_CLIENT_ID", undefined),
+  ms_client_secret: opt("MS_CLIENT_SECRET", undefined),
+  ms_redirect_uri: opt("MS_REDIRECT_URI", undefined),
+  ms_tenant_id: opt("MS_TENANT_ID", undefined),
+  email_user: opt("EMAIL_USER", undefined),
+  email_pass: opt("EMAIL_PASS", undefined),
+    isGoogleEnabled() {
+    return !!(this.google_client_id && this.google_client_secret && this.google_redirect_uri);
+  },
+  isMicrosoftEnabled() {
+    return !!(this.ms_client_id && this.ms_redirect_uri && this.ms_tenant_id && this.ms_client_secret);
+  },
+   isEmailEnabled() {
+    return !!(this.email_user && this.email_pass);
+  }, 
 };
 
 Object.freeze(config);

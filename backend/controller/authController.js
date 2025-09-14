@@ -13,8 +13,10 @@ const {
   httpError,
   assertAllowed,
 } = require("../utility/httpUtility");
+const logger = require("../utility/logger");
 
 const url = require("url");
+const config = require("../config/envManager");
 
 const setTemp = (res, key, val) =>
   res.cookie(key, val, {
@@ -80,6 +82,10 @@ const verify_email = async (req, res, next) => {
 
 const microsoftStart = async (_req, res, next) => {
   try {
+    if (!config.isMicrosoftEnabled()){
+      logger.warn("Microsoft OAuth is not avaliable")
+      httpError(503, "Microsoft OAuth is not avaliable. Please use another login method")
+    }
     const { url: authUrl, state, codeVerifier } = await startMicrosoftOAuth();
     setTemp(res, "ms_pkce", JSON.stringify({ state, codeVerifier }));
     res.redirect(authUrl);
@@ -90,6 +96,10 @@ const microsoftStart = async (_req, res, next) => {
 
 const microsoftCallback = async (req, res, next) => {
   try {
+    if (!config.isMicrosoftEnabled()){
+      logger.warn("Microsoft OAuth is not avaliable")
+      httpError(503, "Microsoft OAuth is not avaliable. Please use another login method")
+    }
     const params = url.parse(req.url, true).query;
 
     if (!params.code) {
@@ -125,6 +135,10 @@ const validateEmail = (email) => {
 
 const googleStart = async (_req, res, next) => {
   try {
+    if (!config.isGoogleEnabled()){
+      logger.warn("Google OAuth is not avaliable")
+      httpError(503, "Google OAuth is not avaliable. Please use another login method")
+    }
     const { url: authUrl, state, codeVerifier } = await startGoogleOAuth();
     setTemp(res, "g_pkce", JSON.stringify({ state, codeVerifier }));
     res.redirect(authUrl);
@@ -135,6 +149,10 @@ const googleStart = async (_req, res, next) => {
 
 const googleCallback = async (req, res, next) => {
   try {
+    if (!config.isGoogleEnabled()){
+      logger.warn("Google OAuth is not avaliable")
+      httpError(503, "Google OAuth is not avaliable. Please use another login method")
+    }
     const params = url.parse(req.url, true).query;
 
     if (!params.code) {
