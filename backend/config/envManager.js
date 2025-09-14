@@ -12,7 +12,6 @@ function req(key) {
     logger.error(`Missing required environment variable: ${key}`);
     process.exit(1);
   }
-  console.log(v)
   return v;
 }
 
