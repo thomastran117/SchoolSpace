@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
-import logger from "../utility/logger.js";
+const dotenv = require("dotenv")
+const logger = require("../utility/logger")
 dotenv.config();
 
 const asInt = (v, fallback) => (v == null ? fallback : parseInt(v, 10));
@@ -12,6 +12,7 @@ function req(key) {
     logger.error(`Missing required environment variable: ${key}`);
     process.exit(1);
   }
+  console.log(v)
   return v;
 }
 
@@ -20,8 +21,9 @@ function opt(key, def) {
   return v == null || v === "" ? def : v;
 }
 
-export const config = {
+const config = {
   database_url: req("DATABASE_URL"),
+  redis_url: req("REDIS_URL"),
   jwt_secret: opt("JWT_SECRET", "dev-secret"),
   jwt_secret_2: opt("JWT_SECRET_2", "dev-secret-2"),
   cors_whitelist: opt("CORS_WHITELIST", "http://localhost:3040"),
@@ -38,3 +40,5 @@ export const config = {
 };
 
 Object.freeze(config);
+
+module.exports = config;
