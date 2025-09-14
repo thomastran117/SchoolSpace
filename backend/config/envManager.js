@@ -1,5 +1,5 @@
-const dotenv = require("dotenv")
-const logger = require("../utility/logger")
+const dotenv = require("dotenv");
+const logger = require("../utility/logger");
 dotenv.config();
 
 const asInt = (v, fallback) => (v == null ? fallback : parseInt(v, 10));
