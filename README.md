@@ -37,33 +37,33 @@ Run
 
 More indepth information about the .env variables in the backend
 
-# Database & Cache
+### Database & Cache
 DATABASE_URL=             # Connection string for your database
 REDIS_URL=                # Redis connection string
 
-# Authentication
+### Authentication
 JWT_SECRET=               # Primary JWT secret key
 JWT_SECRET_2=             # Secondary JWT secret (for rotation)
 
-# CORS
+### CORS
 CORS_WHITELIST=           # Comma-separated list of allowed origins
 
-# Google OAuth
+### Google OAuth
 GOOGLE_CLIENT_ID=         # Google OAuth client ID
 GOOGLE_CLIENT_SECRET=     # Google OAuth client secret
 GOOGLE_REDIRECT_URI=      # Google OAuth redirect URI
 
-# Email (SMTP)
+### Email (SMTP)
 EMAIL_USER=               # Email address used to send mails
 EMAIL_PASS=               # App password or SMTP password
 
-# Microsoft OAuth
+### Microsoft OAuth
 MS_TENANT_ID=             # Microsoft tenant ID
 MS_CLIENT_ID=             # Microsoft OAuth client ID
 MS_CLIENT_SECRET=         # Microsoft OAuth client secret
 MS_REDIRECT_URI=          # Microsoft OAuth redirect URI
 
-# Frontend
+### Frontend
 FRONTEND_CLIENT=          # Frontend client URL
 
 More information about the .env variables in the frontend
@@ -82,10 +82,13 @@ Deployed webite:
 
 ## Requirements
 
-To run the project, you will either need:
+There are a few ways to run the project. You may run the project locally with your own environment, or with Docker. We will go through the two provided ways.
 
-- Docker (recommended)
+### Docker (recommended)
 
+Install Docker if you don't have it yet.
+- [Windows Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Linux Docker Engine](https://docs.docker.com/engine/)
 Verify Docker is working with:
 
 ```bash
@@ -94,11 +97,11 @@ Verify Docker is working with:
 
 This is the recommended approach as the docker file will instantiate and install all dependencies
 
-or
+### Locally (not recommended)
 
 Not recommended, setup is rather tedious
 
-- [Node.js](https://nodejs.org/en/download)
+- [Node.js v22.16.0](https://nodejs.org/en/download)
 - [MySQL](https://www.mysql.com/downloads/)
 - [Redis](https://redis.io/downloads/)
 
@@ -126,39 +129,35 @@ PONG # Should return pong
 
 You are now ready to install and run SchoolSpace
 
-## Installation
+## Running the application
 
-### Clone the project
-
-```bash
-  git clone https://github.com/thomastran117/EasyFood.git
-```
-
-### Frontend
-
-Install the frontend's dependencies with npm
+### 1. Clone the project
 
 ```bash
-  cd frontend
-  npm install
+  git clone https://github.com/thomastran117/SchoolSpace.git
 ```
 
-### Backend
-Install the backend's dependencies with npm
+Run locally or with docker
 
+## Running with Docker (recommended)
+
+Using docker, run the following command in the root directory:
 ```bash
-  cd backend
-  npm install
+  .\scripts\start-app.ps1 # Windows
+  # OR
+  ./scripts/start-app.sh # Linux
 ```
+  
+The frontend is avaliable at http://localhost:3040 and the backend is at http://localhost:8040. Remember to use the api prefix for the server.
 
-## Running the Application
+## Running locally
 
 ### Running the frontend
 
 ```bash
   # If not already in frontend directory
   cd frontend
-
+  npm install
   npm run dev
 ```
 
@@ -170,21 +169,11 @@ The backend is avaliable at http://localhost:8040
 ```bash
   # If not already in backend directory
   cd backend
-  
+  npm install
   npm run dev
 ```
 Remember to use the api prefix
 
-### Docker (optional but recommended)
-
-Using docker, run the following command in the root directory:
-```bash
-  .\scripts\start-app.ps1 # Windows
-  # OR
-  ./scripts/start-app.sh # Linux
-```
-  
-The frontend is avaliable at http://localhost:3040 and the backend is at http://localhost:8040. Remember to use the api prefix for the server.
 ## Running Tests
 
 To run tests, run the following command
