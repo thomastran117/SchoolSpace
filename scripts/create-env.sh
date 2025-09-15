@@ -10,25 +10,56 @@ BACKEND_PATH="$SCRIPT_DIR/../backend"
 ENV_FILE="$BACKEND_PATH/.env"
 
 read -r -d '' ENV_CONTENT <<'EOF'
-DATABASE_URL=""
-REDIS_URL=""
-JWT_SECRET=""
-JWT_SECRET_2=""
-CORS_WHITELIST=""
+##############################################
+# Server
+##############################################
+
+FRONTEND_CLIENT="http://localhost:3040"
+PORT=8040
+
+##############################################
+# Database & Redis
+##############################################
+
+DATABASE_URL="mysql://root:password123@localhost:3306/database"
+REDIS_URL="redis://127.0.0.1:6379"
+
+##############################################
+# Security / JWT
+##############################################
+
+JWT_SECRET="schoolspace-secret"
+JWT_SECRET_2="schoolspace-top-secret"
+
+##############################################
+# CORS Configuration
+##############################################
+
+CORS_WHITELIST=["http://localhost:3040", "http://127.0.0.1:3040", "http://localhost:5173"]
+
+##############################################
+# Email (SMTP credentials)
+##############################################
+
+EMAIL_USER=""
+EMAIL_PASS=""
+
+##############################################
+# Google OAuth2
+##############################################
 
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
 GOOGLE_REDIRECT_URI=""
 
-EMAIL_USER=""
-EMAIL_PASS=""
+##############################################
+# Microsoft OAuth2
+##############################################
 
 MS_TENANT_ID=""
 MS_CLIENT_ID=""
 MS_CLIENT_SECRET=""
 MS_REDIRECT_URI=""
-
-FRONTEND_CLIENT=""
 EOF
 
 if [[ ! -d "$BACKEND_PATH" ]]; then
