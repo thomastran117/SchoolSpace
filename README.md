@@ -146,39 +146,39 @@ You are now ready to install and run SchoolSpace
 
 Run locally or with docker
 
+Ensure you have .env with redis_url and database_url set.
+
+
 ## Running with Docker (recommended)
 
 Using docker, run the following command in the root directory:
 ```bash
-  .\scripts\start-app.ps1 # Windows
+  .\scripts\run-docker.ps1 # Windows
   # OR
-  ./scripts/start-app.sh # Linux
+  ./scripts/run-docker.sh # Linux
 ```
   
 The frontend is avaliable at http://localhost:3040 and the backend is at http://localhost:8040. Remember to use the api prefix for the server.
 
 ## Running locally
 
-### Running the frontend
 
 ```bash
-  # If not already in frontend directory
-  cd frontend
-  npm install
-  npm run dev
+  # Installing the application
+  .\scripts\setup.ps1 # Windows
+  # OR
+  ./scripts/setup.sh # Linux
+
+  # Running the application
+  .\scripts\run-app.ps1 # Windows
+  # OR
+  ./scripts/run-app.sh # Linux
 ```
 
 The frontend is avaliable at http://localhost:3040
-### Running the backend
 
 The backend is avaliable at http://localhost:8040
 
-```bash
-  # If not already in backend directory
-  cd backend
-  npm install
-  npm run dev
-```
 Remember to use the api prefix
 
 ## Running Tests

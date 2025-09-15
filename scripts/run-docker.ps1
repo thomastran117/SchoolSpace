@@ -1,4 +1,3 @@
-# scripts/start-app.ps1
 $ErrorActionPreference = "Stop"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
