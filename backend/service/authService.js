@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const prisma = require("../resource/prisma");
 const { createToken } = require("./tokenService");
-const microsoftOAuth = require("./oauth/microsoftService");
+const { verifyMicrosoftIdToken } = require("./oauth/microsoftService");
 const googleOAuth = require("./oauth/googleService");
 const redis = require("../resource/redis");
 const {
@@ -110,30 +110,31 @@ const verifyUser = async (token) => {
   }
 };
 
-const startMicrosoftOAuth = async () => {
-  return microsoftOAuth.start();
-};
+async function verifyMicrosoftIdTokenAndSignIn(idToken) {
+  const claims = await verifyMicrosoftIdToken(idToken);
 
-const finishMicrosoftOAuth = async (callbackParams, expected) => {
-  const profile = await microsoftOAuth.finish(callbackParams, expected);
-  if (!profile.email) {
-    httpError(400, "Microsoft email missing");
-  }
+  ftSub = claims.sub || claims.oid;
+  const email = claims.email || claims.preferred_username;
+  const name = claims.name || "";
 
-  let user = await prisma.user.findUnique({ where: { email: profile.email } });
+  if (!email) httpError(400, "Microsoft email missing");
+  if (!microsoftSub) httpError(400, "Microsoft subject missing");
 
+  let user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    user = await prisma.user.findFirst({ where: { microsoftId: profile.sub } });
+    user = await prisma.user.findFirst({
+      where: { microsoftId: microsoftSub },
+    });
   }
 
   if (!user) {
     user = await prisma.user.create({
       data: {
-        email: profile.email,
-        name: profile.name,
+        email,
+        name,
         provider: "microsoft",
         password: null,
-        microsoftId: profile.sub,
+        microsoftId: microsoftSub,
         role: "notdefined",
       },
     });
@@ -141,20 +142,21 @@ const finishMicrosoftOAuth = async (callbackParams, expected) => {
     user = await prisma.user.update({
       where: { id: user.id },
       data: {
-        microsoftId: profile.sub,
+        microsoftId: microsoftSub,
         provider: "microsoft",
-        name: user.name || profile.name,
+        name: user.name || name,
       },
     });
   }
 
   const token = await createToken(user.id, user.email, user.role);
+
   return {
     token,
     role: user.role,
     user: { id: user.id, email: user.email, name: user.name },
   };
-};
+}
 
 const startGoogleOAuth = async () => {
   return googleOAuth.start();
@@ -243,8 +245,7 @@ module.exports = {
   loginUser,
   verifyUser,
   update_role,
-  startMicrosoftOAuth,
-  finishMicrosoftOAuth,
+  verifyMicrosoftIdTokenAndSignIn,
   startGoogleOAuth,
   finishGoogleOAuth,
   signupUserWOVerify,

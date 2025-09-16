@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { msalInstance, microsoftScopes, waitForMsal } from "../auth/msalClient";
 
 export default function AuthPage({ onAuth }) {
   const [mode, setMode] = useState("login");
@@ -7,8 +8,25 @@ export default function AuthPage({ onAuth }) {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [msalReady, setMsalReady] = useState(false);
 
   const isSignup = mode === "signup";
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        await waitForMsal();
+        if (alive) setMsalReady(true);
+      } catch (e) {
+        if (alive) {
+          setError("Microsoft sign-in not available (MSAL init failed).");
+          setMsalReady(false);
+        }
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,11 +63,46 @@ export default function AuthPage({ onAuth }) {
     setError(""); setShowPw(false);
   };
 
-  const handleOAuth = (provider) => {
-    if (provider === "microsoft") {
-      window.location.href = `http://localhost:8040/api/auth/microsoft/start`;
-    } else if (provider === "google") {
-      window.location.href = `http://localhost:8040/api/auth/google/start`;
+  const handleOAuth = async (provider) => {
+    try {
+      setError(""); setLoading(true);
+
+      if (provider === "microsoft") {
+        // Ensure MSAL is ready even if called directly (idempotent)
+        await waitForMsal();
+
+        const loginResult = await msalInstance.loginPopup({
+          scopes: microsoftScopes,
+          prompt: "select_account",
+        });
+
+        const idToken = loginResult.idToken;
+        if (!idToken) throw new Error("Microsoft sign-in failed: missing id_token");
+
+        const resp = await fetch("http://localhost:8040/api/auth/microsoft/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", // optional if you set cookies
+          body: JSON.stringify({ id_token: idToken }),
+        });
+
+        if (!resp.ok) {
+          const msg = await resp.text();
+          throw new Error(msg || `Verify failed (${resp.status})`);
+        }
+
+        const data = await resp.json();
+        await onAuth?.("oauth", data);
+        return;
+      }
+
+      if (provider === "google") {
+        window.location.href = `http://localhost:8040/api/auth/google/start`;
+      }
+    } catch (err) {
+      setError(err?.message || "OAuth failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,13 +130,25 @@ export default function AuthPage({ onAuth }) {
 
               {/* OAuth buttons */}
               <div className="d-grid gap-2 mb-3">
-                <button type="button" className="btn btn-light border btn-google rounded-pill d-flex align-items-center justify-content-center gap-2" onClick={() => handleOAuth("google")}>
+                <button
+                  type="button"
+                  className="btn btn-light border btn-google rounded-pill d-flex align-items-center justify-content-center gap-2"
+                  onClick={() => handleOAuth("google")}
+                  disabled={loading}
+                >
                   {GoogleIcon}
                   Continue with Google
                 </button>
-                <button type="button" className="btn btn-light border btn-microsoft rounded-pill d-flex align-items-center justify-content-center gap-2" onClick={() => handleOAuth("microsoft")}>
+
+                <button
+                  type="button"
+                  className="btn btn-light border btn-microsoft rounded-pill d-flex align-items-center justify-content-center gap-2"
+                  onClick={() => handleOAuth("microsoft")}
+                  disabled={loading || !msalReady}
+                  title={msalReady ? "Sign in with Microsoft" : "Initializing Microsoft sign-in…"}
+                >
                   {MicrosoftIcon}
-                  Continue with Microsoft
+                  {msalReady ? "Continue with Microsoft" : "Microsoft (initializing…)"}
                 </button>
               </div>
 
@@ -136,7 +201,7 @@ export default function AuthPage({ onAuth }) {
               </form>
 
               <div className="text-center mt-3">
-                <button className="btn btn-link text-decoration-none" onClick={switchMode}>
+                <button className="btn btn-link text-decoration-none" onClick={switchMode} disabled={loading}>
                   {isSignup ? "Have an account? Sign in" : "New here? Create account"}
                 </button>
               </div>
@@ -153,7 +218,7 @@ export default function AuthPage({ onAuth }) {
 }
 
 const GoogleIcon = (
-  <svg className="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.2-1.6 3.5-5.4 3.5-3.2 0-5.9-2.7-5.9-6s2.7-6 5.9-6c1.8 0 3 .8 3.6 1.4l2.4-2.3C16.9 3 14.7 2 12 2 6.9 2 2.7 6.2 2.7 11.3S6.9 20.7 12 20.7c5.7 0 9.4-4 9.4-9.5 0-.6-.1-1-.2-1.5H12z"/><path fill="#34A853" d="M3.9 7.6l3.2 2.3C8 7.4 9.8 6.1 12 6.1c1.8 0 3 .8 3.6 1.4l2.4-2.3C16.9 3 14.7 2 12 2 8 2 4.6 4.2 3.9 7.6z"/><path fill="#4A90E2" d="M12 20.7c2.7 0 5-.9 6.6-2.5l-3.1-2.6c-.9.6-2.2 1-3.5 1-2.6 0-4.8-1.7-5.6-4.1l-3.3 2.5C4.7 18.9 8 20.7 12 20.7z"/><path fill="#FBBC05" d="M20.6 11.2c0-.5-.1-.9-.2-1.4H12v3.9h5.4c-.3 1.4-1.6 2.3-3.4 2.3-.9 0-2.1-.4-2.9-1.2l-3.3 2.5c1.5 2.7 4 4.4 6.8 4.4 3.5 0 6.6-1.9 7.9-5 1-2.3 1.1-4.2 1.1-5.1z"/></svg>
+  <svg className="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.2-1.6 3.5-5.4 3.5-3.2 0-5.9-2.7-5.9-6s2.7-6 5.9-6c1.8 0 3 .8 3.6 1.4l2.4-2.3C16.9 3 14.7 2 12 2 8 2 4.6 4.2 3.9 7.6z"/><path fill="#34A853" d="M3.9 7.6l3.2 2.3C8 7.4 9.8 6.1 12 6.1c1.8 0 3 .8 3.6 1.4l2.4-2.3C16.9 3 14.7 2 12 2 8 2 4.6 4.2 3.9 7.6z"/><path fill="#4A90E2" d="M12 20.7c2.7 0 5-.9 6.6-2.5l-3.1-2.6c-.9.6-2.2 1-3.5 1-2.6 0-4.8-1.7-5.6-4.1l-3.3 2.5C4.7 18.9 8 20.7 12 20.7z"/><path fill="#FBBC05" d="M20.6 11.2c0-.5-.1-.9-.2-1.4H12v3.9h5.4c-.3 1.4-1.6 2.3-3.4 2.3-.9 0-2.1-.4-2.9-1.2l-3.3 2.5c1.5 2.7 4 4.4 6.8 4.4 3.5 0 6.6-1.9 7.9-5 1-2.3 1.1-4.2 1.1-5.1z"/></svg>
 );
 
 const MicrosoftIcon = (

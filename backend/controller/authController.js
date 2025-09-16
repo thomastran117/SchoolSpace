@@ -3,8 +3,7 @@ const {
   signupUser,
   verifyUser,
   signupUserWOVerify,
-  startMicrosoftOAuth,
-  finishMicrosoftOAuth,
+  verifyMicrosoftIdTokenAndSignIn,
   startGoogleOAuth,
   finishGoogleOAuth,
   update_role,
@@ -93,55 +92,27 @@ const verify_email = async (req, res, next) => {
   }
 };
 
-const microsoftStart = async (_req, res, next) => {
+const microsoftVerify = async (req, res, next) => {
   try {
     if (!config.isMicrosoftEnabled()) {
-      logger.warn("Microsoft OAuth is not avaliable");
-      httpError(
+      logger.warn("Microsoft OAuth is not available");
+      return httpError(
         503,
-        "Microsoft OAuth is not avaliable. Please use another login method",
+        "Microsoft OAuth is not available. Please use another login method",
       );
     }
-    const { url: authUrl, state, codeVerifier } = await startMicrosoftOAuth();
-    setTemp(res, "ms_pkce", JSON.stringify({ state, codeVerifier }));
-    res.redirect(authUrl);
-  } catch (err) {
-    next(err);
-  }
-};
 
-const microsoftCallback = async (req, res, next) => {
-  try {
-    if (!config.isMicrosoftEnabled()) {
-      logger.warn("Microsoft OAuth is not avaliable");
-      httpError(
-        503,
-        "Microsoft OAuth is not avaliable. Please use another login method",
-      );
-    }
-    const params = url.parse(req.url, true).query;
+    const { id_token: idToken } = req.body || {};
+    if (!idToken) return httpError(400, "Missing id_token");
 
-    if (!params.code) {
-      httpError(400, "Missing code");
-    }
-    if (wasCodeRedeemed(req, params.code)) {
-      httpError(400, "Missing token");
-    }
+    const { token, role, user } =
+      await verifyMicrosoftIdTokenAndSignIn(idToken);
 
-    const pkceRaw = popTemp(req, res, "ms_pkce");
-    if (!pkceRaw) {
-      httpError(400, "PKCE data missing (cookie expired?)");
-    }
-    const { state, codeVerifier } = JSON.parse(pkceRaw);
-
-    const { token, role } = await finishMicrosoftOAuth(params, {
-      state,
-      codeVerifier,
+    return res.status(200).json({
+      token,
+      role,
+      user,
     });
-
-    const redirect = new URL("/auth/signed-in", process.env.FRONTEND_CLIENT);
-    redirect.hash = `token=${encodeURIComponent(token)}&role=${encodeURIComponent(role)}`;
-    return res.redirect(redirect.toString());
   } catch (err) {
     next(err);
   }
@@ -242,8 +213,7 @@ const wasGCodeRedeemed = (req, code) => {
 module.exports = {
   login,
   signup,
-  microsoftCallback,
-  microsoftStart,
+  microsoftVerify,
   verify_email,
   updateRole,
   googleStart,

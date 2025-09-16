@@ -15,8 +15,7 @@ const express = require("express");
 const {
   login,
   signup,
-  microsoftStart,
-  microsoftCallback,
+  microsoftVerify,
   verify_email,
   googleStart,
   googleCallback,
@@ -58,14 +57,7 @@ router.get("/verify", verify_email);
  * @description Initiates Microsoft OAuth login flow.
  * @access Public
  */
-router.get("/microsoft/start", microsoftStart);
-
-/**
- * @route GET /auth/microsoft/callback
- * @description Handles Microsoft OAuth callback and token exchange.
- * @access Public
- */
-router.get("/microsoft/callback", microsoftCallback);
+router.post("/microsoft/verify", microsoftVerify);
 
 /**
  * @route GET /auth/google/start

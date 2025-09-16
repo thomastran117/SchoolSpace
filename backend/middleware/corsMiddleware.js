@@ -18,17 +18,18 @@ if (process.env.FRONTEND_CLIENT && !raw.length) {
 }
 
 const whitelist = new Set(raw.map(normalizeOrigin).filter(Boolean));
-console.log(whitelist);
 
 const corsOptionsDelegate = (req, cb) => {
   const originHdr = req.header("Origin");
-  let isAllowed = !originHdr; // allow non-browser clients (no Origin)
+  let isAllowed = !originHdr;
 
   if (originHdr) {
     const norm = normalizeOrigin(originHdr);
     isAllowed = whitelist.has(norm);
     if (!isAllowed) {
-      console.warn(`[CORS BLOCKED] ${req.method} ${req.originalUrl} from Origin: ${originHdr}`);
+      console.warn(
+        `[CORS BLOCKED] ${req.method} ${req.originalUrl} from Origin: ${originHdr}`,
+      );
     }
   }
 

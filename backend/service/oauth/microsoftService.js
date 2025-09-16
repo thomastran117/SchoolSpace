@@ -1,78 +1,58 @@
+const jwksClient = require("jwks-rsa");
+const jwt = require("jsonwebtoken");
 const config = require("../../config/envManager");
+const { httpError } = require("../../utility/httpUtility");
 
-let OIDC;
-let Issuer, generators;
-let _client;
+const MS_TENANT_ID = config.ms_tenant_id;
+const MS_CLIENT_ID = config.ms_client_id;
 
-async function loadOIDC() {
-  if (!OIDC) {
-    OIDC = await import("openid-client");
-    ({ Issuer, generators } = OIDC);
-  }
+if (!MS_CLIENT_ID) {
+  throw new Error("Missing ms_client_id in envManager");
 }
 
-async function ensureClient() {
-  await loadOIDC();
-  if (_client) return _client;
+const issuer = `https://login.microsoftonline.com/${MS_TENANT_ID}/v2.0`;
+const jwksUri = `${issuer}/discovery/v2.0/keys`;
 
-  const {
-    ms_tenant_id: MS_TENANT_ID,
-    ms_client_id: MS_CLIENT_ID,
-    ms_client_secret: MS_CLIENT_SECRET,
-    ms_redirect_uri: MS_REDIRECT_URI,
-  } = config;
+const client = jwksClient({
+  jwksUri,
+  cache: true,
+  cacheMaxEntries: 5,
+  cacheMaxAge: 10 * 60 * 1000,
+  timeout: 8000,
+});
 
-  const issuer = await Issuer.discover(
-    `https://login.microsoftonline.com/${MS_TENANT_ID}/v2.0`,
-  );
-  _client = new issuer.Client({
-    client_id: MS_CLIENT_ID,
-    client_secret: MS_CLIENT_SECRET,
-    redirect_uris: [MS_REDIRECT_URI],
-    response_types: ["code"],
+function getKey(header, callback) {
+  client.getSigningKey(header.kid, (err, key) => {
+    if (err) return callback(err);
+    callback(null, key.getPublicKey());
   });
-  return _client;
 }
 
-module.exports = {
-  async start() {
-    const client = await ensureClient();
-    const state = generators.state();
-    const codeVerifier = generators.codeVerifier();
-    const codeChallenge = generators.codeChallenge(codeVerifier);
+function verifyMicrosoftIdToken(idToken) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(
+      idToken,
+      getKey,
+      {
+        algorithms: ["RS256"],
+        issuer: [issuer],
+        audience: MS_CLIENT_ID,
+        clockTolerance: 5,
+      },
+      (err, decoded) => {
+        if (err)
+          return reject(
+            httpError(401, `Invalid Microsoft id_token: ${err.message}`),
+          );
+        if (!decoded || (!decoded.sub && !decoded.oid)) {
+          return reject(
+            httpError(401, "Invalid Microsoft id_token: missing subject"),
+          );
+        }
+        resolve(decoded);
+      },
+    );
+  });
+}
 
-    const url = client.authorizationUrl({
-      scope: "openid profile email offline_access User.Read",
-      code_challenge: codeChallenge,
-      code_challenge_method: "S256",
-      state,
-    });
-
-    return { url, state, codeVerifier };
-  },
-
-  async finish(callbackParams, expected) {
-    await loadOIDC();
-    const client = await ensureClient();
-
-    const { state, codeVerifier } = expected;
-
-    if (!callbackParams.state || callbackParams.state !== state) {
-      const e = new Error("Invalid state");
-      e.statusCode = 400;
-      throw e;
-    }
-
-    const tokenSet = await client.callback(MS_REDIRECT_URI, callbackParams, {
-      state,
-      code_verifier: codeVerifier,
-    });
-
-    const claims = tokenSet.claims();
-    return {
-      sub: claims.sub,
-      email: claims.email || claims.preferred_username,
-      name: claims.name || "",
-    };
-  },
-};
+module.exports = { verifyMicrosoftIdToken };
