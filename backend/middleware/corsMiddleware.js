@@ -1,28 +1,46 @@
+// middleware/corsMiddleware.js
 const cors = require("cors");
 
-const whitelist = (process.env.CORS_WHITELIST || "")
+function normalizeOrigin(o) {
+  if (!o) return null;
+  let s = o.trim();
+  if (!/^https?:\/\//i.test(s)) s = `http://${s}`; // assume http if scheme missing (dev)
+  return s.replace(/\/+$/, "");
+}
+
+const raw = (process.env.CORS_WHITELIST || "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 
-if (process.env.FRONTEND_CLIENT && !whitelist.length) {
-  whitelist.push(process.env.FRONTEND_CLIENT.trim());
+if (process.env.FRONTEND_CLIENT && !raw.length) {
+  raw.push(process.env.FRONTEND_CLIENT.trim());
 }
 
-const corsOptionsDelegate = (req, callback) => {
-  const origin = req.header("Origin");
-  const isAllowed = !origin || whitelist.includes(origin);
+const whitelist = new Set(raw.map(normalizeOrigin).filter(Boolean));
+console.log(whitelist);
 
-  const options = {
-    origin: isAllowed,
-    credentials: true,
+const corsOptionsDelegate = (req, cb) => {
+  const originHdr = req.header("Origin");
+  let isAllowed = !originHdr; // allow non-browser clients (no Origin)
+
+  if (originHdr) {
+    const norm = normalizeOrigin(originHdr);
+    isAllowed = whitelist.has(norm);
+    if (!isAllowed) {
+      console.warn(`[CORS BLOCKED] ${req.method} ${req.originalUrl} from Origin: ${originHdr}`);
+    }
+  }
+
+  cb(null, {
+    origin: isAllowed ? originHdr : false,
+    credentials: true, // if you send cookies/Authorization from the browser
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["set-cookie"],
+    // Do NOT expose Set-Cookie; browsers disallow it
     maxAge: 86400,
-  };
-
-  callback(null, options);
+    // You can add: optionsSuccessStatus: 204,
+  });
 };
 
 module.exports = cors(corsOptionsDelegate);

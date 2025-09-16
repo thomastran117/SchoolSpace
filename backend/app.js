@@ -19,6 +19,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(corsMiddleware);
+app.options(/.*/, corsMiddleware);
 app.set("trust proxy", 1);
 //app.use(generalRateLimiter);
 app.use(requestLogger);
