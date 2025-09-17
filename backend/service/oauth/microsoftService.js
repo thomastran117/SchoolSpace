@@ -1,55 +1,79 @@
+// utilities/microsoftJwt.js
 const jwksClient = require("jwks-rsa");
 const jwt = require("jsonwebtoken");
 const config = require("../../config/envManager");
 const { httpError } = require("../../utility/httpUtility");
 
-const MS_TENANT_ID = config.ms_tenant_id;
 const MS_CLIENT_ID = config.ms_client_id;
+if (!MS_CLIENT_ID) throw new Error("Missing ms_client_id in envManager");
 
-if (!MS_CLIENT_ID) {
-  throw new Error("Missing ms_client_id in envManager");
-}
-
-const issuer = `https://login.microsoftonline.com/${MS_TENANT_ID}/v2.0`;
-const jwksUri = `${issuer}/discovery/v2.0/keys`;
-
-const client = jwksClient({
-  jwksUri,
-  cache: true,
-  cacheMaxEntries: 5,
-  cacheMaxAge: 10 * 60 * 1000,
-  timeout: 8000,
-});
-
-function getKey(header, callback) {
-  client.getSigningKey(header.kid, (err, key) => {
-    if (err) return callback(err);
-    callback(null, key.getPublicKey());
+// Build a JWKS client for a specific issuer
+function clientForIssuer(iss) {
+  if (!iss) throw new Error("Missing issuer");
+  // iss looks like: https://login.microsoftonline.com/<tenant>/v2.0
+  const tenantBase = iss.replace(/\/v2\.0\/?$/, ""); // <-- strip the trailing /v2.0
+  const jwksUri = `${tenantBase}/discovery/v2.0/keys`;
+  return jwksClient({
+    jwksUri,
+    cache: true,
+    cacheMaxEntries: 10,
+    cacheMaxAge: 10 * 60 * 1000,
+    timeout: 8000,
   });
 }
 
-function verifyMicrosoftIdToken(idToken) {
+function getKeyFrom(client, header) {
+  return new Promise((resolve, reject) => {
+    client.getSigningKey(header.kid, (err, key) => {
+      if (err) return reject(err);
+      resolve(key.getPublicKey());
+    });
+  });
+}
+
+async function verifyMicrosoftIdToken(idToken) {
+  if (!idToken || typeof idToken !== "string") {
+    throw httpError(400, "Missing or invalid id_token");
+  }
+
+  const decoded = jwt.decode(idToken, { complete: true });
+  if (!decoded?.header || !decoded?.payload) {
+    throw httpError(401, "Invalid Microsoft token: cannot decode");
+  }
+
+  const { header, payload } = decoded;
+  const { iss, aud } = payload;
+
+  // Basic checks
+  if (
+    !iss ||
+    !/^https:\/\/login\.microsoftonline\.com\/[^/]+\/v2\.0$/i.test(iss)
+  ) {
+    throw httpError(401, "Invalid issuer in token");
+  }
+  if (aud !== MS_CLIENT_ID) {
+    throw httpError(401, "Audience mismatch");
+  }
+
+  // Verify signature using the correct JWKS endpoint
+  const client = clientForIssuer(iss);
+  const publicKey = await getKeyFrom(client, header);
+
   return new Promise((resolve, reject) => {
     jwt.verify(
       idToken,
-      getKey,
+      publicKey,
       {
         algorithms: ["RS256"],
-        issuer: [issuer],
+        issuer: iss,
         audience: MS_CLIENT_ID,
         clockTolerance: 5,
       },
-      (err, decoded) => {
-        if (err)
-          return reject(
-            httpError(401, `Invalid Microsoft id_token: ${err.message}`),
-          );
-        if (!decoded || (!decoded.sub && !decoded.oid)) {
-          return reject(
-            httpError(401, "Invalid Microsoft id_token: missing subject"),
-          );
-        }
-        resolve(decoded);
+      (err, verified) => {
+        if (err) return reject(httpError(401, "Invalid Microsoft Token"));
+        if (!verified?.sub && !verified?.oid)
+          return reject(httpError(401, "Invalid Microsoft Token"));
+        resolve(verified);
       },
     );
   });

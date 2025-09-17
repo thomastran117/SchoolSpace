@@ -110,15 +110,15 @@ const verifyUser = async (token) => {
   }
 };
 
-async function verifyMicrosoftIdTokenAndSignIn(idToken) {
+const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
   const claims = await verifyMicrosoftIdToken(idToken);
 
-  ftSub = claims.sub || claims.oid;
+  const microsoftSub = claims.sub || claims.oid;
   const email = claims.email || claims.preferred_username;
   const name = claims.name || "";
 
-  if (!email) httpError(400, "Microsoft email missing");
-  if (!microsoftSub) httpError(400, "Microsoft subject missing");
+  if (!email) throw httpError(400, "Microsoft email missing");
+  if (!microsoftSub) throw httpError(400, "Microsoft subject missing");
 
   let user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
@@ -156,7 +156,7 @@ async function verifyMicrosoftIdTokenAndSignIn(idToken) {
     role: user.role,
     user: { id: user.id, email: user.email, name: user.name },
   };
-}
+};
 
 const startGoogleOAuth = async () => {
   return googleOAuth.start();
