@@ -1,4 +1,3 @@
-// utilities/microsoftJwt.js
 const jwksClient = require("jwks-rsa");
 const jwt = require("jsonwebtoken");
 const config = require("../../config/envManager");
@@ -7,11 +6,9 @@ const { httpError } = require("../../utility/httpUtility");
 const MS_CLIENT_ID = config.ms_client_id;
 if (!MS_CLIENT_ID) throw new Error("Missing ms_client_id in envManager");
 
-// Build a JWKS client for a specific issuer
 function clientForIssuer(iss) {
   if (!iss) throw new Error("Missing issuer");
-  // iss looks like: https://login.microsoftonline.com/<tenant>/v2.0
-  const tenantBase = iss.replace(/\/v2\.0\/?$/, ""); // <-- strip the trailing /v2.0
+  const tenantBase = iss.replace(/\/v2\.0\/?$/, "");
   const jwksUri = `${tenantBase}/discovery/v2.0/keys`;
   return jwksClient({
     jwksUri,
@@ -44,7 +41,6 @@ async function verifyMicrosoftIdToken(idToken) {
   const { header, payload } = decoded;
   const { iss, aud } = payload;
 
-  // Basic checks
   if (
     !iss ||
     !/^https:\/\/login\.microsoftonline\.com\/[^/]+\/v2\.0$/i.test(iss)
@@ -55,7 +51,6 @@ async function verifyMicrosoftIdToken(idToken) {
     throw httpError(401, "Audience mismatch");
   }
 
-  // Verify signature using the correct JWKS endpoint
   const client = clientForIssuer(iss);
   const publicKey = await getKeyFrom(client, header);
 
