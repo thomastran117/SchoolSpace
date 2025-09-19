@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_PATH="$SCRIPT_DIR/../backend"
 ENV_FILE="$BACKEND_PATH/.env"
 
-read -r -d '' ENV_CONTENT <<'EOF'
+ENV_CONTENT=$(cat <<'EOF'
 ##############################################
 # Server
 ##############################################
@@ -63,6 +63,7 @@ MS_CLIENT_ID=""
 MS_CLIENT_SECRET=""
 MS_REDIRECT_URI=""
 EOF
+)
 
 if [[ ! -d "$BACKEND_PATH" ]]; then
   echo "❌ Backend folder not found at $BACKEND_PATH" >&2

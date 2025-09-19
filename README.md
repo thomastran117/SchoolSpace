@@ -138,6 +138,8 @@ You are now ready to install and run SchoolSpace
 
 ## Running the application
 
+Most of the scripts can be ran with app.ps1 "command". You can manaully run the scripts if you wish
+
 ### 1. Clone the project
 
 ```bash
