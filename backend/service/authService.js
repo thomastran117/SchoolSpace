@@ -1,7 +1,6 @@
 const bcrypt = require("bcrypt");
 const prisma = require("../resource/prisma");
 const { createToken } = require("./tokenService");
-const { verifyMicrosoftIdToken } = require("./oauth/microsoftService");
 const googleOAuth = require("./oauth/googleService");
 const redis = require("../resource/redis");
 const {
@@ -13,9 +12,6 @@ const jwt = require("jsonwebtoken");
 const { httpError } = require("../utility/httpUtility");
 const config = require("../config/envManager");
 const jwksClient = require("jwks-rsa");
-const jwt = require("jsonwebtoken");
-const config = require("../../config/envManager");
-const { httpError } = require("../../utility/httpUtility");
 
 const { frontend_client: FRONTEND_CLIENT, jwt_secret_2: JWT_SECRET_2, ms_client_id: MS_CLIENT_ID } = config;
 
