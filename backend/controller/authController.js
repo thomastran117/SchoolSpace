@@ -196,13 +196,6 @@ const updateRole = async (req, res, next) => {
   }
 };
 
-const wasCodeRedeemed = (req, code) => {
-  if (!req.session) return false;
-  if (req.session.lastMsCode === code) return true;
-  req.session.lastMsCode = code;
-  return false;
-};
-
 const wasGCodeRedeemed = (req, code) => {
   if (!req.session) return false;
   if (req.session.lastGCode === code) return true;

@@ -4,7 +4,6 @@ const config = require("../../config/envManager");
 const { httpError } = require("../../utility/httpUtility");
 
 const MS_CLIENT_ID = config.ms_client_id;
-if (!MS_CLIENT_ID) throw new Error("Missing ms_client_id in envManager");
 
 function clientForIssuer(iss) {
   if (!iss) throw new Error("Missing issuer");

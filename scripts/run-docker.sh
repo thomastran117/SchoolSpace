@@ -33,7 +33,7 @@ echo "Building and starting containers (detached)..."
 docker compose up -d --build
 
 echo "Waiting for MySQL health..."
-wait_for_health "app-mysql" 180
+wait_for_health "schoolspace-mysql" 180
 
 echo "Running Prisma migrations..."
 docker compose run --rm backend npx prisma migrate deploy
