@@ -23,7 +23,7 @@ function opt(key, def) {
 const config = {
   database_url: req("DATABASE_URL"),
   redis_url: req("REDIS_URL"),
-  mongo_url: req("MONGO_URL"),
+  mongo_url: opt("MONGO_URL", undefined),
   jwt_secret: opt("JWT_SECRET", "dev-secret"),
   jwt_secret_2: opt("JWT_SECRET_2", "dev-secret-2"),
   cors_whitelist: opt("CORS_WHITELIST", "http://localhost:3040"),
