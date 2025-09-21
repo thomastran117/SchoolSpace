@@ -1,4 +1,7 @@
-const { RateLimiterRedis, RateLimiterMemory } = require("rate-limiter-flexible");
+const {
+  RateLimiterRedis,
+  RateLimiterMemory,
+} = require("rate-limiter-flexible");
 const redis = require("../resource/redis");
 
 function buildLimiter({ points, duration, blockDuration }) {
@@ -27,7 +30,7 @@ function limiterMiddleware(limiter, message) {
       res.setHeader("X-RateLimit-Remaining", rlRes.remainingPoints);
       res.setHeader(
         "X-RateLimit-Reset",
-        Math.ceil((Date.now() + rlRes.msBeforeNext) / 1000)
+        Math.ceil((Date.now() + rlRes.msBeforeNext) / 1000),
       );
 
       return next();
@@ -36,7 +39,10 @@ function limiterMiddleware(limiter, message) {
         return next();
       }
 
-      const retrySecs = Math.max(1, Math.ceil((err.msBeforeNext || 1000) / 1000));
+      const retrySecs = Math.max(
+        1,
+        Math.ceil((err.msBeforeNext || 1000) / 1000),
+      );
       res.setHeader("Retry-After", retrySecs);
       return res.status(429).json({ error: message });
     }
@@ -56,12 +62,12 @@ const authLimiter = buildLimiter({
 
 const generalRateLimiter = limiterMiddleware(
   generalLimiter,
-  "Too many requests. Please try again later."
+  "Too many requests. Please try again later.",
 );
 
 const authRateLimiter = limiterMiddleware(
   authLimiter,
-  "Too many attempts. Please wait and try again."
+  "Too many attempts. Please wait and try again.",
 );
 
 module.exports = { generalRateLimiter, authRateLimiter };

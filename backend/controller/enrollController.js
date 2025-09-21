@@ -1,7 +1,7 @@
 const {
   requireFields,
   httpError,
-  validatePositiveInt
+  validatePositiveInt,
 } = require("../utility/httpUtility");
 const {
   enroll_in_course,
@@ -18,7 +18,7 @@ function resolveStudentId(req) {
   if (role === "teacher" || role === "admin") {
     const studentId = req.query.id;
     if (!studentId) {
-      httpError(400, "Missing ?id query for target student");
+      httpError(400, "Missing id query for target student");
     }
     return validatePositiveInt(studentId, "studentId");
   }
@@ -32,9 +32,7 @@ const enrollInCourse = async (req, res, next) => {
     const studentId = resolveStudentId(req);
 
     const enrollment = await enroll_in_course(studentId, courseId);
-    res
-      .status(201)
-      .json({ message: "Enrollment successful", enrollment });
+    res.status(201).json({ message: "Enrollment successful", enrollment });
   } catch (err) {
     next(err);
   }

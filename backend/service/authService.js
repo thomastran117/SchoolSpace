@@ -13,7 +13,11 @@ const { httpError } = require("../utility/httpUtility");
 const config = require("../config/envManager");
 const jwksClient = require("jwks-rsa");
 
-const { frontend_client: FRONTEND_CLIENT, jwt_secret_2: JWT_SECRET_2, ms_client_id: MS_CLIENT_ID } = config;
+const {
+  frontend_client: FRONTEND_CLIENT,
+  jwt_secret_2: JWT_SECRET_2,
+  ms_client_id: MS_CLIENT_ID,
+} = config;
 
 const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({
@@ -307,7 +311,6 @@ async function verifyMicrosoftIdToken(idToken) {
     );
   });
 }
-
 
 module.exports = {
   signupUser,

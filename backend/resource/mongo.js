@@ -8,8 +8,12 @@ mongoose.set("strictQuery", true);
 
 function attachLifecycleLogs() {
   mongoose.connection.on("connected", () => logger.info("Mongo is connected"));
-  mongoose.connection.on("disconnected", () => logger.warn("Mongo is disconnected"));
-  mongoose.connection.on("error", (err) => logger.error(`Mongo connection error: ${err.message}`));
+  mongoose.connection.on("disconnected", () =>
+    logger.warn("Mongo is disconnected"),
+  );
+  mongoose.connection.on("error", (err) =>
+    logger.error(`Mongo connection error: ${err.message}`),
+  );
 }
 
 async function connectAndPing() {

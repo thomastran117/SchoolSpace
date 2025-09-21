@@ -84,27 +84,27 @@ const getCourses = async (req, res, next) => {
     const { id: authUserId, role } = req.user;
 
     const {
-      search = '',
+      search = "",
       ownerId,
       includeEnrollmentFor,
-      limit = '20',
+      limit = "20",
       cursor,
     } = req.query;
 
     const normalizedLimit = Math.min(
       Math.max(parseInt(limit, 10) || 20, 1),
-      100
+      100,
     );
 
     const effectiveOwnerId =
-      ownerId && role === 'admin' ? ownerId : ownerId ? authUserId : undefined;
+      ownerId && role === "admin" ? ownerId : ownerId ? authUserId : undefined;
 
     const includeEnrollFor =
-      includeEnrollmentFor === 'me'
+      includeEnrollmentFor === "me"
         ? authUserId
         : includeEnrollmentFor
-        ? includeEnrollmentFor
-        : undefined;
+          ? includeEnrollmentFor
+          : undefined;
 
     const effectiveCursor = cursor ?? undefined;
 
@@ -113,11 +113,11 @@ const getCourses = async (req, res, next) => {
       effectiveOwnerId,
       includeEnrollFor,
       normalizedLimit,
-      effectiveCursor
+      effectiveCursor,
     );
 
     res.status(200).json({
-      message: 'Courses fetched successfully',
+      message: "Courses fetched successfully",
       items,
       nextCursor,
       limit: normalizedLimit,
@@ -132,7 +132,10 @@ const getCoursesByTeacher = async (req, res, next) => {
     const { id: authUserId, role } = req.user;
 
     if (role !== "teacher" && role !== "admin") {
-      return httpError(403, "You must be a teacher or admin to view this endpoint");
+      return httpError(
+        403,
+        "You must be a teacher or admin to view this endpoint",
+      );
     }
 
     let targetId;
@@ -145,14 +148,11 @@ const getCoursesByTeacher = async (req, res, next) => {
       targetId = req.params.id;
     }
 
-    const {
-      limit = '20',
-      cursor,
-    } = req.query;
+    const { limit = "20", cursor } = req.query;
 
     const normalizedLimit = Math.min(
       Math.max(parseInt(limit, 10) || 20, 1),
-      100
+      100,
     );
 
     const effectiveCursor = cursor ?? undefined;
@@ -160,16 +160,15 @@ const getCoursesByTeacher = async (req, res, next) => {
     const { items, nextCursor } = await get_courses_by_teacher(
       targetId,
       normalizedLimit,
-      effectiveCursor
+      effectiveCursor,
     );
 
     res.status(200).json({
-      message: 'Courses fetched successfully',
+      message: "Courses fetched successfully",
       items,
       nextCursor,
       limit: normalizedLimit,
     });
-    
   } catch (err) {
     next(err);
   }
@@ -180,7 +179,10 @@ const getCoursesByStudent = async (req, res, next) => {
     const { id: authUserId, role } = req.user;
 
     if (role !== "student" && role !== "admin") {
-      return httpError(403, "You must be a student or admin to view this endpoint");
+      return httpError(
+        403,
+        "You must be a student or admin to view this endpoint",
+      );
     }
 
     let targetId;
@@ -193,14 +195,11 @@ const getCoursesByStudent = async (req, res, next) => {
       targetId = req.params.id;
     }
 
-    const {
-      limit = '20',
-      cursor,
-    } = req.query;
+    const { limit = "20", cursor } = req.query;
 
     const normalizedLimit = Math.min(
       Math.max(parseInt(limit, 10) || 20, 1),
-      100
+      100,
     );
 
     const effectiveCursor = cursor ?? undefined;
@@ -208,11 +207,11 @@ const getCoursesByStudent = async (req, res, next) => {
     const { items, nextCursor } = await get_courses_by_student(
       authUserId,
       normalizedLimit,
-      effectiveCursor
+      effectiveCursor,
     );
 
     res.status(200).json({
-      message: 'Courses fetched successfully',
+      message: "Courses fetched successfully",
       items,
       nextCursor,
       limit: normalizedLimit,

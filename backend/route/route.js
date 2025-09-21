@@ -49,7 +49,7 @@ router.use("/course-enroll", makeRequireAuth, enrollRoute);
 router.use("/user", makeRequireAuth, userRoute);
 
 router.get("/help", (req, res) => {
-  const routes = listRoutesFromRouter(router).map(r => ({
+  const routes = listRoutesFromRouter(router).map((r) => ({
     path: req.baseUrl + (r.path === "/" ? "" : r.path),
     methods: r.methods,
   }));
