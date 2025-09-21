@@ -1,13 +1,40 @@
 const {
   requireFields,
   httpError,
-  assertAllowed,
+  validatePositiveInt
 } = require("../utility/httpUtility");
+const {
+  enroll_in_course,
+  unenroll_in_course,
+} = require("../service/enrollService");
+
+function resolveStudentId(req) {
+  const { id: authUserId, role } = req.user;
+
+  if (role === "student") {
+    return authUserId;
+  }
+
+  if (role === "teacher" || role === "admin") {
+    const studentId = req.query.id;
+    if (!studentId) {
+      httpError(400, "Missing ?id query for target student");
+    }
+    return validatePositiveInt(studentId, "studentId");
+  }
+
+  httpError(403, "You lack permissions to perform this action");
+}
 
 const enrollInCourse = async (req, res, next) => {
   try {
-    const { id: userId, role } = req.user;
-    httpError(501, "Not implemented yet");
+    const courseId = validatePositiveInt(req.params.id, "courseId");
+    const studentId = resolveStudentId(req);
+
+    const enrollment = await enroll_in_course(studentId, courseId);
+    res
+      .status(201)
+      .json({ message: "Enrollment successful", enrollment });
   } catch (err) {
     next(err);
   }
@@ -15,8 +42,11 @@ const enrollInCourse = async (req, res, next) => {
 
 const unenrollInCourse = async (req, res, next) => {
   try {
-    const { id: userId, role } = req.user;
-    httpError(501, "Not implemented yet");
+    const courseId = validatePositiveInt(req.params.id, "courseId");
+    const studentId = resolveStudentId(req);
+
+    await unenroll_in_course(studentId, courseId);
+    res.status(200).json({ message: "Unenrollment successful" });
   } catch (err) {
     next(err);
   }

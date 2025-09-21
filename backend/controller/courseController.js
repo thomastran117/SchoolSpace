@@ -61,7 +61,7 @@ const deleteCourse = async (req, res, next) => {
       httpError(403, "The user lacks permissions to update this course");
     const courseId = validatePositiveInt(req.params.id, "courseId");
     await delete_course(courseId, userId);
-    res.status(201).json({ message: "Course deleted successfully" });
+    res.status(200).json({ message: "Course deleted successfully" });
   } catch (err) {
     next(err);
   }
