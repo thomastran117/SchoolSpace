@@ -1,7 +1,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const path = require("path");
-const { listAllRoutes } = require("./utility/listRoutes");
 
 require("dotenv").config();
 
@@ -32,13 +31,6 @@ app.get("/", (_req, res) =>
 app.get("/api", (_req, res) => res.send("API is running!"));
 app.use("/api/auth", authRateLimiter);
 app.use("/api", serverRoutes);
-app.get("/help", (req, res) => {
-  const routes = listAllRoutes(serverRoutes).map(r => ({
-    ...r,
-    path: "/api" + (r.path === "/" ? "" : r.path),
-  }));
-  res.json({ routes });
-});
 
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;

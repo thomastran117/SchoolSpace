@@ -10,13 +10,13 @@
  */
 
 const express = require("express");
-const listEndpoints = require("express-list-endpoints");
 const authRoute = require("./authRoute");
 const courseRoute = require("./courseRoute");
 const enrollRoute = require("./enrollRoute");
 const userRoute = require("./userRoute");
 const { makeRequireAuth } = require("../middleware/authTokenMiddleware");
 const { httpError } = require("../utility/httpUtility");
+const listRoutesFromRouter = require("../utility/listRoutes");
 
 const router = express.Router();
 
@@ -47,6 +47,14 @@ router.use("/course-enroll", makeRequireAuth, enrollRoute);
  * @access Private
  */
 router.use("/user", makeRequireAuth, userRoute);
+
+router.get("/help", (req, res) => {
+  const routes = listRoutesFromRouter(router).map(r => ({
+    path: req.baseUrl + (r.path === "/" ? "" : r.path),
+    methods: r.methods,
+  }));
+  res.json({ routes });
+});
 
 router.use((req, res, next) => {
   httpError(404, `Route '${req.originalUrl}' does not exist`);
