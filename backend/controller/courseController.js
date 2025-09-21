@@ -13,6 +13,7 @@ const {
   httpError,
   validatePositiveInt,
 } = require("../utility/httpUtility");
+const logger = require("../utility/logger");
 
 const addCourse = async (req, res, next) => {
   try {
@@ -73,7 +74,6 @@ const getCourse = async (req, res, next) => {
     res
       .status(200)
       .json({ message: "Course fetched successfully", course: course });
-    httpError(501, "Not implemented yet");
   } catch (err) {
     next(err);
   }
@@ -81,8 +81,47 @@ const getCourse = async (req, res, next) => {
 
 const getCourses = async (req, res, next) => {
   try {
-    const { id: userId, role } = req.user;
-    httpError(501, "Not implemented yet");
+    const { id: authUserId, role } = req.user;
+
+    const {
+      search = '',
+      ownerId,
+      includeEnrollmentFor,
+      limit = '20',
+      cursor,
+    } = req.query;
+
+    const normalizedLimit = Math.min(
+      Math.max(parseInt(limit, 10) || 20, 1),
+      100
+    );
+
+    const effectiveOwnerId =
+      ownerId && role === 'admin' ? ownerId : ownerId ? authUserId : undefined;
+
+    const includeEnrollFor =
+      includeEnrollmentFor === 'me'
+        ? authUserId
+        : includeEnrollmentFor
+        ? includeEnrollmentFor
+        : undefined;
+
+    const effectiveCursor = cursor ?? undefined;
+
+    const { items, nextCursor } = await get_courses(
+      search,
+      effectiveOwnerId,
+      includeEnrollFor,
+      normalizedLimit,
+      effectiveCursor
+    );
+
+    res.status(200).json({
+      message: 'Courses fetched successfully',
+      items,
+      nextCursor,
+      limit: normalizedLimit,
+    });
   } catch (err) {
     next(err);
   }
@@ -90,8 +129,47 @@ const getCourses = async (req, res, next) => {
 
 const getCoursesByTeacher = async (req, res, next) => {
   try {
-    const { id: userId, role } = req.user;
-    httpError(501, "Not implemented yet");
+    const { id: authUserId, role } = req.user;
+
+    if (role !== "teacher" && role !== "admin") {
+      return httpError(403, "You must be a teacher or admin to view this endpoint");
+    }
+
+    let targetId;
+
+    if (role === "teacher") {
+      targetId = authUserId;
+    }
+
+    if (role === "admin") {
+      targetId = req.params.id;
+    }
+
+    const {
+      limit = '20',
+      cursor,
+    } = req.query;
+
+    const normalizedLimit = Math.min(
+      Math.max(parseInt(limit, 10) || 20, 1),
+      100
+    );
+
+    const effectiveCursor = cursor ?? undefined;
+
+    const { items, nextCursor } = await get_courses_by_teacher(
+      targetId,
+      normalizedLimit,
+      effectiveCursor
+    );
+
+    res.status(200).json({
+      message: 'Courses fetched successfully',
+      items,
+      nextCursor,
+      limit: normalizedLimit,
+    });
+    
   } catch (err) {
     next(err);
   }
@@ -99,8 +177,46 @@ const getCoursesByTeacher = async (req, res, next) => {
 
 const getCoursesByStudent = async (req, res, next) => {
   try {
-    const { id: userId, role } = req.user;
-    httpError(501, "Not implemented yet");
+    const { id: authUserId, role } = req.user;
+
+    if (role !== "student" && role !== "admin") {
+      return httpError(403, "You must be a student or admin to view this endpoint");
+    }
+
+    let targetId;
+
+    if (role === "student") {
+      targetId = authUserId;
+    }
+
+    if (role === "admin") {
+      targetId = req.params.id;
+    }
+
+    const {
+      limit = '20',
+      cursor,
+    } = req.query;
+
+    const normalizedLimit = Math.min(
+      Math.max(parseInt(limit, 10) || 20, 1),
+      100
+    );
+
+    const effectiveCursor = cursor ?? undefined;
+
+    const { items, nextCursor } = await get_courses_by_student(
+      authUserId,
+      normalizedLimit,
+      effectiveCursor
+    );
+
+    res.status(200).json({
+      message: 'Courses fetched successfully',
+      items,
+      nextCursor,
+      limit: normalizedLimit,
+    });
   } catch (err) {
     next(err);
   }

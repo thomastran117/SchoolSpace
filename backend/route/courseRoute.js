@@ -58,7 +58,8 @@ router.get("/", getCourses);
  * @description Get a list of courses that a student is enrolled in.
  * @access Private
  */
-router.get("/student/id", getCoursesByStudent);
+router.get("/student/:id", getCoursesByStudent);
+router.get("/student/", getCoursesByStudent);
 
 /**
  * @route GET /courses/teacher/:id
@@ -66,6 +67,7 @@ router.get("/student/id", getCoursesByStudent);
  * @access Private
  */
 router.get("/teacher/:id", getCoursesByTeacher);
+router.get("/teacher/", getCoursesByTeacher);
 
 /**
  * @route GET /courses/:id

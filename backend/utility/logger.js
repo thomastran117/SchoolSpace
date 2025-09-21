@@ -33,7 +33,7 @@ function log(level, message) {
       console.log(`${timestamp} ${chalk.red("[ERROR]")} ${message}`);
       logToFile(level, message);
       break;
-    case "error":
+    case "debug":
       console.log(`${timestamp} ${chalk.cyan("[DEBUG]")} ${message}`);
       break;
     default:
@@ -45,5 +45,6 @@ module.exports = {
   info: (msg) => log("info", msg),
   warn: (msg) => log("warn", msg),
   error: (msg) => log("error", msg),
+  debug: (msg) => log("debug", msg),
   log: (msg) => log("log", msg),
 };

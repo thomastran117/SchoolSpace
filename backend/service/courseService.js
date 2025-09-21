@@ -1,6 +1,7 @@
 const prisma = require("../resource/prisma");
 // const mongo = require("../resource/mongo");
 const { httpError } = require("../utility/httpUtility");
+const logger = require("../utility/logger");
 
 const add_course = async (ownerId, title, description, code) => {
   const course = await prisma.course.create({
@@ -52,7 +53,7 @@ const get_course = async (courseId, requesterId) => {
     where: { id: courseId },
     include: {
       owner: { select: { id: true, name: true, email: true } },
-      _count: { select: { enrollments: true } },
+      // _count: { select: { enrollments: true } },
     },
   });
 
@@ -92,7 +93,7 @@ const get_courses = async (
     orderBy: { id: "asc" },
     include: {
       owner: { select: { id: true, name: true, email: true } },
-      _count: { select: { enrollments: true } },
+      // _count: { select: { enrollments: true } },
     },
   };
 

@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const path = require("path");
+const logger = require("./utility/logger");
 
 require("dotenv").config();
 
@@ -35,6 +36,10 @@ app.use("/api", serverRoutes);
 app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
   const message = err.message || "Server failed to process the data";
+
+  if (err.statusCode === 500){
+    logger.error(`Server failed to process the data: ${err.message}`)
+  }
   res.status(status).json({ error: message });
 });
 
