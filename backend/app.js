@@ -22,14 +22,14 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(corsMiddleware);
 app.options(/.*/, corsMiddleware);
 app.set("trust proxy", 1);
-//app.use(generalRateLimiter);
+app.use(generalRateLimiter);
 app.use(requestLogger);
 
 app.get("/", (_req, res) =>
   res.sendFile(path.join(__dirname, "public", "index.html")),
 );
 app.get("/api", (_req, res) => res.send("API is running!"));
-//app.use("/api/auth", authRateLimiter);
+app.use("/api/auth", authRateLimiter);
 app.use("/api", serverRoutes);
 
 app.use((err, req, res, next) => {
