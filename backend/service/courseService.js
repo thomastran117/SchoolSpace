@@ -1,4 +1,5 @@
 const prisma = require("../resource/prisma");
+const mongo = require("../resource/mongo");
 const { httpError } = require("../utility/httpUtility");
 
 const add_course = async (ownerId, title, description, code) => {
