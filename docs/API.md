@@ -18,8 +18,15 @@ Alternatively, you may use a local version of the API provided that you clone an
 All endpoints are prefixed with api
 
 Auth
+
 | Method | Endpoint | Body | Response |
 | ------------- | ------------- | | ------------- | | ------------- |
 | POST  | login  | email, password  | token  |
 | POST  | signup  | email, password, role  | None |
 | POST  | verify  | token  | None |
+
+Courses
+
+Enroll-Course
+
+Users
