@@ -10,11 +10,11 @@
 /**
  * Imports
  */
-const express = require("express");
-const {
+import express from "express";
+import {
   enrollInCourse,
   unenrollInCourse,
-} = require("../controller/enrollController");
+} from "../controller/enrollController.js";
 const router = express.Router();
 
 /**
@@ -32,4 +32,4 @@ router.post("/:id", enrollInCourse);
 router.delete("/:id", unenrollInCourse);
 
 // Export the router
-module.exports = router;
+export default router;

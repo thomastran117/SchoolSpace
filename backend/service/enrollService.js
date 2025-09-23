@@ -1,5 +1,5 @@
-const prisma = require("../resource/prisma");
-const { httpError } = require("../utility/httpUtility");
+import prisma from "../resource/prisma.js";
+import { httpError } from "../utility/httpUtility.js";
 
 const enroll_in_course = async (userId, courseId) => {
   if (!userId) throw httpError(400, "userId is required");
@@ -52,7 +52,4 @@ const unenroll_in_course = async (userId, courseId) => {
   }
 };
 
-module.exports = {
-  enroll_in_course,
-  unenroll_in_course,
-};
+export { enroll_in_course, unenroll_in_course };

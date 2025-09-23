@@ -1,12 +1,8 @@
-const {
-  requireFields,
-  httpError,
-  validatePositiveInt,
-} = require("../utility/httpUtility");
-const {
+import { httpError, validatePositiveInt } from "../utility/httpUtility.js";
+import {
   enroll_in_course,
   unenroll_in_course,
-} = require("../service/enrollService");
+} from "../service/enrollService.js";
 
 function resolveStudentId(req) {
   const { id: authUserId, role } = req.user;
@@ -50,4 +46,4 @@ const unenrollInCourse = async (req, res, next) => {
   }
 };
 
-module.exports = { enrollInCourse, unenrollInCourse };
+export { enrollInCourse, unenrollInCourse };

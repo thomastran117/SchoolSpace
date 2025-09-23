@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import prisma from "../resource/prisma.js";
 import { createToken } from "./tokenService.js";
 import googleOAuth from "./oauth/googleService.js";
-import redis from "../resource/redis.js"; 
+import redis from "../resource/redis.js";
 import {
   sendVerificationEmail,
   sendWelcomeEmail,
