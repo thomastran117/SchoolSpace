@@ -207,28 +207,6 @@ const finishGoogleOAuth = async (callbackParams, expected) => {
   };
 };
 
-const update_role = async (id, role) => {
-  const user = await prisma.user.findUnique({
-    where: { id },
-  });
-
-  if (!user) {
-    httpError(404, "No user found");
-  }
-
-  const updated = await prisma.user.update({
-    where: { id },
-    role: role,
-  });
-
-  const token = await createToken(updated.id, updated.email, updated.role);
-  return {
-    token,
-    role: updated.role,
-    user: { id: updated.id, email: updated.email, name: updated.name },
-  };
-};
-
 const signupUserWOVerify = async (email, password, role) => {
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
@@ -316,7 +294,6 @@ export {
   signupUser,
   loginUser,
   verifyUser,
-  update_role,
   verifyMicrosoftIdTokenAndSignIn,
   startGoogleOAuth,
   finishGoogleOAuth,

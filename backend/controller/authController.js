@@ -6,7 +6,6 @@ import {
   verifyMicrosoftIdTokenAndSignIn,
   startGoogleOAuth,
   finishGoogleOAuth,
-  update_role,
 } from "../service/authService.js";
 import {
   requireFields,
@@ -171,25 +170,6 @@ const googleCallback = async (req, res, next) => {
     const redirect = new URL("/auth/signed-in", process.env.FRONTEND_CLIENT);
     redirect.hash = `token=${encodeURIComponent(token)}&role=${encodeURIComponent(role)}`;
     return res.redirect(redirect.toString());
-  } catch (err) {
-    next(err);
-  }
-};
-
-const updateRole = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    req.user = await getUserPayload(authHeader);
-
-    requireFields(["role"], req.body);
-    const { role } = req.body;
-
-    assertAllowed(role, ["student", "teacher", "assistant"]);
-
-    const { token, role: userrole } = await update_role(id, role);
-    res
-      .status(200)
-      .json({ message: "Login successful", token: token, role: userrole });
   } catch (err) {
     next(err);
   }

@@ -74,3 +74,4 @@ model Enrollment {
 
   @@unique([userId, courseId])
 }
+
