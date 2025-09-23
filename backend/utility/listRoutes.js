@@ -97,4 +97,4 @@ function mountFromLayer(layer) {
   return "/"; // treat as root if we can't recover it
 }
 
-module.exports = listRoutesFromRouter;
+export default listRoutesFromRouter;

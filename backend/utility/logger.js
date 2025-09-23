@@ -1,6 +1,6 @@
-const fs = require("fs");
-const path = require("path");
-const chalk = require("chalk");
+import fs from "fs";
+import path from "path";
+import chalk from "chalk";
 
 const logDir = path.join(__dirname, "../logs");
 if (!fs.existsSync(logDir)) {
@@ -41,7 +41,7 @@ function log(level, message) {
   }
 }
 
-module.exports = {
+export default {
   info: (msg) => log("info", msg),
   warn: (msg) => log("warn", msg),
   error: (msg) => log("error", msg),

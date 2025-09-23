@@ -56,7 +56,7 @@ function httpResponse(statusCode, message) {
   return err;
 }
 
-module.exports = {
+export {
   requireFields,
   requiresAtLeastOneField,
   validatePositiveInt,
