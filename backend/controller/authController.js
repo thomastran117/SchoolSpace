@@ -12,7 +12,7 @@ import {
   requireFields,
   httpError,
   assertAllowed,
-} from"../utility/httpUtility.js";
+} from "../utility/httpUtility.js";
 import logger from "../utility/logger.js";
 import url from "url";
 import config from "../config/envManager.js";
