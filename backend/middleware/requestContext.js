@@ -1,5 +1,5 @@
-const { AsyncLocalStorage } = require("async_hooks");
-const crypto = require("crypto");
+import { AsyncLocalStorage } from "async_hooks";
+import crypto from "crypto";
 
 const als = new AsyncLocalStorage();
 
@@ -15,4 +15,4 @@ function getContext() {
   return als.getStore() || {};
 }
 
-module.exports = { requestContext, getContext };
+export { requestContext, getContext };

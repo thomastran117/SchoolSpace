@@ -1,4 +1,4 @@
-const cors = require("cors");
+import cors from "cors";
 
 function normalizeOrigin(o) {
   if (!o) return null;
@@ -41,4 +41,4 @@ const corsOptionsDelegate = (req, cb) => {
   });
 };
 
-module.exports = cors(corsOptionsDelegate);
+export default cors(corsOptionsDelegate);

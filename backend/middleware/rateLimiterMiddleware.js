@@ -1,8 +1,8 @@
-const {
+import {
   RateLimiterRedis,
   RateLimiterMemory,
-} = require("rate-limiter-flexible");
-const redis = require("../resource/redis");
+} from "rate-limiter-flexible";
+import redis from "../resource/redis.js";
 
 function buildLimiter({ points, duration, blockDuration }) {
   const insuranceLimiter = new RateLimiterMemory({ points, duration });
@@ -70,4 +70,4 @@ const authRateLimiter = limiterMiddleware(
   "Too many attempts. Please wait and try again.",
 );
 
-module.exports = { generalRateLimiter, authRateLimiter };
+export { generalRateLimiter, authRateLimiter };

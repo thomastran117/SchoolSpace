@@ -1,5 +1,5 @@
-const { getUserPayload } = require("../service/tokenService");
-const config = require("../config/envManager");
+import { getUserPayload } from "../service/tokenService.js";
+import config from "../config/envManager.js";
 
 const API_KEY = config.schoolspace_api_key;
 
@@ -25,4 +25,4 @@ async function requireApiKeyAuth(req, res, next) {
   }
 }
 
-module.exports = { requireApiKeyAuth };
+export { requireApiKeyAuth };

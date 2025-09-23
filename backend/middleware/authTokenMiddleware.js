@@ -1,4 +1,4 @@
-const { getUserPayload } = require("../service/tokenService");
+import { getUserPayload } from "../service/tokenService";
 
 const makeRequireAuth = async (req, res, next) => {
   try {
@@ -12,4 +12,4 @@ const makeRequireAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { makeRequireAuth };
+export { makeRequireAuth };

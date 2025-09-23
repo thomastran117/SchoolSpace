@@ -1,5 +1,5 @@
-const dotenv = require("dotenv");
-const logger = require("../utility/logger");
+import dotenv from "dotenv";
+import logger from "../utility/logger.js";
 dotenv.config();
 
 const asInt = (v, fallback) => (v == null ? fallback : parseInt(v, 10));
@@ -59,4 +59,4 @@ const config = {
 
 Object.freeze(config);
 
-module.exports = config;
+export default config;

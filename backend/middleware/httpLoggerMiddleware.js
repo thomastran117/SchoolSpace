@@ -1,4 +1,4 @@
-const chalk = require("chalk");
+import chalk from "chalk";
 
 function requestLogger(req, res, next) {
   const start = Date.now();
@@ -48,4 +48,4 @@ function requestLogger(req, res, next) {
   next();
 }
 
-module.exports = requestLogger;
+export default requestLogger;
