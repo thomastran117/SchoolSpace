@@ -351,19 +351,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      <footer className="py-4 border-top bg-light">
-        <div className="container d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3 reveal">
-          <div className="text-secondary small">
-            © {new Date().getFullYear()} Your Company. All rights reserved.
-          </div>
-          <ul className="nav small">
-            <li className="nav-item"><NavLink className="nav-link link-secondary" to="/privacy">Privacy</NavLink></li>
-            <li className="nav-item"><NavLink className="nav-link link-secondary" to="/terms">Terms</NavLink></li>
-            <li className="nav-item"><NavLink className="nav-link link-secondary" to="/contact">Contact</NavLink></li>
-          </ul>
-        </div>
-      </footer>
     </main>
   );
 }

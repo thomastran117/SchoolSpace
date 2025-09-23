@@ -68,7 +68,6 @@ export default function AuthPage({ onAuth }) {
       setError(""); setLoading(true);
 
       if (provider === "microsoft") {
-        // Ensure MSAL is ready even if called directly (idempotent)
         await waitForMsal();
 
         const loginResult = await msalInstance.loginPopup({
