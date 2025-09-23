@@ -11,8 +11,8 @@
 /**
  * Imports
  */
-const express = require("express");
-const {
+import express from "express";
+import {
   getCourse,
   getCourses,
   deleteCourse,
@@ -20,7 +20,7 @@ const {
   addCourse,
   getCoursesByStudent,
   getCoursesByTeacher,
-} = require("../controller/courseController");
+} from "../controller/courseController.js";
 
 const router = express.Router();
 
@@ -77,4 +77,4 @@ router.get("/teacher/", getCoursesByTeacher);
 router.get("/:id", getCourse);
 
 // Export the router
-module.exports = router;
+export default router;

@@ -1,7 +1,6 @@
-const prisma = require("../resource/prisma");
+import prisma from "../resource/prisma.js";
 // const mongo = require("../resource/mongo");
-const { httpError } = require("../utility/httpUtility");
-const logger = require("../utility/logger");
+import { httpError } from "../utility/httpUtility.js";
 
 const add_course = async (ownerId, title, description, code) => {
   const course = await prisma.course.create({
@@ -172,7 +171,7 @@ const get_courses_by_student = async (studentId, limit = 20, cursor) => {
   return { items, nextCursor };
 };
 
-module.exports = {
+export {
   get_course,
   get_courses,
   get_courses_by_student,

@@ -1,4 +1,4 @@
-const {
+import {
   add_course,
   update_course,
   delete_course,
@@ -6,13 +6,13 @@ const {
   get_courses,
   get_courses_by_student,
   get_courses_by_teacher,
-} = require("../service/courseService");
-const {
+} from "../service/courseService.js";
+import {
   requireFields,
   requiresAtLeastOneField,
   httpError,
   validatePositiveInt,
-} = require("../utility/httpUtility");
+} from "../utility/httpUtility.js";
 const logger = require("../utility/logger");
 
 const addCourse = async (req, res, next) => {
@@ -221,7 +221,7 @@ const getCoursesByStudent = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   getCourse,
   getCourses,
   deleteCourse,
