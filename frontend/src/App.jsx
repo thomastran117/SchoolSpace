@@ -1,23 +1,18 @@
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/HomePage";
+import HomePage from "./pages/main/HomePage";
 import AuthPage from "./pages/AuthPage";
-import AboutPage from "./pages/AboutPage";
-import PricingPage from "./pages/PricingPage";
-import TermsOfService from "./pages/TermAndConditionPage";
-import PrivacyPage from "./pages/PrivacyPage";
+import AboutPage from "./pages/main/AboutPage";
+import PricingPage from "./pages/main/PricingPage";
+import TermsOfService from "./pages/main/TermAndConditionPage";
+import PrivacyPage from "./pages/main/PrivacyPage";
 import SignedInPage from "./pages/auth/SignedInPage";
-import FeaturesPage from "./pages/FeaturePage";
-import ServicesPage from "./pages/ServicePage";
-import ContactPage from "./pages/ContactPage";
-import FaqPage from "./pages/FrequentlyAskedQuestionPage";
-function App() {
-
-    const handleAuth = async (mode, { name, email, password }) => {
-
-  };
-
+import FeaturesPage from "./pages/main/FeaturePage";
+import ServicesPage from "./pages/main/ServicePage";
+import ContactPage from "./pages/main/ContactPage";
+import FaqPage from "./pages/main/FrequentlyAskedQuestionPage";
+function App(){
   return (
     <Router>
       <Navbar />
@@ -31,7 +26,7 @@ function App() {
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/term-and-service" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/auth" element={<AuthPage onAuth={handleAuth}/>} />
+          <Route path="/auth" element={<AuthPage />} />
           <Route path="/auth/signed-in" element={<SignedInPage />} />
         </Routes>
         <Footer/>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { msalInstance, microsoftScopes, waitForMsal } from "../auth/msalClient";
 
-export default function AuthPage({ onAuth }) {
+export default function AuthPage() {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [showPw, setShowPw] = useState(false);
@@ -12,6 +12,7 @@ export default function AuthPage({ onAuth }) {
 
   const isSignup = mode === "signup";
 
+  // Initialize MSAL
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -51,10 +52,30 @@ export default function AuthPage({ onAuth }) {
     try {
       setLoading(true); setError("");
       const payload = { name: form.name.trim(), email: form.email.trim(), password: form.password };
-      await onAuth?.(mode, payload);
+
+      const endpoint = isSignup
+        ? "http://localhost:8040/api/auth/signup"
+        : "http://localhost:8040/api/auth/login";
+
+      const resp = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      if (!resp.ok) {
+        const msg = await resp.text();
+        throw new Error(msg || `Request failed (${resp.status})`);
+      }
+
+      const data = await resp.json();
+      console.log("Auth success:", data); // you could redirect/store token here
     } catch (err) {
       setError(err?.message || "Something went wrong.");
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const switchMode = () => {
@@ -63,161 +84,253 @@ export default function AuthPage({ onAuth }) {
     setError(""); setShowPw(false);
   };
 
-  const handleOAuth = async (provider) => {
+  /** Google OAuth */
+  const handleGoogleOAuth = async () => {
     try {
       setError(""); setLoading(true);
-
-      if (provider === "microsoft") {
-        await waitForMsal();
-
-        const loginResult = await msalInstance.loginPopup({
-          scopes: microsoftScopes,
-          prompt: "select_account",
-        });
-
-        const idToken = loginResult.idToken;
-        if (!idToken) throw new Error("Microsoft sign-in failed: missing id_token");
-
-        const resp = await fetch("http://localhost:8040/api/auth/microsoft/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include", // optional if you set cookies
-          body: JSON.stringify({ id_token: idToken }),
-        });
-
-        if (!resp.ok) {
-          const msg = await resp.text();
-          throw new Error(msg || `Verify failed (${resp.status})`);
-        }
-
-        const data = await resp.json();
-        await onAuth?.("oauth", data);
-        return;
-      }
-
-      if (provider === "google") {
-        window.location.href = `http://localhost:8040/api/auth/google/start`;
-      }
+      window.location.href = `http://localhost:8040/api/auth/google/start`;
     } catch (err) {
-      setError(err?.message || "OAuth failed.");
+      setError(err?.message || "Google sign-in failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <main className="min-vh-100 d-flex align-items-center bg-light">
-      <style>{`
-        .auth-card { max-width: 440px; }
-        .btn-google { border-color: #e5e7eb; }
-        .btn-google:hover { background: #f8fafc; }
-        .btn-microsoft { border-color: #e5e7eb; }
-        .btn-microsoft:hover { background: #f8fafc; }
-        .icon { width: 18px; height: 18px; }
-      `}</style>
+  /** Microsoft OAuth */
+  const handleMicrosoftOAuth = async () => {
+    try {
+      setError(""); setLoading(true);
+      await waitForMsal();
 
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-12 auth-card">
-            <div className="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
-              <div className="mb-3 text-center">
-                <h2 className="fw-bold m-0">{isSignup ? "Create account" : "Sign in"}</h2>
-                <div className="text-secondary small mt-1">Welcome {isSignup ? "aboard" : "back"}</div>
-              </div>
+      const loginResult = await msalInstance.loginPopup({
+        scopes: microsoftScopes,
+        prompt: "select_account",
+      });
 
-              {error && <div className="alert alert-danger py-2" role="alert">{error}</div>}
+      const idToken = loginResult.idToken;
+      if (!idToken) throw new Error("Microsoft sign-in failed: missing id_token");
 
-              {/* OAuth buttons */}
-              <div className="d-grid gap-2 mb-3">
-                <button
-                  type="button"
-                  className="btn btn-light border btn-google rounded-pill d-flex align-items-center justify-content-center gap-2"
-                  onClick={() => handleOAuth("google")}
-                  disabled={loading}
-                >
-                  {GoogleIcon}
-                  Continue with Google
-                </button>
+      const resp = await fetch("http://localhost:8040/api/auth/microsoft/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ id_token: idToken }),
+      });
 
-                <button
-                  type="button"
-                  className="btn btn-light border btn-microsoft rounded-pill d-flex align-items-center justify-content-center gap-2"
-                  onClick={() => handleOAuth("microsoft")}
-                  disabled={loading || !msalReady}
-                  title={msalReady ? "Sign in with Microsoft" : "Initializing Microsoft sign-in…"}
-                >
-                  {MicrosoftIcon}
-                  {msalReady ? "Continue with Microsoft" : "Microsoft (initializing…)"}
-                </button>
-              </div>
+      if (!resp.ok) {
+        const msg = await resp.text();
+        throw new Error(msg || `Verify failed (${resp.status})`);
+      }
 
-              <div className="d-flex align-items-center my-2">
-                <hr className="flex-grow-1" /><span className="mx-2 text-secondary small">or</span><hr className="flex-grow-1" />
-              </div>
+      const data = await resp.json();
+      console.log("Microsoft OAuth success:", data);
+    } catch (err) {
+      setError(err?.message || "Microsoft sign-in failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-              {/* Form */}
-              <form onSubmit={onSubmit} className="d-grid gap-3">
-                {isSignup && (
-                  <div>
-                    <label htmlFor="name" className="form-label">Full name</label>
-                    <input type="text" className="form-control" id="name" name="name" value={form.name} onChange={handleChange} autoComplete="name" required />
-                  </div>
-                )}
+return (
+  <main className="min-vh-100 d-flex align-items-center bg-gradient">
+    <style>{`
+      .bg-gradient {
+        background: linear-gradient(135deg, #2563eb, #9333ea);
+      }
+      .auth-wrapper {
+        max-width: 900px;
+        background: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        overflow: hidden;
+      }
+      .auth-form {
+        padding: 2rem 2.5rem;
+      }
+      .auth-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #111827;
+      }
+      .auth-subtitle {
+        color: #6b7280;
+        font-size: 0.9rem;
+      }
+      .btn-oauth {
+        font-weight: 500;
+        font-size: 0.9rem;
+        border-radius: 9999px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: all 0.2s;
+      }
+      .btn-oauth svg { width: 16px; height: 16px; }
+      .btn-oauth:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+      }
+      .btn-google, .btn-microsoft {
+        border: 1px solid #e5e7eb;
+        background: #fff;
+      }
+      .form-control {
+        border-radius: 0.75rem;
+      }
+      .btn-submit {
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 1rem;
+      }
+      .switch-mode {
+        color: #2563eb;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .switch-mode:hover { text-decoration: underline; }
+      .auth-image {
+        background: url("https://source.unsplash.com/600x800/?technology,workspace") no-repeat center center;
+        background-size: cover;
+      }
+    `}</style>
 
+    <div className="container">
+      <div className="row justify-content-center">
+        <div className="col-12 auth-wrapper d-flex">
+          {/* Left column - form */}
+          <div className="col-12 col-md-6 auth-form">
+            <div className="mb-4 text-center">
+              <h2 className="auth-title">{isSignup ? "Create Account" : "Sign In"}</h2>
+              <p className="auth-subtitle mb-0">
+                {isSignup ? "Join us and get started!" : "Welcome back, please login."}
+              </p>
+            </div>
+
+            {error && <div className="alert alert-danger py-2">{error}</div>}
+
+            {/* OAuth buttons */}
+            <div className="d-grid gap-2 mb-3">
+              <button
+                type="button"
+                className="btn btn-oauth btn-google"
+                onClick={handleGoogleOAuth}
+                disabled={loading}
+              >
+                {GoogleIcon}
+                Continue with Google
+              </button>
+              <button
+                type="button"
+                className="btn btn-oauth btn-microsoft"
+                onClick={handleMicrosoftOAuth}
+                disabled={loading || !msalReady}
+              >
+                {MicrosoftIcon}
+                {msalReady ? "Continue with Microsoft" : "Microsoft (loading…)"}
+              </button>
+            </div>
+
+            <div className="d-flex align-items-center my-3">
+              <hr className="flex-grow-1" />
+              <span className="mx-2 text-secondary small">or</span>
+              <hr className="flex-grow-1" />
+            </div>
+
+            {/* Auth form */}
+            <form onSubmit={onSubmit} className="d-grid gap-3">
+              {isSignup && (
                 <div>
-                  <label htmlFor="email" className="form-label">Email</label>
-                  <input type="email" className="form-control" id="email" name="email" value={form.email} onChange={handleChange} autoComplete="email" required />
+                  <label htmlFor="name" className="form-label">Full Name</label>
+                  <input type="text" className="form-control" id="name" name="name"
+                    value={form.name} onChange={handleChange} required />
                 </div>
-
+              )}
+              <div>
+                <label htmlFor="email" className="form-label">Email</label>
+                <input type="email" className="form-control" id="email" name="email"
+                  value={form.email} onChange={handleChange} required />
+              </div>
+              <div>
+                <label htmlFor="password" className="form-label">Password</label>
+                <div className="input-group">
+                  <input type={showPw ? "text" : "password"} className="form-control"
+                    id="password" name="password" value={form.password} onChange={handleChange}
+                    minLength={6} required />
+                  <button className="btn btn-outline-secondary" type="button"
+                    onClick={() => setShowPw((s) => !s)}>
+                    {showPw ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+              {isSignup && (
                 <div>
-                  <label htmlFor="password" className="form-label">Password</label>
-                  <div className="input-group">
-                    <input type={showPw ? "text" : "password"} className="form-control" id="password" name="password" value={form.password} onChange={handleChange} minLength={6} autoComplete={isSignup ? "new-password" : "current-password"} required />
-                    <button className="btn btn-outline-secondary" type="button" onClick={() => setShowPw((s) => !s)}>{showPw ? "Hide" : "Show"}</button>
-                  </div>
+                  <label htmlFor="confirm" className="form-label">Confirm Password</label>
+                  <input type={showPw ? "text" : "password"} className="form-control"
+                    id="confirm" name="confirm" value={form.confirm}
+                    onChange={handleChange} minLength={6} required />
                 </div>
-
-                {isSignup && (
-                  <div>
-                    <label htmlFor="confirm" className="form-label">Confirm password</label>
-                    <input type={showPw ? "text" : "password"} className="form-control" id="confirm" name="confirm" value={form.confirm} onChange={handleChange} minLength={6} autoComplete="new-password" required />
+              )}
+              {!isSignup && (
+                <div className="d-flex justify-content-between align-items-center small">
+                  <div className="form-check">
+                    <input className="form-check-input" type="checkbox" id="remember" />
+                    <label className="form-check-label" htmlFor="remember">Remember me</label>
                   </div>
-                )}
+                  <NavLink to="/forgot" className="text-decoration-none">Forgot password?</NavLink>
+                </div>
+              )}
+              <button className="btn btn-success w-100 btn-submit" type="submit" disabled={loading}>
+                {loading ? "Please wait…" : isSignup ? "Create Account" : "Sign In"}
+              </button>
+            </form>
 
-                {!isSignup && (
-                  <div className="d-flex justify-content-between align-items-center small">
-                    <div className="form-check">
-                      <input className="form-check-input" type="checkbox" id="remember" />
-                      <label className="form-check-label" htmlFor="remember">Remember me</label>
-                    </div>
-                    <NavLink to="/forgot" className="text-decoration-none">Forgot password?</NavLink>
-                  </div>
-                )}
+            <div className="text-center mt-3">
+              <span className="switch-mode" onClick={switchMode} disabled={loading}>
+                {isSignup ? "Already have an account? Sign in" : "New here? Create account"}
+              </span>
+            </div>
 
-                <button className="btn btn-success w-100 rounded-pill" type="submit" disabled={loading}>
-                  {loading ? "Please wait…" : isSignup ? "Create account" : "Sign in"}
-                </button>
-              </form>
-
-              <div className="text-center mt-3">
-                <button className="btn btn-link text-decoration-none" onClick={switchMode} disabled={loading}>
-                  {isSignup ? "Have an account? Sign in" : "New here? Create account"}
-                </button>
-              </div>
-
-              <div className="text-center mt-1 text-secondary small">
-                © {new Date().getFullYear()} Your Company · <NavLink to="/privacy">Privacy</NavLink>
-              </div>
+            <div className="text-center mt-4 text-secondary small">
+              © {new Date().getFullYear()} Your Company · <NavLink to="/privacy">Privacy</NavLink>
             </div>
           </div>
+
+          {/* Right column - image */}
+          <div className="col-6 d-none d-md-block auth-image" />
         </div>
       </div>
-    </main>
-  );
+    </div>
+  </main>
+);
+
 }
 
 const GoogleIcon = (
-  <svg className="icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.2-1.6 3.5-5.4 3.5-3.2 0-5.9-2.7-5.9-6s2.7-6 5.9-6c1.8 0 3 .8 3.6 1.4l2.4-2.3C16.9 3 14.7 2 12 2 8 2 4.6 4.2 3.9 7.6z"/><path fill="#34A853" d="M3.9 7.6l3.2 2.3C8 7.4 9.8 6.1 12 6.1c1.8 0 3 .8 3.6 1.4l2.4-2.3C16.9 3 14.7 2 12 2 8 2 4.6 4.2 3.9 7.6z"/><path fill="#4A90E2" d="M12 20.7c2.7 0 5-.9 6.6-2.5l-3.1-2.6c-.9.6-2.2 1-3.5 1-2.6 0-4.8-1.7-5.6-4.1l-3.3 2.5C4.7 18.9 8 20.7 12 20.7z"/><path fill="#FBBC05" d="M20.6 11.2c0-.5-.1-.9-.2-1.4H12v3.9h5.4c-.3 1.4-1.6 2.3-3.4 2.3-.9 0-2.1-.4-2.9-1.2l-3.3 2.5c1.5 2.7 4 4.4 6.8 4.4 3.5 0 6.6-1.9 7.9-5 1-2.3 1.1-4.2 1.1-5.1z"/></svg>
+  <svg
+    className="icon"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 533.5 544.3"
+    aria-hidden="true"
+  >
+    <path
+      fill="#4285F4"
+      d="M533.5 278.4c0-18.5-1.5-37-4.7-54.9H272v103.9h147.5c-6.4 34.7-25.7 64-54.8 83.7v69.4h88.4c51.6-47.6 80.4-117.8 80.4-202.1z"
+    />
+    <path
+      fill="#34A853"
+      d="M272 544.3c73.9 0 135.9-24.5 181.2-66.2l-88.4-69.4c-24.6 16.6-56.1 26.3-92.8 26.3-71.3 0-131.7-48.1-153.4-112.8H28v70.7c45.2 89.1 138.7 151.4 244 151.4z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M118.6 322.2c-10.9-32.6-10.9-67.6 0-100.2V151.3H28c-38.2 76.2-38.2 165.5 0 241.7l90.6-70.8z"
+    />
+    <path
+      fill="#EA4335"
+      d="M272 107.7c39.9-.6 78.1 14.7 107.2 42.9l79.6-79.6C408 24.6 343.6-.7 272 0 166.7 0 73.2 62.3 28 151.3l90.6 70.7C140.3 155.8 200.7 107.7 272 107.7z"
+    />
+  </svg>
 );
 
 const MicrosoftIcon = (
