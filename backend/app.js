@@ -1,20 +1,20 @@
-const express = require("express");
-const cookieParser = require("cookie-parser");
-const path = require("path");
-const logger = require("./utility/logger");
-
-require("dotenv").config();
-
-const corsMiddleware = require("./middleware/corsMiddleware");
-const {
+import express from "express";
+import cookieParser from "cookie-parser";
+import path from "path";
+import logger from "./utility/logger.js";
+import { fileURLToPath } from "url";
+import corsMiddleware from "./middleware/corsMiddleware.js";
+import {
   generalRateLimiter,
   authRateLimiter,
-} = require("./middleware/rateLimiterMiddleware");
-const requestLogger = require("./middleware/httpLoggerMiddleware");
-const serverRoutes = require("./route/route");
-const { requestContext } = require("./middleware/requestContext");
+} from "./middleware/rateLimiterMiddleware.js";
+import requestLogger from "./middleware/httpLoggerMiddleware.js";
+import serverRoutes from "./route/route.js";
+import { requestContext } from "./middleware/requestContext.js";
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(cookieParser());
@@ -43,4 +43,4 @@ app.use((err, req, res, next) => {
   res.status(status).json({ error: message });
 });
 
-module.exports = app;
+export default app;

@@ -1,7 +1,4 @@
-import {
-  RateLimiterRedis,
-  RateLimiterMemory,
-} from "rate-limiter-flexible";
+import { RateLimiterRedis, RateLimiterMemory } from "rate-limiter-flexible";
 import redis from "../resource/redis.js";
 
 function buildLimiter({ points, duration, blockDuration }) {

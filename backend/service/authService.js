@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import prisma from "../resource/prisma.js";
 import { createToken } from "./tokenService.js";
-import googleOAuth from "./oauth/googleService.js";
+import { start, finish } from "./oauth/googleService.js";
 import redis from "../resource/redis.js";
 import {
   sendVerificationEmail,
@@ -163,11 +163,11 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
 };
 
 const startGoogleOAuth = async () => {
-  return googleOAuth.start();
+  return start();
 };
 
 const finishGoogleOAuth = async (callbackParams, expected) => {
-  const { profile } = await googleOAuth.finish(callbackParams, expected);
+  const { profile } = await finish(callbackParams, expected);
 
   let user = await prisma.user.findUnique({ where: { email: profile.email } });
 

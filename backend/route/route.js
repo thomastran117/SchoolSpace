@@ -9,14 +9,14 @@
  *
  */
 
-const express = require("express");
-const authRoute = require("./authRoute");
-const courseRoute = require("./courseRoute");
-const enrollRoute = require("./enrollRoute");
-const userRoute = require("./userRoute");
-const { makeRequireAuth } = require("../middleware/authTokenMiddleware");
-const { httpError } = require("../utility/httpUtility");
-const listRoutesFromRouter = require("../utility/listRoutes");
+import express from "express";
+import authRoute from "./authRoute.js";
+import courseRoute from "./courseRoute.js";
+import enrollRoute from "./enrollRoute.js";
+import userRoute from "./userRoute.js";
+import { makeRequireAuth } from "../middleware/authTokenMiddleware.js";
+import { httpError } from "../utility/httpUtility.js";
+import listRoutesFromRouter from "../utility/listRoutes.js";
 
 const router = express.Router();
 
@@ -60,4 +60,4 @@ router.use((req, res, next) => {
   httpError(404, `Route '${req.originalUrl}' does not exist`);
 });
 
-module.exports = router;
+export default router;

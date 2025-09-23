@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import logger from"../utility/logger.js";
+import logger from "../utility/logger.js";
 import config from "../config/envManager.js";
 
 const MONGO_URL = config.mongo_url;

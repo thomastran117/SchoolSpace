@@ -1,4 +1,4 @@
-import { getUserPayload } from "../service/tokenService";
+import { getUserPayload } from "../service/tokenService.js";
 
 const makeRequireAuth = async (req, res, next) => {
   try {

@@ -1,5 +1,5 @@
-const { PrismaClient } = require("@prisma/client");
-import logger from"../utility/logger.js";
+import { PrismaClient } from "@prisma/client";
+import logger from "../utility/logger.js";
 const prisma = new PrismaClient();
 
 async function init() {

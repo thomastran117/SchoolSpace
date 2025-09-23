@@ -13,7 +13,7 @@ import {
   httpError,
   validatePositiveInt,
 } from "../utility/httpUtility.js";
-const logger = require("../utility/logger");
+import logger from "../utility/logger.js";
 
 const addCourse = async (req, res, next) => {
   try {
