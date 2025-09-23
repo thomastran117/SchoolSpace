@@ -1,6 +1,6 @@
-const jwt = require("jsonwebtoken");
-const { httpError } = require("../utility/httpUtility");
-const config = require("../config/envManager");
+import jwt from "jsonwebtoken";
+import { httpError } from "../utility/httpUtility.js";
+import config from "../config/envManager.js";
 
 const { jwt_secret: JWT_SECRET, jwt_secret_2: JWT_SECRET_2 } = config;
 
@@ -30,8 +30,4 @@ const getUserPayload = async (authHeader) => {
   return { id: decoded.userId, role: decoded.role };
 };
 
-module.exports = {
-  createToken,
-  getUserPayload,
-  validateToken,
-};
+export { createToken, getUserPayload, validateToken };

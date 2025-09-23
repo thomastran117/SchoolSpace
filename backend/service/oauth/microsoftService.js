@@ -1,7 +1,7 @@
-const jwksClient = require("jwks-rsa");
-const jwt = require("jsonwebtoken");
-const config = require("../../config/envManager");
-const { httpError } = require("../../utility/httpUtility");
+import jwksClient from "jwks-rsa";
+import jwt from "jsonwebtoken";
+import config from "../../config/envManager.js";
+import { httpError } from "../../utility/httpUtility.js";
 
 const MS_CLIENT_ID = config.ms_client_id;
 
@@ -73,4 +73,4 @@ async function verifyMicrosoftIdToken(idToken) {
   });
 }
 
-module.exports = { verifyMicrosoftIdToken };
+export { verifyMicrosoftIdToken };

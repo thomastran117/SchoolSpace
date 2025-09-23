@@ -1,6 +1,6 @@
-const { OAuth2Client } = require("google-auth-library");
-const crypto = require("crypto");
-const config = require("../../config/envManager");
+import { OAuth2Client } from "google-auth-library";
+import crypto from "crypto";
+import config from "../../config/envManager.js";
 
 const {
   google_client_id: GOOGLE_CLIENT_ID,
@@ -114,4 +114,4 @@ async function finish(callbackParams, expected) {
   return { profile };
 }
 
-module.exports = { start, finish };
+export { start, finish };

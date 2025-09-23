@@ -11,8 +11,8 @@
 /**
  * Imports
  */
-const express = require("express");
-const {
+import express from "express";
+import {
   login,
   signup,
   microsoftVerify,
@@ -20,7 +20,7 @@ const {
   googleStart,
   googleCallback,
   updateRole,
-} = require("../controller/authController");
+} from "../controller/authController.js";
 
 const router = express.Router();
 
@@ -74,4 +74,4 @@ router.get("/google/start", googleStart);
 router.get("/google/callback", googleCallback);
 
 // Export the router
-module.exports = router;
+export default router;

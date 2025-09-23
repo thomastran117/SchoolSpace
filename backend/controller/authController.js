@@ -1,4 +1,4 @@
-const {
+import {
   loginUser,
   signupUser,
   verifyUser,
@@ -7,16 +7,15 @@ const {
   startGoogleOAuth,
   finishGoogleOAuth,
   update_role,
-} = require("../service/authService");
-const {
+} from "../service/authService.js";
+import {
   requireFields,
   httpError,
   assertAllowed,
-} = require("../utility/httpUtility");
-const logger = require("../utility/logger");
-
-const url = require("url");
-const config = require("../config/envManager");
+} from"../utility/httpUtility.js";
+import logger from "../utility/logger.js";
+import url from "url";
+import config from "../config/envManager.js";
 
 const setTemp = (res, key, val) =>
   res.cookie(key, val, {
@@ -203,7 +202,7 @@ const wasGCodeRedeemed = (req, code) => {
   return false;
 };
 
-module.exports = {
+export {
   login,
   signup,
   microsoftVerify,

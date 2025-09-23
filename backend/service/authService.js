@@ -1,17 +1,17 @@
-const bcrypt = require("bcrypt");
-const prisma = require("../resource/prisma");
-const { createToken } = require("./tokenService");
-const googleOAuth = require("./oauth/googleService");
-const redis = require("../resource/redis");
-const {
+import bcrypt from "bcrypt";
+import prisma from "../resource/prisma.js";
+import { createToken } from "./tokenService.js";
+import googleOAuth from "./oauth/googleService.js";
+import redis from "../resource/redis.js"; 
+import {
   sendVerificationEmail,
   sendWelcomeEmail,
-} = require("../service/emailService");
-const { randomBytes } = require("crypto");
-const jwt = require("jsonwebtoken");
-const { httpError } = require("../utility/httpUtility");
-const config = require("../config/envManager");
-const jwksClient = require("jwks-rsa");
+} from "../service/emailService.js";
+import { randomBytes } from "crypto";
+import jwt from "jsonwebtoken";
+import { httpError } from "../utility/httpUtility.js";
+import config from "../config/envManager.js";
+import jwksClient from "jwks-rsa";
 
 const {
   frontend_client: FRONTEND_CLIENT,
@@ -312,7 +312,7 @@ async function verifyMicrosoftIdToken(idToken) {
   });
 }
 
-module.exports = {
+export {
   signupUser,
   loginUser,
   verifyUser,
