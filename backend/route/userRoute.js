@@ -36,7 +36,7 @@ router.put("/users/:id", updateUser);
 router.delete("/users/:id", deleteUser);
 
 /**
- * @route POST /users/
+ * @route POST /users/:id
  * @description Get teacher by course id
  * @access Private
  */

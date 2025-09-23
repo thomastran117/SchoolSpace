@@ -17,16 +17,54 @@ Alternatively, you may use a local version of the API provided that you clone an
 
 All endpoints are prefixed with api
 
-Auth
+#### Auth
 
-| Method | Endpoint | Body | Response |
-| ------------- | ------------- | | ------------- | | ------------- |
-| POST  | login  | email, password  | token  |
-| POST  | signup  | email, password, role  | None |
-| POST  | verify  | token  | None |
+| Method | Endpoint | Params | Body | Response |
+|  :------- |  :------- | :------- | :------- | :------- |
+| POST  | login  | None | { email, password }  | {id, token, role}  |
+| POST  | signup  | None | { email, password, role }  | { message: "User created. Please verify email." } |
+| GET  | verify  | ?token=xyz  | None | { message: "Email verified." } |
 
-Courses
+#### Users
 
-Enroll-Course
+| Method | Endpoint | Params | Body | Response |
+|  :------- |  :------- | :------- | :------- | :------- |
+| PUT  | login  | None | { email, password }  | {id, token, role}  |
+| PUT  | signup  | None | { email, password, role }  | { message: "User created. Please verify email." } |
+| DELETE  | verify  | ?token=xyz  | None | { message: "Email verified." } |
+| GET  | verify  | ?token=xyz  | None | { message: "Email verified." } |
+| GET  | verify  | ?token=xyz  | None | { message: "Email verified." } |
+| GET  | verify  | ?token=xyz  | None | { message: "Email verified." } |
 
-Users
+#### Courses
+
+| Method | Endpoint | Params | Body | Response |
+|  :------- |  :------- |   :------- | :------- | :------- |
+| POST  | login  | None | { email, password }  | {id, token, role}  |
+| POST  | signup  | None | { email, password, role }  | { message: "User created. Please verify email." } |
+| GET  | verify  | ?token=xyz  | None | { message: "Email verified." } |
+| GET  | verify  | ?token=xyz  | None | { message: "Email verified." } |
+| GET  | verify  | ?token=xyz  | None | { message: "Email verified." } |
+| GET  | verify  | ?token=xyz  | None | { message: "Email verified." } |
+| GET  | verify  | ?token=xyz  | None | { message: "Email verified." } |
+
+#### Enroll-Course
+
+| Method | Endpoint | Params | Body | Response |
+|  :------- |  :------- |   :------- | :------- | :------- |
+| POST  | login  | None | { email, password }  | {id, token, role}  |
+| POST  | signup  | None | { email, password, role }  | { message: "User created. Please verify email." } |
+
+#### Assignments
+
+#### Submissions
+
+#### Grades
+
+#### Discussion
+
+#### Responses
+
+#### Annoucements
+
+#### Contents
