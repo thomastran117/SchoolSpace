@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-const logger = require("../utility/logger");
-const config = require("../config/envManager");
+import mongoose from "mongoose";
+import logger from"../utility/logger.js";
+import config from "../config/envManager.js";
 
 const MONGO_URL = config.mongo_url;
 
@@ -51,4 +51,4 @@ connectAndPing()
     process.exit(1);
   });
 
-module.exports = mongoose;
+export default mongoose;

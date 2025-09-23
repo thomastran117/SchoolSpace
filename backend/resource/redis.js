@@ -1,6 +1,6 @@
-const Redis = require("ioredis");
-const logger = require("../utility/logger");
-const config = require("../config/envManager");
+import Redis from "ioredis";
+import logger from"../utility/logger.js";
+import config from "../config/envManager.js";
 
 const redis = new Redis(config.redis_url, {
   lazyConnect: true,
@@ -17,4 +17,4 @@ const redis = new Redis(config.redis_url, {
   }
 })();
 
-module.exports = redis;
+export default redis;
