@@ -1,7 +1,7 @@
-const fs = require("fs/promises");
-const path = require("path");
-const { v4: uuidv4 } = require("uuid");
-const logger = require("../utility/logger");
+import fs from "fs/promises";
+import path from "path";
+import { uuidv4 } from "uuid";
+import logger from "../utility/logger.";
 
 const PUBLIC_DIR = path.join(__dirname, "../public");
 
@@ -64,4 +64,4 @@ const deleteFile = async (fileName) => {
   }
 };
 
-module.exports = { getFile, deleteFile, uploadFile };
+export { getFile, deleteFile, uploadFile };

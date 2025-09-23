@@ -1,17 +1,17 @@
-const nodemailer = require("nodemailer");
-require("dotenv").config();
+import nodemailer from "nodemailer";
+import config from "../config/envManager.js";
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: config.email_user,
+    pass: config.email_pass,
   },
 });
 
 async function sendVerificationEmail(email, verifyUrl) {
   const mailOptions = {
-    from: `"SchoolSpace" <${process.env.EMAIL_USER}>`,
+    from: `"SchoolSpace" <${config.email_user}>`,
     to: email,
     subject: "Verify Your Email Address",
     html: `
@@ -70,7 +70,7 @@ async function sendVerificationEmail(email, verifyUrl) {
 
 async function sendWelcomeEmail(email) {
   const mailOptions = {
-    from: `"SchoolSpace" <${process.env.EMAIL_USER}>`,
+    from: `"SchoolSpace" <${config.email_user}>`,
     to: email,
     subject: "Welcome to SchoolSpace 🎉",
     html: `
@@ -139,7 +139,7 @@ async function sendAssignmentEmail(email, course) {
   //TO DO
 }
 
-module.exports = {
+export {
   sendVerificationEmail,
   sendAnnouncementEmail,
   sendAssignmentEmail,
