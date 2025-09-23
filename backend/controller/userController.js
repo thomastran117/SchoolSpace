@@ -1,8 +1,8 @@
-const {
+import {
   requireFields,
   httpError,
   assertAllowed,
-} = require("../utility/httpUtility");
+} from "../utility/httpUtility.js";
 
 const getStudentsByCourse = async (req, res, next) => {
   try {
@@ -49,7 +49,7 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   updateUser,
   deleteUser,
   getStudentsByCourse,
