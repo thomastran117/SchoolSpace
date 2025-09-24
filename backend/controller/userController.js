@@ -3,7 +3,14 @@ import {
   httpError,
   assertAllowed,
 } from "../utility/httpUtility.js";
-
+import {
+  get_students_by_course,
+  get_teacher_by_course,
+  get_user,
+  get_users,
+  delete_user,
+  update_role,
+} from "../service/userService.js";
 const getStudentsByCourse = async (req, res, next) => {
   try {
     const { id: userId, role } = req.user;
@@ -43,7 +50,8 @@ const updateUser = async (req, res, next) => {
 const deleteUser = async (req, res, next) => {
   try {
     const { id: userId, role } = req.user;
-    httpError(501, "Not implemented yet");
+    await delete_user(userId);
+    res.status(200).json({ message: "User deleted." });
   } catch (err) {
     next(err);
   }
@@ -51,18 +59,24 @@ const deleteUser = async (req, res, next) => {
 
 const updateRole = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    req.user = await getUserPayload(authHeader);
+    const { id: authUserId, role } = req.user;
+    if (role !== "undefined") {
+      httpError(409, "The user already has a role");
+    }
 
     requireFields(["role"], req.body);
-    const { role } = req.body;
+    const { role: userRole } = req.body;
 
     assertAllowed(role, ["student", "teacher", "assistant"]);
 
-    const { token, role: userrole } = await update_role(id, role);
+    const { token, role: userrole } = await update_role(authUserId, userRole);
     res
       .status(200)
-      .json({ message: "Login successful", token: token, role: userrole });
+      .json({
+        message: "Role updated. New token provided",
+        token: token,
+        role: userrole,
+      });
   } catch (err) {
     next(err);
   }

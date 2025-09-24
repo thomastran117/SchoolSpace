@@ -4,7 +4,7 @@ import {
   verifyUser,
   signupUserWOVerify,
   verifyMicrosoftIdTokenAndSignIn,
-  loginOrCreateFromGoogle
+  loginOrCreateFromGoogle,
 } from "../service/authService.js";
 import {
   requireFields,
@@ -141,10 +141,4 @@ const validateEmail = (email) => {
   return emailRegex.test(email);
 };
 
-export {
-  login,
-  signup,
-  microsoftVerify,
-  verify_email,
-  googleVerify
-};
+export { login, signup, microsoftVerify, verify_email, googleVerify };

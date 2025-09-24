@@ -1,7 +1,6 @@
 import bcrypt from "bcrypt";
 import prisma from "../resource/prisma.js";
 import { createToken } from "./tokenService.js";
-import { start, finish } from "./oauth/googleService.js";
 import redis from "../resource/redis.js";
 import {
   sendVerificationEmail,
@@ -11,8 +10,7 @@ import { randomBytes } from "crypto";
 import jwt from "jsonwebtoken";
 import { httpError } from "../utility/httpUtility.js";
 import config from "../config/envManager.js";
-import jwksClient from "jwks-rsa";
-
+import { verifyMicrosoftIdToken } from "./oauth/microsoftService.js";
 const {
   frontend_client: FRONTEND_CLIENT,
   jwt_secret_2: JWT_SECRET_2,
@@ -162,44 +160,25 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
   };
 };
 
-const startGoogleOAuth = async () => {
-  return start();
-};
-
-const finishGoogleOAuth = async (callbackParams, expected) => {
-  const { profile } = await finish(callbackParams, expected);
-
-  let user = await prisma.user.findUnique({ where: { email: profile.email } });
-
-  if (!user) {
-    user = await prisma.user.findFirst({ where: { googleId: profile.sub } });
-  }
+const loginOrCreateFromGoogle = async (googleUser) => {
+  let user = await prisma.user.findUnique({
+    where: { email: googleUser.email },
+  });
 
   if (!user) {
     user = await prisma.user.create({
       data: {
-        email: profile.email,
-        name: profile.name,
-        avatar: profile.picture,
+        email: googleUser.email,
+        name: googleUser.name,
+        avatar: googleUser.picture,
+        googleId: googleUser.sub,
         provider: "google",
-        password: null,
-        googleId: profile.sub,
-      },
-    });
-  } else if (!user.googleId) {
-    user = await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        googleId: profile.sub,
-        provider: "google",
-        name: user.name || profile.name,
-        avatar: user.avatar || profile.picture,
-        role: "notdefined",
       },
     });
   }
 
   const token = await createToken(user.id, user.email, user.role);
+
   return {
     token,
     role: user.role,
@@ -222,80 +201,11 @@ const signupUserWOVerify = async (email, password, role) => {
   return user;
 };
 
-function clientForIssuer(iss) {
-  if (!iss) throw new Error("Missing issuer");
-  const tenantBase = iss.replace(/\/v2\.0\/?$/, "");
-  const jwksUri = `${tenantBase}/discovery/v2.0/keys`;
-  return jwksClient({
-    jwksUri,
-    cache: true,
-    cacheMaxEntries: 10,
-    cacheMaxAge: 10 * 60 * 1000,
-    timeout: 8000,
-  });
-}
-
-function getKeyFrom(client, header) {
-  return new Promise((resolve, reject) => {
-    client.getSigningKey(header.kid, (err, key) => {
-      if (err) return reject(err);
-      resolve(key.getPublicKey());
-    });
-  });
-}
-
-async function verifyMicrosoftIdToken(idToken) {
-  if (!idToken || typeof idToken !== "string") {
-    throw httpError(400, "Missing or invalid id_token");
-  }
-
-  const decoded = jwt.decode(idToken, { complete: true });
-  if (!decoded?.header || !decoded?.payload) {
-    throw httpError(401, "Invalid Microsoft token: cannot decode");
-  }
-
-  const { header, payload } = decoded;
-  const { iss, aud } = payload;
-
-  if (
-    !iss ||
-    !/^https:\/\/login\.microsoftonline\.com\/[^/]+\/v2\.0$/i.test(iss)
-  ) {
-    throw httpError(401, "Invalid issuer in token");
-  }
-  if (aud !== MS_CLIENT_ID) {
-    throw httpError(401, "Audience mismatch");
-  }
-
-  const client = clientForIssuer(iss);
-  const publicKey = await getKeyFrom(client, header);
-
-  return new Promise((resolve, reject) => {
-    jwt.verify(
-      idToken,
-      publicKey,
-      {
-        algorithms: ["RS256"],
-        issuer: iss,
-        audience: MS_CLIENT_ID,
-        clockTolerance: 5,
-      },
-      (err, verified) => {
-        if (err) return reject(httpError(401, "Invalid Microsoft Token"));
-        if (!verified?.sub && !verified?.oid)
-          return reject(httpError(401, "Invalid Microsoft Token"));
-        resolve(verified);
-      },
-    );
-  });
-}
-
 export {
   signupUser,
   loginUser,
   verifyUser,
   verifyMicrosoftIdTokenAndSignIn,
-  startGoogleOAuth,
-  finishGoogleOAuth,
+  loginOrCreateFromGoogle,
   signupUserWOVerify,
 };

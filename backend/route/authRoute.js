@@ -17,9 +17,7 @@ import {
   signup,
   microsoftVerify,
   verify_email,
-  googleStart,
-  googleCallback,
-  updateRole,
+  googleVerify,
 } from "../controller/authController.js";
 
 const router = express.Router();
@@ -37,13 +35,6 @@ router.post("/login", login);
  * @access Public
  */
 router.post("/signup", signup);
-
-/**
- * @route PUT /auth/role
- * @description Updates an OAuth user with their designated role
- * @access Private
- */
-router.put("/role", updateRole);
 
 /**
  * @route GET /auth/verify
@@ -64,14 +55,7 @@ router.post("/microsoft/verify", microsoftVerify);
  * @description Initiates Google OAuth login flow.
  * @access Public
  */
-router.get("/google/start", googleStart);
-
-/**
- * @route GET /auth/google/callback
- * @description Handles Google OAuth callback and token exchange.
- * @access Public
- */
-router.get("/google/callback", googleCallback);
+router.post("/google/verify", googleVerify);
 
 // Export the router
 export default router;

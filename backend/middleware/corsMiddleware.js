@@ -9,7 +9,7 @@ function normalizeOrigin(o) {
   return s;
 }
 
-const raw = (config.cors_whitelist)
+const raw = config.cors_whitelist
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);

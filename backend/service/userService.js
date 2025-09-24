@@ -94,11 +94,11 @@ const update_role = async (id, role) => {
 };
 
 export {
-    get_students_by_course,
-    get_teacher_by_course,
-    delete_user,
-    get_user,
-    get_users,
-    update_user,
-    update_role
+  get_students_by_course,
+  get_teacher_by_course,
+  delete_user,
+  get_user,
+  get_users,
+  update_user,
+  update_role,
 };
