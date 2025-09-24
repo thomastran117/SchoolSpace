@@ -5,6 +5,7 @@ import {
   signupUserWOVerify,
   verifyMicrosoftIdTokenAndSignIn,
   loginOrCreateFromGoogle,
+  generateRefreshToken,
 } from "../service/authService.js";
 import {
   requireFields,
@@ -13,20 +14,6 @@ import {
 } from "../utility/httpUtility.js";
 import logger from "../utility/logger.js";
 import config from "../config/envManager.js";
-import * as googleService from "../service/oauth/googleService.js";
-
-const setTemp = (res, key, val) =>
-  res.cookie(key, val, {
-    httpOnly: true,
-    sameSite: "lax",
-    maxAge: 5 * 60 * 1000,
-  });
-
-const popTemp = (req, res, key) => {
-  const v = req.cookies[key];
-  res.clearCookie(key);
-  return v;
-};
 
 const login = async (req, res, next) => {
   try {
@@ -37,10 +24,21 @@ const login = async (req, res, next) => {
       httpError(400, "Invalid email format");
     }
 
-    const { token, role } = await loginUser(email, password);
+    const { accessToken, refreshToken, role, id } = await loginUser(
+      email,
+      password,
+    );
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res
       .status(200)
-      .json({ message: "Login successful", token: token, role: role });
+      .json({ message: "Login successful", accessToken, role, email, id });
   } catch (err) {
     next(err);
   }
@@ -102,13 +100,14 @@ const microsoftVerify = async (req, res, next) => {
     const { id_token: idToken } = req.body || {};
     if (!idToken) return httpError(400, "Missing id_token");
 
-    const { token, role, user } =
+    const { token, role, email, id } =
       await verifyMicrosoftIdTokenAndSignIn(idToken);
 
     return res.status(200).json({
       token,
       role,
-      user,
+      email,
+      id,
     });
   } catch (err) {
     next(err);
@@ -117,23 +116,39 @@ const microsoftVerify = async (req, res, next) => {
 
 const googleVerify = async (req, res, next) => {
   try {
-    const { token } = req.body;
-    if (!token) {
-      return res.status(400).json({ message: "Google token is required" });
+    const { token: googleToken } = req.body;
+    if (!googleToken) {
+      throw httpError(400, "Google token missing");
     }
 
-    const googleUser = await googleService.verifyGoogleToken(token);
+    const { token, role, email, id } =
+      await loginOrCreateFromGoogle(googleToken);
 
-    if (!googleUser?.email) {
-      return res.status(401).json({ message: "Invalid Google token" });
-    }
-
-    const appToken = await loginOrCreateFromGoogle(googleUser);
-
-    return res.status(200).json({ token: appToken });
+    return res.status(200).json({
+      token,
+      role,
+      email,
+      id,
+    });
   } catch (err) {
     next(err);
   }
+};
+
+const newAccessToken = async (req, res, next) => {
+  try {
+    const token = req.cookies.refreshToken;
+    if (!token) return httpError(401, "Misisng refresh token");
+    const accessToken = await generateRefreshToken(token);
+    return res.json({ accessToken: accessToken });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const logout = async (req, res, next) => {
+  res.clearCookie("refreshToken");
+  return res.json({ message: "Logged out" });
 };
 
 const validateEmail = (email) => {
@@ -141,4 +156,12 @@ const validateEmail = (email) => {
   return emailRegex.test(email);
 };
 
-export { login, signup, microsoftVerify, verify_email, googleVerify };
+export {
+  login,
+  signup,
+  logout,
+  microsoftVerify,
+  verify_email,
+  googleVerify,
+  newAccessToken,
+};

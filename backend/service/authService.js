@@ -1,6 +1,10 @@
 import bcrypt from "bcrypt";
 import prisma from "../resource/prisma.js";
-import { createToken } from "./tokenService.js";
+import {
+  createAccessToken,
+  createRefreshToken,
+  validateRefreshToken,
+} from "./tokenService.js";
 import redis from "../resource/redis.js";
 import {
   sendVerificationEmail,
@@ -11,11 +15,9 @@ import jwt from "jsonwebtoken";
 import { httpError } from "../utility/httpUtility.js";
 import config from "../config/envManager.js";
 import { verifyMicrosoftIdToken } from "./oauth/microsoftService.js";
-const {
-  frontend_client: FRONTEND_CLIENT,
-  jwt_secret_2: JWT_SECRET_2,
-  ms_client_id: MS_CLIENT_ID,
-} = config;
+import * as googleService from "./oauth/googleService.js";
+
+const { frontend_client: FRONTEND_CLIENT, jwt_secret_2: JWT_SECRET_2 } = config;
 
 const loginUser = async (email, password) => {
   const user = await prisma.user.findUnique({
@@ -31,8 +33,9 @@ const loginUser = async (email, password) => {
     httpError(401, "Invalid credentials");
   }
 
-  const token = await createToken(user.id, user.email, user.role);
-  return { token: token, role: user.role };
+  const token = await createAccessToken(user.id, user.email, user.role);
+  const refreshToken = createRefreshToken(user.id);
+  return { accessToken: token, refreshToken, role: user.role, id: user.id };
 };
 
 const signupUser = async (email, password, role) => {
@@ -151,16 +154,18 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
     });
   }
 
-  const token = await createToken(user.id, user.email, user.role);
-
-  return {
-    token,
-    role: user.role,
-    user: { id: user.id, email: user.email, name: user.name },
-  };
+  const token = await createAccessToken(user.id, user.email, user.role);
+  const refreshToken = createRefreshToken(user.id);
+  return { accessToken: token, refreshToken, role: user.role, id: user.id };
 };
 
-const loginOrCreateFromGoogle = async (googleUser) => {
+const loginOrCreateFromGoogle = async (googleToken) => {
+  const googleUser = await googleService.verifyGoogleToken(googleToken);
+
+  if (!googleUser?.email) {
+    httpError(401, "Invalid Google token");
+  }
+
   let user = await prisma.user.findUnique({
     where: { email: googleUser.email },
   });
@@ -177,13 +182,9 @@ const loginOrCreateFromGoogle = async (googleUser) => {
     });
   }
 
-  const token = await createToken(user.id, user.email, user.role);
-
-  return {
-    token,
-    role: user.role,
-    user: { id: user.id, email: user.email, name: user.name },
-  };
+  const token = await createAccessToken(user.id, user.email, user.role);
+  const refreshToken = createRefreshToken(user.id);
+  return { accessToken: token, refreshToken, role: user.role, id: user.id };
 };
 
 const signupUserWOVerify = async (email, password, role) => {
@@ -201,10 +202,24 @@ const signupUserWOVerify = async (email, password, role) => {
   return user;
 };
 
+const generateRefreshToken = async (token) => {
+  const decoded = validateRefreshToken(token);
+  if (!decoded) {
+    httpError(401, "Invalid refresh token");
+  }
+  const newAccessToken = createAccessToken(
+    decoded.userId,
+    decoded.email,
+    decoded.role,
+  );
+  return res.json({ accessToken: newAccessToken });
+};
+
 export {
   signupUser,
   loginUser,
   verifyUser,
+  generateRefreshToken,
   verifyMicrosoftIdTokenAndSignIn,
   loginOrCreateFromGoogle,
   signupUserWOVerify,

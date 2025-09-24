@@ -18,6 +18,8 @@ import {
   microsoftVerify,
   verify_email,
   googleVerify,
+  newAccessToken,
+  logout,
 } from "../controller/authController.js";
 
 const router = express.Router();
@@ -44,18 +46,31 @@ router.post("/signup", signup);
 router.get("/verify", verify_email);
 
 /**
- * @route GET /auth/microsoft/start
+ * @route POST /auth/microsoft/verify
  * @description Initiates Microsoft OAuth login flow.
  * @access Public
  */
 router.post("/microsoft/verify", microsoftVerify);
 
 /**
- * @route GET /auth/google/start
+ * @route POST /auth/google/verify
  * @description Initiates Google OAuth login flow.
  * @access Public
  */
 router.post("/google/verify", googleVerify);
 
+/**
+ * @route GET /auth/refresh
+ * @description Refreshes access token
+ * @access Public
+ */
+router.get("/refresh", newAccessToken);
+
+/**
+ * @route GET /auth/logout
+ * @description Clears refresh token
+ * @access Public
+ */
+router.get("/logout", logout)
 // Export the router
 export default router;

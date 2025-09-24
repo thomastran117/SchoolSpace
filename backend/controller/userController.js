@@ -70,13 +70,11 @@ const updateRole = async (req, res, next) => {
     assertAllowed(role, ["student", "teacher", "assistant"]);
 
     const { token, role: userrole } = await update_role(authUserId, userRole);
-    res
-      .status(200)
-      .json({
-        message: "Role updated. New token provided",
-        token: token,
-        role: userrole,
-      });
+    res.status(200).json({
+      message: "Role updated. New token provided",
+      token: token,
+      role: userrole,
+    });
   } catch (err) {
     next(err);
   }

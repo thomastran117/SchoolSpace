@@ -4,30 +4,47 @@ import config from "../config/envManager.js";
 
 const { jwt_secret: JWT_SECRET, jwt_secret_2: JWT_SECRET_2 } = config;
 
-const JWT_EXPIRY = "6h";
-const JWT_EXPIRY_2 = "30m";
-const VERIFY_EXP_MINUTES = 60;
+const ACCESS_EXPIRY = "30m";
+const REFRESH_EXPIRY = "7d";
 
-const createToken = async (userId, email, role) => {
+const createAccessToken = (userId, email, role) => {
   const payload = { userId, email, role };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_EXPIRY });
 };
 
-const validateToken = async (token) => {
+const createRefreshToken = (userId) => {
+  return jwt.sign({ userId }, JWT_SECRET_2, { expiresIn: REFRESH_EXPIRY });
+};
+
+const validateAccessToken = (token) => {
   try {
     return jwt.verify(token, JWT_SECRET);
   } catch {
-    httpError(401, "Invalid or expired token");
+    httpError(401, "Invalid or expired access token");
   }
 };
 
-const getUserPayload = async (authHeader) => {
+const validateRefreshToken = (token) => {
+  try {
+    return jwt.verify(token, JWT_SECRET_2);
+  } catch {
+    httpError(401, "Invalid or expired refresh token");
+  }
+};
+
+const getUserPayload = (authHeader) => {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     httpError(401, "Missing token");
   }
   const token = authHeader.split(" ")[1];
-  const decoded = await validateToken(token);
+  const decoded = validateAccessToken(token);
   return { id: decoded.userId, role: decoded.role };
 };
 
-export { createToken, getUserPayload, validateToken };
+export {
+  createAccessToken,
+  createRefreshToken,
+  validateAccessToken,
+  validateRefreshToken,
+  getUserPayload,
+};
