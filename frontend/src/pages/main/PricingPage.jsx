@@ -6,12 +6,12 @@ export default function PricingPage() {
       name: "Free",
       price: "$0",
       period: "/month",
-      features: [
-        "Basic features",
-        "Community support",
-        "Limited usage",
-      ],
-      button: { text: "Get Started", link: "/signup", style: "outline-success" },
+      features: ["Basic features", "Community support", "Limited usage"],
+      button: {
+        text: "Get Started",
+        link: "/signup",
+        style: "outline-success",
+      },
     },
     {
       name: "Pro",
@@ -36,7 +36,11 @@ export default function PricingPage() {
         "Custom solutions",
         "24/7 support",
       ],
-      button: { text: "Contact Sales", link: "/contact", style: "outline-success" },
+      button: {
+        text: "Contact Sales",
+        link: "/contact",
+        style: "outline-success",
+      },
     },
   ];
 
@@ -64,7 +68,9 @@ export default function PricingPage() {
               <div className="col-md-6 col-lg-4" key={idx}>
                 <div
                   className={`card h-100 border-0 shadow-sm text-center p-4 ${
-                    plan.highlight ? "border border-2 border-success shadow" : ""
+                    plan.highlight
+                      ? "border border-2 border-success shadow"
+                      : ""
                   }`}
                 >
                   <h5

@@ -1,0 +1,60 @@
+.bg-gradient {
+background: linear-gradient(135deg, #2563eb, #9333ea);
+}
+.auth-wrapper {
+max-width: 900px;
+background: #fff;
+border-radius: 1rem;
+box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+overflow: hidden;
+}
+.auth-form {
+padding: 2rem 2.5rem;
+}
+.auth-title {
+font-size: 1.75rem;
+font-weight: 700;
+color: #111827;
+}
+.auth-subtitle {
+color: #6b7280;
+font-size: 0.9rem;
+}
+.btn-oauth {
+font-weight: 500;
+font-size: 0.9rem;
+border-radius: 9999px;
+height: 42px;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 0.5rem;
+transition: all 0.2s;
+}
+.btn-oauth svg { width: 16px; height: 16px; }
+.btn-oauth:hover {
+transform: translateY(-1px);
+box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+.btn-google, .btn-microsoft {
+border: 1px solid #e5e7eb;
+background: #fff;
+}
+.form-control {
+border-radius: 0.75rem;
+}
+.btn-submit {
+border-radius: 9999px;
+font-weight: 600;
+font-size: 1rem;
+}
+.switch-mode {
+color: #2563eb;
+font-weight: 500;
+cursor: pointer;
+}
+.switch-mode:hover { text-decoration: underline; }
+.auth-image {
+background: url("https://source.unsplash.com/600x800/?technology,workspace") no-repeat center center;
+background-size: cover;
+}

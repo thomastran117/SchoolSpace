@@ -1,11 +1,5 @@
 import { NavLink } from "react-router-dom";
-import {
-  Facebook,
-  Twitter,
-  Instagram,
-  Github,
-  Linkedin,
-} from "lucide-react"; // If you want icons (or use FontAwesome/Bootstrap icons)
+import { Facebook, Twitter, Instagram, Github, Linkedin } from "lucide-react"; // If you want icons (or use FontAwesome/Bootstrap icons)
 
 export default function ElegantFooter() {
   return (
@@ -46,7 +40,9 @@ export default function ElegantFooter() {
                 className="d-flex align-items-center gap-2 mb-3 text-decoration-none"
               >
                 <span className="fw-bold fs-5 text-success">Brand</span>
-                <span className="badge bg-success-subtle text-success">New</span>
+                <span className="badge bg-success-subtle text-success">
+                  New
+                </span>
               </NavLink>
               <p className="text-muted small">
                 Building modern, responsive web apps with elegance and
@@ -58,20 +54,52 @@ export default function ElegantFooter() {
             <div className="col-md-2">
               <h6 className="fw-bold mb-3">Company</h6>
               <ul className="list-unstyled">
-                <li><NavLink to="/about" className="footer-link">About</NavLink></li>
-                <li><NavLink to="/features" className="footer-link">Features</NavLink></li>
-                <li><NavLink to="/pricing" className="footer-link">Pricing</NavLink></li>
-                <li><NavLink to="/blog" className="footer-link">Blog</NavLink></li>
+                <li>
+                  <NavLink to="/about" className="footer-link">
+                    About
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/features" className="footer-link">
+                    Features
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/pricing" className="footer-link">
+                    Pricing
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/blog" className="footer-link">
+                    Blog
+                  </NavLink>
+                </li>
               </ul>
             </div>
 
             <div className="col-md-2">
               <h6 className="fw-bold mb-3">Support</h6>
               <ul className="list-unstyled">
-                <li><NavLink to="/docs" className="footer-link">Docs</NavLink></li>
-                <li><NavLink to="/help" className="footer-link">Help Center</NavLink></li>
-                <li><NavLink to="/contact" className="footer-link">Contact</NavLink></li>
-                <li><NavLink to="/privacy" className="footer-link">Privacy</NavLink></li>
+                <li>
+                  <NavLink to="/docs" className="footer-link">
+                    Docs
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/help" className="footer-link">
+                    Help Center
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/contact" className="footer-link">
+                    Contact
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/privacy" className="footer-link">
+                    Privacy
+                  </NavLink>
+                </li>
               </ul>
             </div>
 
@@ -90,11 +118,21 @@ export default function ElegantFooter() {
               </form>
 
               <div className="footer-social d-flex gap-2">
-                <a href="#"><Facebook size={18} /></a>
-                <a href="#"><Twitter size={18} /></a>
-                <a href="#"><Instagram size={18} /></a>
-                <a href="#"><Github size={18} /></a>
-                <a href="#"><Linkedin size={18} /></a>
+                <a href="#">
+                  <Facebook size={18} />
+                </a>
+                <a href="#">
+                  <Twitter size={18} />
+                </a>
+                <a href="#">
+                  <Instagram size={18} />
+                </a>
+                <a href="#">
+                  <Github size={18} />
+                </a>
+                <a href="#">
+                  <Linkedin size={18} />
+                </a>
               </div>
             </div>
           </div>

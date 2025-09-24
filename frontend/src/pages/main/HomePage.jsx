@@ -17,22 +17,25 @@ export default function HomePage() {
           }
         });
       },
-      { threshold: 0.12, rootMargin: "0px 0px -10% 0px" }
+      { threshold: 0.12, rootMargin: "0px 0px -10% 0px" },
     );
     revealEls.forEach((el) => io.observe(el));
 
     const statEls = document.querySelectorAll("[data-count-to]");
-    const ioStats = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (!e.isIntersecting) return;
-        const el = e.target;
-        const target = el.getAttribute("data-count-to");
-        if (el.dataset.counted === "1") return;
-        el.dataset.counted = "1";
-        countUp(el, target, 900);
-        ioStats.unobserve(el);
-      });
-    }, { threshold: 0.6 });
+    const ioStats = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          const el = e.target;
+          const target = el.getAttribute("data-count-to");
+          if (el.dataset.counted === "1") return;
+          el.dataset.counted = "1";
+          countUp(el, target, 900);
+          ioStats.unobserve(el);
+        });
+      },
+      { threshold: 0.6 },
+    );
     statEls.forEach((el) => ioStats.observe(el));
 
     const cleanups = [];
@@ -74,17 +77,28 @@ export default function HomePage() {
       dots?.forEach((d, idx) => d.classList.toggle("active", idx === slide));
     };
     let timerId = null;
-    const start = () => { if (!timerId) timerId = setInterval(() => setSlide(slide + 1), 3500); };
-    const stop = () => { if (timerId) { clearInterval(timerId); timerId = null; } };
+    const start = () => {
+      if (!timerId) timerId = setInterval(() => setSlide(slide + 1), 3500);
+    };
+    const stop = () => {
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+    };
     if (track) {
       setSlide(0);
       start();
       section?.addEventListener("mouseenter", stop);
       section?.addEventListener("mouseleave", start);
-      section?.querySelector(".testi-prev")?.addEventListener("click", () => setSlide(slide - 1));
-      section?.querySelector(".testi-next")?.addEventListener("click", () => setSlide(slide + 1));
-      section?.querySelectorAll('.testi-dot').forEach((dot, idx) => {
-        dot.addEventListener('click', () => setSlide(idx));
+      section
+        ?.querySelector(".testi-prev")
+        ?.addEventListener("click", () => setSlide(slide - 1));
+      section
+        ?.querySelector(".testi-next")
+        ?.addEventListener("click", () => setSlide(slide + 1));
+      section?.querySelectorAll(".testi-dot").forEach((dot, idx) => {
+        dot.addEventListener("click", () => setSlide(idx));
       });
     }
 
@@ -149,39 +163,70 @@ export default function HomePage() {
         <div className="container py-5 py-lg-6">
           <div className="row align-items-center g-4 g-lg-5">
             <div className="col-lg-6">
-              <span className="badge text-bg-success rounded-pill mb-3 reveal">New</span>
+              <span className="badge text-bg-success rounded-pill mb-3 reveal">
+                New
+              </span>
               <h1 className="display-5 fw-bold lh-sm mb-3 reveal">
                 Build faster with a crisp, modern UI
               </h1>
               <p className="lead text-secondary mb-4 reveal">
-                A starter home page styled with Bootstrap 5. Clean layout, accessible
-                components, and ready for your brand.
+                A starter home page styled with Bootstrap 5. Clean layout,
+                accessible components, and ready for your brand.
               </p>
               <div className="d-flex gap-2 reveal">
-                <NavLink to="/get-started" className="btn btn-success btn-lg px-4 rounded-pill btn-animate">
+                <NavLink
+                  to="/get-started"
+                  className="btn btn-success btn-lg px-4 rounded-pill btn-animate"
+                >
                   Get Started
                 </NavLink>
-                <NavLink to="/features" className="btn btn-outline-secondary btn-lg px-4 rounded-pill btn-animate">
+                <NavLink
+                  to="/features"
+                  className="btn btn-outline-secondary btn-lg px-4 rounded-pill btn-animate"
+                >
                   Explore Features
                 </NavLink>
               </div>
               <div className="d-flex align-items-center gap-3 mt-4 text-secondary reveal">
                 <div className="d-flex align-items-center gap-2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" />
+                  </svg>
                   No setup hassle
                 </div>
                 <div className="d-flex align-items-center gap-2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" />
+                  </svg>
                   Responsive by default
                 </div>
               </div>
             </div>
             <div className="col-lg-6">
-              <div ref={heroRef} className="ratio ratio-16x9 rounded-4 shadow-sm bg-white border position-relative parallax reveal">
+              <div
+                ref={heroRef}
+                className="ratio ratio-16x9 rounded-4 shadow-sm bg-white border position-relative parallax reveal"
+              >
                 <div className="d-flex flex-column align-items-center justify-content-center h-100 w-100 p-4">
                   <div className="text-center">
-                    <div className="display-6 fw-semibold">Your App Preview</div>
-                    <p className="text-secondary mt-2 mb-0">Swap this for a screenshot or product mockup.</p>
+                    <div className="display-6 fw-semibold">
+                      Your App Preview
+                    </div>
+                    <p className="text-secondary mt-2 mb-0">
+                      Swap this for a screenshot or product mockup.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -189,14 +234,27 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="position-absolute top-0 start-0 w-100 h-100" style={{pointerEvents:'none', background: 'radial-gradient(1200px 600px at 10% -10%, rgba(16,185,129,.15), transparent 60%), radial-gradient(900px 500px at 90% 10%, rgba(59,130,246,.12), transparent 60%)'}}/>
+        <div
+          className="position-absolute top-0 start-0 w-100 h-100"
+          style={{
+            pointerEvents: "none",
+            background:
+              "radial-gradient(1200px 600px at 10% -10%, rgba(16,185,129,.15), transparent 60%), radial-gradient(900px 500px at 90% 10%, rgba(59,130,246,.12), transparent 60%)",
+          }}
+        />
       </section>
 
       <section className="py-4 border-top border-bottom bg-white">
         <div className="container text-center">
           <div className="row row-cols-2 row-cols-md-5 g-3 align-items-center justify-content-center text-secondary opacity-75">
-            {["Acme", "Globe", "Zephyr", "Quanta", "Nimbus"].map((n, i)=> (
-              <div className="col fw-semibold reveal" style={{ transitionDelay: `${i*60}ms` }} key={n}>{n}</div>
+            {["Acme", "Globe", "Zephyr", "Quanta", "Nimbus"].map((n, i) => (
+              <div
+                className="col fw-semibold reveal"
+                style={{ transitionDelay: `${i * 60}ms` }}
+                key={n}
+              >
+                {n}
+              </div>
             ))}
           </div>
         </div>
@@ -206,20 +264,31 @@ export default function HomePage() {
         <div className="container">
           <div className="text-center mb-4 reveal">
             <h2 className="fw-bold">Everything you need to ship</h2>
-            <p className="text-secondary mb-0">Simple building blocks you can rearrange as your product grows.</p>
+            <p className="text-secondary mb-0">
+              Simple building blocks you can rearrange as your product grows.
+            </p>
           </div>
 
           <div className="row g-4 g-lg-4">
             {FEATURES.map((f, idx) => (
-              <div className="col-md-6 col-lg-4 reveal" style={{ transitionDelay: `${idx*80}ms` }} key={f.title}>
+              <div
+                className="col-md-6 col-lg-4 reveal"
+                style={{ transitionDelay: `${idx * 80}ms` }}
+                key={f.title}
+              >
                 <div className="card h-100 shadow-sm border-0 rounded-4 lift glow">
                   <div className="card-body p-4">
-                    <div className="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style={{width:48,height:48, background: f.bg}}>
+                    <div
+                      className="d-inline-flex align-items-center justify-content-center rounded-3 mb-3"
+                      style={{ width: 48, height: 48, background: f.bg }}
+                    >
                       {f.icon}
                     </div>
                     <h5 className="fw-semibold mb-2">{f.title}</h5>
                     <p className="text-secondary mb-3">{f.desc}</p>
-                    <NavLink className="stretched-link link-accent" to={f.to}>Learn more</NavLink>
+                    <NavLink className="stretched-link link-accent" to={f.to}>
+                      Learn more
+                    </NavLink>
                   </div>
                 </div>
               </div>
@@ -232,8 +301,14 @@ export default function HomePage() {
         <div className="container">
           <div className="row align-items-center g-4">
             <div className="col-lg-6 reveal">
-              <h3 className="fw-bold mb-3">Delightful by design, practical in production</h3>
-              <p className="text-secondary mb-4">Built on Bootstrap 5 utilities and components, so you can theme it quickly and keep shipping. Copy the sections you like and remove the rest.</p>
+              <h3 className="fw-bold mb-3">
+                Delightful by design, practical in production
+              </h3>
+              <p className="text-secondary mb-4">
+                Built on Bootstrap 5 utilities and components, so you can theme
+                it quickly and keep shipping. Copy the sections you like and
+                remove the rest.
+              </p>
               <ul className="list-unstyled text-secondary d-grid gap-2">
                 {[
                   "Accessible color contrast & focus states",
@@ -241,7 +316,9 @@ export default function HomePage() {
                   "Works great with React Router",
                 ].map((item) => (
                   <li key={item} className="d-flex align-items-start gap-2">
-                    <span className="mt-1" aria-hidden="true">✅</span>
+                    <span className="mt-1" aria-hidden="true">
+                      ✅
+                    </span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -250,7 +327,11 @@ export default function HomePage() {
             <div className="col-lg-6">
               <div className="row g-3">
                 {STATS.map((s, i) => (
-                  <div className="col-6 reveal" style={{ transitionDelay: `${i*90}ms` }} key={s.label}>
+                  <div
+                    className="col-6 reveal"
+                    style={{ transitionDelay: `${i * 90}ms` }}
+                    key={s.label}
+                  >
                     <div className="p-4 bg-light rounded-4 h-100 border text-center lift">
                       <div className="h2 fw-bold mb-1">
                         <span data-count-to={s.value}>
@@ -273,11 +354,23 @@ export default function HomePage() {
           <div className="d-flex align-items-center justify-content-between mb-3">
             <div>
               <h2 className="fw-bold mb-1">What people say</h2>
-              <p className="text-secondary mb-0">Trusted by teams and indie devs alike</p>
+              <p className="text-secondary mb-0">
+                Trusted by teams and indie devs alike
+              </p>
             </div>
             <div className="d-none d-md-flex gap-2">
-              <button className="btn btn-outline-secondary btn-sm rounded-pill testi-prev testi-ctrl" aria-label="Previous testimonial">‹</button>
-              <button className="btn btn-outline-secondary btn-sm rounded-pill testi-next testi-ctrl" aria-label="Next testimonial">›</button>
+              <button
+                className="btn btn-outline-secondary btn-sm rounded-pill testi-prev testi-ctrl"
+                aria-label="Previous testimonial"
+              >
+                ‹
+              </button>
+              <button
+                className="btn btn-outline-secondary btn-sm rounded-pill testi-next testi-ctrl"
+                aria-label="Next testimonial"
+              >
+                ›
+              </button>
             </div>
           </div>
 
@@ -285,11 +378,20 @@ export default function HomePage() {
             <div className="testi-track" ref={testiTrackRef}>
               {TESTIMONIALS.map((t, i) => (
                 <div className="testi-card" key={i}>
-                  <div className="card h-100 shadow-sm border-0 rounded-4 lift glow reveal" style={{ transitionDelay: `${i*70}ms` }}>
+                  <div
+                    className="card h-100 shadow-sm border-0 rounded-4 lift glow reveal"
+                    style={{ transitionDelay: `${i * 70}ms` }}
+                  >
                     <div className="card-body p-4 d-flex flex-column">
                       <p className="mb-3 testi-quote">{t.quote}</p>
                       <div className="d-flex align-items-center gap-3 mt-auto">
-                        <img src={t.avatar} alt="" width="44" height="44" className="rounded-circle border" />
+                        <img
+                          src={t.avatar}
+                          alt=""
+                          width="44"
+                          height="44"
+                          className="rounded-circle border"
+                        />
                         <div>
                           <div className="fw-semibold">{t.name}</div>
                           <div className="text-secondary small">{t.role}</div>
@@ -304,7 +406,11 @@ export default function HomePage() {
 
           <div className="d-flex justify-content-center gap-2 mt-3">
             {TESTIMONIALS.map((_, i) => (
-              <button key={i} className="testi-dot" aria-label={`Go to slide ${i+1}`}></button>
+              <button
+                key={i}
+                className="testi-dot"
+                aria-label={`Go to slide ${i + 1}`}
+              ></button>
             ))}
           </div>
         </div>
@@ -315,11 +421,24 @@ export default function HomePage() {
           <div className="p-4 p-lg-5 rounded-4 bg-success text-white d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3 reveal">
             <div>
               <h4 className="fw-bold mb-1">Ready to launch?</h4>
-              <p className="mb-0 opacity-90">Start with the basics and iterate quickly. You can always customize later.</p>
+              <p className="mb-0 opacity-90">
+                Start with the basics and iterate quickly. You can always
+                customize later.
+              </p>
             </div>
             <div className="d-flex gap-2">
-              <NavLink to="/get-started" className="btn btn-light rounded-pill px-4 fw-semibold btn-animate">Get Started</NavLink>
-              <NavLink to="/pricing" className="btn btn-outline-light rounded-pill px-4 btn-animate">See Pricing</NavLink>
+              <NavLink
+                to="/get-started"
+                className="btn btn-light rounded-pill px-4 fw-semibold btn-animate"
+              >
+                Get Started
+              </NavLink>
+              <NavLink
+                to="/pricing"
+                className="btn btn-outline-light rounded-pill px-4 btn-animate"
+              >
+                See Pricing
+              </NavLink>
             </div>
           </div>
         </div>
@@ -329,19 +448,37 @@ export default function HomePage() {
         <div className="container">
           <div className="text-center mb-4 reveal">
             <h2 className="fw-bold">Frequently asked questions</h2>
-            <p className="text-secondary">Quick answers to common setup questions.</p>
+            <p className="text-secondary">
+              Quick answers to common setup questions.
+            </p>
           </div>
           <div className="row g-4">
             <div className="col-lg-8 mx-auto">
               <div className="accordion" id="faq">
                 {FAQS.map((q, idx) => (
-                  <div className="accordion-item rounded-4 overflow-hidden mb-3 border reveal" style={{ transitionDelay: `${idx*70}ms` }} key={q.q}>
+                  <div
+                    className="accordion-item rounded-4 overflow-hidden mb-3 border reveal"
+                    style={{ transitionDelay: `${idx * 70}ms` }}
+                    key={q.q}
+                  >
                     <h2 className="accordion-header" id={`h-${idx}`}>
-                      <button className="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target={`#c-${idx}`} aria-expanded="false" aria-controls={`c-${idx}`}>
+                      <button
+                        className="accordion-button collapsed"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target={`#c-${idx}`}
+                        aria-expanded="false"
+                        aria-controls={`c-${idx}`}
+                      >
                         {q.q}
                       </button>
                     </h2>
-                    <div id={`c-${idx}`} className="accordion-collapse collapse" aria-labelledby={`h-${idx}`} data-bs-parent="#faq">
+                    <div
+                      id={`c-${idx}`}
+                      className="accordion-collapse collapse"
+                      aria-labelledby={`h-${idx}`}
+                      data-bs-parent="#faq"
+                    >
                       <div className="accordion-body text-secondary">{q.a}</div>
                     </div>
                   </div>
@@ -362,8 +499,14 @@ const FEATURES = [
     to: "/features#responsive",
     bg: "rgba(16,185,129,.12)",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M3 5h18v6H3V5zm0 8h10v6H3v-6zm12 0h6v6h-6v-6z"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M3 5h18v6H3V5zm0 8h10v6H3v-6zm12 0h6v6h-6v-6z" />
       </svg>
     ),
   },
@@ -373,8 +516,14 @@ const FEATURES = [
     to: "/features#accessibility",
     bg: "rgba(59,130,246,.12)",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-7 7h14v2H5v8H3V9zm16 0v10h-2V9h2z"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M12 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-7 7h14v2H5v8H3V9zm16 0v10h-2V9h2z" />
       </svg>
     ),
   },
@@ -384,8 +533,14 @@ const FEATURES = [
     to: "/features#router",
     bg: "rgba(234,179,8,.15)",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M10 17l5-5-5-5v10z"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M10 17l5-5-5-5v10z" />
       </svg>
     ),
   },
@@ -395,8 +550,14 @@ const FEATURES = [
     to: "/features#cards",
     bg: "rgba(99,102,241,.12)",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M3 7h18v2H3V7zm0 4h10v6H3v-6zm12 0h6v6h-6v-6z"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M3 7h18v2H3V7zm0 4h10v6H3v-6zm12 0h6v6h-6v-6z" />
       </svg>
     ),
   },
@@ -406,8 +567,14 @@ const FEATURES = [
     to: "/features#utilities",
     bg: "rgba(236,72,153,.12)",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z" />
       </svg>
     ),
   },
@@ -417,8 +584,14 @@ const FEATURES = [
     to: "/features#lightweight",
     bg: "rgba(45,212,191,.15)",
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M12 2L2 7l10 5 10-5-10-5zm0 7l10 5-10 5-10-5 10-5z"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M12 2L2 7l10 5 10-5-10-5zm0 7l10 5-10 5-10-5 10-5z" />
       </svg>
     ),
   },
@@ -432,10 +605,30 @@ const STATS = [
 ];
 
 const TESTIMONIALS = [
-  { quote: "This platform has completely transformed our delivery speed.", name: "Alex Rivera", role: "Staff Engineer, Acme", avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Alex" },
-  { quote: "Secure, fast, and reliable — everything our team needs.", name: "Priya Shah", role: "Tech Lead, Nimbus", avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Priya" },
-  { quote: "From mockup to production in days, not weeks.", name: "Daniel Kim", role: "Founder, Zephyr Labs", avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Daniel" },
-  { quote: "Clean components and great docs. 10/10.", name: "Sofia Ramos", role: "Frontend Dev, Quanta", avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Sofia" },
+  {
+    quote: "This platform has completely transformed our delivery speed.",
+    name: "Alex Rivera",
+    role: "Staff Engineer, Acme",
+    avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Alex",
+  },
+  {
+    quote: "Secure, fast, and reliable — everything our team needs.",
+    name: "Priya Shah",
+    role: "Tech Lead, Nimbus",
+    avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Priya",
+  },
+  {
+    quote: "From mockup to production in days, not weeks.",
+    name: "Daniel Kim",
+    role: "Founder, Zephyr Labs",
+    avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Daniel",
+  },
+  {
+    quote: "Clean components and great docs. 10/10.",
+    name: "Sofia Ramos",
+    role: "Frontend Dev, Quanta",
+    avatar: "https://api.dicebear.com/8.x/avataaars/svg?seed=Sofia",
+  },
 ];
 
 const FAQS = [
@@ -455,7 +648,10 @@ const FAQS = [
 
 function countUp(el, targetVal, durationMs) {
   const isNumeric = /^-?\d+(?:\.\d+)?$/.test(targetVal);
-  if (!isNumeric) { el.textContent = targetVal; return; }
+  if (!isNumeric) {
+    el.textContent = targetVal;
+    return;
+  }
   const target = parseFloat(targetVal);
   const decimals = (targetVal.split(".")[1] || "").length;
   const start = performance.now();

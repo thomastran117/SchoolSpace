@@ -147,7 +147,7 @@ export default function ElegantNavbar({
                             {it.label}
                           </NavLink>
                         </li>
-                      )
+                      ),
                     )}
                   </ul>
                 </li>

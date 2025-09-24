@@ -56,7 +56,9 @@ export default function ContactPage() {
                 <i className="bi bi-geo-alt-fill text-success fs-4 me-3"></i>
                 <div>
                   <h6 className="fw-bold mb-0">Office</h6>
-                  <p className="text-muted mb-0">123 Green Street, Ottawa, ON</p>
+                  <p className="text-muted mb-0">
+                    123 Green Street, Ottawa, ON
+                  </p>
                 </div>
               </div>
             </div>

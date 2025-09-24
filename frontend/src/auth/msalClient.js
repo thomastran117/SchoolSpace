@@ -1,10 +1,8 @@
 import { PublicClientApplication } from "@azure/msal-browser";
 
 const MSAL_CLIENT_ID = import.meta.env.VITE_MSAL_CLIENT_ID;
-const MSAL_AUTHORITY =
-  import.meta.env.VITE_MSAL_AUTHORITY;
-const MSAL_REDIRECT_URI =
-  import.meta.env.VITE_MSAL_REDIRECT_URI 
+const MSAL_AUTHORITY = import.meta.env.VITE_MSAL_AUTHORITY;
+const MSAL_REDIRECT_URI = import.meta.env.VITE_MSAL_REDIRECT_URI;
 
 export const msalInstance = new PublicClientApplication({
   auth: {

@@ -19,6 +19,6 @@ export async function verifyGoogleToken(idToken) {
     email: payload?.email,
     name: payload?.name,
     picture: payload?.picture,
-    sub: payload?.sub, 
+    sub: payload?.sub,
   };
 }

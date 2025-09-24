@@ -112,7 +112,11 @@ export default function AboutPage() {
                     src={member.img}
                     alt={member.name}
                     className="rounded-circle mx-auto mb-3"
-                    style={{ width: "120px", height: "120px", objectFit: "cover" }}
+                    style={{
+                      width: "120px",
+                      height: "120px",
+                      objectFit: "cover",
+                    }}
                   />
                   <h5 className="fw-bold">{member.name}</h5>
                   <p className="text-muted">{member.role}</p>
