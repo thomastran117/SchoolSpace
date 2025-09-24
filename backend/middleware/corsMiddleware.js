@@ -1,31 +1,33 @@
 import cors from "cors";
+import logger from "../utility/logger.js";
+import config from "../config/envManager.js";
 
 function normalizeOrigin(o) {
   if (!o) return null;
   let s = o.trim();
-  if (!/^https?:\/\//i.test(s)) s = `http://${s}`;
-  return s.replace(/\/+$/, "");
+  s = s.replace(/\/+$/, "").toLowerCase();
+  return s;
 }
 
-const raw = (process.env.CORS_WHITELIST || "")
+const raw = (config.cors_whitelist)
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 
-if (process.env.FRONTEND_CLIENT && !raw.length) {
-  raw.push(process.env.FRONTEND_CLIENT.trim());
+if (config.frontend_client && !raw.length) {
+  raw.push(config.frontend_client.trim());
 }
 
 const whitelist = new Set(raw.map(normalizeOrigin).filter(Boolean));
-
 const corsOptionsDelegate = (req, cb) => {
   const originHdr = req.header("Origin");
   let isAllowed = !originHdr;
 
   if (originHdr) {
     const norm = normalizeOrigin(originHdr);
-    isAllowed = whitelist.has(norm);
-    if (!isAllowed) {
+    if (whitelist.has(norm)) {
+      isAllowed = true;
+    } else {
       console.warn(
         `[CORS BLOCKED] ${req.method} ${req.originalUrl} from Origin: ${originHdr}`,
       );
@@ -37,6 +39,8 @@ const corsOptionsDelegate = (req, cb) => {
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
     maxAge: 86400,
   });
 };

@@ -4,8 +4,7 @@ import {
   verifyUser,
   signupUserWOVerify,
   verifyMicrosoftIdTokenAndSignIn,
-  startGoogleOAuth,
-  finishGoogleOAuth,
+  loginOrCreateFromGoogle
 } from "../service/authService.js";
 import {
   requireFields,
@@ -13,8 +12,8 @@ import {
   assertAllowed,
 } from "../utility/httpUtility.js";
 import logger from "../utility/logger.js";
-import url from "url";
 import config from "../config/envManager.js";
+import * as googleService from "../service/oauth/googleService.js";
 
 const setTemp = (res, key, val) =>
   res.cookie(key, val, {
@@ -116,70 +115,30 @@ const microsoftVerify = async (req, res, next) => {
   }
 };
 
+const googleVerify = async (req, res, next) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ message: "Google token is required" });
+    }
+
+    const googleUser = await googleService.verifyGoogleToken(token);
+
+    if (!googleUser?.email) {
+      return res.status(401).json({ message: "Invalid Google token" });
+    }
+
+    const appToken = await loginOrCreateFromGoogle(googleUser);
+
+    return res.status(200).json({ token: appToken });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
-};
-
-const googleStart = async (_req, res, next) => {
-  try {
-    if (!config.isGoogleEnabled()) {
-      logger.warn("Google OAuth is not avaliable");
-      httpError(
-        503,
-        "Google OAuth is not avaliable. Please use another login method",
-      );
-    }
-    const { url: authUrl, state, codeVerifier } = await startGoogleOAuth();
-    setTemp(res, "g_pkce", JSON.stringify({ state, codeVerifier }));
-    res.redirect(authUrl);
-  } catch (err) {
-    next(err);
-  }
-};
-
-const googleCallback = async (req, res, next) => {
-  try {
-    if (!config.isGoogleEnabled()) {
-      logger.warn("Google OAuth is not avaliable");
-      httpError(
-        503,
-        "Google OAuth is not avaliable. Please use another login method",
-      );
-    }
-    const params = url.parse(req.url, true).query;
-
-    if (!params.code) {
-      httpError(400, "Missing code");
-    }
-    if (wasGCodeRedeemed(req, params.code)) {
-      httpError(400, "Code already used");
-    }
-
-    const pkceRaw = popTemp(req, res, "g_pkce");
-    if (!pkceRaw) {
-      httpError(400, "PKCE data missing (cookie expired?)");
-    }
-    const { state, codeVerifier } = JSON.parse(pkceRaw);
-
-    const { token, role } = await finishGoogleOAuth(params, {
-      state,
-      codeVerifier,
-    });
-
-    const redirect = new URL("/auth/signed-in", process.env.FRONTEND_CLIENT);
-    redirect.hash = `token=${encodeURIComponent(token)}&role=${encodeURIComponent(role)}`;
-    return res.redirect(redirect.toString());
-  } catch (err) {
-    next(err);
-  }
-};
-
-const wasGCodeRedeemed = (req, code) => {
-  if (!req.session) return false;
-  if (req.session.lastGCode === code) return true;
-  req.session.lastGCode = code;
-  return false;
 };
 
 export {
@@ -187,7 +146,5 @@ export {
   signup,
   microsoftVerify,
   verify_email,
-  updateRole,
-  googleStart,
-  googleCallback,
+  googleVerify
 };
