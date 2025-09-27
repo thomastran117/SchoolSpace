@@ -7,7 +7,6 @@ import AboutPage from "./pages/main/AboutPage";
 import PricingPage from "./pages/main/PricingPage";
 import TermsOfService from "./pages/main/TermAndConditionPage";
 import PrivacyPage from "./pages/main/PrivacyPage";
-import SignedInPage from "./pages/auth/SignedInPage";
 import FeaturesPage from "./pages/main/FeaturePage";
 import ServicesPage from "./pages/main/ServicePage";
 import ContactPage from "./pages/main/ContactPage";
@@ -29,7 +28,6 @@ function App() {
         <Route path="/term-and-service" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/auth" element={<AuthPage />} />
-        <Route path="/auth/signed-in" element={<SignedInPage />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
       </Routes>
       <Footer />

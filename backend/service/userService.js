@@ -84,8 +84,12 @@ const update_role = async (id, role) => {
     role: role,
   });
 
-  const { accessToken, refreshToken } = generateTokens(updated.id, updated.email, updated.role);
-  
+  const { accessToken, refreshToken } = generateTokens(
+    updated.id,
+    updated.email,
+    updated.role,
+  );
+
   return {
     token,
     role: updated.role,

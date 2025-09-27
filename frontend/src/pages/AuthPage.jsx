@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { msalInstance, microsoftScopes, waitForMsal } from "../auth/msalClient";
-import "../styles/auth.css"
+import "../styles/auth.css";
 export default function AuthPage() {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
@@ -46,10 +46,6 @@ export default function AuthPage() {
       return "Enter a valid email.";
     if (!form.password || form.password.length < 6)
       return "Password must be at least 6 characters.";
-    if (isSignup) {
-      if (!form.name.trim()) return "Enter your name.";
-      if (form.password !== form.confirm) return "Passwords do not match.";
-    }
     return "";
   };
 
@@ -222,41 +218,35 @@ export default function AuthPage() {
 
               {/* Auth form */}
               <form onSubmit={onSubmit} className="d-grid gap-3">
-                {isSignup && (
-                  <div>
-                    <label htmlFor="name" className="form-label">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="name"
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                )}
                 <div>
                   <label htmlFor="email" className="form-label">
                     Email
                   </label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    required
-                  />
+                  <div className="input-group input-with-icon">
+                    <span className="input-group-text">
+                      <i className="bi bi-envelope"></i>
+                    </span>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="email"
+                      name="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </div>
                 </div>
+
                 <div>
                   <label htmlFor="password" className="form-label">
                     Password
                   </label>
-                  <div className="input-group">
+                  <div className="input-group input-with-icon">
+                    <span className="input-group-text">
+                      <i className="bi bi-lock"></i>
+                    </span>
                     <input
                       type={showPw ? "text" : "password"}
                       className="form-control"
@@ -264,63 +254,21 @@ export default function AuthPage() {
                       name="password"
                       value={form.password}
                       onChange={handleChange}
+                      placeholder="Enter your password"
                       minLength={6}
                       required
                     />
                     <button
-                      className="btn btn-outline-secondary"
+                      className="btn btn-outline-secondary toggle-password"
                       type="button"
                       onClick={() => setShowPw((s) => !s)}
                     >
-                      {showPw ? "Hide" : "Show"}
+                      <i
+                        className={`bi ${showPw ? "bi-eye-slash" : "bi-eye"}`}
+                      ></i>
                     </button>
                   </div>
                 </div>
-                {isSignup && (
-                  <div>
-                    <label htmlFor="confirm" className="form-label">
-                      Confirm Password
-                    </label>
-                    <input
-                      type={showPw ? "text" : "password"}
-                      className="form-control"
-                      id="confirm"
-                      name="confirm"
-                      value={form.confirm}
-                      onChange={handleChange}
-                      minLength={6}
-                      required
-                    />
-                  </div>
-                )}
-                {!isSignup && (
-                  <div className="d-flex justify-content-between align-items-center small">
-                    <div className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="remember"
-                      />
-                      <label className="form-check-label" htmlFor="remember">
-                        Remember me
-                      </label>
-                    </div>
-                    <NavLink to="/forgot" className="text-decoration-none">
-                      Forgot password?
-                    </NavLink>
-                  </div>
-                )}
-                <button
-                  className="btn btn-success w-100 btn-submit"
-                  type="submit"
-                  disabled={loading}
-                >
-                  {loading
-                    ? "Please wait…"
-                    : isSignup
-                      ? "Create Account"
-                      : "Sign In"}
-                </button>
               </form>
 
               <div className="text-center mt-3">

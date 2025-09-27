@@ -34,7 +34,11 @@ const loginUser = async (email, password) => {
     httpError(401, "Invalid credentials");
   }
 
-  const { accessToken, refreshToken } = generateTokens(user.id, user.email, user.role);
+  const { accessToken, refreshToken } = generateTokens(
+    user.id,
+    user.email,
+    user.role,
+  );
   return { accessToken, refreshToken, role: user.role, id: user.id };
 };
 
@@ -154,7 +158,11 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
     });
   }
 
-  const { accessToken, refreshToken } = generateTokens(user.id, user.email, user.role);
+  const { accessToken, refreshToken } = generateTokens(
+    user.id,
+    user.email,
+    user.role,
+  );
   return { accessToken, refreshToken, role: user.role, id: user.id };
 };
 
@@ -181,7 +189,11 @@ const loginOrCreateFromGoogle = async (googleToken) => {
     });
   }
 
-  const { accessToken, refreshToken } = generateTokens(user.id, user.email, user.role);
+  const { accessToken, refreshToken } = generateTokens(
+    user.id,
+    user.email,
+    user.role,
+  );
   return { accessToken, refreshToken, role: user.role, id: user.id };
 };
 

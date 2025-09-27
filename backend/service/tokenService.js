@@ -77,7 +77,11 @@ const rotateRefreshToken = async (oldToken) => {
 
   await redis.del(`refresh:${decoded.jti}`);
 
-  const accessToken = createAccessToken(decoded.userId, decoded.email, decoded.role);
+  const accessToken = createAccessToken(
+    decoded.userId,
+    decoded.email,
+    decoded.role,
+  );
   const refreshToken = createRefreshToken(decoded.userId, decoded.exp);
 
   const newDecoded = jwt.decode(refreshToken);
@@ -93,5 +97,5 @@ export {
   validateRefreshToken,
   getUserPayload,
   generateTokens,
-  rotateRefreshToken
+  rotateRefreshToken,
 };

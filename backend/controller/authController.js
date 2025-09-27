@@ -39,7 +39,7 @@ const login = async (req, res, next) => {
 
     res
       .status(200)
-      .json({ message: "Login successful", accessToken, role, email, id });
+      .json({ message: "Login successful", accessToken, role, email });
   } catch (err) {
     next(err);
   }
@@ -113,7 +113,7 @@ const microsoftVerify = async (req, res, next) => {
 
     res
       .status(200)
-      .json({ message: "Login successful", accessToken, role, email, id });
+      .json({ message: "Login successful", accessToken, role, email });
   } catch (err) {
     next(err);
   }
@@ -138,7 +138,7 @@ const googleVerify = async (req, res, next) => {
 
     res
       .status(200)
-      .json({ message: "Login successful", accessToken, role, email, id });
+      .json({ message: "Login successful", accessToken, role, email });
   } catch (err) {
     next(err);
   }
