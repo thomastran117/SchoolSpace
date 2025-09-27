@@ -1,7 +1,6 @@
 import prisma from "../resource/prisma.js";
 import { httpError } from "../utility/httpUtility.js";
-import { createToken } from "./tokenService.js";
-
+import { generateTokens } from "./tokenService.js";
 const get_students_by_course = async (courseId) => {
   const course = await prisma.course.findUnique({
     where: { id: courseId },
@@ -85,7 +84,8 @@ const update_role = async (id, role) => {
     role: role,
   });
 
-  const token = await createToken(updated.id, updated.email, updated.role);
+  const { accessToken, refreshToken } = generateTokens(updated.id, updated.email, updated.role);
+  
   return {
     token,
     role: updated.role,

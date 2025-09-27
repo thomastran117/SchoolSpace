@@ -2,8 +2,9 @@ import bcrypt from "bcrypt";
 import prisma from "../resource/prisma.js";
 import {
   createAccessToken,
-  createRefreshToken,
   validateRefreshToken,
+  generateTokens,
+  rotateRefreshToken,
 } from "./tokenService.js";
 import redis from "../resource/redis.js";
 import {
@@ -33,9 +34,8 @@ const loginUser = async (email, password) => {
     httpError(401, "Invalid credentials");
   }
 
-  const token = await createAccessToken(user.id, user.email, user.role);
-  const refreshToken = createRefreshToken(user.id);
-  return { accessToken: token, refreshToken, role: user.role, id: user.id };
+  const { accessToken, refreshToken } = generateTokens(user.id, user.email, user.role);
+  return { accessToken, refreshToken, role: user.role, id: user.id };
 };
 
 const signupUser = async (email, password, role) => {
@@ -154,9 +154,8 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
     });
   }
 
-  const token = await createAccessToken(user.id, user.email, user.role);
-  const refreshToken = createRefreshToken(user.id);
-  return { accessToken: token, refreshToken, role: user.role, id: user.id };
+  const { accessToken, refreshToken } = generateTokens(user.id, user.email, user.role);
+  return { accessToken, refreshToken, role: user.role, id: user.id };
 };
 
 const loginOrCreateFromGoogle = async (googleToken) => {
@@ -182,9 +181,8 @@ const loginOrCreateFromGoogle = async (googleToken) => {
     });
   }
 
-  const token = await createAccessToken(user.id, user.email, user.role);
-  const refreshToken = createRefreshToken(user.id);
-  return { accessToken: token, refreshToken, role: user.role, id: user.id };
+  const { accessToken, refreshToken } = generateTokens(user.id, user.email, user.role);
+  return { accessToken, refreshToken, role: user.role, id: user.id };
 };
 
 const signupUserWOVerify = async (email, password, role) => {
@@ -202,16 +200,26 @@ const signupUserWOVerify = async (email, password, role) => {
   return user;
 };
 
-const generateRefreshToken = async (token) => {
-  const decoded = validateRefreshToken(token);
+const generateRefreshToken = async (oldToken, res) => {
+  const decoded = validateRefreshToken(oldToken);
   if (!decoded) {
     httpError(401, "Invalid refresh token");
   }
+
   const newAccessToken = createAccessToken(
     decoded.userId,
     decoded.email,
     decoded.role,
   );
+  const newRefreshToken = rotateRefreshToken(decoded.userId, decoded.exp);
+
+  res.cookie("refreshToken", newRefreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
   return res.json({ accessToken: newAccessToken });
 };
 

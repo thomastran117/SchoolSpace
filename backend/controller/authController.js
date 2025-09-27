@@ -103,12 +103,16 @@ const microsoftVerify = async (req, res, next) => {
     const { token, role, email, id } =
       await verifyMicrosoftIdTokenAndSignIn(idToken);
 
-    return res.status(200).json({
-      token,
-      role,
-      email,
-      id,
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    res
+      .status(200)
+      .json({ message: "Login successful", accessToken, role, email, id });
   } catch (err) {
     next(err);
   }
@@ -124,12 +128,16 @@ const googleVerify = async (req, res, next) => {
     const { token, role, email, id } =
       await loginOrCreateFromGoogle(googleToken);
 
-    return res.status(200).json({
-      token,
-      role,
-      email,
-      id,
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    res
+      .status(200)
+      .json({ message: "Login successful", accessToken, role, email, id });
   } catch (err) {
     next(err);
   }
