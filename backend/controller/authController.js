@@ -14,6 +14,7 @@ import {
 } from "../utility/httpUtility.js";
 import logger from "../utility/logger.js";
 import config from "../config/envManager.js";
+import redis from "../resource/redis.js";
 
 const login = async (req, res, next) => {
   try {
@@ -154,9 +155,27 @@ const newAccessToken = async (req, res, next) => {
   }
 };
 
-const logout = async (req, res, next) => {
-  res.clearCookie("refreshToken");
-  return res.json({ message: "Logged out" });
+const logout = async (req, res) => {
+  try {
+    const token = req.cookies.refreshToken;
+    if (!token) {
+      return res.status(200).json({ message: "Already logged out" });
+    }
+
+    const decoded = await validateRefreshToken(token);
+
+    await redis.del(`refresh:${decoded.jti}`);
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    return httpError(401, "Invalid refresh token");
+  }
 };
 
 const validateEmail = (email) => {

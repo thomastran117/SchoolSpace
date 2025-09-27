@@ -71,6 +71,7 @@ router.get("/refresh", newAccessToken);
  * @description Clears refresh token
  * @access Public
  */
-router.get("/logout", logout)
+router.post("/logout", logout);
+
 // Export the router
 export default router;
