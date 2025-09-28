@@ -52,7 +52,6 @@ export async function fetchWithAuth(input, init = {}) {
   });
 
   if (response.status === 401) {
-    // Only one refresh at a time
     if (!refreshPromise) {
       refreshPromise = refreshToken(state).finally(() => {
         refreshPromise = null;
