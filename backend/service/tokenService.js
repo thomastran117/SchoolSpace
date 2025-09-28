@@ -159,14 +159,19 @@ const validateVerifyToken = async (token) => {
   return { email, password: passwordHash, role };
 };
 
+const logoutToken = async (token) => {
+  const decoded = await validateRefreshToken(token);
+
+  await redis.del(`refresh:${decoded.jti}`);
+
+  return true;
+};
+
 export {
-  createAccessToken,
-  createRefreshToken,
-  validateAccessToken,
-  validateRefreshToken,
   getUserPayload,
   generateTokens,
   rotateRefreshToken,
   validateVerifyToken,
   createVerifyToken,
+  logoutToken
 };

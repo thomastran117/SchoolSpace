@@ -6,6 +6,7 @@ import {
   verifyMicrosoftIdTokenAndSignIn,
   loginOrCreateFromGoogle,
   generateNewTokens,
+  authLogout
 } from "../service/authService.js";
 import {
   requireFields,
@@ -174,9 +175,7 @@ const logout = async (req, res) => {
       return res.status(200).json({ message: "Already logged out" });
     }
 
-    const decoded = await validateRefreshToken(token);
-
-    await redis.del(`refresh:${decoded.jti}`);
+    await authLogout(token);
 
     res.clearCookie("refreshToken", {
       httpOnly: true,
@@ -186,7 +185,8 @@ const logout = async (req, res) => {
 
     return res.json({ message: "Logged out successfully" });
   } catch (err) {
-    return httpError(401, "Invalid refresh token");
+    logger.debug(err);
+    next(err);
   }
 };
 

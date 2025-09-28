@@ -4,6 +4,7 @@ import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import config from "../configs/envManager";
 
 export default function ElegantNavbar({
   brand = { name: "Brand", href: "/" },
@@ -39,7 +40,7 @@ export default function ElegantNavbar({
 
   const handleLogout = async () => {
     try {
-      await axios.post("/api/auth/logout", {}, { withCredentials: true });
+      await axios.post(`${config.backend_url}/auth/logout`, {}, { withCredentials: true });
     } catch (err) {
       console.error("Logout failed", err);
     } finally {

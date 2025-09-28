@@ -13,6 +13,7 @@ import {
   createVerifyToken,
   generateTokens,
   rotateRefreshToken,
+  logoutToken,
 } from "./tokenService.js";
 
 // Email services
@@ -176,6 +177,10 @@ const generateNewTokens = async (oldToken) => {
   return { accessToken, refreshToken };
 };
 
+const authLogout = async (token) => {
+  return logoutToken(token);
+};
+
 export {
   signupUser,
   loginUser,
@@ -184,4 +189,5 @@ export {
   verifyMicrosoftIdTokenAndSignIn,
   loginOrCreateFromGoogle,
   signupUserWOVerify,
+  authLogout,
 };
