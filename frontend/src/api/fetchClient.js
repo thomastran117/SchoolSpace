@@ -26,7 +26,7 @@ async function refreshToken(state) {
         token: accessToken,
         role: data.user?.role || state.auth.role,
         email: data.user?.email || state.auth.email,
-      })
+      }),
     );
 
     return accessToken;

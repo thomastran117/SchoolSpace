@@ -29,7 +29,7 @@ export default function VerifyPage() {
         {
           method: "GET",
           credentials: "include",
-        }
+        },
       );
 
       if (!resp.ok) {
@@ -91,8 +91,8 @@ export default function VerifyPage() {
             statusType === "success"
               ? "text-success"
               : statusType === "loading"
-              ? "text-secondary"
-              : "text-danger"
+                ? "text-secondary"
+                : "text-danger"
           }`}
         >
           {status}

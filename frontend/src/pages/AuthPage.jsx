@@ -65,17 +65,16 @@ export default function AuthPage() {
       setLoading(true);
       setError("");
 
-    const payload = isSignup
-      ? {
-          email: form.email.trim(),
-          password: form.password,
-          role: form.role,
-        }
-      : {
-          email: form.email.trim(),
-          password: form.password,
-        };
-
+      const payload = isSignup
+        ? {
+            email: form.email.trim(),
+            password: form.password,
+            role: form.role,
+          }
+        : {
+            email: form.email.trim(),
+            password: form.password,
+          };
 
       const endpoint = isSignup
         ? `${config.backend_url}/auth/signup`

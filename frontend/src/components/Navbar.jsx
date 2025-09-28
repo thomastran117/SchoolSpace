@@ -1,4 +1,4 @@
-import { clearCredentials } from "../stores/authSlice"; 
+import { clearCredentials } from "../stores/authSlice";
 import "../styles/navbar.css";
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -40,7 +40,11 @@ export default function ElegantNavbar({
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${config.backend_url}/auth/logout`, {}, { withCredentials: true });
+      await axios.post(
+        `${config.backend_url}/auth/logout`,
+        {},
+        { withCredentials: true },
+      );
     } catch (err) {
       console.error("Logout failed", err);
     } finally {
@@ -129,7 +133,7 @@ export default function ElegantNavbar({
                           {it.label}
                         </NavLink>
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </li>
@@ -170,7 +174,7 @@ export default function ElegantNavbar({
                 >
                   <img
                     src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      email || "U"
+                      email || "U",
                     )}&background=16a34a&color=fff`}
                     alt="avatar"
                     className="rounded-circle"

@@ -6,7 +6,7 @@ import {
   verifyMicrosoftIdTokenAndSignIn,
   loginOrCreateFromGoogle,
   generateNewTokens,
-  authLogout
+  authLogout,
 } from "../service/authService.js";
 import {
   requireFields,

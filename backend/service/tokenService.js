@@ -173,5 +173,5 @@ export {
   rotateRefreshToken,
   validateVerifyToken,
   createVerifyToken,
-  logoutToken
+  logoutToken,
 };

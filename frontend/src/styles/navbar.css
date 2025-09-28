@@ -34,7 +34,9 @@
   padding-left: 1rem;
   padding-right: 1rem;
   box-shadow: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .navbar .form-control:focus {
