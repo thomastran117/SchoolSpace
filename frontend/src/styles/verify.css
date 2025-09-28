@@ -1,0 +1,16 @@
+.verify-card {
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  max-width: 450px;
+}
+
+.spin {
+  display: inline-block;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}

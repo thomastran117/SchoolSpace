@@ -101,7 +101,7 @@ const microsoftVerify = async (req, res, next) => {
     const { id_token: idToken } = req.body || {};
     if (!idToken) return httpError(400, "Missing id_token");
 
-    const { token, role, email, id } =
+    const { accessToken, refreshToken, role, email, id } =
       await verifyMicrosoftIdTokenAndSignIn(idToken);
 
     res.cookie("refreshToken", refreshToken, {
@@ -126,7 +126,7 @@ const googleVerify = async (req, res, next) => {
       throw httpError(400, "Google token missing");
     }
 
-    const { token, role, email, id } =
+    const { accessToken, refreshToken, role, email, id } =
       await loginOrCreateFromGoogle(googleToken);
 
     res.cookie("refreshToken", refreshToken, {
@@ -140,6 +140,7 @@ const googleVerify = async (req, res, next) => {
       .status(200)
       .json({ message: "Login successful", accessToken, role, email });
   } catch (err) {
+    logger.error(err);
     next(err);
   }
 };

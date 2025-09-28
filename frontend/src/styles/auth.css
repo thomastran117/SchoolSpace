@@ -29,31 +29,8 @@
 }
 
 /* Form section */
-/* Auth form fade/slide transition */
 .auth-form {
-  position: relative;
-}
-
-.auth-form form {
-  opacity: 1;
-  transform: translateY(0);
-  transition: all 0.4s ease;
-}
-
-.auth-form form.fade-exit {
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
-}
-
-.auth-form form.fade-enter {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.auth-form form.fade-enter-active {
-  opacity: 1;
-  transform: translateY(0);
+  padding: 2.5rem 2.75rem;
 }
 
 .auth-title {
@@ -67,7 +44,7 @@
   font-size: 1rem;
   margin-top: 0.25rem;
 }
-/* Input group with icons */
+
 .input-with-icon .input-group-text {
   background: #f9fafb;
   border: 1px solid #e5e7eb;

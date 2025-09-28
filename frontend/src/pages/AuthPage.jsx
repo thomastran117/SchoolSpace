@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { msalInstance, microsoftScopes, waitForMsal } from "../auth/msalClient";
+import { useDispatch } from "react-redux";
+import config from "../configs/envManager";
+import { setCredentials } from "../stores/authSlice";
 import "../styles/auth.css";
+
 export default function AuthPage() {
+  const dispatch = useDispatch();
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
-    name: "",
     email: "",
     password: "",
-    confirm: "",
+    role: "student",
   });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,18 +60,26 @@ export default function AuthPage() {
       setError(v);
       return;
     }
+
     try {
       setLoading(true);
       setError("");
-      const payload = {
-        name: form.name.trim(),
-        email: form.email.trim(),
-        password: form.password,
-      };
+
+    const payload = isSignup
+      ? {
+          email: form.email.trim(),
+          password: form.password,
+          role: form.role,
+        }
+      : {
+          email: form.email.trim(),
+          password: form.password,
+        };
+
 
       const endpoint = isSignup
-        ? "http://localhost:8040/api/auth/signup"
-        : "http://localhost:8040/api/auth/login";
+        ? `${config.backend_url}/auth/signup`
+        : `${config.backend_url}/auth/login`;
 
       const resp = await fetch(endpoint, {
         method: "POST",
@@ -81,8 +93,18 @@ export default function AuthPage() {
         throw new Error(msg || `Request failed (${resp.status})`);
       }
 
-      const data = await resp.json();
-      console.log("Auth success:", data);
+      if (isSignup) {
+        alert("Signup successful: ");
+      } else {
+        const data = await resp.json();
+        dispatch(
+          setCredentials({
+            token: data.accessToken,
+            email: data.user,
+            role: data.role,
+          }),
+        );
+      }
     } catch (err) {
       setError(err?.message || "Something went wrong.");
     } finally {
@@ -92,7 +114,7 @@ export default function AuthPage() {
 
   const switchMode = () => {
     setMode(isSignup ? "login" : "signup");
-    setForm({ name: "", email: "", password: "", confirm: "" });
+    setForm({ email: "", password: "", role: "student" });
     setError("");
     setShowPw(false);
   };
@@ -106,7 +128,7 @@ export default function AuthPage() {
         throw new Error("Google Identity Services not loaded");
 
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      const redirectUri = "http://localhost:3040/auth/callback";
+      const redirectUri = `${config.frontend_url}/auth/callback`;
       const scope = "openid email profile";
 
       const params = new URLSearchParams({
@@ -142,23 +164,26 @@ export default function AuthPage() {
       if (!idToken)
         throw new Error("Microsoft sign-in failed: missing id_token");
 
-      const resp = await fetch(
-        "http://localhost:8040/api/auth/microsoft/verify",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ id_token: idToken }),
-        },
-      );
+      const res = await fetch(`${config.backend_url}/auth/microsoft/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ id_token: idToken }),
+      });
 
-      if (!resp.ok) {
-        const msg = await resp.text();
-        throw new Error(msg || `Verify failed (${resp.status})`);
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || `Verify failed (${res.status})`);
       }
 
-      const data = await resp.json();
-      console.log("Microsoft OAuth success:", data);
+      const data = await res.json();
+      dispatch(
+        setCredentials({
+          token: data.accessToken,
+          email: data.user,
+          role: data.role,
+        }),
+      );
     } catch (err) {
       setError(err?.message || "Microsoft sign-in failed.");
     } finally {
@@ -269,6 +294,38 @@ export default function AuthPage() {
                     </button>
                   </div>
                 </div>
+
+                {isSignup && (
+                  <div>
+                    <label htmlFor="role" className="form-label">
+                      Role
+                    </label>
+                    <div className="input-group input-with-icon">
+                      <span className="input-group-text">
+                        <i className="bi bi-person-badge"></i>
+                      </span>
+                      <select
+                        id="role"
+                        name="role"
+                        className="form-select"
+                        value={form.role}
+                        onChange={handleChange}
+                      >
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="assistant">Assistant</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn btn-primary w-100 mt-3"
+                  disabled={loading}
+                >
+                  {loading ? "Processing..." : isSignup ? "Sign Up" : "Login"}
+                </button>
               </form>
 
               <div className="text-center mt-3">
