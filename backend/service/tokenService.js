@@ -3,6 +3,7 @@ import { httpError } from "../utility/httpUtility.js";
 import config from "../config/envManager.js";
 import { v4 as uuidv4 } from "uuid";
 import redis from "../resource/redis.js";
+import prisma from "../resource/prisma.js";
 
 const { jwt_secret: JWT_SECRET, jwt_secret_2: JWT_SECRET_2 } = config;
 
@@ -14,15 +15,11 @@ const createAccessToken = (userId, email, role) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_EXPIRY });
 };
 
-const createRefreshToken = (userId, exp) => {
+const createRefreshToken = (userId) => {
   const jti = uuidv4();
   const payload = { userId, jti };
 
-  const options = exp
-    ? { expiresIn: Math.floor(exp - Date.now() / 1000) }
-    : { expiresIn: REFRESH_EXPIRY };
-
-  return jwt.sign(payload, JWT_SECRET_2, options);
+  return jwt.sign(payload, JWT_SECRET_2, { expiresIn: REFRESH_EXPIRY });
 };
 
 const saveRefreshToken = async (jti, userId, exp) => {
@@ -74,18 +71,17 @@ const generateTokens = async (id, email, role) => {
 
 const rotateRefreshToken = async (oldToken) => {
   const decoded = await validateRefreshToken(oldToken);
+  if (!decoded) httpError(401, "Invalid refresh token");
 
   await redis.del(`refresh:${decoded.jti}`);
+  const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+  if (!user) httpError(401, "User not found");
 
-  const accessToken = createAccessToken(
-    decoded.userId,
-    decoded.email,
-    decoded.role,
-  );
-  const refreshToken = createRefreshToken(decoded.userId, decoded.exp);
-
+  const accessToken = createAccessToken(user.id, user.email, user.role);
+  const refreshToken = createRefreshToken(user.id);
+  
   const newDecoded = jwt.decode(refreshToken);
-  await saveRefreshToken(newDecoded.jti, decoded.userId, newDecoded.exp);
+  await saveRefreshToken(newDecoded.jti, newDecoded.userId, newDecoded.exp);
 
   return { accessToken, refreshToken };
 };

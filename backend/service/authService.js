@@ -17,6 +17,7 @@ import { httpError } from "../utility/httpUtility.js";
 import config from "../config/envManager.js";
 import { verifyMicrosoftIdToken } from "./oauth/microsoftService.js";
 import * as googleService from "./oauth/googleService.js";
+import logger from "../utility/logger.js";
 
 const { frontend_client: FRONTEND_CLIENT, jwt_secret_2: JWT_SECRET_2 } = config;
 
@@ -29,6 +30,9 @@ const loginUser = async (email, password) => {
     httpError(401, "Invalid credentials");
   }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    logger.info(hashedPassword)
   const passwordMatches = await bcrypt.compare(password, user.password);
   if (!passwordMatches) {
     httpError(401, "Invalid credentials");
@@ -70,11 +74,21 @@ const signupUser = async (email, password, role) => {
 };
 
 const verifyUser = async (token) => {
-  const payload = jwt.verify(token, JWT_SECRET_2);
+  let payload;
+  try {
+    payload = jwt.verify(token, JWT_SECRET_2);
+  } catch (err) {
+    if (err.name === "JsonWebTokenError") {
+      httpError(400, "Invalid or malformed token");
+    }
+    if (err.name === "TokenExpiredError") {
+      httpError(400, "Token expired");
+    }
+    throw err;
+  }
+
   if (payload.purpose !== "email-verify") {
-    const error = new Error("Invalid token purpose");
-    error.statusCode = 400;
-    throw error;
+    httpError(400, "Invalid token purpose");
   }
 
   let pendingStr;
@@ -118,6 +132,7 @@ const verifyUser = async (token) => {
     await redis.setex(`used:${payload.jti}`, 24 * 60 * 60, "1");
   }
 };
+
 
 const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
   const claims = await verifyMicrosoftIdToken(idToken);
@@ -213,34 +228,17 @@ const signupUserWOVerify = async (email, password, role) => {
   return user;
 };
 
-const generateRefreshToken = async (oldToken, res) => {
-  const decoded = validateRefreshToken(oldToken);
-  if (!decoded) {
-    httpError(401, "Invalid refresh token");
-  }
+const generateNewTokens = async (oldToken) => {
+  const { accessToken, refreshToken } = await rotateRefreshToken(oldToken);
 
-  const newAccessToken = createAccessToken(
-    decoded.userId,
-    decoded.email,
-    decoded.role,
-  );
-  const newRefreshToken = rotateRefreshToken(decoded.userId, decoded.exp);
-
-  res.cookie("refreshToken", newRefreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
-
-  return res.json({ accessToken: newAccessToken });
+  return { accessToken, refreshToken };
 };
 
 export {
   signupUser,
   loginUser,
   verifyUser,
-  generateRefreshToken,
+  generateNewTokens,
   verifyMicrosoftIdTokenAndSignIn,
   loginOrCreateFromGoogle,
   signupUserWOVerify,

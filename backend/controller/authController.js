@@ -5,7 +5,7 @@ import {
   signupUserWOVerify,
   verifyMicrosoftIdTokenAndSignIn,
   loginOrCreateFromGoogle,
-  generateRefreshToken,
+  generateNewTokens,
 } from "../service/authService.js";
 import {
   requireFields,
@@ -32,9 +32,10 @@ const login = async (req, res, next) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
 
     res
@@ -106,9 +107,10 @@ const microsoftVerify = async (req, res, next) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
 
     res
@@ -131,16 +133,16 @@ const googleVerify = async (req, res, next) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: false,
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
 
     res
       .status(200)
       .json({ message: "Login successful", accessToken, role, email });
   } catch (err) {
-    logger.error(err);
     next(err);
   }
 };
@@ -148,8 +150,17 @@ const googleVerify = async (req, res, next) => {
 const newAccessToken = async (req, res, next) => {
   try {
     const token = req.cookies.refreshToken;
-    if (!token) return httpError(401, "Misisng refresh token");
-    const accessToken = await generateRefreshToken(token);
+    if (!token) return httpError(401, "Missing refresh token");
+    const { accessToken, refreshToken } = await generateNewTokens(token);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+
     return res.json({ accessToken: accessToken });
   } catch (err) {
     next(err);

@@ -12,7 +12,8 @@ export default function ElegantNavbar({
     label: "More",
     items: [
       { label: "Docs", to: "/docs" },
-      { label: "Blog", to: "/blog" },
+      { label: "Dashboard", to: "/dashboard" },
+      { label: "Login", to: "/auth" },
       { divider: true },
       { label: "Support", to: "/support" },
     ],

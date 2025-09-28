@@ -7,7 +7,7 @@ import ContactPage from "../pages/main/ContactPage";
 import FaqPage from "../pages/main/FrequentlyAskedQuestionPage";
 import TermsOfService from "../pages/main/TermAndConditionPage";
 import PrivacyPage from "../pages/main/PrivacyPage";
-
+import Dashboard from "../pages/TestPage";
 const mainRoutes = [
   { path: "/", element: <HomePage /> },
   { path: "/about", element: <AboutPage /> },
@@ -18,6 +18,7 @@ const mainRoutes = [
   { path: "/faq", element: <FaqPage /> },
   { path: "/term-and-service", element: <TermsOfService /> },
   { path: "/privacy", element: <PrivacyPage /> },
+  { path: "/dashboard", element: <Dashboard /> },
 ];
 
 export default mainRoutes;
