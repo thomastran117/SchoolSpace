@@ -133,11 +133,11 @@ const newAccessToken = async (req, res, next) => {
   try {
     const token = req.cookies.refreshToken;
     if (!token) return httpError(401, "Missing refresh token");
-    const { accessToken, refreshToken } = await generateNewTokens(token);
+    const { accessToken, refreshToken, user } = await generateNewTokens(token);
 
     sendCookie(res, refreshToken);
 
-    return res.json({ accessToken: accessToken });
+    return res.json({ accessToken: accessToken, role: user.role, email: user.email });
   } catch (err) {
     next(err);
   }

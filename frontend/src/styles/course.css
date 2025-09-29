@@ -4,7 +4,7 @@
 
 .clickable-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 0.75rem 1.25rem rgba(25, 135, 84, 0.3); /* green glow */
+  box-shadow: 0 0.75rem 1.25rem rgba(25, 135, 84, 0.3);
 }
 
 .clickable-card:active {

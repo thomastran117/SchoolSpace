@@ -14,6 +14,7 @@ import {
   generateTokens,
   rotateRefreshToken,
   logoutToken,
+  checkRefreshToken
 } from "./tokenService.js";
 
 // Email services
@@ -172,9 +173,14 @@ const loginOrCreateFromGoogle = async (googleToken) => {
 };
 
 const generateNewTokens = async (oldToken) => {
-  const { accessToken, refreshToken } = await rotateRefreshToken(oldToken);
+  const decoded = await checkRefreshToken(oldToken);
+  
+  const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+  if (!user) httpError(401, "User not found");
 
-  return { accessToken, refreshToken };
+  const { accessToken, refreshToken, } = await rotateRefreshToken(user.id, user.email, user.role);
+  
+  return { accessToken, refreshToken, user };
 };
 
 const authLogout = async (token) => {

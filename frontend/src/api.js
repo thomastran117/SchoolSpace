@@ -15,13 +15,13 @@ let refreshPromise = null;
 async function refreshToken(state) {
   try {
     const refreshResp = await api.get("/auth/refresh");
-    const { accessToken } = refreshResp.data;
+    const { accessToken, email, role } = refreshResp.data;
 
     store.dispatch(
       setCredentials({
         token: accessToken,
-        role: state.auth.role,
-        email: state.auth.email,
+        role: role,
+        email: email,
       })
     );
 

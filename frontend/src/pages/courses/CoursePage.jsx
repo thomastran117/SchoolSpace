@@ -54,7 +54,7 @@ export default function CoursePage() {
               className="card h-100 shadow-sm border-0 clickable-card position-relative"
               style={{
                 cursor: "pointer",
-                backgroundColor: "#f9fff9", // very light green
+                backgroundColor: "#f9fff9",
               }}
               onClick={() => navigate(`/courses/${course.id}`)}
             >
@@ -67,7 +67,6 @@ export default function CoursePage() {
                   <span className="fw-bold text-success">Code:</span>{" "}
                   {course.code}
                 </p>
-                {/* Stretched link makes entire card a clickable target */}
                 <a href={`/courses/${course.id}`} className="stretched-link"></a>
               </div>
             </div>

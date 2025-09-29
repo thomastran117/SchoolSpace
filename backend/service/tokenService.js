@@ -90,15 +90,15 @@ const saveRefreshToken = async (jti, userId, exp) => {
   await redis.setex(`refresh:${jti}`, ttl, userId.toString());
 };
 
-const rotateRefreshToken = async (oldToken) => {
+const checkRefreshToken = async (oldToken) => {
   const decoded = await validateRefreshToken(oldToken);
-
   await redis.del(`refresh:${decoded.jti}`);
-  const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
-  if (!user) httpError(401, "User not found");
+  return decoded
+};
 
-  const accessToken = createAccessToken(user.id, user.email, user.role);
-  const refreshToken = createRefreshToken(user.id);
+const rotateRefreshToken = async (id, email ,role) => {
+  const accessToken = createAccessToken(id, email, role);
+  const refreshToken = createRefreshToken(id);
 
   const newDecoded = jwt.decode(refreshToken);
   await saveRefreshToken(newDecoded.jti, newDecoded.userId, newDecoded.exp);
@@ -185,6 +185,7 @@ const logoutToken = async (token) => {
 export {
   getUserPayload,
   generateTokens,
+  checkRefreshToken,
   rotateRefreshToken,
   validateVerifyToken,
   createVerifyToken,
