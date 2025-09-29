@@ -1,0 +1,13 @@
+.clickable-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.clickable-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.75rem 1.25rem rgba(25, 135, 84, 0.3); /* green glow */
+}
+
+.clickable-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 0.5rem 1rem rgba(25, 135, 84, 0.2);
+}
