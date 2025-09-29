@@ -2,7 +2,7 @@
  * @file httpLoggerMiddleware.js
  * @description  Logs HTTP request including method, api endpoint, response and time to respond
  * Useful for development and testing. Disable in production and log to a file instead
- * 
+ *
  * @module middleware
  *
  * @author Thomas

@@ -1,6 +1,6 @@
 /**
  * @file app.js
- * @description 
+ * @description
  *  * Express application setup.
  *
  * - Configures JSON parsing, cookies, static files.

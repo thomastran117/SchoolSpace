@@ -3,6 +3,10 @@
  * @description  All environment variables are mounted and requested from the config class
  * Doing this will allow all variables to be consistent across the application
  *
+ * Refer to SETUP.md to setup environment variables. CONFIGURATION.md will contain a full description
+ * of each variable
+ *
+ * NOTE: Database and Redis URL are mandatory, everything else is optional as there is a default
  * @module config
  *
  * @author Thomas
@@ -76,16 +80,13 @@ function opt(key, def) {
  * @property {string} database_url - Database connection string (required).
  * @property {string} redis_url - Redis connection string (required).
  * @property {string|undefined} mongo_url - MongoDB connection string (optional).
- * @property {string} jwt_secret - Primary JWT secret (default: "dev-secret").
- * @property {string} jwt_secret_2 - Secondary JWT secret (default: "dev-secret-2").
+ * @property {string} jwt_secret_access - Primary JWT secret (default: "dev-secret").
+ * @property {string} jwt_secret_refresh - Secondary JWT secret (default: "dev-secret-2").
+ * @property {string} jwt_secret_refresh - Tertiary JWT secret (default: "dev-secret-3").
  * @property {string} cors_whitelist - Allowed CORS origins (default: "http://localhost:3040").
  * @property {string} frontend_client - Frontend client URL (default: "http://localhost:3040").
  * @property {string|undefined} google_client_id - Google OAuth client ID.
- * @property {string|undefined} google_client_secret - Google OAuth client secret.
- * @property {string|undefined} google_redirect_uri - Google OAuth redirect URI.
  * @property {string|undefined} ms_client_id - Microsoft OAuth client ID.
- * @property {string|undefined} ms_client_secret - Microsoft OAuth client secret.
- * @property {string|undefined} ms_redirect_uri - Microsoft OAuth redirect URI.
  * @property {string|undefined} ms_tenant_id - Microsoft tenant ID.
  * @property {string|undefined} email_user - SMTP email user.
  * @property {string|undefined} email_pass - SMTP email password.
@@ -98,34 +99,22 @@ const config = {
   database_url: req("DATABASE_URL"),
   redis_url: req("REDIS_URL"),
   mongo_url: opt("MONGO_URL", undefined),
-  jwt_secret: opt("JWT_SECRET", "dev-secret"),
-  jwt_secret_2: opt("JWT_SECRET_2", "dev-secret-2"),
+  jwt_secret_access: opt("JWT_SECRET_ACCESS", "dev-secret"),
+  jwt_secret_refresh: opt("JWT_SECRET_REFRESH", "dev-secret-2"),
+  jwt_secret_verify: opt("JWT_SECRET_VERIFY", "dev-secret-3"),
   cors_whitelist: opt("CORS_WHITELIST", "http://localhost:3040"),
   frontend_client: opt("FRONTEND_CLIENT", "http://localhost:3040"),
   google_client_id: opt("GOOGLE_CLIENT_ID", undefined),
-  google_client_secret: opt("GOOGLE_CLIENT_SECRET", undefined),
-  google_redirect_uri: opt("GOOGLE_REDIRECT_URI", undefined),
   ms_client_id: opt("MS_CLIENT_ID", undefined),
-  ms_client_secret: opt("MS_CLIENT_SECRET", undefined),
-  ms_redirect_uri: opt("MS_REDIRECT_URI", undefined),
   ms_tenant_id: opt("MS_TENANT_ID", undefined),
   email_user: opt("EMAIL_USER", undefined),
   email_pass: opt("EMAIL_PASS", undefined),
 
   isGoogleEnabled() {
-    return !!(
-      this.google_client_id &&
-      this.google_client_secret &&
-      this.google_redirect_uri
-    );
+    return !!this.google_client_id;
   },
   isMicrosoftEnabled() {
-    return !!(
-      this.ms_client_id &&
-      this.ms_redirect_uri &&
-      this.ms_tenant_id &&
-      this.ms_client_secret
-    );
+    return !!(this.ms_client_id && this.ms_tenant_id);
   },
   isEmailEnabled() {
     return !!(this.email_user && this.email_pass);

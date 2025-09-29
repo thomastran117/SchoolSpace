@@ -95,4 +95,3 @@ const corsOptionsDelegate = (req, cb) => {
  * app.use(corsMiddleware);
  */
 export default cors(corsOptionsDelegate);
-

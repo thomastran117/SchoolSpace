@@ -22,7 +22,11 @@ import { httpError } from "../utility/httpUtility.js";
 // Resources
 import redis from "../resource/redis.js";
 
-const { jwt_secret: JWT_SECRET, jwt_secret_2: JWT_SECRET_2 } = config;
+const {
+  jwt_secret_access: JWT_SECRET_ACCESS,
+  jwt_secret_refresh: JWT_SECRET_REFRESH,
+  jwt_secret_verify: JWT_SECRET_VERIFY,
+} = config;
 
 const ACCESS_EXPIRY = "30m";
 const REFRESH_EXPIRY = "7d";
@@ -65,7 +69,7 @@ const generateTokens = async (id, email, role) => {
  */
 const createAccessToken = (userId, email, role) => {
   const payload = { userId, email, role };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_EXPIRY });
+  return jwt.sign(payload, JWT_SECRET_ACCESS, { expiresIn: ACCESS_EXPIRY });
 };
 
 /**
@@ -76,7 +80,7 @@ const createAccessToken = (userId, email, role) => {
  */
 export const validateAccessToken = (token) => {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, JWT_SECRET_ACCESS);
   } catch (err) {
     if (err.name === "TokenExpiredError") {
       httpError(401, "Expired access token");
@@ -92,7 +96,7 @@ export const validateAccessToken = (token) => {
 const createRefreshToken = (userId) => {
   const jti = uuidv4();
   const payload = { userId, jti };
-  return jwt.sign(payload, JWT_SECRET_2, { expiresIn: REFRESH_EXPIRY });
+  return jwt.sign(payload, JWT_SECRET_REFRESH, { expiresIn: REFRESH_EXPIRY });
 };
 
 /**
@@ -103,7 +107,7 @@ const createRefreshToken = (userId) => {
  */
 const validateRefreshToken = async (token) => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET_2);
+    const decoded = jwt.verify(token, JWT_SECRET_REFRESH);
     const exists = await redis.get(`refresh:${decoded.jti}`);
 
     if (!exists) {
@@ -173,9 +177,13 @@ const createVerifyToken = async (email, passwordHash, role) => {
     15 * 60,
   );
 
-  return jwt.sign({ sub: email, jti, purpose: "email-verify" }, JWT_SECRET_2, {
-    expiresIn: "15m",
-  });
+  return jwt.sign(
+    { sub: email, jti, purpose: "email-verify" },
+    JWT_SECRET_VERIFY,
+    {
+      expiresIn: "15m",
+    },
+  );
 };
 
 /**
@@ -186,7 +194,7 @@ const createVerifyToken = async (email, passwordHash, role) => {
 const validateVerifyToken = async (token) => {
   let payload;
   try {
-    payload = jwt.verify(token, JWT_SECRET_2);
+    payload = jwt.verify(token, JWT_SECRET_VERIFY);
   } catch (err) {
     if (err.name === "TokenExpiredError") {
       httpError(400, "Expired verify token");

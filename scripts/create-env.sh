@@ -31,8 +31,9 @@ MONGO_URL="mongodb://localhost:27017/app";
 # Security / JWT
 ##############################################
 
-JWT_SECRET="schoolspace-secret"
-JWT_SECRET_2="schoolspace-top-secret"
+JWT_SECRET_ACCESS="access-jwt-token"
+JWT_SECRET_REFRESH="refresh-jwt-token"
+JWT_SECRET_VERIFY="verify-jwt-token"
 
 ##############################################
 # CORS Configuration
@@ -48,21 +49,13 @@ EMAIL_USER=""
 EMAIL_PASS=""
 
 ##############################################
-# Google OAuth2
+# OAuth
 ##############################################
 
 GOOGLE_CLIENT_ID=""
-GOOGLE_CLIENT_SECRET=""
-GOOGLE_REDIRECT_URI=""
-
-##############################################
-# Microsoft OAuth2
-##############################################
-
 MS_TENANT_ID=""
 MS_CLIENT_ID=""
-MS_CLIENT_SECRET=""
-MS_REDIRECT_URI=""
+
 EOF
 )
 

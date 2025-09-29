@@ -15,11 +15,7 @@ import { OAuth2Client } from "google-auth-library";
 // Internal config & utilities
 import config from "../../config/envManager.js";
 
-const {
-  google_client_id: GOOGLE_CLIENT_ID,
-  google_client_secret: GOOGLE_CLIENT_SECRET,
-  google_redirect_uri: GOOGLE_REDIRECT_URI,
-} = config;
+const { google_client_id: GOOGLE_CLIENT_ID } = config;
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
