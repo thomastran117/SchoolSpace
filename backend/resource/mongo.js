@@ -1,21 +1,31 @@
+/**
+ * @file mongo.js
+ * @description A mongo client instance that mounts and exports itself to be used anywhere in the
+ * service layer
+ *
+ * @module resource
+ *
+ * @author Thomas
+ * @version 1.0.0
+ *
+ */
+
+// External libraries
 import mongoose from "mongoose";
+
+// Internal core modules
 import logger from "../utility/logger.js";
 import config from "../config/envManager.js";
 
 const MONGO_URL = config.mongo_url;
 
-mongoose.set("strictQuery", true);
-
-function attachLifecycleLogs() {
-  mongoose.connection.on("connected", () => logger.info("Mongo is connected"));
-  mongoose.connection.on("disconnected", () =>
-    logger.warn("Mongo is disconnected"),
-  );
-  mongoose.connection.on("error", (err) =>
-    logger.error(`Mongo connection error: ${err.message}`),
-  );
-}
-
+/**
+ * Connects to MongoDB and verifies the connection by sending a `ping` command.
+ *
+ * @async
+ * @function connectAndPing
+ * @throws {Error} If MongoDB connection fails or ping response is not ok.
+ */
 async function connectAndPing() {
   const options = {
     serverSelectionTimeoutMS: 8000,
@@ -28,6 +38,15 @@ async function connectAndPing() {
   if (res?.ok !== 1) throw new Error("MongoDB ping returned non-ok result");
 }
 
+/**
+ * Sets up graceful shutdown hooks for MongoDB.
+ *
+ * - Listens for `SIGINT` and `SIGTERM`.
+ * - Closes the MongoDB connection cleanly.
+ * - Logs closure or errors during shutdown.
+ *
+ * @function setupGracefulShutdown
+ */
 function setupGracefulShutdown() {
   const close = async (signal) => {
     try {
@@ -43,6 +62,23 @@ function setupGracefulShutdown() {
   process.on("SIGTERM", () => close("SIGTERM"));
 }
 
+/**
+ * Attaches lifecycle logs for MongoDB connection events.
+ *
+ * Example logs: connected, disconnected, error.
+ * @function attachLifecycleLogs
+ */
+function attachLifecycleLogs() {
+  mongoose.connection.on("connected", () => logger.info("MongoDB connected"));
+  mongoose.connection.on("disconnected", () =>
+    logger.warn("MongoDB disconnected"),
+  );
+  mongoose.connection.on("error", (err) =>
+    logger.error(`MongoDB error: ${err.message}`),
+  );
+}
+
+// Initialize MongoDB connection
 attachLifecycleLogs();
 connectAndPing()
   .then(() => setupGracefulShutdown())
