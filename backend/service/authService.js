@@ -1,3 +1,15 @@
+/**
+ * @file authService.js
+ * @description Auth Service file that handles authentication with the User model and
+ * communicates with Token Service for JWT management
+ *
+ * @module service
+ *
+ * @author Thomas
+ * @version 1.0.0
+ *
+ */
+
 // External libraries
 import bcrypt from "bcrypt";
 
@@ -14,7 +26,7 @@ import {
   generateTokens,
   rotateRefreshToken,
   logoutToken,
-  checkRefreshToken
+  checkRefreshToken,
 } from "./tokenService.js";
 
 // Email services
@@ -27,72 +39,86 @@ import {
 import { verifyMicrosoftIdToken } from "./oauth/microsoftService.js";
 import * as googleService from "./oauth/googleService.js";
 
-const { frontend_client: FRONTEND_CLIENT, jwt_secret_2: JWT_SECRET_2 } = config;
+const { frontend_client: FRONTEND_CLIENT } = config;
 
+/**
+ * Authenticate user with email and password.
+ * @param {string} email - User email.
+ * @param {string} password - Plain-text password.
+ * @returns {Promise<{ accessToken: string, refreshToken: string, role: string, id: string }>}
+ * @throws {Error} If credentials are invalid.
+ */
 const loginUser = async (email, password) => {
-  const user = await prisma.user.findUnique({
-    where: { email },
-  });
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) httpError(401, "Invalid credentials");
 
-  if (!user) {
-    httpError(401, "Invalid credentials");
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  logger.info(hashedPassword);
   const passwordMatches = await bcrypt.compare(password, user.password);
-  if (!passwordMatches) {
-    httpError(401, "Invalid credentials");
-  }
+  if (!passwordMatches) httpError(401, "Invalid credentials");
 
   const { accessToken, refreshToken } = await generateTokens(
     user.id,
     user.email,
     user.role,
   );
+
   return { accessToken, refreshToken, role: user.role, id: user.id };
 };
 
+/**
+ * Signup with email/password and send verification email.
+ * @param {string} email - User email.
+ * @param {string} password - Plain-text password.
+ * @param {string} role - User role.
+ * @returns {Promise<{ message: string }>}
+ */
 const signupUser = async (email, password, role) => {
   const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) {
-    httpError(409, "Email already in use");
-  }
+  if (existingUser) httpError(409, "Email already in use");
 
   const hashedPassword = await bcrypt.hash(password, 10);
-
   const token = await createVerifyToken(email, hashedPassword, role);
 
   const url = `${FRONTEND_CLIENT}/verify?token=${encodeURIComponent(token)}`;
   await sendVerificationEmail(email, url);
+
   return { message: "Verification email sent" };
 };
 
+/**
+ * Verify a user’s signup token and create the account.
+ * @param {string} token - Verification token from email.
+ * @returns {Promise<object>} Created user object.
+ */
 const verifyUser = async (token) => {
   const { email, password, role } = await validateVerifyToken(token);
-  const user = await prisma.user.create({
-    data: { email, password, role },
-  });
+  const user = await prisma.user.create({ data: { email, password, role } });
+
   await sendWelcomeEmail(email);
   return user;
 };
 
+/**
+ * Signup user directly without email verification.
+ * @param {string} email - User email.
+ * @param {string} password - Plain-text password.
+ * @param {string} role - User role.
+ * @returns {Promise<object>} Created user object.
+ */
 const signupUserWOVerify = async (email, password, role) => {
   const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) {
-    httpError(409, "Email already in use");
-  }
+  if (existingUser) httpError(409, "Email already in use");
 
   const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = await prisma.user.create({
+  return prisma.user.create({
     data: { email, password: hashedPassword, role },
   });
-
-  return user;
 };
 
+/**
+ * Authenticate or register a user using Microsoft OAuth ID token.
+ * @param {string} idToken - Microsoft ID token (JWT).
+ * @returns {Promise<{ accessToken: string, refreshToken: string, role: string, id: string }>}
+ */
 const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
   const claims = await verifyMicrosoftIdToken(idToken);
 
@@ -100,8 +126,8 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
   const email = claims.email || claims.preferred_username;
   const name = claims.name || "";
 
-  if (!email) throw httpError(400, "Microsoft email missing");
-  if (!microsoftSub) throw httpError(400, "Microsoft subject missing");
+  if (!email) httpError(400, "Microsoft email missing");
+  if (!microsoftSub) httpError(400, "Microsoft subject missing");
 
   let user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
@@ -141,17 +167,18 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
   return { accessToken, refreshToken, role: user.role, id: user.id };
 };
 
+/**
+ * Authenticate or register a user using Google OAuth ID token.
+ * @param {string} googleToken - Google ID token (JWT).
+ * @returns {Promise<{ accessToken: string, refreshToken: string, role: string, id: string }>}
+ */
 const loginOrCreateFromGoogle = async (googleToken) => {
   const googleUser = await googleService.verifyGoogleToken(googleToken);
-
-  if (!googleUser?.email) {
-    httpError(401, "Invalid Google token");
-  }
+  if (!googleUser?.email) httpError(401, "Invalid Google token");
 
   let user = await prisma.user.findUnique({
     where: { email: googleUser.email },
   });
-
   if (!user) {
     user = await prisma.user.create({
       data: {
@@ -169,20 +196,34 @@ const loginOrCreateFromGoogle = async (googleToken) => {
     user.email,
     user.role,
   );
+
   return { accessToken, refreshToken, role: user.role, id: user.id };
 };
 
+/**
+ * Rotate refresh token and issue new tokens.
+ * @param {string} oldToken - Previous refresh token.
+ * @returns {Promise<{ accessToken: string, refreshToken: string, user: object }>}
+ */
 const generateNewTokens = async (oldToken) => {
   const decoded = await checkRefreshToken(oldToken);
-  
   const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
   if (!user) httpError(401, "User not found");
 
-  const { accessToken, refreshToken, } = await rotateRefreshToken(user.id, user.email, user.role);
-  
+  const { accessToken, refreshToken } = await rotateRefreshToken(
+    user.id,
+    user.email,
+    user.role,
+  );
+
   return { accessToken, refreshToken, user };
 };
 
+/**
+ * Logout user by invalidating refresh token.
+ * @param {string} token - Refresh token.
+ * @returns {Promise<boolean>}
+ */
 const authLogout = async (token) => {
   return logoutToken(token);
 };
@@ -191,9 +232,9 @@ export {
   signupUser,
   loginUser,
   verifyUser,
+  signupUserWOVerify,
   generateNewTokens,
   verifyMicrosoftIdTokenAndSignIn,
   loginOrCreateFromGoogle,
-  signupUserWOVerify,
   authLogout,
 };
