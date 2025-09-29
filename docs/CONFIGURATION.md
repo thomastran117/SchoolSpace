@@ -15,11 +15,27 @@ If you haven't already, create a .env for each folder using the provided script:
 This scripts creates a .env skeleton to be filled out for the frontend and backend.
 ## Frontend Environment Variables
 
+Since React is built with Vite, all .env variables must be prefixed with VITE
+### Configuration
+
+VITE_ENVIRONMENT=                    # Development, production or testing
+
+### Server
+
+VITE_FRONTEND_URL=                   # Client URL
+VITE_BACKEND_URL=                    # Backend URL
+
+### OAuth
+
+VITE_MSAL_CLIENT_ID=                 # MS CLient ID
+VITE_MSAL_AUTHORITY=                 # MS Authority, use commons
+VITE_MSAL_REDIRECT_URI=              # MS Callback
+VITE_GOOGLE_CLIENT_ID=               # Google Client ID
 
 ## Backend Environment Variables
 
 ### Configuration
-- ENVIRONMENT=             # production, development or test, defauls to development
+- ENVIRONMENT=              # production, development or test, defauls to development
 
 ### Database & Cache
 - DATABASE_URL=             # Connection string for your database
