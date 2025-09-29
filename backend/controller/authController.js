@@ -15,7 +15,6 @@ import {
 } from "../utility/httpUtility.js";
 import logger from "../utility/logger.js";
 import config from "../config/envManager.js";
-import redis from "../resource/redis.js";
 
 const login = async (req, res, next) => {
   try {
@@ -31,13 +30,7 @@ const login = async (req, res, next) => {
       password,
     );
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
-    });
+    sendCookie(res, refreshToken);
 
     res
       .status(200)
@@ -106,13 +99,7 @@ const microsoftVerify = async (req, res, next) => {
     const { accessToken, refreshToken, role, email, id } =
       await verifyMicrosoftIdTokenAndSignIn(idToken);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
-    });
+    sendCookie(res, refreshToken);
 
     res
       .status(200)
@@ -132,13 +119,7 @@ const googleVerify = async (req, res, next) => {
     const { accessToken, refreshToken, role, email, id } =
       await loginOrCreateFromGoogle(googleToken);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
-    });
+    sendCookie(res, refreshToken);
 
     res
       .status(200)
@@ -154,13 +135,7 @@ const newAccessToken = async (req, res, next) => {
     if (!token) return httpError(401, "Missing refresh token");
     const { accessToken, refreshToken } = await generateNewTokens(token);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
-    });
+    sendCookie(res, refreshToken);
 
     return res.json({ accessToken: accessToken });
   } catch (err) {
@@ -193,6 +168,16 @@ const logout = async (req, res) => {
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+};
+
+const sendCookie = (res, refreshToken) => {
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: "/",
+  });
 };
 
 export {

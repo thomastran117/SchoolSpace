@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchWithAuth } from "../api/fetchClient";
+import api from "../api.js"; 
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -7,12 +7,8 @@ export default function Dashboard() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetchWithAuth("/courses");
-        if (res.ok) {
-          setData(await res.json());
-        } else {
-          console.error("Request failed:", res.status);
-        }
+        const res = await api("/courses");
+        setData(await res.data);
       } catch (err) {
         console.error("Fetch error:", err);
       }

@@ -24,15 +24,33 @@ const getUserPayload = (authHeader) => {
   return { id: decoded.userId, role: decoded.role };
 };
 
+const generateTokens = async (id, email, role) => {
+  const accessToken = createAccessToken(id, email, role);
+  const refreshToken = createRefreshToken(id);
+
+  const decoded = jwt.decode(refreshToken);
+  await saveRefreshToken(decoded.jti, id, decoded.exp);
+
+  return { accessToken, refreshToken };
+};
+
 const createAccessToken = (userId, email, role) => {
   const payload = { userId, email, role };
   return jwt.sign(payload, JWT_SECRET, { expiresIn: ACCESS_EXPIRY });
 };
 
-const validateAccessToken = (token) => {
+export const validateAccessToken = (token) => {
   try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (!decoded) httpError(401, "Invalid access token");
+    return decoded;
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      httpError(401, "Expired access token");
+    }
+    if (err.name === "JsonWebTokenError") {
+      httpError(401, "Invalid access token");
+    }
     httpError(401, "Invalid or expired access token");
   }
 };
@@ -53,8 +71,16 @@ const validateRefreshToken = async (token) => {
       httpError(401, "Refresh token revoked or already used");
     }
 
+    if (!decoded) httpError(401, "Invalid refresh token");
+
     return decoded;
-  } catch {
+  } catch (err){
+    if (err.name === "TokenExpiredError") {
+      httpError(401, "Expired refresh token");
+    }
+    if (err.name === "JsonWebTokenError") {
+      httpError(401, "Invalid refresh token");
+    }
     httpError(401, "Invalid or expired refresh token");
   }
 };
@@ -66,7 +92,6 @@ const saveRefreshToken = async (jti, userId, exp) => {
 
 const rotateRefreshToken = async (oldToken) => {
   const decoded = await validateRefreshToken(oldToken);
-  if (!decoded) httpError(401, "Invalid refresh token");
 
   await redis.del(`refresh:${decoded.jti}`);
   const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
@@ -99,26 +124,16 @@ const createVerifyToken = async (email, passwordHash, role) => {
   return token;
 };
 
-const generateTokens = async (id, email, role) => {
-  const accessToken = createAccessToken(id, email, role);
-  const refreshToken = createRefreshToken(id);
-
-  const decoded = jwt.decode(refreshToken);
-  await saveRefreshToken(decoded.jti, id, decoded.exp);
-
-  return { accessToken, refreshToken };
-};
-
 const validateVerifyToken = async (token) => {
   let payload;
   try {
     payload = jwt.verify(token, JWT_SECRET_2);
   } catch (err) {
     if (err.name === "JsonWebTokenError") {
-      httpError(400, "Invalid or malformed token");
+      httpError(400, "Invalid verify token");
     }
     if (err.name === "TokenExpiredError") {
-      httpError(400, "Token expired");
+      httpError(400, "Expired verify token");
     }
     throw err;
   }
