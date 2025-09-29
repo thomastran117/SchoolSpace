@@ -3,9 +3,41 @@ param (
 )
 
 $backendPath = Join-Path $PSScriptRoot "..\backend"
-$envFilePath = Join-Path $backendPath ".env"
+$frontendPath = Join-Path $PSScriptRoot "..\frontend"
+$envFilePathBackend = Join-Path $backendPath ".env"
+$envFilePathFrontend = Join-Path $frontendPath ".env"
 
-$envContent = @'
+$envContent_frontend = @'
+##############################################
+# Configuration
+##############################################
+
+VITE_ENVIRONMENT="development"
+
+##############################################
+# Server
+##############################################
+
+VITE_FRONTEND_URL="http://localhost:3040"
+VITE_BACKEND_URL="http://localhost:8040"
+
+##############################################
+# OAuth
+##############################################
+
+VITE_MSAL_CLIENT_ID="ms_client"
+VITE_MSAL_AUTHORITY="https://login.microsoftonline.com/common"
+VITE_MSAL_REDIRECT_URI="http://localhost:3040/auth/callback"
+VITE_GOOGLE_CLIENT_ID="google_client"
+
+'@
+
+$envContent_backend = @'
+##############################################
+# Configuration
+##############################################
+
+ENVIRONMENT="development"
 
 ##############################################
 # Server
@@ -58,6 +90,15 @@ if (-Not (Test-Path $backendPath)) {
     exit 1
 }
 
-Set-Content -Path $envFilePath -Value $envContent -Encoding UTF8
+if (-Not (Test-Path $frontendPath)) {
+    Write-Error "Frontend folder not found at $frontendPath"
+    exit 1
+}
 
-Write-Host ".env file has been created at $envFilePath"
+Set-Content -Path $envFilePathBackend -Value $envContent_backend -Encoding UTF8
+
+Write-Host ".env file has been created at $envFilePathBackend"
+
+Set-Content -Path $envFilePathFrontend -Value $envContent_frontend -Encoding UTF8
+
+Write-Host ".env file has been created at $envFilePathFrontend"

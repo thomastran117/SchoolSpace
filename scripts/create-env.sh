@@ -9,9 +9,44 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_PATH="$SCRIPT_DIR/../backend"
-ENV_FILE="$BACKEND_PATH/.env"
+ENV_FILE_BACK="$BACKEND_PATH/.env"
 
-ENV_CONTENT=$(cat <<'EOF'
+FRONTEND_PATH="$SCRIPT_DIR/../frontend"
+ENV_FILE_FRONT="$FRONTEND_PATH/.env"
+
+ENV_CONTENT_FRONT=$(cat <<'EOF'
+##############################################
+# Configuration
+##############################################
+
+VITE_ENVIRONMENT="development"
+
+##############################################
+# Server
+##############################################
+
+VITE_FRONTEND_URL="http://localhost:3040"
+VITE_BACKEND_URL="http://localhost:8040"
+
+##############################################
+# OAuth
+##############################################
+
+VITE_MSAL_CLIENT_ID="ms_client"
+VITE_MSAL_AUTHORITY="https://login.microsoftonline.com/common"
+VITE_MSAL_REDIRECT_URI="http://localhost:3040/auth/callback"
+VITE_GOOGLE_CLIENT_ID="google_client"
+
+EOF
+)
+
+ENV_CONTENT_BACK=$(cat <<'EOF'
+##############################################
+# Configuration
+##############################################
+
+ENVIRONMENT="development"
+
 ##############################################
 # Server
 ##############################################
@@ -64,6 +99,13 @@ if [[ ! -d "$BACKEND_PATH" ]]; then
   exit 1
 fi
 
-echo "$ENV_CONTENT" > "$ENV_FILE"
+if [[ ! -d "$FRONTEND_PATH" ]]; then
+  echo "❌ Frontend folder not found at $FRONTEND_PATH" >&2
+  exit 1
+fi
 
-echo "✅ .env file has been created at $ENV_FILE"
+echo "$ENV_CONTENT_BACK" > "$ENV_FILE_BACK"
+echo "✅ .env file has been created at $ENV_FILE_BACK"
+
+echo "$ENV_CONTENT_FRONT" > "$ENV_FILE_FRONT"
+echo "✅ .env file has been created at $ENV_FILE_FRONT"
