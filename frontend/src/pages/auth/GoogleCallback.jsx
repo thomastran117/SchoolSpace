@@ -3,15 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../stores/authSlice";
 
-export default function AuthCallback() {
+export default function GoogleCallback() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [status, setStatus] = useState("Finishing sign-in…");
+  const [status, setStatus] = useState("Completing Google sign-in…");
   const [error, setError] = useState("");
 
   const retryGoogleOAuth = () => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    const redirectUri = "http://localhost:3040/auth/callback";
+    const redirectUri = "http://localhost:3040/auth/google";
     const scope = "openid email profile";
 
     const params = new URLSearchParams({
@@ -37,7 +37,7 @@ export default function AuthCallback() {
 
     (async () => {
       try {
-        setStatus("Verifying your account…");
+        setStatus("Verifying your Google account…");
 
         const resp = await fetch(
           "http://localhost:8040/api/auth/google/verify",
@@ -73,8 +73,8 @@ export default function AuthCallback() {
           JSON.stringify({ token: data.accessToken, user: data.user }),
         );
 
-        setStatus("Login successful! Redirecting…");
-        setTimeout(() => navigate("/dashboard", { replace: true }), 1200);
+        setStatus("✅ Login successful! Redirecting to dashboard…");
+        setTimeout(() => navigate("/dashboard", { replace: true }), 1500);
       } catch (err) {
         console.error("Google verify failed", err);
         setError(err.message || "Sign-in failed. Please try again.");
@@ -86,19 +86,19 @@ export default function AuthCallback() {
     return (
       <div className="d-flex min-vh-100 justify-content-center align-items-center bg-light">
         <div
-          className="text-center p-4 rounded shadow-sm bg-white"
-          style={{ maxWidth: "420px" }}
+          className="text-center p-4 rounded-4 shadow-lg bg-white"
+          style={{ maxWidth: "420px", width: "100%" }}
         >
-          <div className="mb-3 fs-2 text-danger">✖</div>
-          <h5 className="fw-bold mb-2 text-dark">Authentication Error</h5>
-          <p className="text-muted">{error}</p>
+          <div className="mb-3 fs-1 text-danger">⚠️</div>
+          <h4 className="fw-bold mb-2 text-dark">Google Sign-In Failed</h4>
+          <p className="text-muted mb-4">{error}</p>
 
-          <div className="d-flex gap-2 justify-content-center mt-3">
-            <button className="btn btn-success" onClick={retryGoogleOAuth}>
-              Retry Sign-In
+          <div className="d-flex gap-3 justify-content-center">
+            <button className="btn btn-danger px-4" onClick={retryGoogleOAuth}>
+              Retry
             </button>
             <button
-              className="btn btn-outline-secondary"
+              className="btn btn-outline-secondary px-4"
               onClick={() => navigate("/auth")}
             >
               Back to Sign In
@@ -112,14 +112,19 @@ export default function AuthCallback() {
   return (
     <div className="d-flex min-vh-100 justify-content-center align-items-center bg-light">
       <div
-        className="text-center p-4 rounded shadow-sm bg-white"
-        style={{ maxWidth: "420px" }}
+        className="text-center p-4 rounded-4 shadow-sm bg-white"
+        style={{ maxWidth: "420px", width: "100%" }}
       >
-        <div className="spinner-border text-success mb-3" role="status">
+        <div
+          className="spinner-border text-primary mb-3"
+          role="status"
+          style={{ width: "3rem", height: "3rem" }}
+        >
           <span className="visually-hidden">Loading…</span>
         </div>
-        <p className="fw-semibold text-success">{status}</p>
+        <p className="fw-semibold text-primary">{status}</p>
       </div>
     </div>
   );
 }
+

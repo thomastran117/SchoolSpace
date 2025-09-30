@@ -127,7 +127,7 @@ export default function AuthPage() {
         throw new Error("Google Identity Services not loaded");
 
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      const redirectUri = `${config.frontend_url}/auth/callback`;
+      const redirectUri = `${config.frontend_url}/auth/google`;
       const scope = "openid email profile";
 
       const params = new URLSearchParams({
@@ -149,47 +149,13 @@ export default function AuthPage() {
   };
 
   const handleMicrosoftOAuth = async () => {
-    try {
-      setError("");
-      setLoading(true);
-      await waitForMsal();
-
-      const loginResult = await msalInstance.loginPopup({
-        scopes: microsoftScopes,
-        prompt: "select_account",
-      });
-
-      const idToken = loginResult.idToken;
-      if (!idToken)
-        throw new Error("Microsoft sign-in failed: missing id_token");
-
-      const res = await fetch(`${config.backend_url}/auth/microsoft/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ id_token: idToken }),
-      });
-
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(msg || `Verify failed (${res.status})`);
-      }
-
-      const data = await res.json();
-      dispatch(
-        setCredentials({
-          token: data.accessToken,
-          email: data.user,
-          role: data.role,
-        }),
-      );
-    } catch (err) {
-      setError(err?.message || "Microsoft sign-in failed.");
-    } finally {
-      setLoading(false);
-    }
+    await waitForMsal();
+    await msalInstance.loginRedirect({
+      scopes: microsoftScopes,
+      prompt: "select_account",
+    });
   };
-
+  
   return (
     <main className="min-vh-100 d-flex align-items-center bg-gradient">
       <div className="container">

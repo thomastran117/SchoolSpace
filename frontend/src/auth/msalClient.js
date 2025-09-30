@@ -5,7 +5,8 @@ export const msalInstance = new PublicClientApplication({
   auth: {
     clientId: config.ms_client,
     authority: config.msal_authority,
-    redirectUri: `${config.frontend_url}/auth/callback`,
+    redirectUri: `http://localhost:3040/auth/microsoft`,
+    navigateToLoginRequestUrl: false,
   },
   cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false },
 });
