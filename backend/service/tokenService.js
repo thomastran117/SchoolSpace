@@ -18,6 +18,7 @@ import { randomBytes } from "crypto";
 // Internal config & utilities
 import config from "../config/envManager.js";
 import { httpError } from "../utility/httpUtility.js";
+import logger from "../utility/logger.js";
 
 // Resources
 import redis from "../resource/redis.js";
@@ -55,7 +56,7 @@ const getUserPayload = (authHeader) => {
  */
 const generateTokens = async (id, email, role) => {
   const accessToken = createAccessToken(id, email, role);
-  const refreshToken = createRefreshToken(id);
+  const refreshToken = createRefreshToken(id, email, role);
 
   const decoded = jwt.decode(refreshToken);
   await saveRefreshToken(decoded.jti, id, decoded.exp);
@@ -90,12 +91,12 @@ export const validateAccessToken = (token) => {
 };
 
 /**
- * Creates a signed refresh token with a unique jti.
+ * Creates a signed refresh token with a unique jti and user payload.
  * @private
  */
-const createRefreshToken = (userId) => {
+const createRefreshToken = (userId, email, role) => {
   const jti = uuidv4();
-  const payload = { userId, jti };
+  const payload = { userId, email, role, jti };
   return jwt.sign(payload, JWT_SECRET_REFRESH, { expiresIn: REFRESH_EXPIRY });
 };
 
@@ -113,6 +114,7 @@ const validateRefreshToken = async (token) => {
     if (!exists) {
       httpError(401, "Refresh token revoked or already used");
     }
+    console.log(decoded);
     return decoded;
   } catch (err) {
     if (err.name === "TokenExpiredError") {
@@ -121,6 +123,7 @@ const validateRefreshToken = async (token) => {
     httpError(401, "Invalid refresh token");
   }
 };
+
 
 /**
  * Saves a refresh token to Redis with TTL matching expiration.
@@ -132,31 +135,22 @@ const saveRefreshToken = async (jti, userId, exp) => {
 };
 
 /**
- * Checks and revokes an existing refresh token.
- * @param {string} oldToken
- * @returns {Promise<object>} Decoded token.
- */
-const checkRefreshToken = async (oldToken) => {
-  const decoded = await validateRefreshToken(oldToken);
-  await redis.del(`refresh:${decoded.jti}`);
-  return decoded;
-};
-
-/**
  * Rotates refresh token: revokes old, issues new pair.
  * @param {string} id - User ID.
  * @param {string} email - User email.
  * @param {string} role - User role.
  * @returns {Promise<{ accessToken: string, refreshToken: string }>}
  */
-const rotateRefreshToken = async (id, email, role) => {
-  const accessToken = createAccessToken(id, email, role);
-  const refreshToken = createRefreshToken(id);
+const rotateRefreshToken = async (oldToken) => {
+  const decoded = await validateRefreshToken(oldToken);
+  await redis.del(`refresh:${decoded.jti}`);
+  const accessToken = createAccessToken(decoded.userId, decoded.email, decoded.role);
+  const refreshToken = createRefreshToken(decoded.userId, decoded.email, decoded.role);
 
   const newDecoded = jwt.decode(refreshToken);
   await saveRefreshToken(newDecoded.jti, newDecoded.userId, newDecoded.exp);
 
-  return { accessToken, refreshToken };
+  return { accessToken, refreshToken, role: decoded.role, email: decoded.email };
 };
 
 /**
@@ -206,7 +200,6 @@ const validateVerifyToken = async (token) => {
     httpError(400, "Invalid token purpose");
   }
 
-  // Atomically fetch & delete
   let pendingStr;
   if (typeof redis.getdel === "function") {
     pendingStr = await redis.getdel(`verify:${payload.jti}`);
@@ -246,7 +239,6 @@ const logoutToken = async (token) => {
 export {
   getUserPayload,
   generateTokens,
-  checkRefreshToken,
   rotateRefreshToken,
   validateVerifyToken,
   createVerifyToken,
