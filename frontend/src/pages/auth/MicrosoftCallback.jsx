@@ -64,11 +64,6 @@ export default function MicrosoftCallback() {
           }),
         );
 
-        sessionStorage.setItem(
-          "auth",
-          JSON.stringify({ token: data.accessToken, user: data.user }),
-        );
-
         setStatus("✅ Login successful! Redirecting to dashboard…");
         setTimeout(() => navigate("/dashboard", { replace: true }), 1500);
       } catch (err) {
@@ -78,47 +73,51 @@ export default function MicrosoftCallback() {
     })();
   }, [navigate, dispatch]);
 
-  if (error) {
-    return (
-      <div className="d-flex min-vh-100 justify-content-center align-items-center bg-light">
-        <div
-          className="text-center p-4 rounded-4 shadow-lg bg-white"
-          style={{ maxWidth: "420px", width: "100%" }}
-        >
-          <div className="mb-3 fs-1 text-danger">✖</div>
-          <h4 className="fw-bold mb-2 text-dark">Microsoft Authentication Error</h4>
-          <p className="text-muted mb-4">{error}</p>
-
-          <div className="d-flex gap-3 justify-content-center">
-            <button className="btn btn-primary px-4" onClick={retryMicrosoftOAuth}>
-              Retry Microsoft Sign-In
-            </button>
-            <button
-              className="btn btn-outline-secondary px-4"
-              onClick={() => navigate("/auth")}
-            >
-              Back to Sign In
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="d-flex min-vh-100 justify-content-center align-items-center bg-light">
+    <div
+      className="d-flex min-vh-100 justify-content-center align-items-center"
+      style={{
+        background: "linear-gradient(135deg, #eef4ff, #f2ebff, #ffffff)",
+        // light blue → soft lavender → white
+      }}
+    >
       <div
-        className="text-center p-4 rounded-4 shadow-sm bg-white"
-        style={{ maxWidth: "420px", width: "100%" }}
+        className="text-center p-5 rounded-5 shadow-lg bg-white border border-light"
+        style={{ maxWidth: "500px", width: "100%" }}
       >
-        <div
-          className="spinner-border text-primary mb-3"
-          role="status"
-          style={{ width: "3rem", height: "3rem" }}
-        >
-          <span className="visually-hidden">Loading…</span>
-        </div>
-        <p className="fw-semibold text-primary">{status}</p>
+        {error ? (
+          <>
+            <div className="mb-4 fs-1 text-danger">✖</div>
+            <h3 className="fw-bold mb-3 text-dark">Microsoft Authentication Error</h3>
+            <p className="text-muted mb-4 fs-5">{error}</p>
+
+            <div className="d-flex gap-3 justify-content-center">
+              <button
+                className="btn btn-primary btn-lg px-5"
+                onClick={retryMicrosoftOAuth}
+              >
+                Retry Microsoft Sign-In
+              </button>
+              <button
+                className="btn btn-outline-secondary btn-lg px-5"
+                onClick={() => navigate("/auth")}
+              >
+                Back to Sign In
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div
+              className="spinner-border text-primary mb-4"
+              role="status"
+              style={{ width: "4rem", height: "4rem" }}
+            >
+              <span className="visually-hidden">Loading…</span>
+            </div>
+            <p className="fw-semibold text-primary fs-5">{status}</p>
+          </>
+        )}
       </div>
     </div>
   );

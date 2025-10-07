@@ -39,23 +39,18 @@ export default function GoogleCallback() {
       try {
         setStatus("Verifying your Google account…");
 
-        const resp = await fetch(
-          "http://localhost:8040/api/auth/google/verify",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ token: id_token }),
-          },
-        );
+        const resp = await fetch("http://localhost:8040/api/auth/google/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ token: id_token }),
+        });
 
         if (resp.status === 401 || resp.status === 403) {
           throw new Error("Your sign-in session is invalid or expired.");
         }
         if (!resp.ok) {
-          throw new Error(
-            (await resp.text()) || "Unexpected error from server.",
-          );
+          throw new Error((await resp.text()) || "Unexpected error from server.");
         }
 
         const data = await resp.json();
@@ -68,11 +63,6 @@ export default function GoogleCallback() {
           }),
         );
 
-        sessionStorage.setItem(
-          "auth",
-          JSON.stringify({ token: data.accessToken, user: data.user }),
-        );
-
         setStatus("✅ Login successful! Redirecting to dashboard…");
         setTimeout(() => navigate("/dashboard", { replace: true }), 1500);
       } catch (err) {
@@ -82,49 +72,51 @@ export default function GoogleCallback() {
     })();
   }, [navigate, dispatch]);
 
-  if (error) {
-    return (
-      <div className="d-flex min-vh-100 justify-content-center align-items-center bg-light">
-        <div
-          className="text-center p-4 rounded-4 shadow-lg bg-white"
-          style={{ maxWidth: "420px", width: "100%" }}
-        >
-          <div className="mb-3 fs-1 text-danger">⚠️</div>
-          <h4 className="fw-bold mb-2 text-dark">Google Sign-In Failed</h4>
-          <p className="text-muted mb-4">{error}</p>
-
-          <div className="d-flex gap-3 justify-content-center">
-            <button className="btn btn-danger px-4" onClick={retryGoogleOAuth}>
-              Retry
-            </button>
-            <button
-              className="btn btn-outline-secondary px-4"
-              onClick={() => navigate("/auth")}
-            >
-              Back to Sign In
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="d-flex min-vh-100 justify-content-center align-items-center bg-light">
+    <div
+      className="d-flex min-vh-100 justify-content-center align-items-center"
+      style={{
+        background: "linear-gradient(135deg, #fef7f7, #f7faff, #ffffff)",
+      }}
+    >
       <div
-        className="text-center p-4 rounded-4 shadow-sm bg-white"
-        style={{ maxWidth: "420px", width: "100%" }}
+        className="text-center p-5 rounded-5 shadow-lg bg-white border border-light"
+        style={{ maxWidth: "500px", width: "100%" }}
       >
-        <div
-          className="spinner-border text-primary mb-3"
-          role="status"
-          style={{ width: "3rem", height: "3rem" }}
-        >
-          <span className="visually-hidden">Loading…</span>
-        </div>
-        <p className="fw-semibold text-primary">{status}</p>
+        {error ? (
+          <>
+            <div className="mb-4 fs-1 text-danger">⚠️</div>
+            <h3 className="fw-bold mb-3 text-dark">Google Sign-In Failed</h3>
+            <p className="text-muted mb-4 fs-5">{error}</p>
+
+            <div className="d-flex gap-3 justify-content-center">
+              <button
+                className="btn btn-danger btn-lg px-5"
+                onClick={retryGoogleOAuth}
+              >
+                Retry Google Sign-In
+              </button>
+              <button
+                className="btn btn-outline-secondary btn-lg px-5"
+                onClick={() => navigate("/auth")}
+              >
+                Back to Sign In
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div
+              className="spinner-border text-primary mb-4"
+              role="status"
+              style={{ width: "4rem", height: "4rem" }}
+            >
+              <span className="visually-hidden">Loading…</span>
+            </div>
+            <p className="fw-semibold text-primary fs-5">{status}</p>
+          </>
+        )}
       </div>
     </div>
   );
 }
-

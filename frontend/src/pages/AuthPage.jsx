@@ -4,39 +4,31 @@ import { msalInstance, microsoftScopes, waitForMsal } from "../auth/msalClient";
 import { useDispatch } from "react-redux";
 import config from "../configs/envManager";
 import { setCredentials } from "../stores/authSlice";
-import "../styles/auth.css";
 
 export default function AuthPage() {
   const dispatch = useDispatch();
   const [mode, setMode] = useState("login");
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    role: "student",
-  });
+  const [form, setForm] = useState({ email: "", password: "", role: "student" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [msalReady, setMsalReady] = useState(false);
-
   const isSignup = mode === "signup";
 
   useEffect(() => {
-    let alive = true;
+    let active = true;
     (async () => {
       try {
         await waitForMsal();
-        if (alive) setMsalReady(true);
-      } catch (e) {
-        if (alive) {
-          setError("Microsoft sign-in not available (MSAL init failed).");
+        if (active) setMsalReady(true);
+      } catch {
+        if (active) {
+          setError("Microsoft sign-in not available.");
           setMsalReady(false);
         }
       }
     })();
-    return () => {
-      alive = false;
-    };
+    return () => (active = false);
   }, []);
 
   const handleChange = (e) => {
@@ -45,7 +37,6 @@ export default function AuthPage() {
   };
 
   const validate = () => {
-    setError("");
     if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       return "Enter a valid email.";
     if (!form.password || form.password.length < 6)
@@ -56,25 +47,13 @@ export default function AuthPage() {
   const onSubmit = async (e) => {
     e.preventDefault();
     const v = validate();
-    if (v) {
-      setError(v);
-      return;
-    }
-
+    if (v) return setError(v);
     try {
       setLoading(true);
       setError("");
-
       const payload = isSignup
-        ? {
-            email: form.email.trim(),
-            password: form.password,
-            role: form.role,
-          }
-        : {
-            email: form.email.trim(),
-            password: form.password,
-          };
+        ? { email: form.email.trim(), password: form.password, role: form.role }
+        : { email: form.email.trim(), password: form.password };
 
       const endpoint = isSignup
         ? `${config.backend_url}/auth/signup`
@@ -87,25 +66,16 @@ export default function AuthPage() {
         body: JSON.stringify(payload),
       });
 
-      if (!resp.ok) {
-        const msg = await resp.text();
-        throw new Error(msg || `Request failed (${resp.status})`);
-      }
+      if (!resp.ok) throw new Error(await resp.text() || "Request failed");
 
       if (isSignup) {
-        alert("Signup successful: ");
+        alert("Signup successful!");
       } else {
         const data = await resp.json();
-        dispatch(
-          setCredentials({
-            token: data.accessToken,
-            email: data.user,
-            role: data.role,
-          }),
-        );
+        dispatch(setCredentials({ token: data.accessToken, email: data.user, role: data.role }));
       }
     } catch (err) {
-      setError(err?.message || "Something went wrong.");
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -120,233 +90,191 @@ export default function AuthPage() {
 
   const handleGoogleOAuth = async () => {
     try {
-      setError("");
-      setLoading(true);
-
-      if (!window.google)
-        throw new Error("Google Identity Services not loaded");
-
+      if (!window.google) throw new Error("Google Identity not loaded");
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
       const redirectUri = `${config.frontend_url}/auth/google`;
-      const scope = "openid email profile";
-
       const params = new URLSearchParams({
         client_id: clientId,
         redirect_uri: redirectUri,
         response_type: "id_token",
-        scope,
+        scope: "openid email profile",
         nonce: crypto.randomUUID(),
         prompt: "select_account",
       });
-
-      const url = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-
-      window.location.href = url;
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
     } catch (err) {
       setError(err.message || "Google sign-in failed.");
-      setLoading(false);
     }
   };
 
   const handleMicrosoftOAuth = async () => {
     await waitForMsal();
-    await msalInstance.loginRedirect({
-      scopes: microsoftScopes,
-      prompt: "select_account",
-    });
+    await msalInstance.loginRedirect({ scopes: microsoftScopes, prompt: "select_account" });
   };
-  
+
   return (
-    <main className="min-vh-100 d-flex align-items-center bg-gradient">
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-12 auth-wrapper d-flex">
-            {/* Left column - form */}
-            <div className="col-12 col-md-6 auth-form">
-              <div className="mb-4 text-center">
-                <h2 className="auth-title">
-                  {isSignup ? "Create Account" : "Sign In"}
-                </h2>
-                <p className="auth-subtitle mb-0">
-                  {isSignup
-                    ? "Join us and get started!"
-                    : "Welcome back, please login."}
-                </p>
-              </div>
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 p-6">
+      <div className="w-full max-w-md relative bg-white/80 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden">
+        {/* Accent blobs */}
+        <div className="absolute -top-16 -right-20 w-60 h-60 bg-gradient-to-br from-green-300 via-emerald-400 to-teal-400 opacity-20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-20 -left-20 w-60 h-60 bg-gradient-to-br from-emerald-400 via-green-300 to-teal-300 opacity-20 rounded-full blur-3xl"></div>
 
-              {error && <div className="alert alert-danger py-2">{error}</div>}
+        <div className="relative p-8">
+          {/* Header */}
+          <h2 className="text-3xl font-bold text-center text-emerald-700 mb-1">
+            {isSignup ? "Create Account" : "Welcome Back"}
+          </h2>
+          <p className="text-center text-gray-600 mb-6">
+            {isSignup
+              ? "Join our vibrant community today!"
+              : "Sign in to continue your journey."}
+          </p>
 
-              {/* OAuth buttons */}
-              <div className="d-grid gap-2 mb-3">
+          {/* OAuth Buttons (unified design) */}
+          <div className="flex flex-col gap-3 mb-6">
+            <button
+              onClick={handleGoogleOAuth}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-white text-gray-700 font-medium shadow-md hover:shadow-lg active:shadow-sm transition-all duration-150 border border-transparent"
+            >
+              {GoogleIcon}
+              Continue with Google
+            </button>
+            <button
+              onClick={handleMicrosoftOAuth}
+              disabled={loading || !msalReady}
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-white text-gray-700 font-medium shadow-md hover:shadow-lg active:shadow-sm transition-all duration-150 border border-transparent"
+            >
+              {MicrosoftIcon}
+              Continue with Microsoft
+            </button>
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-2 my-5">
+            <div className="flex-grow border-t border-gray-200" />
+            <span className="text-sm text-gray-500">or</span>
+            <div className="flex-grow border-t border-gray-200" />
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="bg-red-50 text-red-700 p-2 text-sm rounded mb-3 border border-red-100">
+              {error}
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                className="w-full mt-1 px-3 py-2 rounded-md border border-gray-200 bg-white/70 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-700">Password</label>
+              <div className="relative">
+                <input
+                  type={showPw ? "text" : "password"}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  className="w-full mt-1 px-3 py-2 rounded-md border border-gray-200 bg-white/70 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+                />
                 <button
                   type="button"
-                  className="btn btn-oauth btn-google"
-                  onClick={handleGoogleOAuth}
-                  disabled={loading}
+                  onClick={() => setShowPw((s) => !s)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-emerald-600"
                 >
-                  {GoogleIcon}
-                  Continue with Google
+                  <i className={`bi ${showPw ? "bi-eye-slash" : "bi-eye"}`} />
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-oauth btn-microsoft"
-                  onClick={handleMicrosoftOAuth}
-                  disabled={loading || !msalReady}
-                >
-                  {MicrosoftIcon}
-                  {msalReady
-                    ? "Continue with Microsoft"
-                    : "Microsoft (loading…)"}
-                </button>
-              </div>
-
-              <div className="d-flex align-items-center my-3">
-                <hr className="flex-grow-1" />
-                <span className="mx-2 text-secondary small">or</span>
-                <hr className="flex-grow-1" />
-              </div>
-
-              {/* Auth form */}
-              <form onSubmit={onSubmit} className="d-grid gap-3">
-                <div>
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
-                  <div className="input-group input-with-icon">
-                    <span className="input-group-text">
-                      <i className="bi bi-envelope"></i>
-                    </span>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      placeholder="you@example.com"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="form-label">
-                    Password
-                  </label>
-                  <div className="input-group input-with-icon">
-                    <span className="input-group-text">
-                      <i className="bi bi-lock"></i>
-                    </span>
-                    <input
-                      type={showPw ? "text" : "password"}
-                      className="form-control"
-                      id="password"
-                      name="password"
-                      value={form.password}
-                      onChange={handleChange}
-                      placeholder="Enter your password"
-                      minLength={6}
-                      required
-                    />
-                    <button
-                      className="btn btn-outline-secondary toggle-password"
-                      type="button"
-                      onClick={() => setShowPw((s) => !s)}
-                    >
-                      <i
-                        className={`bi ${showPw ? "bi-eye-slash" : "bi-eye"}`}
-                      ></i>
-                    </button>
-                  </div>
-                </div>
-
-                {isSignup && (
-                  <div>
-                    <label htmlFor="role" className="form-label">
-                      Role
-                    </label>
-                    <div className="input-group input-with-icon">
-                      <span className="input-group-text">
-                        <i className="bi bi-person-badge"></i>
-                      </span>
-                      <select
-                        id="role"
-                        name="role"
-                        className="form-select"
-                        value={form.role}
-                        onChange={handleChange}
-                      >
-                        <option value="student">Student</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="assistant">Assistant</option>
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100 mt-3"
-                  disabled={loading}
-                >
-                  {loading ? "Processing..." : isSignup ? "Sign Up" : "Login"}
-                </button>
-              </form>
-
-              <div className="text-center mt-3">
-                <span
-                  className="switch-mode"
-                  onClick={switchMode}
-                  disabled={loading}
-                >
-                  {isSignup
-                    ? "Already have an account? Sign in"
-                    : "New here? Create account"}
-                </span>
-              </div>
-
-              <div className="text-center mt-4 text-secondary small">
-                © {new Date().getFullYear()} Your Company ·{" "}
-                <NavLink to="/privacy">Privacy</NavLink>
               </div>
             </div>
 
-            <div className="col-6 d-none d-md-block auth-image" />
+            {isSignup && (
+              <div>
+                <label className="text-sm font-medium text-gray-700">Role</label>
+                <select
+                  name="role"
+                  value={form.role}
+                  onChange={handleChange}
+                  className="w-full mt-1 px-3 py-2 rounded-md border border-gray-200 bg-white/70 focus:outline-none focus:ring-2 focus:ring-emerald-400 transition"
+                >
+                  <option value="student">Student</option>
+                  <option value="teacher">Teacher</option>
+                  <option value="assistant">Assistant</option>
+                </select>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-2 py-2 rounded-md bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white font-semibold hover:opacity-95 shadow-md transition-all duration-150"
+            >
+              {loading ? "Processing..." : isSignup ? "Sign Up" : "Login"}
+            </button>
+          </form>
+
+          {/* Switch Mode */}
+          <div className="mt-5 text-center text-sm text-gray-600">
+            {isSignup ? (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  onClick={switchMode}
+                  className="text-emerald-600 hover:underline font-medium"
+                >
+                  Sign in
+                </button>
+              </>
+            ) : (
+              <>
+                New here?{" "}
+                <button
+                  type="button"
+                  onClick={switchMode}
+                  className="text-emerald-600 hover:underline font-medium"
+                >
+                  Create account
+                </button>
+              </>
+            )}
           </div>
+
+          <p className="mt-6 text-center text-xs text-gray-400">
+            © {new Date().getFullYear()} Your Company ·{" "}
+            <NavLink
+              to="/privacy"
+              className="underline text-emerald-600 hover:text-emerald-700"
+            >
+              Privacy
+            </NavLink>
+          </p>
         </div>
       </div>
     </main>
   );
 }
 
+// Unified icons
 const GoogleIcon = (
-  <svg
-    className="icon"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 533.5 544.3"
-    aria-hidden="true"
-  >
-    <path
-      fill="#4285F4"
-      d="M533.5 278.4c0-18.5-1.5-37-4.7-54.9H272v103.9h147.5c-6.4 34.7-25.7 64-54.8 83.7v69.4h88.4c51.6-47.6 80.4-117.8 80.4-202.1z"
-    />
-    <path
-      fill="#34A853"
-      d="M272 544.3c73.9 0 135.9-24.5 181.2-66.2l-88.4-69.4c-24.6 16.6-56.1 26.3-92.8 26.3-71.3 0-131.7-48.1-153.4-112.8H28v70.7c45.2 89.1 138.7 151.4 244 151.4z"
-    />
-    <path
-      fill="#FBBC05"
-      d="M118.6 322.2c-10.9-32.6-10.9-67.6 0-100.2V151.3H28c-38.2 76.2-38.2 165.5 0 241.7l90.6-70.8z"
-    />
-    <path
-      fill="#EA4335"
-      d="M272 107.7c39.9-.6 78.1 14.7 107.2 42.9l79.6-79.6C408 24.6 343.6-.7 272 0 166.7 0 73.2 62.3 28 151.3l90.6 70.7C140.3 155.8 200.7 107.7 272 107.7z"
-    />
+  <svg className="w-5 h-5" viewBox="0 0 533.5 544.3">
+    <path fill="#EA4335" d="M533.5 278.4c0-18.5..." />
   </svg>
 );
 
 const MicrosoftIcon = (
-  <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
+  <svg className="w-5 h-5" viewBox="0 0 24 24">
     <path fill="#F25022" d="M11.5 11.5H2.5V2.5h9z" />
     <path fill="#7FBA00" d="M21.5 11.5h-9V2.5h9z" />
     <path fill="#00A4EF" d="M11.5 21.5H2.5v-9h9z" />
