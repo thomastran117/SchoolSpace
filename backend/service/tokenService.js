@@ -114,7 +114,6 @@ const validateRefreshToken = async (token) => {
     if (!exists) {
       httpError(401, "Refresh token revoked or already used");
     }
-    console.log(decoded);
     return decoded;
   } catch (err) {
     if (err.name === "TokenExpiredError") {

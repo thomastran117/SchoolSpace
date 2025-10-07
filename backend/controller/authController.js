@@ -223,7 +223,6 @@ const logout = async (req, res, next) => {
 
     res.json({ message: "Logged out successfully" });
   } catch (err) {
-    logger.debug(err);
     next(err);
   }
 };
