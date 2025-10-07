@@ -6,10 +6,10 @@ import { store } from "./stores";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import 'virtual:uno.css'
+import "virtual:uno.css";
 
 createRoot(document.getElementById("root")).render(
-    <Provider store={store}>
-      <App />
-    </Provider>
+  <Provider store={store}>
+    <App />
+  </Provider>,
 );

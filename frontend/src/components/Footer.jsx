@@ -1,158 +1,139 @@
 import { NavLink } from "react-router-dom";
-import { Facebook, Twitter, Instagram, Github, Linkedin } from "lucide-react"; // If you want icons (or use FontAwesome/Bootstrap icons)
+import { Facebook, Twitter, Instagram, Github, Linkedin } from "lucide-react";
 
 export default function ElegantFooter() {
   return (
-    <>
-      <style>{`
-        .footer-link {
-          color: #6c757d;
-          text-decoration: none;
-          transition: color 0.2s;
-        }
-        .footer-link:hover {
-          color: #16a34a; /* emerald */
-        }
-        .footer-social a {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          background-color: rgba(22, 163, 74, 0.1);
-          color: #16a34a;
-          transition: all 0.3s;
-        }
-        .footer-social a:hover {
-          background-color: #16a34a;
-          color: #fff;
-        }
-      `}</style>
+    <footer className="bg-gradient-to-b from-white to-gray-50 border-t border-gray-200 pt-16 pb-8 px-6 mt-20 text-gray-600">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div>
+          <NavLink
+            to="/"
+            className="inline-flex items-center gap-2 mb-4 no-underline"
+          >
+            <span className="text-2xl font-bold text-emerald-600">Brand</span>
+            <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700">
+              New
+            </span>
+          </NavLink>
+          <p className="text-sm text-gray-500 leading-relaxed">
+            Building modern, responsive web apps with elegance and simplicity.
+          </p>
+        </div>
 
-      <footer className="bg-light border-top pt-5 mt-5">
-        <div className="container">
-          <div className="row gy-4">
-            {/* Brand + Description */}
-            <div className="col-md-4">
+        <div>
+          <h6 className="text-gray-800 font-semibold mb-3">Company</h6>
+          <ul className="space-y-2">
+            <li>
               <NavLink
-                to="/"
-                className="d-flex align-items-center gap-2 mb-3 text-decoration-none"
+                to="/about"
+                className="hover:text-emerald-600 transition"
               >
-                <span className="fw-bold fs-5 text-success">Brand</span>
-                <span className="badge bg-success-subtle text-success">
-                  New
-                </span>
+                About
               </NavLink>
-              <p className="text-muted small">
-                Building modern, responsive web apps with elegance and
-                simplicity.
-              </p>
-            </div>
-
-            {/* Links */}
-            <div className="col-md-2">
-              <h6 className="fw-bold mb-3">Company</h6>
-              <ul className="list-unstyled">
-                <li>
-                  <NavLink to="/about" className="footer-link">
-                    About
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/features" className="footer-link">
-                    Features
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/pricing" className="footer-link">
-                    Pricing
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/blog" className="footer-link">
-                    Blog
-                  </NavLink>
-                </li>
-              </ul>
-            </div>
-
-            <div className="col-md-2">
-              <h6 className="fw-bold mb-3">Support</h6>
-              <ul className="list-unstyled">
-                <li>
-                  <NavLink to="/docs" className="footer-link">
-                    Docs
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/help" className="footer-link">
-                    Help Center
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/contact" className="footer-link">
-                    Contact
-                  </NavLink>
-                </li>
-                <li>
-                  <NavLink to="/privacy" className="footer-link">
-                    Privacy
-                  </NavLink>
-                </li>
-              </ul>
-            </div>
-
-            {/* Newsletter + Social */}
-            <div className="col-md-4">
-              <h6 className="fw-bold mb-3">Stay Updated</h6>
-              <form className="d-flex mb-3">
-                <input
-                  type="email"
-                  className="form-control rounded-start-pill"
-                  placeholder="Your email"
-                />
-                <button className="btn btn-success rounded-end-pill px-3">
-                  Subscribe
-                </button>
-              </form>
-
-              <div className="footer-social d-flex gap-2">
-                <a href="#">
-                  <Facebook size={18} />
-                </a>
-                <a href="#">
-                  <Twitter size={18} />
-                </a>
-                <a href="#">
-                  <Instagram size={18} />
-                </a>
-                <a href="#">
-                  <Github size={18} />
-                </a>
-                <a href="#">
-                  <Linkedin size={18} />
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <hr className="my-4" />
-          <div className="d-flex flex-column flex-md-row justify-content-between align-items-center text-muted small">
-            <p className="mb-2 mb-md-0">
-              © {new Date().getFullYear()} Brand. All rights reserved.
-            </p>
-            <div>
-              <NavLink to="/terms" className="footer-link me-3">
-                Terms
+            </li>
+            <li>
+              <NavLink
+                to="/features"
+                className="hover:text-emerald-600 transition"
+              >
+                Features
               </NavLink>
-              <NavLink to="/privacy" className="footer-link">
+            </li>
+            <li>
+              <NavLink
+                to="/pricing"
+                className="hover:text-emerald-600 transition"
+              >
+                Pricing
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/blog" className="hover:text-emerald-600 transition">
+                Blog
+              </NavLink>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h6 className="text-gray-800 font-semibold mb-3">Support</h6>
+          <ul className="space-y-2">
+            <li>
+              <NavLink to="/docs" className="hover:text-emerald-600 transition">
+                Docs
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/help" className="hover:text-emerald-600 transition">
+                Help Center
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/contact"
+                className="hover:text-emerald-600 transition"
+              >
+                Contact
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/privacy"
+                className="hover:text-emerald-600 transition"
+              >
                 Privacy
               </NavLink>
-            </div>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h6 className="text-gray-800 font-semibold mb-3">Stay Updated</h6>
+          <form className="flex mb-4">
+            <input
+              type="email"
+              placeholder="Your email"
+              className="flex-1 px-4 py-2 rounded-l-full border border-gray-300 focus:outline-none focus:border-emerald-500"
+            />
+            <button
+              type="button"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 rounded-r-full font-semibold transition"
+            >
+              Subscribe
+            </button>
+          </form>
+
+          <div className="flex gap-3">
+            {[
+              { icon: Facebook, href: "#" },
+              { icon: Twitter, href: "#" },
+              { icon: Instagram, href: "#" },
+              { icon: Github, href: "#" },
+              { icon: Linkedin, href: "#" },
+            ].map(({ icon: Icon, href }, i) => (
+              <a
+                key={i}
+                href={href}
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600 hover:bg-emerald-600 hover:text-white transition"
+              >
+                <Icon size={18} />
+              </a>
+            ))}
           </div>
         </div>
-      </footer>
-    </>
+      </div>
+
+      <div className="border-t border-gray-200 mt-10 pt-6 text-sm text-gray-500 flex flex-col md:flex-row justify-between items-center gap-3">
+        <p>© {new Date().getFullYear()} Brand. All rights reserved.</p>
+        <div className="flex gap-4">
+          <NavLink to="/terms" className="hover:text-emerald-600 transition">
+            Terms
+          </NavLink>
+          <NavLink to="/privacy" className="hover:text-emerald-600 transition">
+            Privacy
+          </NavLink>
+        </div>
+      </div>
+    </footer>
   );
 }

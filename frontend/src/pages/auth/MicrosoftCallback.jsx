@@ -40,18 +40,25 @@ export default function MicrosoftCallback() {
 
         setStatus("Verifying your Microsoft account…");
 
-        const resp = await fetch(`${config.backend_url}/auth/microsoft/verify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ id_token: idToken }),
-        });
+        const resp = await fetch(
+          `${config.backend_url}/auth/microsoft/verify`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ id_token: idToken }),
+          },
+        );
 
         if (resp.status === 401 || resp.status === 403) {
-          throw new Error("Your Microsoft sign-in session is invalid or expired.");
+          throw new Error(
+            "Your Microsoft sign-in session is invalid or expired.",
+          );
         }
         if (!resp.ok) {
-          throw new Error((await resp.text()) || "Unexpected error from server.");
+          throw new Error(
+            (await resp.text()) || "Unexpected error from server.",
+          );
         }
 
         const data = await resp.json();
@@ -74,32 +81,27 @@ export default function MicrosoftCallback() {
   }, [navigate, dispatch]);
 
   return (
-    <div
-      className="d-flex min-vh-100 justify-content-center align-items-center"
-      style={{
-        background: "linear-gradient(135deg, #eef4ff, #f2ebff, #ffffff)",
-        // light blue → soft lavender → white
-      }}
-    >
-      <div
-        className="text-center p-5 rounded-5 shadow-lg bg-white border border-light"
-        style={{ maxWidth: "500px", width: "100%" }}
-      >
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 via-indigo-50 to-white px-4">
+      <div className="relative w-full max-w-md p-8 rounded-2xl bg-white/90 backdrop-blur-md shadow-xl border border-white/40 text-center">
+        <div className="absolute -top-20 -right-20 w-60 h-60 bg-gradient-to-br from-sky-200 via-indigo-200 to-emerald-200 opacity-30 blur-3xl rounded-full" />
+
         {error ? (
           <>
-            <div className="mb-4 fs-1 text-danger">✖</div>
-            <h3 className="fw-bold mb-3 text-dark">Microsoft Authentication Error</h3>
-            <p className="text-muted mb-4 fs-5">{error}</p>
+            <div className="mb-4 text-6xl text-red-500">✖</div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              Microsoft Authentication Error
+            </h3>
+            <p className="text-gray-600 mb-6">{error}</p>
 
-            <div className="d-flex gap-3 justify-content-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
-                className="btn btn-primary btn-lg px-5"
+                className="flex-1 py-2.5 rounded-md bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold shadow-md hover:opacity-90 transition"
                 onClick={retryMicrosoftOAuth}
               >
                 Retry Microsoft Sign-In
               </button>
               <button
-                className="btn btn-outline-secondary btn-lg px-5"
+                className="flex-1 py-2.5 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 font-semibold transition"
                 onClick={() => navigate("/auth")}
               >
                 Back to Sign In
@@ -108,14 +110,10 @@ export default function MicrosoftCallback() {
           </>
         ) : (
           <>
-            <div
-              className="spinner-border text-primary mb-4"
-              role="status"
-              style={{ width: "4rem", height: "4rem" }}
-            >
-              <span className="visually-hidden">Loading…</span>
+            <div className="flex justify-center mb-6">
+              <div className="w-12 h-12 border-4 border-sky-400 border-t-transparent rounded-full animate-spin" />
             </div>
-            <p className="fw-semibold text-primary fs-5">{status}</p>
+            <p className="text-sky-700 font-medium text-lg">{status}</p>
           </>
         )}
       </div>
