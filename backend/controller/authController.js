@@ -29,6 +29,8 @@ import {
   requireFields,
   httpError,
   assertAllowed,
+  isBoolean,
+  validateEmail,
 } from "../utility/httpUtility.js";
 
 /**
@@ -42,13 +44,15 @@ import {
 const login = async (req, res, next) => {
   try {
     requireFields(["email", "password"], req.body);
-    const { email, password } = req.body;
+    const { email, password, remember } = req.body;
 
     if (!validateEmail(email)) httpError(400, "Invalid email format");
+    const remember_boolean = isBoolean(remember);
 
     const { accessToken, refreshToken, role } = await loginUser(
       email,
       password,
+      remember_boolean,
     );
 
     sendCookie(res, refreshToken);
@@ -225,17 +229,6 @@ const logout = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
-
-/**
- * Utility: Validates email format.
- *
- * @param {string} email
- * @returns {boolean}
- */
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
 };
 
 /**

@@ -132,10 +132,45 @@ function httpResponse(statusCode, message) {
   return err;
 }
 
+/**
+ * Validates that a string is a boolean
+ *
+ * @param {str|boolean} str - The value to validate.
+ * @returns {boolean} The boolean value
+ * @throws {Error} If the value is not a positive integer.
+ *
+ * @example
+ * const remember = isBoolean(req.body.remember);
+ */
+function isBoolean(str) {
+  if (typeof str === "boolean") return str;
+
+  if (typeof str === "string") {
+    const lower = str.toLowerCase();
+    if (lower === "true") return true;
+    if (lower === "false") return false;
+  }
+
+  return false;
+}
+
+/**
+ * Utility: Validates email format.
+ *
+ * @param {string} email
+ * @returns {boolean}
+ */
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 export {
   requireFields,
   requiresAtLeastOneField,
   validatePositiveInt,
   httpError,
   assertAllowed,
+  isBoolean,
+  validateEmail,
 };

@@ -30,7 +30,8 @@ const {
 } = config;
 
 const ACCESS_EXPIRY = "30m";
-const REFRESH_EXPIRY = "7d";
+const SHORT_REFRESH_EXPIRY = "1d";
+const LONG_REFRESH_EXPIRY = "7d";
 
 /**
  * Extracts user payload (id, role) from Authorization header.
@@ -54,7 +55,7 @@ const getUserPayload = (authHeader) => {
  * @param {string} role - User role.
  * @returns {Promise<{ accessToken: string, refreshToken: string }>}
  */
-const generateTokens = async (id, email, role) => {
+const generateTokens = async (id, email, role, remember) => {
   const accessToken = createAccessToken(id, email, role);
   const refreshToken = createRefreshToken(id, email, role);
 
@@ -94,10 +95,12 @@ export const validateAccessToken = (token) => {
  * Creates a signed refresh token with a unique jti and user payload.
  * @private
  */
-const createRefreshToken = (userId, email, role) => {
+const createRefreshToken = (userId, email, role, remember) => {
   const jti = uuidv4();
-  const payload = { userId, email, role, jti };
-  return jwt.sign(payload, JWT_SECRET_REFRESH, { expiresIn: REFRESH_EXPIRY });
+  const payload = { userId, email, role, jti, remember };
+  const expiresIn = remember ? LONG_REFRESH_EXPIRY : SHORT_REFRESH_EXPIRY;
+  
+  return jwt.sign(payload, JWT_SECRET_REFRESH, { expiresIn });
 };
 
 /**
@@ -144,7 +147,7 @@ const rotateRefreshToken = async (oldToken) => {
   const decoded = await validateRefreshToken(oldToken);
   await redis.del(`refresh:${decoded.jti}`);
   const accessToken = createAccessToken(decoded.userId, decoded.email, decoded.role);
-  const refreshToken = createRefreshToken(decoded.userId, decoded.email, decoded.role);
+  const refreshToken = createRefreshToken(decoded.userId, decoded.email, decoded.role, decoded.remember);
 
   const newDecoded = jwt.decode(refreshToken);
   await saveRefreshToken(newDecoded.jti, newDecoded.userId, newDecoded.exp);

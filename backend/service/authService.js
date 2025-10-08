@@ -47,7 +47,7 @@ const { frontend_client: FRONTEND_CLIENT } = config;
  * @returns {Promise<{ accessToken: string, refreshToken: string, role: string, id: string }>}
  * @throws {Error} If credentials are invalid.
  */
-const loginUser = async (email, password) => {
+const loginUser = async (email, password, remember) => {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) httpError(401, "Invalid credentials");
 
@@ -58,6 +58,7 @@ const loginUser = async (email, password) => {
     user.id,
     user.email,
     user.role,
+    remember,
   );
 
   return { accessToken, refreshToken, role: user.role, id: user.id };
@@ -77,7 +78,7 @@ const signupUser = async (email, password, role) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const token = await createVerifyToken(email, hashedPassword, role);
 
-  const url = `${FRONTEND_CLIENT}/verify?token=${encodeURIComponent(token)}`;
+  const url = `${FRONTEND_CLIENT}/auth/verify?token=${encodeURIComponent(token)}`;
   await sendVerificationEmail(email, url);
 
   return { message: "Verification email sent" };
