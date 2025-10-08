@@ -29,8 +29,11 @@
 .auth-form {
   position: relative;
   padding: 3rem;
-  background:
-    linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(147, 51, 234, 0.08)),
+  background: linear-gradient(
+      135deg,
+      rgba(99, 102, 241, 0.06),
+      rgba(147, 51, 234, 0.08)
+    ),
     #ffffff;
   backdrop-filter: blur(8px);
   overflow: hidden;
@@ -75,8 +78,7 @@
 }
 
 @keyframes subtlePulse {
-  0%,
-  100% {
+  0%, 100% {
     opacity: 0.9;
   }
   50% {
@@ -173,6 +175,7 @@
   box-shadow: 0 0 0 3px rgba(0, 164, 239, 0.25);
   color: #00a4ef;
 }
+
 
 .btn-oauth:hover {
   transform: translateY(-2px);

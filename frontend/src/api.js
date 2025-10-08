@@ -22,7 +22,7 @@ async function refreshToken(state) {
         token: accessToken,
         role: role,
         email: email,
-      }),
+      })
     );
 
     return accessToken;
@@ -75,9 +75,7 @@ api.interceptors.response.use(
 
       if (msg.includes("Invalid access token")) {
         store.dispatch(clearCredentials());
-        return Promise.reject(
-          new Error("Invalid session. Please log in again."),
-        );
+        return Promise.reject(new Error("Invalid session. Please log in again."));
       }
 
       if (!originalConfig._retry) {
@@ -104,13 +102,11 @@ api.interceptors.response.use(
 
     if (error.response?.status === 500) {
       console.error("Internal server error:", error.response?.data);
-      throw new Error(
-        "An unexpected server error occurred. Please try again later.",
-      );
+      throw new Error("An unexpected server error occurred. Please try again later.");
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;

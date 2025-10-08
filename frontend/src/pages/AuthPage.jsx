@@ -8,11 +8,7 @@ import { setCredentials } from "../stores/authSlice";
 export default function AuthPage() {
   const dispatch = useDispatch();
   const [mode, setMode] = useState("login");
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    role: "student",
-  });
+  const [form, setForm] = useState({ email: "", password: "", role: "student" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -70,19 +66,13 @@ export default function AuthPage() {
         body: JSON.stringify(payload),
       });
 
-      if (!resp.ok) throw new Error((await resp.text()) || "Request failed");
+      if (!resp.ok) throw new Error(await resp.text() || "Request failed");
 
       if (isSignup) {
         alert("Signup successful!");
       } else {
         const data = await resp.json();
-        dispatch(
-          setCredentials({
-            token: data.accessToken,
-            email: data.user,
-            role: data.role,
-          }),
-        );
+        dispatch(setCredentials({ token: data.accessToken, email: data.user, role: data.role }));
       }
     } catch (err) {
       setError(err.message || "Something went wrong.");
@@ -119,10 +109,7 @@ export default function AuthPage() {
 
   const handleMicrosoftOAuth = async () => {
     await waitForMsal();
-    await msalInstance.loginRedirect({
-      scopes: microsoftScopes,
-      prompt: "select_account",
-    });
+    await msalInstance.loginRedirect({ scopes: microsoftScopes, prompt: "select_account" });
   };
 
   return (
@@ -192,9 +179,7 @@ export default function AuthPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700">
-                Password
-              </label>
+              <label className="text-sm font-medium text-gray-700">Password</label>
               <div className="relative">
                 <input
                   type={showPw ? "text" : "password"}
@@ -216,9 +201,7 @@ export default function AuthPage() {
 
             {isSignup && (
               <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Role
-                </label>
+                <label className="text-sm font-medium text-gray-700">Role</label>
                 <select
                   name="role"
                   value={form.role}
@@ -283,28 +266,10 @@ export default function AuthPage() {
   );
 }
 
+// Unified icons
 const GoogleIcon = (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 533.5 544.3"
-    className="w-5 h-5"
-  >
-    <path
-      fill="#4285F4"
-      d="M533.5 278.4c0-17.4-1.5-34.1-4.5-50.3H272v95.2h146.9c-6.3 34-25 62.9-53.6 82.2l86.6 67.2c50.6-46.6 81.6-115.3 81.6-194.3z"
-    />
-    <path
-      fill="#34A853"
-      d="M272 544.3c72.9 0 134.1-24.1 178.8-65.7l-86.6-67.2c-24 16.1-54.7 25.7-92.2 25.7-70.9 0-130.9-47.8-152.4-111.9l-89.4 69c41.8 82.7 128.1 150.1 242.8 150.1z"
-    />
-    <path
-      fill="#FBBC05"
-      d="M119.6 325.2c-10.9-32.6-10.9-67.7 0-100.3l-89.4-69C10.8 201.1 0 238.5 0 278s10.8 76.9 30.2 122.1l89.4-69z"
-    />
-    <path
-      fill="#EA4335"
-      d="M272 107.7c39.7 0 75.5 13.7 103.6 40.5l77.3-77.3C406.1 24.1 344.9 0 272 0 157.3 0 71 67.4 30.2 155.9l89.4 69c21.5-64.1 81.5-111.9 152.4-111.9z"
-    />
+  <svg className="w-5 h-5" viewBox="0 0 533.5 544.3">
+    <path fill="#EA4335" d="M533.5 278.4c0-18.5..." />
   </svg>
 );
 

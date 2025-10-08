@@ -1,107 +1,87 @@
 import React from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function FeaturesPage() {
   const features = [
     {
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-8 h-8 text-emerald-600"
-          fill="currentColor"
-          viewBox="0 0 16 16"
-        >
-          <path d="M11.3 1L4 9h4v6l7.3-8H11.3z" />
-        </svg>
-      ),
+      icon: "bi bi-lightning-fill",
       title: "Fast Performance",
       text: "Our platform is optimized for speed, ensuring quick load times and smooth interactions.",
     },
     {
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-8 h-8 text-emerald-600"
-          fill="currentColor"
-          viewBox="0 0 16 16"
-        >
-          <path d="M5.5 9.5l2 2 4.5-4.5L10.5 5l-3 3-1.5-1.5z" />
-          <path d="M8 0a8 8 0 1 0 8 8A8 8 0 0 0 8 0zm0 14.5A6.5 6.5 0 1 1 14.5 8 6.5 6.5 0 0 1 8 14.5z" />
-        </svg>
-      ),
+      icon: "bi bi-shield-check",
       title: "Secure by Design",
       text: "We use advanced security practices to keep your data safe at all times.",
     },
     {
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-8 h-8 text-emerald-600"
-          fill="currentColor"
-          viewBox="0 0 16 16"
-        >
-          <path d="M8 8a3 3 0 1 0-3-3 3 3 0 0 0 3 3z" />
-          <path d="M14 13a6 6 0 1 0-12 0z" />
-        </svg>
-      ),
+      icon: "bi bi-people-fill",
       title: "User Friendly",
       text: "A simple, intuitive interface built for everyone, from beginners to experts.",
     },
     {
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-8 h-8 text-emerald-600"
-          fill="currentColor"
-          viewBox="0 0 16 16"
-        >
-          <path d="M11 1a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2z" />
-          <path d="M8 14a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z" />
-        </svg>
-      ),
+      icon: "bi bi-phone-fill",
       title: "Mobile Ready",
       text: "Seamlessly optimized for mobile, tablet, and desktop experiences.",
     },
   ];
 
   return (
-    <div className="features-page">
-      <section className="py-20 text-center text-white bg-gradient-to-br from-emerald-500 to-green-700 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold mb-3">Our Features</h1>
-          <p className="text-lg text-white/90">
+    <div className="features-page bg-light">
+      <section
+        className="py-5 text-center text-white"
+        style={{
+          background: "linear-gradient(135deg, #16a34a, #15803d)",
+        }}
+      >
+        <div className="container">
+          <h1 className="fw-bold display-4">Our Features</h1>
+          <p className="lead mt-3 text-light">
             Discover what makes our platform powerful, secure, and easy to use.
           </p>
         </div>
       </section>
 
-      <section className="py-20 px-4 bg-gradient-to-br from-white via-emerald-50 to-white">
-        <div className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((f, idx) => (
-            <div
-              key={idx}
-              className="text-center bg-white rounded-xl shadow-md hover:shadow-lg transition p-8 flex flex-col items-center"
-            >
-              <div className="w-16 h-16 flex items-center justify-center rounded-full bg-emerald-100 mb-4">
-                {f.icon}
+      <section className="py-5">
+        <div className="container">
+          <div className="row g-4">
+            {features.map((f, idx) => (
+              <div className="col-md-6 col-lg-3" key={idx}>
+                <div className="card h-100 border-0 shadow-sm text-center p-4">
+                  <div
+                    className="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                    style={{
+                      width: "70px",
+                      height: "70px",
+                      backgroundColor: "rgba(22, 163, 74, 0.12)",
+                      color: "#16a34a",
+                      fontSize: "2rem",
+                    }}
+                  >
+                    <i className={f.icon}></i>
+                  </div>
+                  <h5 className="fw-bold">{f.title}</h5>
+                  <p className="text-muted">{f.text}</p>
+                </div>
               </div>
-              <h5 className="text-lg font-semibold mb-2 text-gray-800">
-                {f.title}
-              </h5>
-              <p className="text-gray-500 text-sm leading-relaxed">{f.text}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="py-20 text-center text-white bg-gradient-to-br from-green-700 to-emerald-600 px-4">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold mb-3">Ready to get started?</h2>
-          <p className="text-white/90 mb-8">
+      <section
+        className="py-5 text-center text-white"
+        style={{
+          background: "linear-gradient(135deg, #15803d, #166534)",
+        }}
+      >
+        <div className="container">
+          <h2 className="fw-bold mb-3">Ready to get started?</h2>
+          <p className="mb-4">
             Experience all these features and more by joining us today.
           </p>
           <a
             href="/get-started"
-            className="inline-block bg-white text-emerald-600 font-semibold rounded-full px-6 py-3 shadow-md hover:bg-emerald-50 transition"
+            className="btn btn-light text-success fw-semibold rounded-pill px-4 py-2 shadow-sm"
           >
             Get Started
           </a>
