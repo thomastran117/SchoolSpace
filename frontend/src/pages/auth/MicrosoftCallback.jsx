@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { msalInstance, waitForMsal } from "../../auth/msalClient";
+import { msalInstance, waitForMsal } from "../../configs/msalClient";
 import config from "../../configs/envManager";
 import { setCredentials } from "../../stores/authSlice";
 
