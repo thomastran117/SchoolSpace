@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { msalInstance, microsoftScopes, waitForMsal } from "../auth/msalClient";
 import { useDispatch } from "react-redux";
-import config from "../configs/envManager";
 import { setCredentials } from "../stores/authSlice";
+import GoogleButton from "../components/auth/GoogleButton";
+import MicrosoftButton from "../components/auth/MicrosoftButton";
+import config from "../configs/envManager";
 import "../styles/auth.css";
 
 export default function AuthPage() {
   const dispatch = useDispatch();
-  const [mode, setMode] = useState("login");
+  const [isSignup, setIsSignup] = useState(false);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -17,49 +18,39 @@ export default function AuthPage() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [msalReady, setMsalReady] = useState(false);
-
-  const isSignup = mode === "signup";
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        await waitForMsal();
-        if (alive) setMsalReady(true);
-      } catch (e) {
-        if (alive) {
-          setError("Microsoft sign-in not available (MSAL init failed).");
-          setMsalReady(false);
-        }
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
-  };
 
   const validate = () => {
-    setError("");
     if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       return "Enter a valid email.";
     if (!form.password || form.password.length < 6)
       return "Password must be at least 6 characters.";
+    if (isSignup && !form.role) return "Please select your role.";
     return "";
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const parseError = async (res) => {
+    if (res.status === 400) return "Invalid input or missing required fields.";
+    if (res.status === 401) return "Incorrect email or password.";
+    if (res.status === 404) return "Incorrect email";
+    if (res.status === 500) return "Server error. Please try again later.";
+    try {
+      const text = await res.text();
+      if (text) return text;
+    } catch {
+      /* ignore */
+    }
+    return "Something went wrong. Please try again.";
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
     const v = validate();
-    if (v) {
-      setError(v);
-      return;
-    }
+    if (v) return setError(v);
 
     try {
       setLoading(true);
@@ -80,276 +71,297 @@ export default function AuthPage() {
         ? `${config.backend_url}/auth/signup`
         : `${config.backend_url}/auth/login`;
 
-      const resp = await fetch(endpoint, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(payload),
       });
 
-      if (!resp.ok) {
-        const msg = await resp.text();
-        throw new Error(msg || `Request failed (${resp.status})`);
-      }
+      if (!res.ok) throw new Error(await parseError(res));
+
+      const data = await res.json();
 
       if (isSignup) {
-        alert("Signup successful: ");
+        alert("Signup successful!");
+        setIsSignup(false);
       } else {
-        const data = await resp.json();
         dispatch(
           setCredentials({
             token: data.accessToken,
             email: data.user,
             role: data.role,
-          }),
+          })
         );
       }
     } catch (err) {
-      setError(err?.message || "Something went wrong.");
+      setError(err.message || "Authentication failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  const switchMode = () => {
-    setMode(isSignup ? "login" : "signup");
-    setForm({ email: "", password: "", role: "student" });
-    setError("");
-    setShowPw(false);
-  };
+  const RoleSelect = () => (
+    <div className="d-flex justify-content-center gap-3 mt-3">
+      {["student", "teacher"].map((role) => (
+        <div
+          key={role}
+          onClick={() => setForm((prev) => ({ ...prev, role }))}
+          className={`role-card text-center px-4 py-3 rounded-3 border ${
+            form.role === role
+              ? "border-primary bg-primary-subtle"
+              : "border-secondary-subtle bg-light"
+          }`}
+          style={{
+            cursor: "pointer",
+            minWidth: "120px",
+            transition: "all 0.3s ease",
+          }}
+        >
+          <i
+            className={`bi ${
+              role === "student" ? "bi-mortarboard" : "bi-person-badge"
+            } mb-2 fs-4 ${
+              form.role === role ? "text-primary" : "text-secondary"
+            }`}
+          ></i>
+          <div
+            className={`fw-semibold ${
+              form.role === role ? "text-primary" : "text-muted"
+            }`}
+          >
+            {role.charAt(0).toUpperCase() + role.slice(1)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
-  const handleGoogleOAuth = async () => {
-    try {
-      setError("");
-      setLoading(true);
-
-      if (!window.google)
-        throw new Error("Google Identity Services not loaded");
-
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      const redirectUri = `${config.frontend_url}/auth/google`;
-      const scope = "openid email profile";
-
-      const params = new URLSearchParams({
-        client_id: clientId,
-        redirect_uri: redirectUri,
-        response_type: "id_token",
-        scope,
-        nonce: crypto.randomUUID(),
-        prompt: "select_account",
-      });
-
-      const url = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-
-      window.location.href = url;
-    } catch (err) {
-      setError(err.message || "Google sign-in failed.");
-      setLoading(false);
-    }
-  };
-
-  const handleMicrosoftOAuth = async () => {
-    await waitForMsal();
-    await msalInstance.loginRedirect({
-      scopes: microsoftScopes,
-      prompt: "select_account",
-    });
-  };
-  
+  // --- UI ---
   return (
-    <main className="min-vh-100 d-flex align-items-center bg-gradient">
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-12 auth-wrapper d-flex">
-            {/* Left column - form */}
-            <div className="col-12 col-md-6 auth-form">
-              <div className="mb-4 text-center">
-                <h2 className="auth-title">
-                  {isSignup ? "Create Account" : "Sign In"}
-                </h2>
-                <p className="auth-subtitle mb-0">
-                  {isSignup
-                    ? "Join us and get started!"
-                    : "Welcome back, please login."}
-                </p>
-              </div>
+    <main
+      className="min-vh-100 d-flex align-items-center justify-content-center"
+      style={{
+        background:
+          "linear-gradient(135deg, #dbe8ff 0%, #edf3ff 50%, #e0edff 100%)",
+      }}
+    >
+      <div
+        className="p-1 rounded-4 shadow-lg position-relative"
+        style={{
+          background:
+            "linear-gradient(135deg, #0d6efd, #6f42c1, #ff6f61, #ffc107)",
+          backgroundSize: "300% 300%",
+          animation: "borderShift 8s ease infinite",
+          width: "100%",
+          maxWidth: "900px",
+        }}
+      >
+        <div
+          className="rounded-4 bg-white position-relative overflow-hidden"
+          style={{
+            zIndex: 2,
+            padding: "0",
+          }}
+        >
+          {/* background blobs */}
+          <div
+            className="position-absolute rounded-circle"
+            style={{
+              top: "-50px",
+              left: "-50px",
+              width: "150px",
+              height: "150px",
+              background: "rgba(13,110,253,0.12)",
+              filter: "blur(40px)",
+              zIndex: 0,
+            }}
+          ></div>
+          <div
+            className="position-absolute rounded-circle"
+            style={{
+              bottom: "-60px",
+              right: "-40px",
+              width: "180px",
+              height: "180px",
+              background: "rgba(111,66,193,0.12)",
+              filter: "blur(40px)",
+              zIndex: 0,
+            }}
+          ></div>
 
-              {error && <div className="alert alert-danger py-2">{error}</div>}
+          <div className="row g-0 position-relative" style={{ zIndex: 1 }}>
+            {/* left illustration */}
+            <div className="col-md-6 d-none d-md-flex justify-content-center align-items-center bg-light-subtle">
+              <img
+                src="https://cdn.dribbble.com/users/1003944/screenshots/15817552/media/ea568c474ffebf5b54b978c706ba0a6e.png"
+                alt="Illustration"
+                className="img-fluid"
+                style={{ maxWidth: "80%", objectFit: "contain" }}
+              />
+            </div>
 
-              {/* OAuth buttons */}
-              <div className="d-grid gap-2 mb-3">
-                <button
-                  type="button"
-                  className="btn btn-oauth btn-google"
-                  onClick={handleGoogleOAuth}
-                  disabled={loading}
+            {/* right form */}
+            <div className="col-12 col-md-6 p-5">
+              <div
+                className={`auth-content fade-section ${
+                  isSignup ? "fade-slide-right" : "fade-slide-left"
+                }`}
+                key={isSignup ? "signup" : "login"}
+              >
+                <h3
+                  className="fw-bold mb-4 text-center"
+                  style={{
+                    color: isSignup ? "#6f42c1" : "#0d6efd",
+                    transition: "color 0.4s ease",
+                  }}
                 >
-                  {GoogleIcon}
-                  Continue with Google
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-oauth btn-microsoft"
-                  onClick={handleMicrosoftOAuth}
-                  disabled={loading || !msalReady}
-                >
-                  {MicrosoftIcon}
-                  {msalReady
-                    ? "Continue with Microsoft"
-                    : "Microsoft (loading…)"}
-                </button>
-              </div>
+                  {isSignup ? "Create Account" : "Welcome Back"}
+                </h3>
 
-              <div className="d-flex align-items-center my-3">
-                <hr className="flex-grow-1" />
-                <span className="mx-2 text-secondary small">or</span>
-                <hr className="flex-grow-1" />
-              </div>
-
-              {/* Auth form */}
-              <form onSubmit={onSubmit} className="d-grid gap-3">
-                <div>
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
-                  <div className="input-group input-with-icon">
-                    <span className="input-group-text">
-                      <i className="bi bi-envelope"></i>
-                    </span>
+                <form className="d-grid gap-4" onSubmit={onSubmit}>
+                  <div className="position-relative">
+                    <i
+                      className="bi bi-envelope position-absolute"
+                      style={{
+                        left: 0,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "#6c757d",
+                      }}
+                    ></i>
                     <input
-                      type="email"
-                      className="form-control"
-                      id="email"
                       name="email"
                       value={form.email}
                       onChange={handleChange}
+                      type="email"
+                      className="form-control border-0 border-bottom ps-4"
                       placeholder="you@example.com"
-                      required
+                      style={{
+                        borderRadius: 0,
+                        boxShadow: "none",
+                        background: "transparent",
+                      }}
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label htmlFor="password" className="form-label">
-                    Password
-                  </label>
-                  <div className="input-group input-with-icon">
-                    <span className="input-group-text">
-                      <i className="bi bi-lock"></i>
-                    </span>
+                  <div className="position-relative">
+                    <i
+                      className="bi bi-lock position-absolute"
+                      style={{
+                        left: 0,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "#6c757d",
+                      }}
+                    ></i>
                     <input
-                      type={showPw ? "text" : "password"}
-                      className="form-control"
-                      id="password"
                       name="password"
                       value={form.password}
                       onChange={handleChange}
-                      placeholder="Enter your password"
-                      minLength={6}
-                      required
+                      type={showPw ? "text" : "password"}
+                      className="form-control border-0 border-bottom ps-4 pe-4"
+                      placeholder="Password"
+                      style={{
+                        borderRadius: 0,
+                        boxShadow: "none",
+                        background: "transparent",
+                      }}
                     />
                     <button
-                      className="btn btn-outline-secondary toggle-password"
                       type="button"
-                      onClick={() => setShowPw((s) => !s)}
+                      className="btn position-absolute p-0"
+                      style={{
+                        right: 0,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        border: "none",
+                        background: "transparent",
+                      }}
+                      onClick={() => setShowPw((prev) => !prev)}
                     >
                       <i
-                        className={`bi ${showPw ? "bi-eye-slash" : "bi-eye"}`}
+                        className={`bi ${
+                          showPw ? "bi-eye-slash" : "bi-eye"
+                        } text-secondary`}
                       ></i>
                     </button>
                   </div>
-                </div>
 
-                {isSignup && (
-                  <div>
-                    <label htmlFor="role" className="form-label">
-                      Role
-                    </label>
-                    <div className="input-group input-with-icon">
-                      <span className="input-group-text">
-                        <i className="bi bi-person-badge"></i>
-                      </span>
-                      <select
-                        id="role"
-                        name="role"
-                        className="form-select"
-                        value={form.role}
-                        onChange={handleChange}
-                      >
-                        <option value="student">Student</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="assistant">Assistant</option>
-                      </select>
+                  {isSignup && <RoleSelect />}
+
+                  {/* inline small error message */}
+                  {error && (
+                    <small className="text-danger text-center fw-semibold mt-2">
+                      {error}
+                    </small>
+                  )}
+
+                  {!isSignup && (
+                    <div className="form-check mt-2">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="remember"
+                      />
+                      <label className="form-check-label" htmlFor="remember">
+                        Remember me
+                      </label>
                     </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="btn w-100 mt-3 text-white"
+                    disabled={loading}
+                    style={{
+                      backgroundColor: isSignup ? "#6f42c1" : "#0d6efd",
+                      border: "none",
+                      transition: "background-color 0.3s ease",
+                    }}
+                  >
+                    {loading
+                      ? "Processing..."
+                      : isSignup
+                      ? "Sign up"
+                      : "Log in"}
+                  </button>
+
+                  <div className="text-center mt-2">
+                    <button
+                      type="button"
+                      className="btn btn-link text-decoration-none"
+                      onClick={() => setIsSignup((prev) => !prev)}
+                      disabled={loading}
+                    >
+                      {isSignup
+                        ? "Already have an account? Log in"
+                        : "New here? Create account"}
+                    </button>
                   </div>
-                )}
+                </form>
 
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100 mt-3"
-                  disabled={loading}
-                >
-                  {loading ? "Processing..." : isSignup ? "Sign Up" : "Login"}
-                </button>
-              </form>
-
-              <div className="text-center mt-3">
-                <span
-                  className="switch-mode"
-                  onClick={switchMode}
-                  disabled={loading}
-                >
-                  {isSignup
-                    ? "Already have an account? Sign in"
-                    : "New here? Create account"}
-                </span>
+                {/* OAuth */}
+                <div className="text-center mt-4">
+                  <p className="text-muted small mb-3">Or continue with</p>
+                  <div className="d-flex justify-content-center gap-3 flex-wrap">
+                    <GoogleButton disabled={loading} />
+                    <MicrosoftButton disabled={loading} />
+                  </div>
               </div>
 
-              <div className="text-center mt-4 text-secondary small">
-                © {new Date().getFullYear()} Your Company ·{" "}
-                <NavLink to="/privacy">Privacy</NavLink>
+
+                <p className="text-center text-muted small mt-4 mb-0">
+                  © {new Date().getFullYear()} SchoolSpace ·{" "}
+                  <NavLink to="/privacy" className="text-decoration-none">
+                    Privacy Policy
+                  </NavLink>
+                </p>
               </div>
             </div>
-
-            <div className="col-6 d-none d-md-block auth-image" />
           </div>
         </div>
       </div>
     </main>
   );
 }
-
-const GoogleIcon = (
-  <svg
-    className="icon"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 533.5 544.3"
-    aria-hidden="true"
-  >
-    <path
-      fill="#4285F4"
-      d="M533.5 278.4c0-18.5-1.5-37-4.7-54.9H272v103.9h147.5c-6.4 34.7-25.7 64-54.8 83.7v69.4h88.4c51.6-47.6 80.4-117.8 80.4-202.1z"
-    />
-    <path
-      fill="#34A853"
-      d="M272 544.3c73.9 0 135.9-24.5 181.2-66.2l-88.4-69.4c-24.6 16.6-56.1 26.3-92.8 26.3-71.3 0-131.7-48.1-153.4-112.8H28v70.7c45.2 89.1 138.7 151.4 244 151.4z"
-    />
-    <path
-      fill="#FBBC05"
-      d="M118.6 322.2c-10.9-32.6-10.9-67.6 0-100.2V151.3H28c-38.2 76.2-38.2 165.5 0 241.7l90.6-70.8z"
-    />
-    <path
-      fill="#EA4335"
-      d="M272 107.7c39.9-.6 78.1 14.7 107.2 42.9l79.6-79.6C408 24.6 343.6-.7 272 0 166.7 0 73.2 62.3 28 151.3l90.6 70.7C140.3 155.8 200.7 107.7 272 107.7z"
-    />
-  </svg>
-);
-
-const MicrosoftIcon = (
-  <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
-    <path fill="#F25022" d="M11.5 11.5H2.5V2.5h9z" />
-    <path fill="#7FBA00" d="M21.5 11.5h-9V2.5h9z" />
-    <path fill="#00A4EF" d="M11.5 21.5H2.5v-9h9z" />
-    <path fill="#FFB900" d="M21.5 21.5h-9v-9h9z" />
-  </svg>
-);
