@@ -1,4 +1,4 @@
-import AuthPage from "../pages/AuthPage";
+import AuthPage from "../pages/auth/AuthPage";
 import GoogleCallback from "../pages/auth/GoogleCallback";
 import MicrosoftCallback from "../pages/auth/MicrosoftCallback";
 import VerifyPage from "../pages/auth/VerifyPage";

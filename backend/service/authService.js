@@ -206,9 +206,8 @@ const loginOrCreateFromGoogle = async (googleToken) => {
  * @returns {Promise<{ accessToken: string, refreshToken: string, user: object }>}
  */
 const generateNewTokens = async (oldToken) => {
-  const { accessToken, refreshToken, role, email} = await rotateRefreshToken(
-    oldToken
-);
+  const { accessToken, refreshToken, role, email } =
+    await rotateRefreshToken(oldToken);
 
   return { accessToken, refreshToken, role, email };
 };

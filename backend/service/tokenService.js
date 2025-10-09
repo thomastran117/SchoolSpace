@@ -99,7 +99,7 @@ const createRefreshToken = (userId, email, role, remember) => {
   const jti = uuidv4();
   const payload = { userId, email, role, jti, remember };
   const expiresIn = remember ? LONG_REFRESH_EXPIRY : SHORT_REFRESH_EXPIRY;
-  
+
   return jwt.sign(payload, JWT_SECRET_REFRESH, { expiresIn });
 };
 
@@ -126,7 +126,6 @@ const validateRefreshToken = async (token) => {
   }
 };
 
-
 /**
  * Saves a refresh token to Redis with TTL matching expiration.
  * @private
@@ -146,13 +145,27 @@ const saveRefreshToken = async (jti, userId, exp) => {
 const rotateRefreshToken = async (oldToken) => {
   const decoded = await validateRefreshToken(oldToken);
   await redis.del(`refresh:${decoded.jti}`);
-  const accessToken = createAccessToken(decoded.userId, decoded.email, decoded.role);
-  const refreshToken = createRefreshToken(decoded.userId, decoded.email, decoded.role, decoded.remember);
+  const accessToken = createAccessToken(
+    decoded.userId,
+    decoded.email,
+    decoded.role,
+  );
+  const refreshToken = createRefreshToken(
+    decoded.userId,
+    decoded.email,
+    decoded.role,
+    decoded.remember,
+  );
 
   const newDecoded = jwt.decode(refreshToken);
   await saveRefreshToken(newDecoded.jti, newDecoded.userId, newDecoded.exp);
 
-  return { accessToken, refreshToken, role: decoded.role, email: decoded.email };
+  return {
+    accessToken,
+    refreshToken,
+    role: decoded.role,
+    email: decoded.email,
+  };
 };
 
 /**

@@ -1,6 +1,10 @@
 import express from "express";
 import multer from "multer";
-import { serveFile, handleUpload, handleDelete } from "../controller/fileController.js";
+import {
+  serveFile,
+  handleUpload,
+  handleDelete,
+} from "../controller/fileController.js";
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });

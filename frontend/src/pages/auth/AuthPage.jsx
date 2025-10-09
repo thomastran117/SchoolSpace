@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setCredentials } from "../stores/authSlice";
-import GoogleButton from "../components/auth/GoogleButton";
-import MicrosoftButton from "../components/auth/MicrosoftButton";
-import config from "../configs/envManager";
-import "../styles/auth.css";
+import { setCredentials } from "../../stores/authSlice";
+import GoogleButton from "../../components/auth/GoogleButton";
+import MicrosoftButton from "../../components/auth/MicrosoftButton";
+import SecondaryApi from "../../api/SecondaryApi";
+import "../../styles/auth.css";
 
 export default function AuthPage() {
   const dispatch = useDispatch();
@@ -33,20 +33,6 @@ export default function AuthPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const parseError = async (res) => {
-    if (res.status === 400) return "Invalid input or missing required fields.";
-    if (res.status === 401) return "Incorrect email or password.";
-    if (res.status === 404) return "Incorrect email";
-    if (res.status === 500) return "Server error. Please try again later.";
-    try {
-      const text = await res.text();
-      if (text) return text;
-    } catch {
-      /* ignore */
-    }
-    return "Something went wrong. Please try again.";
-  };
-
   const onSubmit = async (e) => {
     e.preventDefault();
     const v = validate();
@@ -67,20 +53,11 @@ export default function AuthPage() {
             password: form.password,
           };
 
-      const endpoint = isSignup
-        ? `${config.backend_url}/auth/signup`
-        : `${config.backend_url}/auth/login`;
+      const endpoint = isSignup ? "/auth/signup" : "/auth/login";
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
+      const res = await SecondaryApi.post(endpoint, payload);
 
-      if (!res.ok) throw new Error(await parseError(res));
-
-      const data = await res.json();
+      const data = res.data;
 
       if (isSignup) {
         alert("Signup successful!");
@@ -91,11 +68,21 @@ export default function AuthPage() {
             token: data.accessToken,
             email: data.user,
             role: data.role,
-          })
+          }),
         );
       }
     } catch (err) {
-      setError(err.message || "Authentication failed.");
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.response?.status === 400) {
+        setError("Invalid request. Please check your input.");
+      } else if (err.response?.status === 401) {
+        setError("Incorrect email or password.");
+      } else if (err.response?.status === 500) {
+        setError("Internal server error. Please try again later.");
+      } else {
+        setError(err.message || "Authentication failed.");
+      }
     } finally {
       setLoading(false);
     }
@@ -323,8 +310,8 @@ export default function AuthPage() {
                     {loading
                       ? "Processing..."
                       : isSignup
-                      ? "Sign up"
-                      : "Log in"}
+                        ? "Sign up"
+                        : "Log in"}
                   </button>
 
                   <div className="text-center mt-2">
@@ -348,8 +335,7 @@ export default function AuthPage() {
                     <GoogleButton disabled={loading} />
                     <MicrosoftButton disabled={loading} />
                   </div>
-              </div>
-
+                </div>
 
                 <p className="text-center text-muted small mt-4 mb-0">
                   © {new Date().getFullYear()} SchoolSpace ·{" "}

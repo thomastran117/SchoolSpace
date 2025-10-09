@@ -51,7 +51,7 @@ app.use(corsMiddleware);
 app.options(/.*/, corsMiddleware);
 
 // ---------- Rate Limiting ----------
-app.use(generalRateLimiter);
+// app.use(generalRateLimiter);
 
 // ---------- Logging ----------
 app.use(requestLogger);
@@ -73,7 +73,7 @@ app.get("/", (_req, res) =>
 app.get("/api", (_req, res) => res.send("API is running!"));
 
 // Auth routes have stricter rate limiting
-app.use("/api/auth", authRateLimiter);
+// app.use("/api/auth", authRateLimiter);
 app.use("/api", serverRoutes);
 
 // ---------- Error Handler ----------

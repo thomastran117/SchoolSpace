@@ -191,7 +191,8 @@ const newAccessToken = async (req, res, next) => {
     const token = req.cookies.refreshToken;
     if (!token) httpError(401, "Missing refresh token");
 
-    const { accessToken, refreshToken, role, email } = await generateNewTokens(token);
+    const { accessToken, refreshToken, role, email } =
+      await generateNewTokens(token);
 
     sendCookie(res, refreshToken);
 

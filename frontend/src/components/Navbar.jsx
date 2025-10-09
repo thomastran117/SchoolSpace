@@ -36,7 +36,11 @@ export default function ElegantNavbar({
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${config.backend_url}/auth/logout`, {}, { withCredentials: true });
+      await axios.post(
+        `${config.backend_url}/auth/logout`,
+        {},
+        { withCredentials: true },
+      );
     } catch (err) {
       console.error("Logout failed", err);
     } finally {
@@ -97,7 +101,9 @@ export default function ElegantNavbar({
           className="navbar-brand fw-bold text-success d-flex align-items-center gap-2"
         >
           {brand.name}
-          <span className="badge bg-success-subtle text-success fw-semibold">Space</span>
+          <span className="badge bg-success-subtle text-success fw-semibold">
+            Space
+          </span>
         </NavLink>
 
         <button
@@ -159,7 +165,7 @@ export default function ElegantNavbar({
                           {it.label}
                         </NavLink>
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </li>
@@ -199,7 +205,7 @@ export default function ElegantNavbar({
               >
                 <img
                   src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    email || "U"
+                    email || "U",
                   )}&background=16a34a&color=fff`}
                   alt="avatar"
                   className="rounded-circle me-2"

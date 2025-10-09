@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../../api";
+import PrimaryAPi from "../../api/primaryApi";
 import { useNavigate } from "react-router-dom";
 import "../../styles/course.css";
 
@@ -13,7 +13,7 @@ export default function CoursePage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const resp = await api.get("/courses");
+        const resp = await PrimaryAPi.get("/courses");
         setCourses(resp.data.items);
       } catch (err) {
         console.error("Error fetching courses:", err);
@@ -67,7 +67,10 @@ export default function CoursePage() {
                   <span className="fw-bold text-success">Code:</span>{" "}
                   {course.code}
                 </p>
-                <a href={`/courses/${course.id}`} className="stretched-link"></a>
+                <a
+                  href={`/courses/${course.id}`}
+                  className="stretched-link"
+                ></a>
               </div>
             </div>
           </div>

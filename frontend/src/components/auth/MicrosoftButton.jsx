@@ -1,4 +1,8 @@
-import { msalInstance, microsoftScopes, waitForMsal } from "../../configs/msalClient";
+import {
+  msalInstance,
+  microsoftScopes,
+  waitForMsal,
+} from "../../configs/msalClient";
 import { useState, useEffect } from "react";
 
 export default function MicrosoftButton({ disabled = false }) {

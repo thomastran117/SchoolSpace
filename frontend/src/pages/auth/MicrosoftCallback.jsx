@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { msalInstance, waitForMsal } from "../../configs/msalClient";
-import config from "../../configs/envManager";
 import { setCredentials } from "../../stores/authSlice";
+import SecondaryApi from "../../api/SecondaryApi";
 
 export default function MicrosoftCallback() {
   const navigate = useNavigate();
@@ -40,27 +40,17 @@ export default function MicrosoftCallback() {
 
         setStatus("Verifying your Microsoft account…");
 
-        const resp = await fetch(`${config.backend_url}/auth/microsoft/verify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ id_token: idToken }),
+        const resp = await SecondaryApi.post("/auth/microsoft/verify", {
+          id_token: idToken,
         });
 
-        if (resp.status === 401 || resp.status === 403) {
-          throw new Error("Your Microsoft sign-in session is invalid or expired.");
-        }
-        if (!resp.ok) {
-          throw new Error((await resp.text()) || "Unexpected error from server.");
-        }
-
-        const data = await resp.json();
+        const { accessToken, user, role } = resp.data;
 
         dispatch(
           setCredentials({
-            token: data.accessToken,
-            email: data.user,
-            role: data.role,
+            token: accessToken,
+            email: user,
+            role,
           }),
         );
 
@@ -68,7 +58,14 @@ export default function MicrosoftCallback() {
         setTimeout(() => navigate("/dashboard", { replace: true }), 1500);
       } catch (err) {
         console.error("Microsoft verify failed", err);
-        setError(err.message || "Sign-in failed. Please try again.");
+
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          setError("Your Microsoft sign-in session is invalid or expired.");
+        } else if (err.response?.data?.message) {
+          setError(err.response.data.message);
+        } else {
+          setError(err.message || "Sign-in failed. Please try again.");
+        }
       }
     })();
   }, [navigate, dispatch]);
@@ -78,7 +75,6 @@ export default function MicrosoftCallback() {
       className="d-flex min-vh-100 justify-content-center align-items-center"
       style={{
         background: "linear-gradient(135deg, #eef4ff, #f2ebff, #ffffff)",
-        // light blue → soft lavender → white
       }}
     >
       <div
@@ -88,7 +84,9 @@ export default function MicrosoftCallback() {
         {error ? (
           <>
             <div className="mb-4 fs-1 text-danger">✖</div>
-            <h3 className="fw-bold mb-3 text-dark">Microsoft Authentication Error</h3>
+            <h3 className="fw-bold mb-3 text-dark">
+              Microsoft Authentication Error
+            </h3>
             <p className="text-muted mb-4 fs-5">{error}</p>
 
             <div className="d-flex gap-3 justify-content-center">

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../stores/authSlice";
+import SecondaryApi from "../../api/SecondaryApi";
+import config from "../../configs/envManager";
 
 export default function GoogleCallback() {
   const navigate = useNavigate();
@@ -11,7 +13,7 @@ export default function GoogleCallback() {
 
   const retryGoogleOAuth = () => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    const redirectUri = "http://localhost:3040/auth/google";
+    const redirectUri = `${config.frontend_url}/auth/google`;
     const scope = "openid email profile";
 
     const params = new URLSearchParams({
@@ -39,27 +41,17 @@ export default function GoogleCallback() {
       try {
         setStatus("Verifying your Google account…");
 
-        const resp = await fetch("http://localhost:8040/api/auth/google/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ token: id_token }),
+        const resp = await SecondaryApi.post("/auth/google/verify", {
+          token: id_token,
         });
 
-        if (resp.status === 401 || resp.status === 403) {
-          throw new Error("Your sign-in session is invalid or expired.");
-        }
-        if (!resp.ok) {
-          throw new Error((await resp.text()) || "Unexpected error from server.");
-        }
-
-        const data = await resp.json();
+        const { accessToken, user, role } = resp.data;
 
         dispatch(
           setCredentials({
-            token: data.accessToken,
-            email: data.user,
-            role: data.role,
+            token: accessToken,
+            email: user,
+            role,
           }),
         );
 
@@ -67,7 +59,14 @@ export default function GoogleCallback() {
         setTimeout(() => navigate("/dashboard", { replace: true }), 1500);
       } catch (err) {
         console.error("Google verify failed", err);
-        setError(err.message || "Sign-in failed. Please try again.");
+
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          setError("Your sign-in session is invalid or expired.");
+        } else if (err.response?.data?.message) {
+          setError(err.response.data.message);
+        } else {
+          setError(err.message || "Sign-in failed. Please try again.");
+        }
       }
     })();
   }, [navigate, dispatch]);

@@ -1,7 +1,7 @@
 import "../../styles/verify.css";
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import config from "../../configs/envManager";
+import SecondaryApi from "../../api/SecondaryApi";
 
 export default function VerifyPage() {
   const [searchParams] = useSearchParams();
@@ -24,39 +24,37 @@ export default function VerifyPage() {
       setStatus("Verifying...");
       setStatusType("loading");
 
-      const resp = await fetch(
-        `${config.backend_url}/auth/verify?token=${encodeURIComponent(token)}`,
-        {
-          method: "GET",
-          credentials: "include",
-        },
-      );
-
-      if (!resp.ok) {
-        if (resp.status === 400 || resp.status === 401) {
-          setStatus("❌ Invalid or expired verification link.");
-          setStatusType("error");
-          return;
-        } else if (resp.status === 503) {
-          setStatus("⚠️ Verification service unavailable.");
-          setStatusType("unavailable");
-          return;
-        } else if (resp.status >= 500) {
-          setStatus("⚠️ Server error. Please try again.");
-          setStatusType("retry");
-          return;
-        }
-
-        const msg = await resp.text();
-        throw new Error(msg || "Verification failed.");
-      }
+      await SecondaryApi.get("/auth/verify", {
+        params: { token },
+      });
 
       setStatus("✅ Your account has been verified! Redirecting to login...");
       setStatusType("success");
+
       setTimeout(() => navigate("/auth"), 3000);
-    } catch {
-      setStatus("⚠️ Something went wrong. Please try again later.");
-      setStatusType("error");
+    } catch (err) {
+      console.error("Email verification failed:", err);
+
+      if (err.response) {
+        const { status: code } = err.response;
+
+        if (code === 400 || code === 401) {
+          setStatus("❌ Invalid or expired verification link.");
+          setStatusType("error");
+        } else if (code === 503) {
+          setStatus("⚠️ Verification service unavailable.");
+          setStatusType("unavailable");
+        } else if (code >= 500) {
+          setStatus("⚠️ Server error. Please try again.");
+          setStatusType("retry");
+        } else {
+          setStatus("⚠️ Verification failed. Please try again.");
+          setStatusType("error");
+        }
+      } else {
+        setStatus("⚠️ Something went wrong. Please try again later.");
+        setStatusType("error");
+      }
     }
   }, [token, navigate]);
 

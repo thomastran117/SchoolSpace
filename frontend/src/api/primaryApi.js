@@ -1,20 +1,20 @@
 import axios from "axios";
-import { store } from "./stores";
-import { setCredentials, clearCredentials } from "./stores/authSlice";
-import config from "./configs/envManager";
+import { store } from "../stores";
+import { setCredentials, clearCredentials } from "../stores/authSlice";
+import config from "../configs/envManager";
 
 const BASE_URL = config.backend_url;
 
-const api = axios.create({
+const PrimaryApi = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
 });
 
 let refreshPromise = null;
 
-async function refreshToken(state) {
+async function refreshToken() {
   try {
-    const refreshResp = await api.get("/auth/refresh");
+    const refreshResp = await PrimaryApi.get("/auth/refresh");
     const { accessToken, email, role } = refreshResp.data;
 
     store.dispatch(
@@ -22,7 +22,7 @@ async function refreshToken(state) {
         token: accessToken,
         role: role,
         email: email,
-      })
+      }),
     );
 
     return accessToken;
@@ -49,7 +49,7 @@ async function refreshToken(state) {
   }
 }
 
-api.interceptors.request.use((config) => {
+PrimaryApi.interceptors.request.use((config) => {
   const state = store.getState();
   const token = state.auth.token;
 
@@ -60,11 +60,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-api.interceptors.response.use(
+PrimaryApi.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalConfig = error.config;
-    const state = store.getState();
 
     if (originalConfig?.url?.includes("/auth/refresh")) {
       return Promise.reject(error);
@@ -75,14 +74,16 @@ api.interceptors.response.use(
 
       if (msg.includes("Invalid access token")) {
         store.dispatch(clearCredentials());
-        return Promise.reject(new Error("Invalid session. Please log in again."));
+        return Promise.reject(
+          new Error("Invalid session. Please log in again."),
+        );
       }
 
       if (!originalConfig._retry) {
         originalConfig._retry = true;
 
         if (!refreshPromise) {
-          refreshPromise = refreshToken(state).finally(() => {
+          refreshPromise = refreshToken().finally(() => {
             refreshPromise = null;
           });
         }
@@ -93,7 +94,7 @@ api.interceptors.response.use(
           originalConfig.headers = originalConfig.headers ?? {};
           originalConfig.headers.Authorization = `Bearer ${newToken}`;
 
-          return api(originalConfig);
+          return PrimaryApi(originalConfig);
         } catch (err) {
           return Promise.reject(err);
         }
@@ -102,11 +103,13 @@ api.interceptors.response.use(
 
     if (error.response?.status === 500) {
       console.error("Internal server error:", error.response?.data);
-      throw new Error("An unexpected server error occurred. Please try again later.");
+      throw new Error(
+        "An unexpected server error occurred. Please try again later.",
+      );
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
-export default api;
+export default PrimaryApi;

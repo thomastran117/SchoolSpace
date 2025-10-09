@@ -25,9 +25,8 @@ const SessionManager = () => {
             token: accessToken,
             email,
             role,
-          })
+          }),
         );
-
       } catch (err) {
         if (cancelled) return;
         dispatch(clearCredentials());
