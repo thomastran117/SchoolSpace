@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../stores/authSlice";
 import GoogleButton from "../../components/auth/GoogleButton";
 import MicrosoftButton from "../../components/auth/MicrosoftButton";
 import SecondaryApi from "../../api/SecondaryApi";
+import Captcha from "../../components/auth/GoogleCaptcha";
 import "../../styles/auth.css";
 
 export default function AuthPage() {
@@ -18,6 +19,7 @@ export default function AuthPage() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const captchaRef = useRef();
 
   const validate = () => {
     if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
@@ -37,23 +39,31 @@ export default function AuthPage() {
     e.preventDefault();
     const v = validate();
     if (v) return setError(v);
-
     try {
       setLoading(true);
       setError("");
+
+      const endpoint = isSignup ? "/auth/signup" : "/auth/login";
+      
+      const token = await captchaRef.current.execute();
+      if (!token) {
+        setError("Captcha verification failed. Please try again.");
+        setLoading(false);
+        return;
+      }
 
       const payload = isSignup
         ? {
             email: form.email.trim(),
             password: form.password,
             role: form.role,
+            captcha: token,
           }
         : {
             email: form.email.trim(),
             password: form.password,
+            captcha: token,
           };
-
-      const endpoint = isSignup ? "/auth/signup" : "/auth/login";
 
       const res = await SecondaryApi.post(endpoint, payload);
 
@@ -348,6 +358,7 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
+      <Captcha ref={captchaRef} />
     </main>
   );
 }

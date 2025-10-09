@@ -36,7 +36,7 @@ import {
 
 // OAuth providers
 import { verifyMicrosoftIdToken } from "./oauth/microsoftService.js";
-import * as googleService from "./oauth/googleService.js";
+import { verifyGoogleToken, verifyGoogleCaptcha } from "./oauth/googleService.js";
 
 const { frontend_client: FRONTEND_CLIENT } = config;
 
@@ -47,7 +47,11 @@ const { frontend_client: FRONTEND_CLIENT } = config;
  * @returns {Promise<{ accessToken: string, refreshToken: string, role: string, id: string }>}
  * @throws {Error} If credentials are invalid.
  */
-const loginUser = async (email, password, remember) => {
+const loginUser = async (email, password, remember, captcha) => {
+  const result = verifyGoogleCaptcha(captcha);
+
+  if (!result) httpError(401, "Invalid captcha");
+
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) httpError(401, "Invalid credentials");
 
@@ -71,7 +75,11 @@ const loginUser = async (email, password, remember) => {
  * @param {string} role - User role.
  * @returns {Promise<{ message: string }>}
  */
-const signupUser = async (email, password, role) => {
+const signupUser = async (email, password, role, captcha) => {
+  const result = verifyGoogleCaptcha(captcha);
+
+  if (!result) httpError(401, "Invalid captcha");
+
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) httpError(409, "Email already in use");
 
@@ -79,7 +87,7 @@ const signupUser = async (email, password, role) => {
   const token = await createVerifyToken(email, hashedPassword, role);
 
   const url = `${FRONTEND_CLIENT}/auth/verify?token=${encodeURIComponent(token)}`;
-  await sendVerificationEmail(email, url);
+  sendVerificationEmail(email, url);
 
   return { message: "Verification email sent" };
 };
@@ -173,7 +181,7 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
  * @returns {Promise<{ accessToken: string, refreshToken: string, role: string, id: string }>}
  */
 const loginOrCreateFromGoogle = async (googleToken) => {
-  const googleUser = await googleService.verifyGoogleToken(googleToken);
+  const googleUser = await verifyGoogleToken(googleToken);
   if (!googleUser?.email) httpError(401, "Invalid Google token");
 
   let user = await prisma.user.findUnique({

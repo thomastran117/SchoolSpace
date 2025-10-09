@@ -109,6 +109,8 @@ const config = {
   ms_tenant_id: opt("MS_TENANT_ID", undefined),
   email_user: opt("EMAIL_USER", undefined),
   email_pass: opt("EMAIL_PASS", undefined),
+  google_api_key: opt("GOOGLE_API_KEY", undefined),
+  google_captcha_secret: opt("GOOGLE_CAPTCHA_SECRET", undefined),
 
   isGoogleEnabled() {
     return !!this.google_client_id;

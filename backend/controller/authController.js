@@ -43,8 +43,8 @@ import {
  */
 const login = async (req, res, next) => {
   try {
-    requireFields(["email", "password"], req.body);
-    const { email, password, remember } = req.body;
+    requireFields(["email", "password", "captcha"], req.body);
+    const { email, password, remember, captcha } = req.body;
 
     if (!validateEmail(email)) httpError(400, "Invalid email format");
     const remember_boolean = isBoolean(remember);
@@ -53,6 +53,7 @@ const login = async (req, res, next) => {
       email,
       password,
       remember_boolean,
+      captcha
     );
 
     sendCookie(res, refreshToken);
@@ -75,14 +76,14 @@ const login = async (req, res, next) => {
  */
 const signup = async (req, res, next) => {
   try {
-    requireFields(["email", "password", "role"], req.body);
-    const { email, password, role } = req.body;
+    requireFields(["email", "password", "role", "captcha"], req.body);
+    const { email, password, role, captcha } = req.body;
 
     assertAllowed(role, ["student", "teacher", "assistant"]);
     if (!validateEmail(email)) httpError(400, "Invalid email format");
 
     if (config.isEmailEnabled()) {
-      await signupUser(email, password, role);
+      await signupUser(email, password, role, captcha);
       res.status(201).json({ message: "Email sent. Please verify." });
     } else {
       await signupUserWOVerify(email, password, role);
