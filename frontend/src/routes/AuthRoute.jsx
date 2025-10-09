@@ -7,7 +7,7 @@ const authRoutes = [
   { path: "/auth", element: <AuthPage /> },
   { path: "/auth/google", element: <GoogleCallback /> },
   { path: "/auth/microsoft", element: <MicrosoftCallback /> },
-  { path: "/verify", element: <VerifyPage /> },
+  { path: "/auth/verify", element: <VerifyPage /> },
 ];
 
 export default authRoutes;

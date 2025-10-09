@@ -39,9 +39,9 @@ export default function ElegantFooter() {
                 to="/"
                 className="d-flex align-items-center gap-2 mb-3 text-decoration-none"
               >
-                <span className="fw-bold fs-5 text-success">Brand</span>
+                <span className="fw-bold fs-5 text-success">School</span>
                 <span className="badge bg-success-subtle text-success">
-                  New
+                  Space
                 </span>
               </NavLink>
               <p className="text-muted small">

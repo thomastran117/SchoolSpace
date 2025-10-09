@@ -1,16 +1,16 @@
 import fs from "fs/promises";
 import path from "path";
-import { uuidv4 } from "uuid";
-import logger from "../utility/logger.";
+import { v4 as uuidv4 } from "uuid";
+import logger from "../utility/logger.js";
 
-const PUBLIC_DIR = path.join(__dirname, "../public");
+const UPLOADS_DIR = path.join(__dirname, "../../uploads");
 
 (async () => {
   try {
-    await fs.mkdir(PUBLIC_DIR, { recursive: true });
-    logger.info(`Public directory ready at: ${PUBLIC_DIR}`);
+    await fs.mkdir(UPLOADS_DIR, { recursive: true });
+    logger.info(`Uploads directory ready at: ${UPLOADS_DIR}`);
   } catch (err) {
-    logger.error(`Failed to create public directory: ${err.message}`);
+    logger.error(`Failed to create uploads directory: ${err.message}`);
   }
 })();
 
@@ -18,7 +18,7 @@ const uploadFile = async (buffer, originalName) => {
   try {
     const ext = path.extname(originalName) || "";
     const fileName = `${uuidv4()}${ext}`;
-    const filePath = path.join(PUBLIC_DIR, fileName);
+    const filePath = path.join(UPLOADS_DIR, fileName);
 
     await fs.writeFile(filePath, buffer);
 
@@ -27,7 +27,7 @@ const uploadFile = async (buffer, originalName) => {
     return {
       fileName,
       filePath,
-      publicUrl: `/public/${fileName}`,
+      publicUrl: `/uploads/${fileName}`,
     };
   } catch (err) {
     logger.error(`File upload failed: ${err.message}`);
@@ -37,7 +37,7 @@ const uploadFile = async (buffer, originalName) => {
 
 const getFile = async (fileName) => {
   try {
-    const filePath = path.join(PUBLIC_DIR, fileName);
+    const filePath = path.join(UPLOADS_DIR, fileName);
     const file = await fs.readFile(filePath);
 
     logger.info(`File read: ${fileName}`);
@@ -50,9 +50,8 @@ const getFile = async (fileName) => {
 
 const deleteFile = async (fileName) => {
   try {
-    const filePath = path.join(PUBLIC_DIR, fileName);
+    const filePath = path.join(UPLOADS_DIR, fileName);
     await fs.unlink(filePath);
-
     logger.info(`File deleted: ${fileName}`);
   } catch (err) {
     if (err.code === "ENOENT") {

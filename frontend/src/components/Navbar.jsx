@@ -6,7 +6,7 @@ import axios from "axios";
 import config from "../configs/envManager";
 
 export default function ElegantNavbar({
-  brand = { name: "Brand", href: "/" },
+  brand = { name: "School", href: "/" },
   links = [
     { label: "Home", to: "/" },
     { label: "Features", to: "/features" },
@@ -97,7 +97,7 @@ export default function ElegantNavbar({
           className="navbar-brand fw-bold text-success d-flex align-items-center gap-2"
         >
           {brand.name}
-          <span className="badge bg-success-subtle text-success fw-semibold">New</span>
+          <span className="badge bg-success-subtle text-success fw-semibold">Space</span>
         </NavLink>
 
         <button

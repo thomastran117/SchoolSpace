@@ -14,6 +14,7 @@ import authRoute from "./authRoute.js";
 import courseRoute from "./courseRoute.js";
 import enrollRoute from "./enrollRoute.js";
 import userRoute from "./userRoute.js";
+import fileRoute from "./fileRoute.js"
 import { makeRequireAuth } from "../middleware/authTokenMiddleware.js";
 import { httpError } from "../utility/httpUtility.js";
 import listRoutesFromRouter from "../utility/listRoutes.js";
@@ -47,6 +48,8 @@ router.use("/course-enroll", makeRequireAuth, enrollRoute);
  * @access Private
  */
 router.use("/user", makeRequireAuth, userRoute);
+
+// router.use("/files", makeRequireAuth, fileRoute);
 
 router.get("/help", (req, res) => {
   const routes = listRoutesFromRouter(router).map((r) => ({

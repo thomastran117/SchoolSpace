@@ -1,7 +1,8 @@
 import { useEffect } from "react";
+import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setCredentials, clearCredentials } from "../../stores/authSlice";
-import api from "../../api";
+import config from "../../configs/envManager";
 
 const SessionManager = () => {
   const dispatch = useDispatch();
@@ -11,7 +12,10 @@ const SessionManager = () => {
 
     const initSession = async () => {
       try {
-        const res = await api.get("/auth/refresh");
+        const res = await axios.get(`${config.backend_url}/auth/refresh`, {
+          withCredentials: true,
+        });
+
         if (cancelled) return;
 
         const { accessToken, email, role } = res.data;
@@ -26,7 +30,6 @@ const SessionManager = () => {
 
       } catch (err) {
         if (cancelled) return;
-        console.warn("No valid session found:", err.message);
         dispatch(clearCredentials());
       }
     };
