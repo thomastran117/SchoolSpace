@@ -70,7 +70,6 @@ const updateAvatar = async (req, res, next) => {
       httpError(400, "No file found");
     }
 
-    logger.debug("1");
     const { accessToken, refreshToken, role, username, avatar } =
       await update_avatar(id, file);
 

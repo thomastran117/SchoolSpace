@@ -167,7 +167,14 @@ export default function AuthSection({ isSignup, setIsSignup, captchaRef }) {
           isSignup ? "fade-slide-right" : "fade-slide-left"
         }`}
         key={isSignup ? "signup" : "login"}
-        style={{ position: "relative", zIndex: 2 }}
+        style={{
+          position: "relative",
+          zIndex: 2,
+          minHeight: "540px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
       >
         <h3
           className="fw-bold mb-4 text-center"
@@ -246,25 +253,47 @@ export default function AuthSection({ isSignup, setIsSignup, captchaRef }) {
             </button>
           </div>
 
-          {isSignup && <RoleSelect />}
+          {!isSignup && (
+            <div className="d-flex justify-content-between align-items-center mt-2">
+              <div className="form-check m-0">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="remember"
+                />
+                <label className="form-check-label ms-1" htmlFor="remember">
+                  Remember me
+                </label>
+              </div>
 
+              <NavLink
+                to="/forgot-password"
+                className="small text-primary text-decoration-none"
+                style={{
+                  fontWeight: 500,
+                  transition: "color 0.2s ease",
+                }}
+              >
+                Forgot password?
+              </NavLink>
+            </div>
+          )}
+
+          <div
+            style={{
+              height: "110px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "opacity 0.3s ease",
+            }}
+          >
+            {isSignup ? <RoleSelect /> : null}
+          </div>
           {error && (
             <small className="text-danger text-center fw-semibold mt-2">
               {error}
             </small>
-          )}
-
-          {!isSignup && (
-            <div className="form-check mt-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="remember"
-              />
-              <label className="form-check-label" htmlFor="remember">
-                Remember me
-              </label>
-            </div>
           )}
 
           <button
