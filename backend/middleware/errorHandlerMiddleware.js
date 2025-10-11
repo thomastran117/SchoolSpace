@@ -26,9 +26,7 @@ export function errorHandler(err, req, res, next) {
 
   if (status === 500) {
     logger.error(`Server failed to process the data: ${err.message}`);
-  } else {
-    logger.warn(`Handled error (${status}): ${err.message}`);
   }
-
+  
   res.status(status).json({ error: message });
 }

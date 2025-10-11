@@ -51,13 +51,13 @@ const getUserPayload = (authHeader) => {
 /**
  * Generates a new access and refresh token pair.
  * @param {string} id - User ID.
- * @param {string} email - User email.
+ * @param {string} username - User username.
  * @param {string} role - User role.
  * @returns {Promise<{ accessToken: string, refreshToken: string }>}
  */
-const generateTokens = async (id, email, role, remember) => {
-  const accessToken = createAccessToken(id, email, role);
-  const refreshToken = createRefreshToken(id, email, role);
+const generateTokens = async (id, username, role, avatar, remember) => {
+  const accessToken = createAccessToken(id, username, role, avatar,);
+  const refreshToken = createRefreshToken(id, username, role, avatar, remember);
 
   const decoded = jwt.decode(refreshToken);
   await saveRefreshToken(decoded.jti, id, decoded.exp);
@@ -69,8 +69,8 @@ const generateTokens = async (id, email, role, remember) => {
  * Creates a signed access token.
  * @private
  */
-const createAccessToken = (userId, email, role) => {
-  const payload = { userId, email, role };
+const createAccessToken = (userId, username, role) => {
+  const payload = { userId, username, role };
   return jwt.sign(payload, JWT_SECRET_ACCESS, { expiresIn: ACCESS_EXPIRY });
 };
 
@@ -95,9 +95,9 @@ export const validateAccessToken = (token) => {
  * Creates a signed refresh token with a unique jti and user payload.
  * @private
  */
-const createRefreshToken = (userId, email, role, remember) => {
+const createRefreshToken = (userId, username, role, avatar, remember) => {
   const jti = uuidv4();
-  const payload = { userId, email, role, jti, remember };
+  const payload = { userId, username, role, avatar, jti, remember };
   const expiresIn = remember ? LONG_REFRESH_EXPIRY : SHORT_REFRESH_EXPIRY;
 
   return jwt.sign(payload, JWT_SECRET_REFRESH, { expiresIn });
@@ -138,7 +138,7 @@ const saveRefreshToken = async (jti, userId, exp) => {
 /**
  * Rotates refresh token: revokes old, issues new pair.
  * @param {string} id - User ID.
- * @param {string} email - User email.
+ * @param {string} username - User username.
  * @param {string} role - User role.
  * @returns {Promise<{ accessToken: string, refreshToken: string }>}
  */
@@ -147,13 +147,14 @@ const rotateRefreshToken = async (oldToken) => {
   await redis.del(`refresh:${decoded.jti}`);
   const accessToken = createAccessToken(
     decoded.userId,
-    decoded.email,
+    decoded.username,
     decoded.role,
   );
   const refreshToken = createRefreshToken(
     decoded.userId,
-    decoded.email,
+    decoded.username,
     decoded.role,
+    decoded.avatar,
     decoded.remember,
   );
 
@@ -164,7 +165,9 @@ const rotateRefreshToken = async (oldToken) => {
     accessToken,
     refreshToken,
     role: decoded.role,
-    email: decoded.email,
+    username: decoded.username,
+    avatar: decoded.avatar,
+    id: decoded.id,
   };
 };
 

@@ -49,7 +49,7 @@ const login = async (req, res, next) => {
     if (!validateEmail(email)) httpError(400, "Invalid email format");
     const remember_boolean = isBoolean(remember);
 
-    const { accessToken, refreshToken, role } = await loginUser(
+    const { accessToken, refreshToken, role, username, avatar } = await loginUser(
       email,
       password,
       remember_boolean,
@@ -62,8 +62,10 @@ const login = async (req, res, next) => {
       message: "Login successful",
       accessToken,
       role,
-      email,
+      avatar,
+      username
     });
+    
   } catch (err) {
     next(err);
   }
@@ -140,7 +142,7 @@ const microsoftVerify = async (req, res, next) => {
     const { id_token: idToken } = req.body || {};
     if (!idToken) httpError(400, "Missing id_token");
 
-    const { accessToken, refreshToken, role, email } =
+    const { accessToken, refreshToken, role, username, avatar } =
       await verifyMicrosoftIdTokenAndSignIn(idToken);
 
     sendCookie(res, refreshToken);
@@ -149,7 +151,8 @@ const microsoftVerify = async (req, res, next) => {
       message: "Login successful",
       accessToken,
       role,
-      email,
+      avatar,
+      username,
     });
   } catch (err) {
     next(err);
@@ -166,7 +169,7 @@ const googleVerify = async (req, res, next) => {
     const { token: googleToken } = req.body;
     if (!googleToken) httpError(400, "Google token missing");
 
-    const { accessToken, refreshToken, role, email } =
+    const { accessToken, refreshToken, role, username, avatar } =
       await loginOrCreateFromGoogle(googleToken);
 
     sendCookie(res, refreshToken);
@@ -175,7 +178,8 @@ const googleVerify = async (req, res, next) => {
       message: "Login successful",
       accessToken,
       role,
-      email,
+      avatar,
+      username,
     });
   } catch (err) {
     next(err);
@@ -192,7 +196,7 @@ const newAccessToken = async (req, res, next) => {
     const token = req.cookies.refreshToken;
     if (!token) httpError(401, "Missing refresh token");
 
-    const { accessToken, refreshToken, role, email } =
+    const { accessToken, refreshToken, role, username, avatar } =
       await generateNewTokens(token);
 
     sendCookie(res, refreshToken);
@@ -200,7 +204,8 @@ const newAccessToken = async (req, res, next) => {
     res.status(200).json({
       accessToken,
       role,
-      email,
+      avatar,
+      username,
     });
   } catch (err) {
     next(err);

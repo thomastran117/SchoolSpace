@@ -63,12 +63,13 @@ const loginUser = async (email, password, remember, captcha) => {
 
   const { accessToken, refreshToken } = await generateTokens(
     user.id,
-    user.email,
+    user.username || user.email,
     user.role,
+    user.avatar,
     remember,
   );
 
-  return { accessToken, refreshToken, role: user.role, id: user.id };
+  return { accessToken, refreshToken, role: user.role, id: user.id, username: user.username, avatar: user.avatar };
 };
 
 /**
@@ -171,11 +172,12 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
 
   const { accessToken, refreshToken } = await generateTokens(
     user.id,
-    user.email,
+    user.username || user.email,
     user.role,
+    user.avatar,
   );
 
-  return { accessToken, refreshToken, role: user.role, id: user.id };
+  return { accessToken, refreshToken, role: user.role, id: user.id, username: user.username, avatar: user.avatar };
 };
 
 /**
@@ -204,11 +206,12 @@ const loginOrCreateFromGoogle = async (googleToken) => {
 
   const { accessToken, refreshToken } = await generateTokens(
     user.id,
-    user.email,
+    user.username || user.email,
     user.role,
+    user.avatar,
   );
 
-  return { accessToken, refreshToken, role: user.role, id: user.id };
+  return { accessToken, refreshToken, role: user.role, id: user.id, username: user.username, avatar: user.avatar };
 };
 
 /**
@@ -217,10 +220,10 @@ const loginOrCreateFromGoogle = async (googleToken) => {
  * @returns {Promise<{ accessToken: string, refreshToken: string, user: object }>}
  */
 const generateNewTokens = async (oldToken) => {
-  const { accessToken, refreshToken, role, email } =
+  const { accessToken, refreshToken, role, username, avatar } =
     await rotateRefreshToken(oldToken);
 
-  return { accessToken, refreshToken, role, email };
+  return { accessToken, refreshToken, role, username, avatar };
 };
 
 /**
