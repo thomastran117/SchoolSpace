@@ -142,6 +142,6 @@ const sanitizeInput = (req, _res, next) => {
   if (req.params) clean(req.params);
 
   next();
-}
+};
 
 export { sanitizeInput, corsMiddleware, preventHpp, securityHeaders };

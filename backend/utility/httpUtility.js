@@ -165,6 +165,22 @@ const validateEmail = (email) => {
   return emailRegex.test(email);
 };
 
+/**
+ * Utility: Sends refresh token as HTTP-only cookie.
+ *
+ * @param {import("express").Response} res
+ * @param {string} refreshToken
+ */
+const sendCookie = (res, refreshToken) => {
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: "/",
+  });
+};
+
 export {
   requireFields,
   requiresAtLeastOneField,
@@ -173,4 +189,5 @@ export {
   assertAllowed,
   isBoolean,
   validateEmail,
+  sendCookie,
 };

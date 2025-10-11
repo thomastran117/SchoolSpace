@@ -31,6 +31,7 @@ import {
   assertAllowed,
   isBoolean,
   validateEmail,
+  sendCookie,
 } from "../utility/httpUtility.js";
 
 /**
@@ -49,12 +50,8 @@ const login = async (req, res, next) => {
     if (!validateEmail(email)) httpError(400, "Invalid email format");
     const remember_boolean = isBoolean(remember);
 
-    const { accessToken, refreshToken, role, username, avatar } = await loginUser(
-      email,
-      password,
-      remember_boolean,
-      captcha,
-    );
+    const { accessToken, refreshToken, role, username, avatar } =
+      await loginUser(email, password, remember_boolean, captcha);
 
     sendCookie(res, refreshToken);
 
@@ -63,9 +60,8 @@ const login = async (req, res, next) => {
       accessToken,
       role,
       avatar,
-      username
+      username,
     });
-    
   } catch (err) {
     next(err);
   }
@@ -236,22 +232,6 @@ const logout = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
-
-/**
- * Utility: Sends refresh token as HTTP-only cookie.
- *
- * @param {import("express").Response} res
- * @param {string} refreshToken
- */
-const sendCookie = (res, refreshToken) => {
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: "/",
-  });
 };
 
 export {

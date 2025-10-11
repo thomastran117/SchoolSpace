@@ -69,7 +69,14 @@ const loginUser = async (email, password, remember, captcha) => {
     remember,
   );
 
-  return { accessToken, refreshToken, role: user.role, id: user.id, username: user.username, avatar: user.avatar };
+  return {
+    accessToken,
+    refreshToken,
+    role: user.role,
+    id: user.id,
+    username: user.username,
+    avatar: user.avatar,
+  };
 };
 
 /**
@@ -177,7 +184,14 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
     user.avatar,
   );
 
-  return { accessToken, refreshToken, role: user.role, id: user.id, username: user.username, avatar: user.avatar };
+  return {
+    accessToken,
+    refreshToken,
+    role: user.role,
+    id: user.id,
+    username: user.username,
+    avatar: user.avatar,
+  };
 };
 
 /**
@@ -211,7 +225,14 @@ const loginOrCreateFromGoogle = async (googleToken) => {
     user.avatar,
   );
 
-  return { accessToken, refreshToken, role: user.role, id: user.id, username: user.username, avatar: user.avatar };
+  return {
+    accessToken,
+    refreshToken,
+    role: user.role,
+    id: user.id,
+    username: user.username,
+    avatar: user.avatar,
+  };
 };
 
 /**

@@ -56,7 +56,7 @@ const getUserPayload = (authHeader) => {
  * @returns {Promise<{ accessToken: string, refreshToken: string }>}
  */
 const generateTokens = async (id, username, role, avatar, remember) => {
-  const accessToken = createAccessToken(id, username, role, avatar,);
+  const accessToken = createAccessToken(id, username, role, avatar);
   const refreshToken = createRefreshToken(id, username, role, avatar, remember);
 
   const decoded = jwt.decode(refreshToken);
