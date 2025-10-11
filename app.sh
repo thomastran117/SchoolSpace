@@ -12,10 +12,11 @@ show_help() {
   echo ""
   
   echo -e "\033[36mCommands:\033[0m"
-  printf "  %-10s %s\n" "docker" "Run run-docker.sh   → Starts Docker Compose services"
-  printf "  %-10s %s\n" "app"    "Run run-app.sh      → Launches the app locally"
+  printf "  %-10s %s\n" "docker" "Run docker.sh   → Starts Docker Compose services"
+  printf "  %-10s %s\n" "app"    "Run app.sh      → Launches the app locally"
   printf "  %-10s %s\n" "env"    "Run create-env.sh   → Generates a new .env file"
   printf "  %-10s %s\n" "setup"  "Run setup.sh        → Installs local dependencies"
+  printf "  %-10s %s\n" "format"  "Run format.sh        → Formats repo"
   printf "  %-10s %s\n" "--help" "Show this help message"
   echo ""
   
@@ -32,13 +33,16 @@ shift || true
 
 case "$COMMAND" in
   docker)
-    bash "$SCRIPT_DIR/scripts/run-docker.sh" "$@"
+    bash "$SCRIPT_DIR/scripts/docker.sh" "$@"
     ;;
   app)
-    bash "$SCRIPT_DIR/scripts/run-app.sh" "$@"
+    bash "$SCRIPT_DIR/scripts/app.sh" "$@"
     ;;
   env)
     bash "$SCRIPT_DIR/scripts/create-env.sh" "$@"
+    ;;
+  fprmat)
+    bash "$SCRIPT_DIR/scripts/format.sh" "$@"
     ;;
   setup)
     bash "$SCRIPT_DIR/scripts/setup.sh" "$@"
