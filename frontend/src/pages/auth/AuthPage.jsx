@@ -44,7 +44,7 @@ export default function AuthPage() {
       setError("");
 
       const endpoint = isSignup ? "/auth/signup" : "/auth/login";
-      
+
       const token = await captchaRef.current.execute();
       if (!token) {
         setError("Captcha verification failed. Please try again.");
@@ -67,17 +67,17 @@ export default function AuthPage() {
 
       const res = await SecondaryApi.post(endpoint, payload);
 
-      const data = res.data;
-
+      const { accessToken, username, avatar, role } = res.data;
       if (isSignup) {
         alert("Signup successful!");
         setIsSignup(false);
       } else {
         dispatch(
           setCredentials({
-            token: data.accessToken,
-            email: data.user,
-            role: data.role,
+            token: accessToken,
+            username,
+            role,
+            avatar,
           }),
         );
       }

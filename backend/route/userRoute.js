@@ -13,41 +13,52 @@
 import express from "express";
 import {
   updateUser,
+  updateRole,
+  updateAvatar,
   deleteUser,
   getStudentsByCourse,
   getTeacherByCourse,
   getUser,
 } from "../controller/userController.js";
+import upload from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
 /**
  * @route PUT /users/:id
+ * @description Updates an user avatar
+ * @access Private
+ */
+router.post("/avatar/", upload.single("avatar"), updateAvatar);
+
+/**
+ * @route PUT /users/:id
+ *
  * @description Update an user profile information by ID
  * @access Private
  */
-router.put("/users/:id", updateUser);
+router.put("/:id", updateUser);
 
 /**
  * @route DELETE /users/:id
  * @description Deletes an user by id
  * @access Private
  */
-router.delete("/users/:id", deleteUser);
+router.delete("/:id", deleteUser);
 
 /**
  * @route POST /users/:id
  * @description Get teacher by course id
  * @access Private
  */
-router.get("/users/teacher/:id", getTeacherByCourse);
+router.get("/teacher/:id", getTeacherByCourse);
 
 /**
  * @route GET /users/student/:id
  * @description Get students by course Id
  * @access Private
  */
-router.get("/users/student/:id", getStudentsByCourse);
+router.get("/student/:id", getStudentsByCourse);
 
 /**
  * @route GET /users/:id

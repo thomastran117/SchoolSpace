@@ -47,9 +47,9 @@ router.use("/course-enroll", makeRequireAuth, enrollRoute);
  * @description Handles user management + deletion
  * @access Private
  */
-router.use("/user", makeRequireAuth, userRoute);
+router.use("/users", makeRequireAuth, userRoute);
 
-// router.use("/files", makeRequireAuth, fileRoute);
+router.use("/files", makeRequireAuth, fileRoute);
 
 router.get("/help", (req, res) => {
   const routes = listRoutesFromRouter(router).map((r) => ({

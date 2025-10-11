@@ -2,6 +2,7 @@ import {
   requireFields,
   httpError,
   assertAllowed,
+  sendCookie,
 } from "../utility/httpUtility.js";
 import {
   get_students_by_course,
@@ -10,7 +11,10 @@ import {
   get_users,
   delete_user,
   update_role,
+  update_avatar,
 } from "../service/userService.js";
+import logger from "../utility/logger.js";
+
 const getStudentsByCourse = async (req, res, next) => {
   try {
     const { id: userId, role } = req.user;
@@ -57,9 +61,36 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
+const updateAvatar = async (req, res, next) => {
+  try {
+    const { id } = req.user;
+    const file = req.file;
+
+    if (!file) {
+      httpError(400, "No file found");
+    }
+
+    logger.debug("1");
+    const { accessToken, refreshToken, role, username, avatar } =
+      await update_avatar(id, file);
+
+    sendCookie(res, refreshToken);
+
+    res.status(200).json({
+      message: "Profile avatar updated",
+      accessToken,
+      role,
+      avatar,
+      username,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const updateRole = async (req, res, next) => {
   try {
-    const { id: authUserId, role } = req.user;
+    const { id, role } = req.user;
     if (role !== "undefined") {
       httpError(409, "The user already has a role");
     }
@@ -69,11 +100,22 @@ const updateRole = async (req, res, next) => {
 
     assertAllowed(role, ["student", "teacher", "assistant"]);
 
-    const { token, role: userrole } = await update_role(authUserId, userRole);
-    res.status(200).json({
-      message: "Role updated. New token provided",
-      token: token,
+    const {
+      accessToken,
+      refreshToken,
       role: userrole,
+      username,
+      avatar,
+    } = await update_role(id, userRole);
+
+    sendCookie(res, refreshToken);
+
+    res.status(200).json({
+      message: "Role updated",
+      accessToken,
+      userrole,
+      avatar,
+      username,
     });
   } catch (err) {
     next(err);
@@ -82,6 +124,8 @@ const updateRole = async (req, res, next) => {
 
 export {
   updateUser,
+  updateRole,
+  updateAvatar,
   deleteUser,
   getStudentsByCourse,
   getTeacherByCourse,

@@ -44,13 +44,14 @@ export default function MicrosoftCallback() {
           id_token: idToken,
         });
 
-        const { accessToken, user, role } = resp.data;
+        const { accessToken, username, avatar, role } = resp.data;
 
         dispatch(
           setCredentials({
             token: accessToken,
-            email: user,
+            username,
             role,
+            avatar,
           }),
         );
 

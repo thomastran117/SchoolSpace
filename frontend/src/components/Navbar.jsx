@@ -1,11 +1,12 @@
 import { clearCredentials } from "../stores/authSlice";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import PrimaryApi from "../api/primaryApi";
 import axios from "axios";
 import config from "../configs/envManager";
 
-export default function ElegantNavbar({
+export default function Navbar({
   brand = { name: "School", href: "/" },
   links = [
     { label: "Home", to: "/" },
@@ -22,17 +23,13 @@ export default function ElegantNavbar({
       { label: "Support", to: "/support" },
     ],
   },
-  onSearch,
 }) {
   const [query, setQuery] = useState("");
+  const [avatarBlobUrl, setAvatarBlobUrl] = useState(null);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { token, email } = useSelector((state) => state.auth);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (onSearch) onSearch(query);
-  };
+  const { token, username, avatar } = useSelector((state) => state.auth);
 
   const handleLogout = async () => {
     try {
@@ -49,30 +46,76 @@ export default function ElegantNavbar({
     }
   };
 
+  useEffect(() => {
+    let revokeUrl = null;
+
+    const fetchAvatar = async () => {
+      if (!avatar) {
+        setAvatarBlobUrl(null);
+        return;
+      }
+
+      try {
+        const res = await PrimaryApi.get(avatar, { responseType: "blob" });
+        const blobUrl = URL.createObjectURL(res.data);
+        setAvatarBlobUrl(blobUrl);
+        revokeUrl = blobUrl;
+      } catch (err) {
+        console.error("Failed to load protected avatar:", err);
+        setAvatarBlobUrl(null);
+      }
+    };
+
+    fetchAvatar();
+
+    return () => {
+      if (revokeUrl) URL.revokeObjectURL(revokeUrl);
+    };
+  }, [avatar]);
+
+  const avatarSrc = avatarBlobUrl || null;
+  const firstLetter = username ? username.charAt(0).toUpperCase() : "U";
+
   return (
-    <nav className="navbar navbar-expand-lg bg-light border-bottom sticky-top shadow-sm">
+    <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm">
       <style>{`
+        /* ===== General Navbar Styling ===== */
+        .navbar {
+          backdrop-filter: blur(10px);
+          transition: all 0.3s ease;
+        }
+
+        .navbar:hover {
+          box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-brand span.badge {
+          font-size: 0.8rem;
+          background-color: rgba(25, 135, 84, 0.1);
+        }
+
         /* ===== Underline Animation ===== */
         .nav-link {
           position: relative;
           overflow: hidden;
+          transition: color 0.25s ease;
         }
 
         .nav-link::after {
           content: "";
           position: absolute;
-          left: 10%;
+          left: 15%;
           bottom: 0;
           width: 0;
           height: 2px;
-          background-color: #198754; /* Bootstrap success green */
+          background-color: #198754;
           transition: width 0.3s ease;
           border-radius: 2px;
         }
 
         .nav-link:hover::after,
         .nav-link.router-active::after {
-          width: 80%;
+          width: 70%;
         }
 
         .nav-link:hover,
@@ -92,6 +135,51 @@ export default function ElegantNavbar({
           background-color: #198754 !important;
           color: #fff !important;
         }
+
+        /* ===== Avatar Styling ===== */
+        .avatar-circle {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background-color: #198754;
+          color: white;
+          font-weight: 600;
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .avatar-circle:hover {
+          transform: scale(1.05);
+          box-shadow: 0 0 8px rgba(25, 135, 84, 0.3);
+        }
+
+        img.avatar-img {
+          width: 36px;
+          height: 36px;
+          object-fit: cover;
+          border-radius: 50%;
+          border: 2px solid #19875422;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        img.avatar-img:hover {
+          transform: scale(1.05);
+          box-shadow: 0 0 8px rgba(25, 135, 84, 0.3);
+        }
+
+        /* ===== Username Styling ===== */
+        .username {
+          font-weight: 600;
+          color: #212529;
+          transition: color 0.2s ease;
+        }
+
+        .username:hover {
+          color: #198754;
+        }
       `}</style>
 
       <div className="container py-2">
@@ -101,9 +189,7 @@ export default function ElegantNavbar({
           className="navbar-brand fw-bold text-success d-flex align-items-center gap-2"
         >
           {brand.name}
-          <span className="badge bg-success-subtle text-success fw-semibold">
-            Space
-          </span>
+          <span className="badge text-success fw-semibold">Space</span>
         </NavLink>
 
         <button
@@ -172,21 +258,7 @@ export default function ElegantNavbar({
             )}
           </ul>
 
-          <form
-            className="d-flex me-lg-3 mb-3 mb-lg-0"
-            role="search"
-            onSubmit={handleSubmit}
-          >
-            <input
-              type="search"
-              className="form-control rounded-pill px-3"
-              placeholder="Search..."
-              aria-label="Search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </form>
-
+          {/* Right Side */}
           {!token ? (
             <NavLink
               to="/auth"
@@ -203,15 +275,16 @@ export default function ElegantNavbar({
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    email || "U",
-                  )}&background=16a34a&color=fff`}
-                  alt="avatar"
-                  className="rounded-circle me-2"
-                  width="36"
-                  height="36"
-                />
+                {avatarSrc ? (
+                  <img
+                    src={avatarSrc}
+                    alt="avatar"
+                    className="avatar-img me-2"
+                  />
+                ) : (
+                  <div className="avatar-circle me-2">{firstLetter}</div>
+                )}
+                <span className="username">{username}</span>
               </a>
               <ul
                 className="dropdown-menu dropdown-menu-end shadow border-0 rounded-3"

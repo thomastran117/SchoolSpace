@@ -21,13 +21,21 @@ const UPLOADS_DIR = path.join(__dirname, "../../uploads");
   }
 })();
 
-export const uploadFile = async (buffer, originalName, type = "general") => {
+const uploadFile = async (
+  buffer,
+  originalName = "file.bin",
+  type = "general",
+) => {
   try {
     const dir = path.join(UPLOADS_DIR, type);
     await fs.mkdir(dir, { recursive: true });
 
-    const ext = path.extname(originalName) || "";
-    const fileName = `${uuidv4()}${ext}`;
+    const ext = path.extname(originalName) || ".bin";
+
+    const baseName =
+      path.basename(originalName, ext).trim() || `file_${Date.now()}`;
+
+    const fileName = `${baseName}_${uuidv4()}${ext}`;
     const filePath = path.join(dir, fileName);
 
     await fs.writeFile(filePath, buffer);
@@ -36,7 +44,7 @@ export const uploadFile = async (buffer, originalName, type = "general") => {
     return {
       fileName,
       filePath,
-      publicUrl: `/api/files/${type}/${fileName}`,
+      publicUrl: `/files/${type}/${fileName}`,
     };
   } catch (err) {
     logger.error(`Upload failed: ${err.message}`);
@@ -44,7 +52,7 @@ export const uploadFile = async (buffer, originalName, type = "general") => {
   }
 };
 
-export const getFile = async (type, fileName) => {
+const getFile = async (type, fileName) => {
   try {
     const filePath = path.join(UPLOADS_DIR, type, fileName);
     const file = await fs.readFile(filePath);
@@ -55,7 +63,7 @@ export const getFile = async (type, fileName) => {
   }
 };
 
-export const deleteFile = async (type, fileName) => {
+const deleteFile = async (type, fileName) => {
   try {
     const filePath = path.join(UPLOADS_DIR, type, fileName);
     await fs.unlink(filePath);
@@ -69,3 +77,5 @@ export const deleteFile = async (type, fileName) => {
     throw new Error("File delete failed");
   }
 };
+
+export { uploadFile, getFile, deleteFile };

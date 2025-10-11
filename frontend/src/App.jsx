@@ -8,13 +8,13 @@ function App() {
   return (
     <Router>
       <SessionManager>
-      <Navbar />
-      <Routes>
-        {routes.map(({ path, element }) => (
-          <Route key={path} path={path} element={element} />
-        ))}
-      </Routes>
-      <Footer />
+        <Navbar />
+        <Routes>
+          {routes.map(({ path, element }) => (
+            <Route key={path} path={path} element={element} />
+          ))}
+        </Routes>
+        <Footer />
       </SessionManager>
     </Router>
   );

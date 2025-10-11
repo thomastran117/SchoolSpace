@@ -19,13 +19,14 @@ const SessionManager = ({ children }) => {
 
         if (cancelled) return;
 
-        const { accessToken, email, role } = res.data;
+        const { accessToken, username, avatar, role } = res.data;
         dispatch(
           setCredentials({
             token: accessToken,
-            email,
+            username,
             role,
-          })
+            avatar,
+          }),
         );
       } catch (err) {
         if (cancelled) return;
