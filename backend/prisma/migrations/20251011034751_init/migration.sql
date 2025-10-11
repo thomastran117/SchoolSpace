@@ -4,6 +4,7 @@ CREATE TABLE `User` (
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NULL,
     `role` ENUM('notdefined', 'student', 'teacher', 'assistant', 'admin') NOT NULL DEFAULT 'notdefined',
+    `username` VARCHAR(191) NULL,
     `googleId` VARCHAR(191) NULL,
     `microsoftId` VARCHAR(191) NULL,
     `name` VARCHAR(191) NULL,

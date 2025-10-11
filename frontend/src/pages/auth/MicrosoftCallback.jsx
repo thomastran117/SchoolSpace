@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { msalInstance, waitForMsal } from "../../configs/msalClient";
 import { setCredentials } from "../../stores/authSlice";
-import SecondaryApi from "../../api/SecondaryApi";
+import SecondaryApi from "../../api/secondaryApi";
 
 export default function MicrosoftCallback() {
   const navigate = useNavigate();

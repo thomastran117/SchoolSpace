@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../stores/authSlice";
-import SecondaryApi from "../../api/SecondaryApi";
+import SecondaryApi from "../../api/secondaryApi";
 import config from "../../configs/envManager";
 
 export default function GoogleCallback() {

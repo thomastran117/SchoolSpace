@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "../../stores/authSlice";
 import GoogleButton from "./GoogleButton";
 import MicrosoftButton from "./MicrosoftButton";
-import SecondaryApi from "../../api/SecondaryApi";
+import SecondaryApi from "../../api/secondaryApi";
 
 export default function AuthSection({ isSignup, setIsSignup, captchaRef }) {
   const dispatch = useDispatch();
