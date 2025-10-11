@@ -7,6 +7,7 @@ import SessionManager from "./components/auth/SessionManager";
 function App() {
   return (
     <Router>
+      <SessionManager>
       <Navbar />
       <Routes>
         {routes.map(({ path, element }) => (
@@ -14,6 +15,7 @@ function App() {
         ))}
       </Routes>
       <Footer />
+      </SessionManager>
     </Router>
   );
 }
