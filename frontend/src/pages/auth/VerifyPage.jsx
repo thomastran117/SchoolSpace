@@ -1,7 +1,7 @@
 import "../../styles/verify.css";
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import SecondaryApi from "../../api/secondaryApi";
+import PublicApi from "../../api/PublicApi";
 
 export default function VerifyPage() {
   const [searchParams] = useSearchParams();
@@ -24,7 +24,7 @@ export default function VerifyPage() {
       setStatus("Verifying...");
       setStatusType("loading");
 
-      await SecondaryApi.get("/auth/verify", {
+      await PublicApi.get("/auth/verify", {
         params: { token },
       });
 

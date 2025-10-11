@@ -5,7 +5,7 @@ import config from "../configs/envManager";
 
 const BASE_URL = config.backend_url;
 
-const PrimaryApi = axios.create({
+const ProtectedApi = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
 });
@@ -14,7 +14,7 @@ let refreshPromise = null;
 
 async function refreshToken() {
   try {
-    const refreshResp = await PrimaryApi.get("/auth/refresh");
+    const refreshResp = await ProtectedApi.get("/auth/refresh");
     const { accessToken, email, role } = refreshResp.data;
 
     store.dispatch(
@@ -49,7 +49,7 @@ async function refreshToken() {
   }
 }
 
-PrimaryApi.interceptors.request.use((config) => {
+ProtectedApi.interceptors.request.use((config) => {
   const state = store.getState();
   const token = state.auth.token;
 
@@ -60,7 +60,7 @@ PrimaryApi.interceptors.request.use((config) => {
   return config;
 });
 
-PrimaryApi.interceptors.response.use(
+ProtectedApi.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalConfig = error.config;
@@ -94,7 +94,7 @@ PrimaryApi.interceptors.response.use(
           originalConfig.headers = originalConfig.headers ?? {};
           originalConfig.headers.Authorization = `Bearer ${newToken}`;
 
-          return PrimaryApi(originalConfig);
+          return ProtectedApi(originalConfig);
         } catch (err) {
           return Promise.reject(err);
         }
@@ -112,4 +112,4 @@ PrimaryApi.interceptors.response.use(
   },
 );
 
-export default PrimaryApi;
+export default ProtectedApi;

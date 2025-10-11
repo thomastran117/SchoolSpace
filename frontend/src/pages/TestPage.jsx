@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import PrimaryApi from "../api/primaryApi.js";
+import ProtectedApi from "../api/ProtectedApi.js";
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -7,7 +7,7 @@ export default function Dashboard() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await PrimaryApi("/courses");
+        const res = await ProtectedApi("/courses");
         setData(await res.data);
       } catch (err) {
         console.error("Fetch error:", err);

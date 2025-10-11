@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../stores/authSlice";
-import SecondaryApi from "../../api/secondaryApi";
+import PublicApi from "../../api/PublicApi";
 import config from "../../configs/envManager";
 
 export default function GoogleCallback() {
@@ -41,7 +41,7 @@ export default function GoogleCallback() {
       try {
         setStatus("Verifying your Google account…");
 
-        const resp = await SecondaryApi.post("/auth/google/verify", {
+        const resp = await PublicApi.post("/auth/google/verify", {
           token: id_token,
         });
 

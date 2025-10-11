@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import PrimaryAPi from "../../api/primaryApi";
+import ProtectedApi from "../../api/ProtectedApi";
 import { useNavigate } from "react-router-dom";
 import "../../styles/course.css";
 
@@ -13,7 +13,7 @@ export default function CoursePage() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const resp = await PrimaryAPi.get("/courses");
+        const resp = await ProtectedApi.get("/courses");
         setCourses(resp.data.items);
       } catch (err) {
         console.error("Error fetching courses:", err);

@@ -3,7 +3,7 @@ import config from "../configs/envManager";
 
 const BASE_URL = config.backend_url;
 
-const SecondaryApi = axios.create({
+const PublicApi = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
   headers: {
@@ -11,7 +11,7 @@ const SecondaryApi = axios.create({
   },
 });
 
-SecondaryApi.interceptors.response.use(
+PublicApi.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 500) {
@@ -22,4 +22,4 @@ SecondaryApi.interceptors.response.use(
   },
 );
 
-export default SecondaryApi;
+export default PublicApi;

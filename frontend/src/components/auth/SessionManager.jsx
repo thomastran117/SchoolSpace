@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setCredentials, clearCredentials } from "../../stores/authSlice";
-import config from "../../configs/envManager";
+import PublicApi from "../../api/PublicApi";
 
 const SessionManager = ({ children }) => {
   const [loading, setLoading] = useState(true);
@@ -13,10 +12,7 @@ const SessionManager = ({ children }) => {
 
     const initSession = async () => {
       try {
-        const res = await axios.get(`${config.backend_url}/auth/refresh`, {
-          withCredentials: true,
-        });
-
+        const res = await PublicApi.get("/auth/refresh");
         if (cancelled) return;
 
         const { accessToken, username, avatar, role } = res.data;

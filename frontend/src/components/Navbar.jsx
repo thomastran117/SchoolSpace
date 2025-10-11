@@ -2,9 +2,8 @@ import { clearCredentials } from "../stores/authSlice";
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import PrimaryApi from "../api/primaryApi";
-import axios from "axios";
-import config from "../configs/envManager";
+import ProtectedApi from "../api/ProtectedApi";
+import PublicApi from "../api/PublicApi";
 
 export default function Navbar({
   brand = { name: "School", href: "/" },
@@ -24,7 +23,6 @@ export default function Navbar({
     ],
   },
 }) {
-  const [query, setQuery] = useState("");
   const [avatarBlobUrl, setAvatarBlobUrl] = useState(null);
 
   const dispatch = useDispatch();
@@ -33,11 +31,7 @@ export default function Navbar({
 
   const handleLogout = async () => {
     try {
-      await axios.post(
-        `${config.backend_url}/auth/logout`,
-        {},
-        { withCredentials: true },
-      );
+      await PublicApi.post(`/auth/logout`);
     } catch (err) {
       console.error("Logout failed", err);
     } finally {
@@ -56,7 +50,7 @@ export default function Navbar({
       }
 
       try {
-        const res = await PrimaryApi.get(avatar, { responseType: "blob" });
+        const res = await ProtectedApi.get(avatar, { responseType: "blob" });
         const blobUrl = URL.createObjectURL(res.data);
         setAvatarBlobUrl(blobUrl);
         revokeUrl = blobUrl;

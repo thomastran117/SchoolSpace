@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { msalInstance, waitForMsal } from "../../configs/msalClient";
 import { setCredentials } from "../../stores/authSlice";
-import SecondaryApi from "../../api/secondaryApi";
+import PublicApi from "../../api/PublicApi";
 
 export default function MicrosoftCallback() {
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ export default function MicrosoftCallback() {
 
         setStatus("Verifying your Microsoft account…");
 
-        const resp = await SecondaryApi.post("/auth/microsoft/verify", {
+        const resp = await PublicApi.post("/auth/microsoft/verify", {
           id_token: idToken,
         });
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import PrimaryApi from "../../api/primaryApi";
+import ProtectedApi from "../../api/ProtectedApi";
 import config from "../../configs/envManager";
 import ProfileTab from "../../components/profile/EditProfileTab";
 import DashboardTab from "../../components/profile/EditDashboardTab";
@@ -53,7 +53,7 @@ const EditProfile = () => {
 
       const formData = new FormData();
       formData.append("avatar", avatarFile);
-      await PrimaryApi.post("/users/avatar", formData, {
+      await ProtectedApi.post("/users/avatar", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -74,7 +74,7 @@ const EditProfile = () => {
     e.preventDefault();
     try {
       setFormMsg("Saving...");
-      await PrimaryApi.post("/users/profile", form);
+      await ProtectedApi.post("/users/profile", form);
       setFormMsg("✅ Profile saved successfully!");
     } catch (err) {
       console.error(err);

@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "../../stores/authSlice";
 import GoogleButton from "./GoogleButton";
 import MicrosoftButton from "./MicrosoftButton";
-import SecondaryApi from "../../api/secondaryApi";
+import PublicApi from "../../api/PublicApi";
 
 export default function AuthSection({ isSignup, setIsSignup, captchaRef }) {
   const dispatch = useDispatch();
@@ -52,7 +52,7 @@ export default function AuthSection({ isSignup, setIsSignup, captchaRef }) {
         ? { ...form, email: form.email.trim(), captcha: token }
         : { email: form.email.trim(), password: form.password, captcha: token };
 
-      const res = await SecondaryApi.post(endpoint, payload);
+      const res = await PublicApi.post(endpoint, payload);
       const { accessToken, username, avatar, role } = res.data;
 
       if (isSignup) {
