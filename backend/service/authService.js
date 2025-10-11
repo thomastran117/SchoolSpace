@@ -189,7 +189,7 @@ const verifyMicrosoftIdTokenAndSignIn = async (idToken) => {
     refreshToken,
     role: user.role,
     id: user.id,
-    username: user.username,
+    username: user.username || user.email,
     avatar: user.avatar,
   };
 };
@@ -230,7 +230,7 @@ const loginOrCreateFromGoogle = async (googleToken) => {
     refreshToken,
     role: user.role,
     id: user.id,
-    username: user.username,
+    username: user.username || user.email,
     avatar: user.avatar,
   };
 };
