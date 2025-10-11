@@ -82,9 +82,8 @@ function requestLogger(req, res, next) {
       default:
         methodColor = chalk.white;
     }
-
     const log =
-      `[${new Date().toISOString()}] ` +
+      chalk.gray(`[${new Date().toISOString()}] `) +
       `${methodColor(req.method)} ${req.originalUrl} ` +
       `${statusColor(res.statusCode)} - ${duration}ms`;
 

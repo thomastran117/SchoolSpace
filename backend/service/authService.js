@@ -36,7 +36,10 @@ import {
 
 // OAuth providers
 import { verifyMicrosoftIdToken } from "./oauth/microsoftService.js";
-import { verifyGoogleToken, verifyGoogleCaptcha } from "./oauth/googleService.js";
+import {
+  verifyGoogleToken,
+  verifyGoogleCaptcha,
+} from "./oauth/googleService.js";
 
 const { frontend_client: FRONTEND_CLIENT } = config;
 

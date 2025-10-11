@@ -16,7 +16,10 @@ import axios from "axios";
 // Internal config & utilities
 import config from "../../config/envManager.js";
 
-const { google_client_id: GOOGLE_CLIENT_ID, google_captcha_secret: GOOGLE_CAPTCHA_SECRET} = config;
+const {
+  google_client_id: GOOGLE_CLIENT_ID,
+  google_captcha_secret: GOOGLE_CAPTCHA_SECRET,
+} = config;
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
@@ -50,7 +53,7 @@ export async function verifyGoogleToken(idToken) {
   };
 }
 
-export async function verifyGoogleCaptcha(token){
+export async function verifyGoogleCaptcha(token) {
   const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${GOOGLE_CAPTCHA_SECRET}&response=${token}`;
   const response = await axios.post(verifyUrl);
 

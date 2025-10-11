@@ -25,13 +25,19 @@ import { fileURLToPath } from "url";
 import logger from "./utility/logger.js";
 
 // Middleware
-import corsMiddleware from "./middleware/corsMiddleware.js";
 import {
   generalRateLimiter,
   authRateLimiter,
 } from "./middleware/rateLimiterMiddleware.js";
 import requestLogger from "./middleware/httpLoggerMiddleware.js";
 import { requestContext } from "./middleware/requestContext.js";
+import { errorHandler } from "./middleware/errorHandlerMiddleware.js";
+import {
+  corsMiddleware,
+  securityHeaders,
+  preventHpp,
+  sanitizeInput,
+} from "./middleware/securityMiddleware.js";
 
 // Routes
 import serverRoutes from "./route/route.js";
@@ -42,16 +48,32 @@ const __dirname = path.dirname(__filename);
 
 // ---------- Core Middleware ----------
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // ---------- Security & CORS ----------
-app.set("trust proxy", 1); // Needed for secure cookies behind proxies
+app.set("trust proxy", 1);
 app.use(corsMiddleware);
 app.options(/.*/, corsMiddleware);
+app.use(securityHeaders);
+app.use(preventHpp);
+app.use(sanitizeInput);
 
 // ---------- Rate Limiting ----------
-// app.use(generalRateLimiter);
+app.use(generalRateLimiter);
+app.use(
+  [
+    "/api/auth/login",
+    "/api/auth/signup",
+    "/api/auth/verify",
+    "api/auth/forgot-password",
+    "api/auth/change-password",
+    "api/auth/microsoft",
+    "api/auth/google",
+  ],
+  authRateLimiter,
+);
 
 // ---------- Logging ----------
 app.use(requestLogger);
@@ -73,27 +95,8 @@ app.get("/", (_req, res) =>
 app.get("/api", (_req, res) => res.send("API is running!"));
 
 // Auth routes have stricter rate limiting
-// app.use("/api/auth", authRateLimiter);
 app.use("/api", serverRoutes);
 
-// ---------- Error Handler ----------
-/**
- * Global error handler.
- *
- * @param {Error} err - The error object (with optional `statusCode`).
- * @param {import("express").Request} req - Express request object.
- * @param {import("express").Response} res - Express response object.
- * @param {Function} next - Express next middleware function.
- */
-app.use((err, req, res, next) => {
-  const status = err.statusCode || 500;
-  const message = err.message || "Server failed to process the data";
-
-  if (status === 500) {
-    logger.error(`Server failed to process the data: ${err.message}`);
-  }
-
-  res.status(status).json({ error: message });
-});
+app.use(errorHandler);
 
 export default app;

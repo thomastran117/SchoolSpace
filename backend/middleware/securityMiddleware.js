@@ -1,6 +1,6 @@
 /**
- * @file corsMiddleware.js
- * @description  This middleware  handles the CORS policy, allowing only specified clients to access
+ * @file securityMiddleware.js
+ * @description  This middleware handles the CORS, HTTP headers, HPP and XSS
  *
  * @module middleware
  *
@@ -11,6 +11,9 @@
 
 // External libraries
 import cors from "cors";
+import sanitizeHtml from "sanitize-html";
+import hpp from "hpp";
+import helmet from "helmet";
 
 // Internal core modules
 import config from "../config/envManager.js";
@@ -69,9 +72,11 @@ const corsOptionsDelegate = (req, cb) => {
     if (whitelist.has(norm)) {
       isAllowed = true;
     } else {
-      console.warn(
-        `[CORS BLOCKED] ${req.method} ${req.originalUrl} from Origin: ${originHdr}`,
-      );
+      if (!isAllowed && process.env.NODE_ENV !== "production") {
+        console.warn(
+          `[CORS BLOCKED] ${req.method} ${req.originalUrl} from Origin: ${originHdr}`,
+        );
+      }
     }
   }
 
@@ -86,12 +91,57 @@ const corsOptionsDelegate = (req, cb) => {
   });
 };
 
+const corsMiddleware = cors(corsOptionsDelegate);
+
 /**
- * CORS middleware configured with dynamic whitelist checking.
- *
- * Usage in Express:
- * @example
- * import corsMiddleware from "./middleware/cors.js";
- * app.use(corsMiddleware);
+ * Helmet middleware
+ * Adds secure HTTP headers to protect against
+ * well-known web vulnerabilities like XSS, clickjacking, etc.
  */
-export default cors(corsOptionsDelegate);
+const securityHeaders = helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      "default-src": ["'self'"],
+      "img-src": ["'self'", "data:", "https:"],
+      "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      "style-src": ["'self'", "'unsafe-inline'", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+});
+
+/**
+ * Prevent HTTP Parameter Pollution
+ * Ensures query parameters cannot be sent multiple times to exploit logic
+ */
+const preventHpp = hpp({
+  // Whitelist parameters that should allow duplicates (optional)
+  whitelist: ["tags", "categories", "filters"],
+});
+
+const sanitizeInput = (req, _res, next) => {
+  const clean = (obj) => {
+    if (!obj || typeof obj !== "object") return obj;
+    for (const key of Object.keys(obj)) {
+      const val = obj[key];
+      if (typeof val === "string") {
+        obj[key] = sanitizeHtml(val, {
+          allowedTags: [], // remove all HTML tags
+          allowedAttributes: {},
+        });
+      } else if (typeof val === "object") {
+        clean(val);
+      }
+    }
+    return obj;
+  };
+
+  if (req.body) clean(req.body);
+  if (req.query) clean(req.query);
+  if (req.params) clean(req.params);
+
+  next();
+}
+
+export { sanitizeInput, corsMiddleware, preventHpp, securityHeaders };

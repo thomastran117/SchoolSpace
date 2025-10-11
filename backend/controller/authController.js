@@ -53,7 +53,7 @@ const login = async (req, res, next) => {
       email,
       password,
       remember_boolean,
-      captcha
+      captcha,
     );
 
     sendCookie(res, refreshToken);
