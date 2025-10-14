@@ -51,9 +51,12 @@ const { frontend_client: FRONTEND_CLIENT } = config;
  * @throws {Error} If credentials are invalid.
  */
 const loginUser = async (email, password, remember, captcha) => {
-  const result = verifyGoogleCaptcha(captcha);
-
-  if (!result) httpError(401, "Invalid captcha");
+  if (config.isCaptchaEnabled) {
+    const result = verifyGoogleCaptcha(captcha);
+    if (!result) httpError(401, "Invalid captcha");
+  } else {
+    logger.warn("Google Captcha is not avaliable");
+  }
 
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) httpError(401, "Invalid credentials");
@@ -87,9 +90,12 @@ const loginUser = async (email, password, remember, captcha) => {
  * @returns {Promise<{ message: string }>}
  */
 const signupUser = async (email, password, role, captcha) => {
-  const result = verifyGoogleCaptcha(captcha);
-
-  if (!result) httpError(401, "Invalid captcha");
+  if (config.isCaptchaEnabled) {
+    const result = verifyGoogleCaptcha(captcha);
+    if (!result) httpError(401, "Invalid captcha");
+  } else {
+    logger.warn("Google Captcha is not avaliable");
+  }
 
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) httpError(409, "Email already in use");
@@ -97,10 +103,16 @@ const signupUser = async (email, password, role, captcha) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const token = await createVerifyToken(email, hashedPassword, role);
 
-  const url = `${FRONTEND_CLIENT}/auth/verify?token=${encodeURIComponent(token)}`;
-  sendVerificationEmail(email, url);
-
-  return { message: "Verification email sent" };
+  if (config.isEmailEnabled) {
+    const url = `${FRONTEND_CLIENT}/auth/verify?token=${encodeURIComponent(token)}`;
+    sendVerificationEmail(email, url);
+  } else {
+    logger.warn("Email verification is not avaliable");
+    prisma.user.create({
+      data: { email, password: hashedPassword, role },
+    });
+  }
+  return true;
 };
 
 /**
@@ -114,23 +126,6 @@ const verifyUser = async (token) => {
 
   await sendWelcomeEmail(email);
   return user;
-};
-
-/**
- * Signup user directly without email verification.
- * @param {string} email - User email.
- * @param {string} password - Plain-text password.
- * @param {string} role - User role.
- * @returns {Promise<object>} Created user object.
- */
-const signupUserWOVerify = async (email, password, role) => {
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) httpError(409, "Email already in use");
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  return prisma.user.create({
-    data: { email, password: hashedPassword, role },
-  });
 };
 
 /**
@@ -260,7 +255,6 @@ export {
   signupUser,
   loginUser,
   verifyUser,
-  signupUserWOVerify,
   generateNewTokens,
   verifyMicrosoftIdTokenAndSignIn,
   loginOrCreateFromGoogle,

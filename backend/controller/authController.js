@@ -15,7 +15,6 @@ import {
   loginUser,
   signupUser,
   verifyUser,
-  signupUserWOVerify,
   verifyMicrosoftIdTokenAndSignIn,
   loginOrCreateFromGoogle,
   generateNewTokens,
@@ -80,13 +79,12 @@ const signup = async (req, res, next) => {
     assertAllowed(role, ["student", "teacher", "assistant"]);
     if (!validateEmail(email)) httpError(400, "Invalid email format");
 
-    if (config.isEmailEnabled()) {
-      await signupUser(email, password, role, captcha);
-      res.status(201).json({ message: "Email sent. Please verify." });
-    } else {
-      await signupUserWOVerify(email, password, role);
-      res.status(201).json({ message: "Verification skipped. Please login." });
+    if (!config.isEmailEnabled()) {
+      logger.warn("Email verification is not available");
     }
+
+    await signupUser(email, password, role, captcha);
+    res.status(201).json({ message: "Email sent. Please verify." });
   } catch (err) {
     next(err);
   }

@@ -105,12 +105,11 @@ const config = {
   cors_whitelist: opt("CORS_WHITELIST", "http://localhost:3040"),
   frontend_client: opt("FRONTEND_CLIENT", "http://localhost:3040"),
   google_client_id: opt("GOOGLE_CLIENT_ID", undefined),
+  google_captcha_secret: opt("GOOGLE_CAPTCHA_SECRET", undefined),
   ms_client_id: opt("MS_CLIENT_ID", undefined),
   ms_tenant_id: opt("MS_TENANT_ID", undefined),
   email_user: opt("EMAIL_USER", undefined),
   email_pass: opt("EMAIL_PASS", undefined),
-  google_api_key: opt("GOOGLE_API_KEY", undefined),
-  google_captcha_secret: opt("GOOGLE_CAPTCHA_SECRET", undefined),
 
   isGoogleEnabled() {
     return !!this.google_client_id;
@@ -120,6 +119,9 @@ const config = {
   },
   isEmailEnabled() {
     return !!(this.email_user && this.email_pass);
+  },
+  isCaptchaEnabled() {
+    return !!this.google_captcha_secret;
   },
 };
 
