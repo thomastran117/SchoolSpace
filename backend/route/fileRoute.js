@@ -9,10 +9,10 @@ import {
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.post("/:type/upload", upload.single("file"), handleUpload);
+// router.post("/:type/upload", upload.single("file"), handleUpload);
 
 router.get("/:type/:fileName", serveFile);
 
-router.delete("/:type/:fileName", handleDelete);
+// router.delete("/:type/:fileName", handleDelete);
 
 export default router;

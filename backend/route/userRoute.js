@@ -20,7 +20,7 @@ import {
   getTeacherByCourse,
   getUser,
 } from "../controller/userController.js";
-import upload from "../middleware/uploadMiddleware.js";
+import { uploadAvatar } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -29,7 +29,7 @@ const router = express.Router();
  * @description Updates an user avatar
  * @access Private
  */
-router.post("/avatar/", upload.single("avatar"), updateAvatar);
+router.post("/avatar/", uploadAvatar.single("avatar"), updateAvatar);
 
 /**
  * @route PUT /users/:id
