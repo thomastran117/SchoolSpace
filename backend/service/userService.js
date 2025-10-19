@@ -1,11 +1,16 @@
 import prisma from "../resource/prisma.js";
 import { httpError } from "../utility/httpUtility.js";
 import { generateTokens } from "./tokenService.js";
-import { uploadFile } from "./fileService.js";
+import { uploadFile, deleteFile } from "./fileService.js";
 
 const update_avatar = async (id, image) => {
   const user = await prisma.user.findUnique({ where: { id } });
+  
   if (!user) throw httpError(404, "User not found");
+
+  if (user.avatar){
+    await deleteFile("profile", user.avatar);
+  }
 
   const { fileName, filePath, publicUrl } = await uploadFile(
     image.buffer,

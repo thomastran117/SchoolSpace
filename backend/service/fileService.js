@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
-import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
 import logger from "../utility/logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,6 +21,9 @@ const UPLOADS_DIR = path.join(__dirname, "../../uploads");
   }
 })();
 
+const hashBuffer = (buffer) =>
+  crypto.createHash("sha256").update(buffer).digest("hex");
+
 const uploadFile = async (
   buffer,
   originalName = "file.bin",
@@ -31,15 +34,17 @@ const uploadFile = async (
     await fs.mkdir(dir, { recursive: true });
 
     const ext = path.extname(originalName) || ".bin";
-
-    const baseName =
-      path.basename(originalName, ext).trim() || `file_${Date.now()}`;
-
-    const fileName = `${baseName}_${uuidv4()}${ext}`;
+    const hash = hashBuffer(buffer);
+    const fileName = `${hash}${ext}`;
     const filePath = path.join(dir, fileName);
 
-    await fs.writeFile(filePath, buffer);
-    logger.info(`File uploaded (${type}): ${fileName}`);
+    try {
+      await fs.access(filePath);
+      logger.info(`Duplicate detected (${type}): ${fileName}`);
+    } catch {
+      await fs.writeFile(filePath, buffer);
+      logger.info(`File uploaded (${type}): ${fileName}`);
+    }
 
     return {
       fileName,
@@ -63,14 +68,24 @@ const getFile = async (type, fileName) => {
   }
 };
 
-const deleteFile = async (type, fileName) => {
+const deleteFile = async (type, fileNameOrUrl) => {
   try {
+    let fileName = fileNameOrUrl;
+    const prefix = `/files/${type}/`;
+    if (fileName.startsWith(prefix)) {
+      fileName = fileName.replace(prefix, "");
+    }
+
+    if (fileName.includes("..") || fileName.includes("/")) {
+      throw new Error("Invalid file name");
+    }
+
     const filePath = path.join(UPLOADS_DIR, type, fileName);
     await fs.unlink(filePath);
     logger.info(`Deleted file: ${fileName}`);
   } catch (err) {
     if (err.code === "ENOENT") {
-      logger.warn(`Tried to delete missing file: ${fileName}`);
+      logger.warn(`Tried to delete missing file: ${fileNameOrUrl}`);
       throw new Error("File not found");
     }
     logger.error(`Delete failed: ${err.message}`);
