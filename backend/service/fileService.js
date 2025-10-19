@@ -33,7 +33,8 @@ const uploadFile = async (
     const dir = path.join(UPLOADS_DIR, type);
     await fs.mkdir(dir, { recursive: true });
 
-    const ext = path.extname(originalName) || ".bin";
+    const ext = path.extname(originalName).toLowerCase() || ".bin";
+
     const hash = hashBuffer(buffer);
     const fileName = `${hash}${ext}`;
     const filePath = path.join(dir, fileName);
@@ -41,15 +42,22 @@ const uploadFile = async (
     try {
       await fs.access(filePath);
       logger.info(`Duplicate detected (${type}): ${fileName}`);
-    } catch {
-      await fs.writeFile(filePath, buffer);
-      logger.info(`File uploaded (${type}): ${fileName}`);
-    }
+      return {
+        fileName,
+        filePath,
+        publicUrl: `/files/${type}/${fileName}`,
+        isDuplicate: true,
+      };
+    } catch {}
+
+    await fs.writeFile(filePath, buffer);
+    logger.info(`File uploaded (${type}): ${fileName}`);
 
     return {
       fileName,
       filePath,
       publicUrl: `/files/${type}/${fileName}`,
+      isDuplicate: false,
     };
   } catch (err) {
     logger.error(`Upload failed: ${err.message}`);

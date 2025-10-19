@@ -5,18 +5,21 @@ import { uploadFile, deleteFile } from "./fileService.js";
 
 const update_avatar = async (id, image) => {
   const user = await prisma.user.findUnique({ where: { id } });
-  
+
   if (!user) throw httpError(404, "User not found");
 
-  if (user.avatar){
-    await deleteFile("profile", user.avatar);
-  }
-
+  // Fix deletion for duplicates!
   const { fileName, filePath, publicUrl } = await uploadFile(
     image.buffer,
     image.originalname,
     "profile",
   );
+
+  /*
+  if (user.avatar) {
+    await deleteFile("profile", user.avatar);
+  }
+  */
 
   const updated = await prisma.user.update({
     where: { id },

@@ -4,18 +4,35 @@ import sanitize from "sanitize-filename";
 import logger from "../utility/logger.js";
 
 const allowedMimeTypes = ["image/jpeg", "image/png"];
-const maxSize = 2 * 1024 * 1024; // 2 MB
+const allowedExtensions = [".jpg", ".jpeg", ".png"];
+const maxSize = 2 * 1024 * 1024;
 
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  if (!allowedMimeTypes.includes(file.mimetype)) {
-    logger.warn(`Rejected file type: ${file.mimetype}`);
-    return cb(new Error("Only JPG and PNG files are allowed"));
-  }
+  try {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const mime = file.mimetype;
 
-  file.originalname = sanitize(file.originalname);
-  cb(null, true);
+    const validMime = allowedMimeTypes.includes(mime);
+    const validExt = allowedExtensions.includes(ext);
+
+    if (!validMime || !validExt) {
+      logger.warn(
+        `Rejected file: mimetype=${mime}, ext=${ext}, name=${file.originalname}`,
+      );
+      return cb(
+        new Error("Only JPG and PNG files with correct extensions are allowed"),
+        false,
+      );
+    }
+
+    file.originalname = sanitize(file.originalname);
+    cb(null, true);
+  } catch (err) {
+    logger.error(`File filter error: ${err.message}`);
+    cb(new Error("File validation failed"), false);
+  }
 };
 
 export const uploadAvatar = multer({
