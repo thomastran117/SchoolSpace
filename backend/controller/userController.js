@@ -10,6 +10,7 @@ import {
   update_role,
   update_avatar,
   update_user,
+  get_user
 } from "../service/userService.js";
 import logger from "../utility/logger.js";
 import { sanitizeProfileImage } from "../utility/imageUtility.js";
@@ -18,7 +19,7 @@ import {
   validateAlphaNumericString,
   validateAddress,
   validatePhone,
-  validatePositiveInt,
+  optionalValidateId,
 } from "../utility/validateUtility.js";
 
 const getStudentsByCourse = async (req, res, next) => {
@@ -41,8 +42,16 @@ const getTeacherByCourse = async (req, res, next) => {
 
 const getUser = async (req, res, next) => {
   try {
-    const { id: userId, role } = req.user;
-    httpError(501, "Not implemented yet");
+    const { id: userId } = req.user;
+    const validatedId = optionalValidateId(req.params.id, "userId");
+
+    const targetId = validatedId || userId;
+    const user = await get_user(targetId);
+
+    res.status(200).json({
+      message: "User fetched",
+      user: user,
+    });
   } catch (err) {
     next(err);
   }
@@ -156,7 +165,7 @@ const updateRole = async (req, res, next) => {
 
 const deleteUser = async (req, res, next) => {
   try {
-    const { id: userId, role } = req.user;
+    const { id: userId } = req.user;
     await delete_user(userId);
     res.status(200).json({ message: "User deleted." });
   } catch (err) {

@@ -166,13 +166,43 @@ const delete_user = async (id) => {
 };
 
 const get_user = async (id) => {
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      username: true,
+      name: true,
+      phone: true,
+      address: true,
+      faculty: true,
+      school: true,
+      role: true,
+      avatar: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
   if (!user) throw httpError(404, "User not found");
   return user;
 };
 
 const get_users = async () => {
-  const users = await prisma.user.findMany();
+  const users = await prisma.user.findMany({
+     select: {
+      id: true,
+      username: true,
+      name: true,
+      phone: true,
+      address: true,
+      faculty: true,
+      school: true,
+      role: true,
+      avatar: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
   return users;
 };
 

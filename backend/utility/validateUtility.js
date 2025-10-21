@@ -33,6 +33,25 @@ function validatePositiveInt(value, name = "id") {
 }
 
 /**
+ * Validates that a value is a positive integer.
+ *
+ * @param {string|number} value - The value to validate.
+ * @returns {number} The validated integer value or undefined if invalid
+ *
+ * @example
+ * const userId = validatePositiveInt(req.params.id, "userId");
+ */
+function optionalValidateId(value) {
+  const num = Number(value);
+
+  if (!Number.isInteger(num) || num <= 0) {
+    return undefined
+  }
+
+  return num;
+}
+
+/**
  * Validates that a string is a boolean
  *
  * @param {str|boolean} str - The value to validate.
@@ -251,6 +270,7 @@ export {
   validateAlphaNumericString,
   isBoolean,
   validatePositiveInt,
+  optionalValidateId,
   validateAddress,
   validatePhone,
 };

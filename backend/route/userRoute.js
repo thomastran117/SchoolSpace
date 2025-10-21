@@ -66,6 +66,7 @@ router.get("/student/:id", getStudentsByCourse);
  * @access Private
  */
 router.get("/:id", getUser);
+router.get("/", getUser);
 
 // Export the router
 export default router;
