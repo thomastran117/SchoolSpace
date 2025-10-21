@@ -3,14 +3,23 @@ import {
   httpError,
   assertAllowed,
   sendCookie,
+  requiresAtLeastOneField,
 } from "../utility/httpUtility.js";
 import {
   delete_user,
   update_role,
   update_avatar,
+  update_user,
 } from "../service/userService.js";
 import logger from "../utility/logger.js";
 import { sanitizeProfileImage } from "../utility/imageUtility.js";
+import {
+  validateString,
+  validateAlphaNumericString,
+  validateAddress,
+  validatePhone,
+  validatePositiveInt,
+} from "../utility/validateUtility.js";
 
 const getStudentsByCourse = async (req, res, next) => {
   try {
@@ -41,8 +50,41 @@ const getUser = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
   try {
-    const { id: userId, role } = req.user;
-    httpError(501, "Not implemented yet");
+    const { id: userId } = req.user;
+
+    requiresAtLeastOneField(
+      ["username", "name", "address", "school", "phone", "faculty"],
+      req.body,
+    );
+
+    const { username, name, phone, address, faculty, school } = req.body;
+
+    const sanitized = {
+      username: validateAlphaNumericString(username, "Username", 20, 4),
+      name: validateString(name, "Name", 30, 2),
+      school: validateString(school, "School", 50),
+      faculty: validateString(faculty, "Faculty", 30),
+      phone: validatePhone(phone, "Phone"),
+      address: validateAddress(address, "Address"),
+    };
+
+    const {
+      accessToken,
+      refreshToken,
+      role,
+      username: newUsername,
+      avatar,
+    } = await update_user(userId, ...Object.values(sanitized));
+
+    sendCookie(res, refreshToken);
+
+    res.status(200).json({
+      message: "Profile avatar updated successfully",
+      accessToken,
+      role,
+      avatar,
+      username: newUsername,
+    });
   } catch (err) {
     next(err);
   }

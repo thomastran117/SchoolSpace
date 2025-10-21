@@ -25,6 +25,7 @@ const update_avatar = async (id, image) => {
     where: { id },
     data: {
       avatar: publicUrl,
+      updatedAt: new Date(),
     },
   });
 
@@ -66,6 +67,7 @@ const update_role = async (id, role) => {
     where: { id },
     data: {
       role,
+      updatedAt: new Date(),
     },
   });
 
@@ -87,7 +89,65 @@ const update_role = async (id, role) => {
   };
 };
 
-const update_user = async (id) => {};
+const update_user = async (
+  id,
+  username,
+  name,
+  phone,
+  address,
+  faculty,
+  school,
+) => {
+  if (username) {
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        username,
+        NOT: { id },
+      },
+    });
+
+    if (existingUser) {
+      throw httpError(
+        409,
+        `A user with the username "${username}" already exists. Choose another username.`,
+      );
+    }
+  }
+
+  const data = Object.fromEntries(
+    Object.entries({
+      username,
+      name,
+      phone,
+      address,
+      faculty,
+      school,
+      updatedAt: new Date(),
+    }).filter(([_, v]) => v !== undefined && v !== null),
+  );
+
+  const updated = await prisma.user.update({
+    where: { id },
+    data,
+  });
+
+  const { accessToken, refreshToken } = await generateTokens(
+    updated.id,
+    updated.username || updated.email,
+    updated.role,
+    updated.avatar,
+    true,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+    role: updated.role,
+    id: updated.id,
+    username: updated.username,
+    avatar: updated.avatar,
+  };
+};
 
 const delete_user = async (id) => {
   const user = await prisma.user.findUnique({ where: { id } });
