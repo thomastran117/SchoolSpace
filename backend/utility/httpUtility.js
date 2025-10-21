@@ -78,27 +78,6 @@ function assertAllowed(value, allowed, fieldName = "field") {
 }
 
 /**
- * Validates that a value is a positive integer.
- *
- * @param {string|number} value - The value to validate.
- * @param {string} [name="id"] - The field name for error messaging.
- * @returns {number} The validated integer value.
- * @throws {Error} If the value is not a positive integer.
- *
- * @example
- * const userId = validatePositiveInt(req.params.id, "userId");
- */
-function validatePositiveInt(value, name = "id") {
-  const num = Number(value);
-
-  if (!Number.isInteger(num) || num <= 0) {
-    throw httpError(400, `${name} must be a positive integer`);
-  }
-
-  return num;
-}
-
-/**
  * Creates and throws an HTTP error.
  *
  * @param {number} statusCode - HTTP status code.
@@ -133,39 +112,6 @@ function httpResponse(statusCode, message) {
 }
 
 /**
- * Validates that a string is a boolean
- *
- * @param {str|boolean} str - The value to validate.
- * @returns {boolean} The boolean value
- * @throws {Error} If the value is not a positive integer.
- *
- * @example
- * const remember = isBoolean(req.body.remember);
- */
-function isBoolean(str) {
-  if (typeof str === "boolean") return str;
-
-  if (typeof str === "string") {
-    const lower = str.toLowerCase();
-    if (lower === "true") return true;
-    if (lower === "false") return false;
-  }
-
-  return false;
-}
-
-/**
- * Utility: Validates email format.
- *
- * @param {string} email
- * @returns {boolean}
- */
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-/**
  * Utility: Sends refresh token as HTTP-only cookie.
  *
  * @param {import("express").Response} res
@@ -184,10 +130,7 @@ const sendCookie = (res, refreshToken) => {
 export {
   requireFields,
   requiresAtLeastOneField,
-  validatePositiveInt,
   httpError,
   assertAllowed,
-  isBoolean,
-  validateEmail,
   sendCookie,
 };

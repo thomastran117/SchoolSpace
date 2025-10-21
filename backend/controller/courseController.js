@@ -11,8 +11,8 @@ import {
   requireFields,
   requiresAtLeastOneField,
   httpError,
-  validatePositiveInt,
 } from "../utility/httpUtility.js";
+import { validatePositiveInt } from "../utility/validateUtility.js";
 import logger from "../utility/logger.js";
 
 const addCourse = async (req, res, next) => {

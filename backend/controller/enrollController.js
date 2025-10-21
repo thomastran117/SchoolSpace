@@ -1,4 +1,5 @@
-import { httpError, validatePositiveInt } from "../utility/httpUtility.js";
+import { httpError } from "../utility/httpUtility.js";
+import { validatePositiveInt } from "../utility/validateUtility.js";
 import {
   enroll_in_course,
   unenroll_in_course,

@@ -28,10 +28,9 @@ import {
   requireFields,
   httpError,
   assertAllowed,
-  isBoolean,
-  validateEmail,
   sendCookie,
 } from "../utility/httpUtility.js";
+import { isBoolean, validateEmail } from "../utility/validateUtility.js";
 
 /**
  * Handles user login with email/password.
