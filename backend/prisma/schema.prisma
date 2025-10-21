@@ -33,8 +33,8 @@ model User {
   avatar    String?
   phone     String?
   address   String?
-  Faculty   String?
-  School    String?
+  faculty   String?
+  school    String?
 
   googleId     String? @unique
   microsoftId  String? @unique
