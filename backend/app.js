@@ -32,12 +32,7 @@ import {
 import requestLogger from "./middleware/httpLoggerMiddleware.js";
 import { requestContext } from "./middleware/requestContext.js";
 import { errorHandler } from "./middleware/errorHandlerMiddleware.js";
-import {
-  corsMiddleware,
-  securityHeaders,
-  preventHpp,
-  sanitizeInput,
-} from "./middleware/securityMiddleware.js";
+import { securityMiddlewareBundle } from "./middleware/securityMiddleware.js";
 
 // Routes
 import serverRoutes from "./route/route.js";
@@ -47,18 +42,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ---------- Core Middleware ----------
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // ---------- Security  ----------
-app.set("trust proxy", 1);
-app.use(corsMiddleware);
-app.options(/.*/, corsMiddleware);
-app.use(securityHeaders);
-app.use(preventHpp);
-app.use(sanitizeInput);
+app.use(securityMiddlewareBundle());
+
 
 // ---------- Rate Limiting ----------
 app.use(generalRateLimiter);
