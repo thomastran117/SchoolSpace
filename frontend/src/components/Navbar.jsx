@@ -6,7 +6,7 @@ import ProtectedApi from "../api/ProtectedApi";
 import PublicApi from "../api/PublicApi";
 
 export default function Navbar({
-  brand = { name: "School", href: "/" },
+  brand = { name: "SchoolSpace", href: "/" },
   links = [
     { label: "Home", to: "/" },
     { label: "Features", to: "/features" },
@@ -24,7 +24,6 @@ export default function Navbar({
   },
 }) {
   const [avatarBlobUrl, setAvatarBlobUrl] = useState(null);
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { token, username, avatar } = useSelector((state) => state.auth);
@@ -42,13 +41,11 @@ export default function Navbar({
 
   useEffect(() => {
     let revokeUrl = null;
-
     const fetchAvatar = async () => {
       if (!avatar) {
         setAvatarBlobUrl(null);
         return;
       }
-
       try {
         const res = await ProtectedApi.get(avatar, { responseType: "blob" });
         const blobUrl = URL.createObjectURL(res.data);
@@ -61,7 +58,6 @@ export default function Navbar({
     };
 
     fetchAvatar();
-
     return () => {
       if (revokeUrl) URL.revokeObjectURL(revokeUrl);
     };
@@ -71,108 +67,136 @@ export default function Navbar({
   const firstLetter = username ? username.charAt(0).toUpperCase() : "U";
 
   return (
-    <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm">
+    <nav className="navbar navbar-expand-lg bg-white border-bottom sticky-top shadow-sm navbar-custom">
       <style>{`
-        /* ===== General Navbar Styling ===== */
-        .navbar {
+        /* ===== Indigo Navbar Theme (Scoped) ===== */
+        .navbar-custom {
           backdrop-filter: blur(10px);
           transition: all 0.3s ease;
         }
 
-        .navbar:hover {
-          box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+        .navbar-custom:hover {
+          box-shadow: 0 3px 12px rgba(99, 102, 241, 0.1);
         }
 
-        .navbar-brand span.badge {
+        .navbar-custom .navbar-brand {
+          font-weight: 700;
+          background: linear-gradient(90deg, #6366f1, #818cf8);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .navbar-custom .navbar-brand span.badge {
+          background-color: rgba(99, 102, 241, 0.1);
+          color: #6366f1;
           font-size: 0.8rem;
-          background-color: rgba(25, 135, 84, 0.1);
         }
 
-        /* ===== Underline Animation ===== */
-        .nav-link {
+        /* ===== Nav Links ===== */
+        .navbar-custom .nav-link {
           position: relative;
-          overflow: hidden;
-          transition: color 0.25s ease;
+          font-weight: 500;
+          color: #374151 !important;
+          border-radius: 1rem;
+          padding: 0.5rem 1rem;
+          margin: 0 0.25rem;
+          transition: all 0.25s ease;
         }
 
-        .nav-link::after {
-          content: "";
-          position: absolute;
-          left: 15%;
-          bottom: 0;
-          width: 0;
-          height: 2px;
-          background-color: #198754;
-          transition: width 0.3s ease;
-          border-radius: 2px;
+        .navbar-custom .nav-link:hover {
+          background-color: rgba(99, 102, 241, 0.08);
+          color: #4f46e5 !important;
         }
 
-        .nav-link:hover::after,
-        .nav-link.router-active::after {
-          width: 70%;
-        }
-
-        .nav-link:hover,
-        .dropdown-item:hover {
-          color: #198754 !important;
-        }
-
-        /* ===== Dropdown Hover / Active Green ===== */
-        .dropdown-item:focus,
-        .dropdown-item:hover {
-          background-color: rgba(25, 135, 84, 0.15) !important;
-          color: #198754 !important;
-        }
-
-        .dropdown-item.active,
-        .dropdown-item:active {
-          background-color: #198754 !important;
+        .navbar-custom .nav-link.router-active {
           color: #fff !important;
+          background: linear-gradient(90deg, #6366f1, #818cf8);
+          box-shadow: 0 3px 8px rgba(99, 102, 241, 0.2);
         }
 
-        /* ===== Avatar Styling ===== */
-        .avatar-circle {
+        /* ===== Dropdown ===== */
+        .navbar-custom .dropdown-menu {
+          border: none;
+          border-radius: 1rem;
+          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-custom .dropdown-item {
+          font-weight: 500;
+          color: #374151;
+          transition: all 0.2s ease;
+        }
+
+        .navbar-custom .dropdown-item:hover,
+        .navbar-custom .dropdown-item:focus {
+          background-color: rgba(99, 102, 241, 0.08);
+          color: #4f46e5;
+        }
+
+        .navbar-custom .dropdown-item.active,
+        .navbar-custom .dropdown-item:active {
+          background: linear-gradient(90deg, #6366f1, #818cf8);
+          color: #fff;
+        }
+
+        /* ===== Avatar ===== */
+        .navbar-custom .avatar-circle {
           width: 36px;
           height: 36px;
           border-radius: 50%;
-          background-color: #198754;
+          background: linear-gradient(135deg, #6366f1, #818cf8);
           color: white;
           font-weight: 600;
-          font-size: 1rem;
           display: flex;
           align-items: center;
           justify-content: center;
+          font-size: 1rem;
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .avatar-circle:hover {
+        .navbar-custom .avatar-circle:hover {
           transform: scale(1.05);
-          box-shadow: 0 0 8px rgba(25, 135, 84, 0.3);
+          box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
         }
 
-        img.avatar-img {
+        .navbar-custom img.avatar-img {
           width: 36px;
           height: 36px;
           object-fit: cover;
           border-radius: 50%;
-          border: 2px solid #19875422;
+          border: 2px solid rgba(99, 102, 241, 0.25);
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        img.avatar-img:hover {
+        .navbar-custom img.avatar-img:hover {
           transform: scale(1.05);
-          box-shadow: 0 0 8px rgba(25, 135, 84, 0.3);
+          box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
         }
 
-        /* ===== Username Styling ===== */
-        .username {
+        /* ===== Username ===== */
+        .navbar-custom .username {
           font-weight: 600;
-          color: #212529;
+          color: #111827;
           transition: color 0.2s ease;
         }
 
-        .username:hover {
-          color: #198754;
+        .navbar-custom .username:hover {
+          color: #4f46e5;
+        }
+
+        /* ===== Login Button ===== */
+        .navbar-custom .btn-outline-indigo {
+          color: #4f46e5;
+          border-color: #6366f1;
+          font-weight: 600;
+          transition: all 0.2s ease;
+        }
+
+        .navbar-custom .btn-outline-indigo:hover {
+          background: linear-gradient(90deg, #6366f1, #818cf8);
+          color: #fff;
+          border-color: transparent;
+          box-shadow: 0 3px 10px rgba(99, 102, 241, 0.3);
         }
       `}</style>
 
@@ -180,10 +204,10 @@ export default function Navbar({
         {/* Brand */}
         <NavLink
           to={brand.href}
-          className="navbar-brand fw-bold text-success d-flex align-items-center gap-2"
+          className="navbar-brand d-flex align-items-center gap-2"
         >
           {brand.name}
-          <span className="badge text-success fw-semibold">Space</span>
+          <span className="badge fw-semibold">Portal</span>
         </NavLink>
 
         <button
@@ -199,6 +223,7 @@ export default function Navbar({
         </button>
 
         <div className="collapse navbar-collapse" id="navbarNav">
+          {/* Left Links */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             {links.map((l) => (
               <li className="nav-item" key={l.to}>
@@ -206,9 +231,7 @@ export default function Navbar({
                   to={l.to}
                   end
                   className={({ isActive }) =>
-                    `nav-link fw-medium px-3 ${
-                      isActive ? "text-success router-active" : ""
-                    }`
+                    `nav-link fw-medium ${isActive ? "router-active" : ""}`
                   }
                 >
                   {l.label}
@@ -219,7 +242,7 @@ export default function Navbar({
             {dropdown && (
               <li className="nav-item dropdown">
                 <a
-                  className="nav-link dropdown-toggle fw-medium px-3"
+                  className="nav-link dropdown-toggle fw-medium"
                   href="#"
                   id="navDropdown"
                   role="button"
@@ -256,7 +279,7 @@ export default function Navbar({
           {!token ? (
             <NavLink
               to="/auth"
-              className="btn btn-outline-success rounded-pill px-4 fw-semibold"
+              className="btn btn-outline-indigo rounded-pill px-4 fw-semibold"
             >
               Login
             </NavLink>
