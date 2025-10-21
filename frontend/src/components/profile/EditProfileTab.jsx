@@ -67,8 +67,16 @@ const EditProfileTab = ({ onCancel }) => {
     setForm((prev) => ({ ...prev, [key]: originalForm[key] || "" }));
   };
 
+  // ✅ Detect if anything changed
+  const hasChanges = Object.keys(form).some((key) => form[key] !== originalForm[key]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!hasChanges) {
+      setFormMsg("⚠️ No changes to save.");
+      return;
+    }
+
     try {
       setLoading(true);
       setFormMsg("Saving changes...");
@@ -103,6 +111,7 @@ const EditProfileTab = ({ onCancel }) => {
     if (!msg) return null;
     const isSuccess = msg.startsWith("✅");
     const isError = msg.startsWith("❌");
+    const isWarning = msg.startsWith("⚠️");
 
     return (
       <div
@@ -110,8 +119,10 @@ const EditProfileTab = ({ onCancel }) => {
           isSuccess
             ? "bg-success-subtle text-success border border-success-subtle"
             : isError
-              ? "bg-danger-subtle text-danger border border-danger-subtle"
-              : "bg-light text-muted border border-secondary-subtle"
+            ? "bg-danger-subtle text-danger border border-danger-subtle"
+            : isWarning
+            ? "bg-warning-subtle text-warning border border-warning-subtle"
+            : "bg-light text-muted border border-secondary-subtle"
         }`}
         style={{ fontSize: "0.9rem", transition: "all 0.2s ease" }}
       >
@@ -192,14 +203,19 @@ const EditProfileTab = ({ onCancel }) => {
         >
           <i className="bi bi-x-circle me-1"></i> Cancel
         </button>
+
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !hasChanges}
           className="btn rounded-pill px-4 fw-semibold shadow-sm"
           style={{
-            background: "linear-gradient(90deg, #6366f1, #818cf8)",
-            color: "white",
+            background: hasChanges
+              ? "linear-gradient(90deg, #6366f1, #818cf8)"
+              : "#d1d5db",
+            color: hasChanges ? "white" : "#6b7280",
             border: "none",
+            cursor: hasChanges ? "pointer" : "not-allowed",
+            transition: "all 0.2s ease",
           }}
         >
           <i className="bi bi-save2-fill me-1"></i>{" "}

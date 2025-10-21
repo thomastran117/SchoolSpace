@@ -36,7 +36,6 @@ const EditProfile = () => {
       }
 
       try {
-        // Fetch using protected route so token is included
         const res = await ProtectedApi.get(avatar, { responseType: "blob" });
 
         const blobUrl = URL.createObjectURL(res.data);
@@ -45,7 +44,6 @@ const EditProfile = () => {
       } catch (err) {
         console.error("Failed to fetch protected avatar:", err);
         setAvatarPreview(null);
-        // Show a placeholder image if 401 or missing file
       }
     };
 
@@ -149,7 +147,6 @@ const EditProfile = () => {
         </div>
 
         <div className="row g-4">
-          {/* --- Left Side Avatar Card --- */}
           <div className="col-md-4 text-center">
             <div
               className="card border-0 shadow-sm p-4 rounded-4 align-items-center"
@@ -203,7 +200,6 @@ const EditProfile = () => {
             </div>
           </div>
 
-          {/* --- Right Side Tabs --- */}
           <div className="col-md-8">
             <ul
               className="nav justify-content-start mb-4 gap-2 px-1"
