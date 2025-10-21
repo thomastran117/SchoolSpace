@@ -51,6 +51,7 @@ const getUser = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const { id: userId } = req.user;
+    const token = req.cookies.refreshToken;
 
     requiresAtLeastOneField(
       ["username", "name", "address", "school", "phone", "faculty"],
@@ -74,7 +75,7 @@ const updateUser = async (req, res, next) => {
       role,
       username: newUsername,
       avatar,
-    } = await update_user(userId, ...Object.values(sanitized));
+    } = await update_user(userId, ...Object.values(sanitized), token);
 
     sendCookie(res, refreshToken);
 
@@ -90,27 +91,18 @@ const updateUser = async (req, res, next) => {
   }
 };
 
-const deleteUser = async (req, res, next) => {
-  try {
-    const { id: userId, role } = req.user;
-    await delete_user(userId);
-    res.status(200).json({ message: "User deleted." });
-  } catch (err) {
-    next(err);
-  }
-};
-
 const updateAvatar = async (req, res, next) => {
   try {
     const { id } = req.user;
     const file = req.file;
+    const token = req.cookies.refreshToken;
 
     const { fileName, sanitizedBuffer } = await sanitizeProfileImage(file);
     file.buffer = sanitizedBuffer;
     file.originalname = fileName;
 
     const { accessToken, refreshToken, role, username, avatar } =
-      await update_avatar(id, file);
+      await update_avatar(id, file, token);
 
     sendCookie(res, refreshToken);
 
@@ -130,6 +122,7 @@ const updateAvatar = async (req, res, next) => {
 const updateRole = async (req, res, next) => {
   try {
     const { id, role } = req.user;
+    const token = req.cookies.refreshToken;
     if (role !== "undefined") {
       httpError(409, "The user already has a role");
     }
@@ -145,7 +138,7 @@ const updateRole = async (req, res, next) => {
       role: userrole,
       username,
       avatar,
-    } = await update_role(id, userRole);
+    } = await update_role(id, userRole, token);
 
     sendCookie(res, refreshToken);
 
@@ -156,6 +149,16 @@ const updateRole = async (req, res, next) => {
       avatar,
       username,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteUser = async (req, res, next) => {
+  try {
+    const { id: userId, role } = req.user;
+    await delete_user(userId);
+    res.status(200).json({ message: "User deleted." });
   } catch (err) {
     next(err);
   }

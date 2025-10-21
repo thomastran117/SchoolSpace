@@ -1,9 +1,9 @@
 import prisma from "../resource/prisma.js";
 import { httpError } from "../utility/httpUtility.js";
-import { generateTokens } from "./tokenService.js";
+import { generateTokens, logoutToken } from "./tokenService.js";
 import { uploadFile, deleteFile } from "./fileService.js";
 
-const update_avatar = async (id, image) => {
+const update_avatar = async (id, image, token) => {
   const user = await prisma.user.findUnique({ where: { id } });
 
   if (!user) throw httpError(404, "User not found");
@@ -37,6 +37,8 @@ const update_avatar = async (id, image) => {
     true,
   );
 
+  await logoutToken(token);
+
   return {
     accessToken,
     refreshToken,
@@ -47,7 +49,7 @@ const update_avatar = async (id, image) => {
   };
 };
 
-const update_role = async (id, role) => {
+const update_role = async (id, role, token) => {
   const user = await prisma.user.findUnique({
     where: { id },
   });
@@ -79,6 +81,8 @@ const update_role = async (id, role) => {
     true,
   );
 
+  await logoutToken(token);
+
   return {
     accessToken,
     refreshToken,
@@ -97,6 +101,7 @@ const update_user = async (
   address,
   faculty,
   school,
+  token,
 ) => {
   if (username) {
     const existingUser = await prisma.user.findFirst({
@@ -138,6 +143,8 @@ const update_user = async (
     updated.avatar,
     true,
   );
+
+  await logoutToken(token);
 
   return {
     accessToken,

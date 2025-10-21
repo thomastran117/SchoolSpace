@@ -248,7 +248,7 @@ const generateNewTokens = async (oldToken) => {
  * @returns {Promise<boolean>}
  */
 const authLogout = async (token) => {
-  return logoutToken(token);
+  return await logoutToken(token);
 };
 
 export {
