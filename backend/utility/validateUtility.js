@@ -1,4 +1,4 @@
-import { httpError } from "./httpUtility";
+import { httpError } from "./httpUtility.js";
 
 /**
  * Utility: Validates email format.
@@ -197,8 +197,6 @@ const validatePhone = (
 
   return trimmed;
 };
-
-import { httpError } from "../utility/httpError.js";
 
 /**
  * Validates and sanitizes a street or mailing address.
