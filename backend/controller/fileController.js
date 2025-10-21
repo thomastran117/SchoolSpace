@@ -13,7 +13,6 @@ export const handleUpload = async (req, res) => {
     const result = await uploadFile(file.buffer, file.originalname, type);
     res.status(201).json({ message: "File uploaded successfully", ...result });
   } catch (err) {
-    logger.error(err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -27,7 +26,6 @@ export const serveFile = async (req, res) => {
     res.setHeader("Content-Type", contentType);
     res.sendFile(filePath);
   } catch (err) {
-    logger.error(err.message);
     res.status(404).json({ error: err.message });
   }
 };
@@ -39,7 +37,6 @@ export const handleDelete = async (req, res) => {
     await deleteFile(type, fileName);
     res.status(200).json({ message: "File deleted successfully" });
   } catch (err) {
-    logger.error(err.message);
     res.status(404).json({ error: err.message });
   }
 };

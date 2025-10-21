@@ -10,7 +10,7 @@ import {
   update_role,
   update_avatar,
   update_user,
-  get_user
+  get_user,
 } from "../service/userService.js";
 import logger from "../utility/logger.js";
 import { sanitizeProfileImage } from "../utility/imageUtility.js";

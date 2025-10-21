@@ -45,7 +45,7 @@ function optionalValidateId(value) {
   const num = Number(value);
 
   if (!Number.isInteger(num) || num <= 0) {
-    return undefined
+    return undefined;
   }
 
   return num;

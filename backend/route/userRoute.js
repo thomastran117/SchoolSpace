@@ -38,6 +38,7 @@ router.post("/avatar/", uploadAvatar.single("avatar"), updateAvatar);
  * @access Private
  */
 router.put("/:id", updateUser);
+router.put("/", updateUser);
 
 /**
  * @route DELETE /users/:id
