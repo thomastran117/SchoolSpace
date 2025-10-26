@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "nodemon --watch src --exec node --import ./loader-register.mjs src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
