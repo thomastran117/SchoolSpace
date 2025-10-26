@@ -1,18 +1,16 @@
 /**
- * @file authTokenMiddleware.js
- * @description  This middleware protects routes requesting an access token to access. Adds the
- * user payload to the request object to be access by the controller
+ * @file authTokenMiddleware.ts
+ * @description
+ * Express middleware that protects routes requiring an access token.
+ * Adds the user payload to the request object for downstream access.
  *
  * @module middleware
- *
- * @author Thomas
  * @version 1.0.0
- *
+ * @author Thomas
  */
 
-// Token service
-import { getUserPayload } from "../service/tokenService.js";
-
+import { Request, Response, NextFunction } from "express";
+import { getUserPayload } from "../service/tokenService";
 /**
  * Express middleware that enforces authentication via JWT access token.
  *
@@ -21,29 +19,30 @@ import { getUserPayload } from "../service/tokenService.js";
  * - Attaches the decoded user payload to `req.user`.
  * - Returns `401 Unauthorized` if token is missing, invalid, or expired.
  *
- * @async
- * @function makeRequireAuth
- * @param {import("express").Request} req - Express request object.
- * @param {import("express").Response} res - Express response object.
- * @param {Function} next - Express next middleware function.
- *
  * @example
- * import { makeRequireAuth } from "./middleware/authToken.js";
- *
  * app.get("/protected", makeRequireAuth, (req, res) => {
  *   res.json({ message: `Hello, ${req.user.id}` });
  * });
  */
-const makeRequireAuth = async (req, res, next) => {
+export async function makeRequireAuth(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void>  {
   try {
     const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      res.status(401).json({ error: "Missing Authorization header" });
+      return;
+    }
+
     req.user = await getUserPayload(authHeader);
     next();
-  } catch (e) {
+  } catch (e: any) {
     res
       .status(e.statusCode || 401)
       .json({ error: e.message || "Unauthorized" });
+    return;
   }
-};
-
-export { makeRequireAuth };
+}

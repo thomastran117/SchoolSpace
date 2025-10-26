@@ -1,7 +1,7 @@
 /**
- * @file app.js
+ * @file app.ts
  * @description
- *  * Express application setup.
+ * Express application setup.
  *
  * - Configures JSON parsing, cookies, static files.
  * - Applies CORS, rate limiting, and logging middleware.
@@ -12,34 +12,28 @@
  *
  * @author Thomas
  * @version 1.0.0
- *
  */
 
-// Third party libaries
-import express from "express";
+import express, { Application, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import path from "path";
-import { fileURLToPath } from "url";
 
 // Utilities
-import logger from "./utility/logger.js";
+import logger from "./utility/logger";
 
 // Middleware
 import {
   generalRateLimiter,
   authRateLimiter,
-} from "./middleware/rateLimiterMiddleware.js";
-import requestLogger from "./middleware/httpLoggerMiddleware.js";
-import { requestContext } from "./middleware/requestContext.js";
-import { errorHandler } from "./middleware/errorHandlerMiddleware.js";
-import { securityMiddlewareBundle } from "./middleware/securityMiddleware.js";
+} from "./middleware/rateLimiterMiddleware";
+import requestLogger from "./middleware/httpLoggerMiddleware";
+import { errorHandler } from "./middleware/errorHandlerMiddleware";
+import { securityMiddlewareBundle } from "./middleware/securityMiddleware";
 
 // Routes
-import serverRoutes from "./route/route.js";
+import serverRoutes from "./route/route";
 
-const app = express();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const app: Application = express();
 
 // ---------- Core Middleware ----------
 app.use(express.json({ limit: "1mb" }));
@@ -47,9 +41,8 @@ app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-// ---------- Security  ----------
+// ---------- Security ----------
 app.use(securityMiddlewareBundle());
-
 
 // ---------- Rate Limiting ----------
 app.use(generalRateLimiter);
@@ -58,10 +51,10 @@ app.use(
     "/api/auth/login",
     "/api/auth/signup",
     "/api/auth/verify",
-    "api/auth/forgot-password",
-    "api/auth/change-password",
-    "api/auth/microsoft",
-    "api/auth/google",
+    "/api/auth/forgot-password",
+    "/api/auth/change-password",
+    "/api/auth/microsoft",
+    "/api/auth/google",
   ],
   authRateLimiter,
 );
@@ -69,25 +62,25 @@ app.use(
 // ---------- Logging ----------
 app.use(requestLogger);
 
-// ---------- Context Middleware (if needed globally) ----------
-// app.use(requestContext);
-
 // ---------- Routes ----------
 /**
  * Root route serving static frontend.
  */
-app.get("/", (_req, res) =>
-  res.sendFile(path.join(__dirname, "public", "index.html")),
-);
+app.get("/", (_req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 /**
  * Healthcheck route for API status.
  */
-app.get("/api", (_req, res) => res.send("API is running!"));
+app.get("/api", (_req: Request, res: Response) => {
+  res.send("API is running!");
+});
 
-// Auth routes have stricter rate limiting
+// ---------- API Routes ----------
 app.use("/api", serverRoutes);
 
+// ---------- Error Handling ----------
 app.use(errorHandler);
 
 export default app;
