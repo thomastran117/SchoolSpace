@@ -10,7 +10,7 @@
 /**
  * Imports
  */
-import express from "express";
+import express, { Router } from "express";
 import {
   updateUser,
   updateRole,
@@ -19,10 +19,10 @@ import {
   getStudentsByCourse,
   getTeacherByCourse,
   getUser,
-} from "../controller/userController.js";
+} from "../controller/userController";
 import { uploadAvatar } from "../middleware/uploadMiddleware.js";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * @route PUT /users/:id

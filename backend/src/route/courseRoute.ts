@@ -11,7 +11,7 @@
 /**
  * Imports
  */
-import express from "express";
+import express, { Router } from "express";
 import {
   getCourse,
   getCourses,
@@ -20,9 +20,9 @@ import {
   addCourse,
   getCoursesByStudent,
   getCoursesByTeacher,
-} from "../controller/courseController.js";
+} from "../controller/courseController";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * @route POST /courses/

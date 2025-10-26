@@ -10,12 +10,13 @@
 /**
  * Imports
  */
-import express from "express";
+import express, { Router } from "express";
 import {
   enrollInCourse,
   unenrollInCourse,
 } from "../controller/enrollController.js";
-const router = express.Router();
+
+const router: Router = express.Router();
 
 /**
  * @route POST /course-enroll/:id

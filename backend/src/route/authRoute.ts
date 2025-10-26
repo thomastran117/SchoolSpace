@@ -11,7 +11,7 @@
 /**
  * Imports
  */
-import express from "express";
+import express, { Router } from "express";
 import {
   login,
   signup,
@@ -20,9 +20,9 @@ import {
   googleVerify,
   newAccessToken,
   logout,
-} from "../../controller/authController.js";
+} from "../../controller/authController";
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * @route POST /auth/login
