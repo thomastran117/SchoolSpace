@@ -20,7 +20,7 @@ import {
   googleVerify,
   newAccessToken,
   logout,
-} from "../controller/authController.js";
+} from "../../controller/authController.js";
 
 const router = express.Router();
 

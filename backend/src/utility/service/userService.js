@@ -1,4 +1,4 @@
-import prisma from "../resource/prisma.js";
+import prisma from "../../../resource/prisma.js";
 import { httpError } from "../utility/httpUtility.js";
 import { generateTokens, logoutToken } from "./tokenService.js";
 import { uploadFile, deleteFile } from "./fileService.js";

@@ -16,12 +16,12 @@ import { v4 as uuidv4 } from "uuid";
 import { randomBytes } from "crypto";
 
 // Internal config & utilities
-import config from "../config/envManager.js";
+import config from "../../config/envManager.js";
 import { httpError } from "../utility/httpUtility.js";
 import logger from "../utility/logger.js";
 
 // Resources
-import redis from "../resource/redis.js";
+import redis from "../../../resource/redis.js";
 
 const {
   jwt_secret_access: JWT_SECRET_ACCESS,
