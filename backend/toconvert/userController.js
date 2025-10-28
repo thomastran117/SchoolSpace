@@ -4,23 +4,23 @@ import {
   assertAllowed,
   sendCookie,
   requiresAtLeastOneField,
-} from "../utility/httpUtility.js";
+} from "../src/utility/httpUtility.js";
 import {
   delete_user,
   update_role,
   update_avatar,
   update_user,
   get_user,
-} from "../service/userService.js";
-import logger from "../utility/logger.js";
-import { sanitizeProfileImage } from "../utility/imageUtility.js";
+} from "../src/service/userService.js";
+import logger from "../src/utility/logger.js";
+import { sanitizeProfileImage } from "../src/utility/imageUtility.js";
 import {
   validateString,
   validateAlphaNumericString,
   validateAddress,
   validatePhone,
   optionalValidateId,
-} from "../utility/validateUtility.js";
+} from "../src/utility/validateUtility.js";
 
 const getStudentsByCourse = async (req, res, next) => {
   try {

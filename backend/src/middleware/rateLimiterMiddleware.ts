@@ -10,7 +10,11 @@
  * @author Thomas
  */
 
-import { RateLimiterRedis, RateLimiterMemory, RateLimiterRes } from "rate-limiter-flexible";
+import {
+  RateLimiterRedis,
+  RateLimiterMemory,
+  RateLimiterRes,
+} from "rate-limiter-flexible";
 import type { Request, Response, NextFunction } from "express";
 import redis from "../resource/redis";
 
@@ -51,8 +55,12 @@ function buildLimiter({
  */
 function limiterMiddleware(
   limiter: RateLimiterRedis,
-  message: string
-): (req: Request, res: Response, next: NextFunction) => Promise<void | Response> {
+  message: string,
+): (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => Promise<void | Response> {
   return async (req, res, next) => {
     const key = (req.user as { id?: string })?.id || req.ip;
 
@@ -63,7 +71,7 @@ function limiterMiddleware(
       res.setHeader("X-RateLimit-Remaining", rlRes.remainingPoints.toString());
       res.setHeader(
         "X-RateLimit-Reset",
-        Math.ceil((Date.now() + rlRes.msBeforeNext) / 1000).toString()
+        Math.ceil((Date.now() + rlRes.msBeforeNext) / 1000).toString(),
       );
 
       next();
@@ -72,7 +80,10 @@ function limiterMiddleware(
         return next();
       }
 
-      const retrySecs = Math.max(1, Math.ceil((err.msBeforeNext || 1000) / 1000));
+      const retrySecs = Math.max(
+        1,
+        Math.ceil((err.msBeforeNext || 1000) / 1000),
+      );
       res.setHeader("Retry-After", retrySecs.toString());
       res.status(429).json({ error: message });
     }
@@ -92,12 +103,12 @@ const authLimiter = buildLimiter({
 
 const generalRateLimiter = limiterMiddleware(
   generalLimiter,
-  "Too many requests. Please try again later."
+  "Too many requests. Please try again later.",
 );
 
 const authRateLimiter = limiterMiddleware(
   authLimiter,
-  "Too many attempts. Please wait and try again."
+  "Too many attempts. Please wait and try again.",
 );
 
 export { generalRateLimiter, authRateLimiter };

@@ -69,10 +69,10 @@ function setupGracefulShutdown(): void {
 function attachLifecycleLogs(): void {
   mongoose.connection.on("connected", () => logger.info("MongoDB connected"));
   mongoose.connection.on("disconnected", () =>
-    logger.warn("MongoDB disconnected")
+    logger.warn("MongoDB disconnected"),
   );
   mongoose.connection.on("error", (err) =>
-    logger.error(`MongoDB error: ${err.message}`)
+    logger.error(`MongoDB error: ${err.message}`),
   );
 }
 

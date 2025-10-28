@@ -42,7 +42,10 @@ export class HttpError extends Error {
  * @example
  * requireFields(["email", "password"], req.body);
  */
-export function requireFields(fields: string[], body: Record<string, any>): void {
+export function requireFields(
+  fields: string[],
+  body: Record<string, any>,
+): void {
   const missing = fields.filter((field) => !body[field]);
 
   if (missing.length > 0) {
@@ -65,9 +68,12 @@ export function requireFields(fields: string[], body: Record<string, any>): void
  * @example
  * requiresAtLeastOneField(["username", "email"], req.body);
  */
-export function requiresAtLeastOneField(fields: string[], body: Record<string, any>): void {
+export function requiresAtLeastOneField(
+  fields: string[],
+  body: Record<string, any>,
+): void {
   const provided = fields.filter(
-    (field) => body[field] !== undefined && body[field] !== null
+    (field) => body[field] !== undefined && body[field] !== null,
   );
 
   if (provided.length === 0) {
@@ -95,7 +101,7 @@ export function requiresAtLeastOneField(fields: string[], body: Record<string, a
 export function assertAllowed(
   value: string,
   allowed: string[],
-  fieldName = "field"
+  fieldName = "field",
 ): boolean {
   if (!allowed.includes(value)) {
     const message = `${fieldName} must be one of: ${allowed.join(", ")}`;

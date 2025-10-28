@@ -42,24 +42,24 @@ function requestLogger(req: Request, res: Response, next: NextFunction): void {
       res.statusCode >= 500
         ? chalk.red
         : res.statusCode >= 400
-        ? chalk.yellow
-        : res.statusCode >= 300
-        ? chalk.cyan
-        : res.statusCode >= 200
-        ? chalk.green
-        : chalk.white;
+          ? chalk.yellow
+          : res.statusCode >= 300
+            ? chalk.cyan
+            : res.statusCode >= 200
+              ? chalk.green
+              : chalk.white;
 
     // Pick color based on method
     const methodColor =
       req.method === "GET"
         ? chalk.green
         : req.method === "POST"
-        ? chalk.blue
-        : req.method === "PUT"
-        ? chalk.yellow
-        : req.method === "DELETE"
-        ? chalk.red
-        : chalk.white;
+          ? chalk.blue
+          : req.method === "PUT"
+            ? chalk.yellow
+            : req.method === "DELETE"
+              ? chalk.red
+              : chalk.white;
 
     const log =
       chalk.gray(`[${new Date().toISOString()}] `) +

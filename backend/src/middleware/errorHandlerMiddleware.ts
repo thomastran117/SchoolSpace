@@ -34,7 +34,7 @@ export function errorHandler(
   err: AppError,
   _req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ): void {
   const status = err.statusCode || 500;
   const message = err.message || "Server failed to process the data";

@@ -14,7 +14,7 @@ import express, { Router } from "express";
 import {
   enrollInCourse,
   unenrollInCourse,
-} from "../controller/enrollController.js";
+} from "../../toconvert/enrollController.js";
 
 const router: Router = express.Router();
 

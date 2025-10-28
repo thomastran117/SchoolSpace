@@ -56,7 +56,7 @@ const corsOptionsDelegate: CorsOptionsDelegate<Request> = (req, cb) => {
       isAllowed = true;
     } else if (process.env.NODE_ENV !== "production") {
       console.warn(
-        `[CORS BLOCKED] ${req.method} ${req.originalUrl} from Origin: ${originHdr}`
+        `[CORS BLOCKED] ${req.method} ${req.originalUrl} from Origin: ${originHdr}`,
       );
     }
   }
@@ -102,7 +102,11 @@ const preventHpp = hpp({
 /* -------------------------------------------------------------
  * Mongo / NoSQL Injection Sanitization
  * ----------------------------------------------------------- */
-function preventNoSqlInjection(req: Request, _res: Response, next: NextFunction): void {
+function preventNoSqlInjection(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): void {
   try {
     mongoSanitize.sanitize(req.body, { replaceWith: "_" });
     mongoSanitize.sanitize(req.query, { replaceWith: "_" });

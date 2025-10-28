@@ -20,7 +20,7 @@ import {
   addCourse,
   getCoursesByStudent,
   getCoursesByTeacher,
-} from "../controller/courseController";
+} from "../../toconvert/courseController";
 
 const router: Router = express.Router();
 

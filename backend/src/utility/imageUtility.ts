@@ -35,7 +35,7 @@ export interface SanitizedImageResult {
  * @throws {HttpError} If file is missing, invalid, or corrupted.
  */
 export async function sanitizeProfileImage(
-  file?: Express.Multer.File
+  file?: Express.Multer.File,
 ): Promise<SanitizedImageResult> {
   if (!file) {
     httpError(400, "No file uploaded");
@@ -63,7 +63,7 @@ export async function sanitizeProfileImage(
   return { fileName, sanitizedBuffer };
 }
 
-  /*
+/*
     if (meta.width > 2048 || meta.height > 2048) {
       httpError(400, "Image dimensions too large (max 2048x2048)");
     }

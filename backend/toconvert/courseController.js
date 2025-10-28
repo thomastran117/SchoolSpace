@@ -6,14 +6,14 @@ import {
   get_courses,
   get_courses_by_student,
   get_courses_by_teacher,
-} from "../service/courseService.js";
+} from "../src/service/courseService.js";
 import {
   requireFields,
   requiresAtLeastOneField,
   httpError,
-} from "../utility/httpUtility.js";
-import { validatePositiveInt } from "../utility/validateUtility.js";
-import logger from "../utility/logger.js";
+} from "../src/utility/httpUtility.js";
+import { validatePositiveInt } from "../src/utility/validateUtility.js";
+import logger from "../src/utility/logger.js";
 
 const addCourse = async (req, res, next) => {
   try {

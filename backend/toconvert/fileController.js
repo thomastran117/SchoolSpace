@@ -1,7 +1,7 @@
 import path from "path";
 import mime from "mime-types";
-import { uploadFile, getFile, deleteFile } from "../service/fileService.js";
-import logger from "../utility/logger.js";
+import { uploadFile, getFile, deleteFile } from "../src/service/fileService.js";
+import logger from "../src/utility/logger.js";
 
 export const handleUpload = async (req, res) => {
   const { type } = req.params;

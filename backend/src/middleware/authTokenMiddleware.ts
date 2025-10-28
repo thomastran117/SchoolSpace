@@ -27,8 +27,8 @@ import { getUserPayload } from "../service/tokenService";
 export async function makeRequireAuth(
   req: Request,
   res: Response,
-  next: NextFunction
-): Promise<void>  {
+  next: NextFunction,
+): Promise<void> {
   try {
     const authHeader = req.headers.authorization;
 

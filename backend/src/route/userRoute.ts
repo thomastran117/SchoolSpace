@@ -19,7 +19,7 @@ import {
   getStudentsByCourse,
   getTeacherByCourse,
   getUser,
-} from "../controller/userController";
+} from "../../toconvert/userController";
 import { uploadAvatar } from "../middleware/uploadMiddleware.js";
 
 const router: Router = express.Router();

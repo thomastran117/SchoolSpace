@@ -37,7 +37,10 @@ export const validateEmail = (email: string): boolean => {
  * @returns The validated integer value.
  * @throws {Error} If the value is not a positive integer.
  */
-export function validatePositiveInt(value: string | number, name = "id"): number {
+export function validatePositiveInt(
+  value: string | number,
+  name = "id",
+): number {
   const num = Number(value);
 
   if (!Number.isInteger(num) || num <= 0) {
@@ -96,7 +99,7 @@ export function validateString(
   value: string | undefined | null,
   fieldName: string,
   maxLength = 50,
-  minLength = 2
+  minLength = 2,
 ): string | undefined {
   if (value === undefined || value === null) return undefined;
 
@@ -104,7 +107,10 @@ export function validateString(
   if (!trimmed) return undefined;
 
   if (trimmed.length < minLength) {
-    httpError(400, `${fieldName} must be at least ${minLength} characters long.`);
+    httpError(
+      400,
+      `${fieldName} must be at least ${minLength} characters long.`,
+    );
   }
 
   if (trimmed.length > maxLength) {
@@ -113,10 +119,12 @@ export function validateString(
 
   const allowedPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/;
   if (!allowedPattern.test(trimmed)) {
-    const invalidChar = trimmed.split("").find((ch) => !allowedPattern.test(ch));
+    const invalidChar = trimmed
+      .split("")
+      .find((ch) => !allowedPattern.test(ch));
     httpError(
       400,
-      `${fieldName} contains invalid character "${invalidChar}". Only letters, spaces, apostrophes, and hyphens are allowed.`
+      `${fieldName} contains invalid character "${invalidChar}". Only letters, spaces, apostrophes, and hyphens are allowed.`,
     );
   }
 
@@ -130,7 +138,7 @@ export function validateAlphaNumericString(
   value: string | undefined | null,
   fieldName: string,
   maxLength = 50,
-  minLength = 2
+  minLength = 2,
 ): string | undefined {
   if (value === undefined || value === null) return undefined;
 
@@ -138,7 +146,10 @@ export function validateAlphaNumericString(
   if (!trimmed) return undefined;
 
   if (trimmed.length < minLength) {
-    httpError(400, `${fieldName} must be at least ${minLength} characters long.`);
+    httpError(
+      400,
+      `${fieldName} must be at least ${minLength} characters long.`,
+    );
   }
 
   if (trimmed.length > maxLength) {
@@ -147,10 +158,12 @@ export function validateAlphaNumericString(
 
   const allowedPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ0-9\s'-]+$/;
   if (!allowedPattern.test(trimmed)) {
-    const invalidChar = trimmed.split("").find((ch) => !allowedPattern.test(ch));
+    const invalidChar = trimmed
+      .split("")
+      .find((ch) => !allowedPattern.test(ch));
     httpError(
       400,
-      `${fieldName} contains invalid character "${invalidChar}". Only letters, numbers, spaces, apostrophes, and hyphens are allowed.`
+      `${fieldName} contains invalid character "${invalidChar}". Only letters, numbers, spaces, apostrophes, and hyphens are allowed.`,
     );
   }
 
@@ -168,7 +181,7 @@ export function validatePhone(
   value: string | undefined | null,
   fieldName = "Phone",
   maxLength = 20,
-  minLength = 7
+  minLength = 7,
 ): string | undefined {
   if (value === undefined || value === null) return undefined;
 
@@ -176,7 +189,10 @@ export function validatePhone(
   if (!trimmed) return undefined;
 
   if (trimmed.length < minLength) {
-    httpError(400, `${fieldName} must be at least ${minLength} characters long.`);
+    httpError(
+      400,
+      `${fieldName} must be at least ${minLength} characters long.`,
+    );
   }
 
   if (trimmed.length > maxLength) {
@@ -185,10 +201,12 @@ export function validatePhone(
 
   const allowedPattern = /^[\d\s()+-]+$/;
   if (!allowedPattern.test(trimmed)) {
-    const invalidChar = trimmed.split("").find((ch) => !allowedPattern.test(ch));
+    const invalidChar = trimmed
+      .split("")
+      .find((ch) => !allowedPattern.test(ch));
     httpError(
       400,
-      `${fieldName} contains invalid character "${invalidChar}". Only digits, spaces, '+', '-', and parentheses are allowed.`
+      `${fieldName} contains invalid character "${invalidChar}". Only digits, spaces, '+', '-', and parentheses are allowed.`,
     );
   }
 
@@ -211,7 +229,7 @@ export function validateAddress(
   value: string | undefined | null,
   fieldName = "Address",
   maxLength = 100,
-  minLength = 5
+  minLength = 5,
 ): string | undefined {
   if (value === undefined || value === null) return undefined;
 
@@ -219,7 +237,10 @@ export function validateAddress(
   if (!trimmed) return undefined;
 
   if (trimmed.length < minLength) {
-    httpError(400, `${fieldName} must be at least ${minLength} characters long.`);
+    httpError(
+      400,
+      `${fieldName} must be at least ${minLength} characters long.`,
+    );
   }
 
   if (trimmed.length > maxLength) {
@@ -228,10 +249,12 @@ export function validateAddress(
 
   const allowedPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ0-9\s,.'-]+$/;
   if (!allowedPattern.test(trimmed)) {
-    const invalidChar = trimmed.split("").find((ch) => !allowedPattern.test(ch));
+    const invalidChar = trimmed
+      .split("")
+      .find((ch) => !allowedPattern.test(ch));
     httpError(
       400,
-      `${fieldName} contains invalid character "${invalidChar}". Only letters, numbers, spaces, commas, periods, apostrophes, and hyphens are allowed.`
+      `${fieldName} contains invalid character "${invalidChar}". Only letters, numbers, spaces, commas, periods, apostrophes, and hyphens are allowed.`,
     );
   }
 

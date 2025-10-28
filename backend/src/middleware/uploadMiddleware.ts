@@ -27,7 +27,7 @@ const storage = multer.memoryStorage();
 const fileFilter = (
   req: Request,
   file: Express.Multer.File,
-  cb: FileFilterCallback
+  cb: FileFilterCallback,
 ): void => {
   try {
     const ext = path.extname(file.originalname).toLowerCase();
@@ -38,10 +38,10 @@ const fileFilter = (
 
     if (!validMime || !validExt) {
       logger.warn(
-        `Rejected file: mimetype=${mime}, ext=${ext}, name=${file.originalname}`
+        `Rejected file: mimetype=${mime}, ext=${ext}, name=${file.originalname}`,
       );
       return cb(
-        new Error("Only JPG and PNG files with correct extensions are allowed")
+        new Error("Only JPG and PNG files with correct extensions are allowed"),
       );
     }
 

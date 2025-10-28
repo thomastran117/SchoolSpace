@@ -1,9 +1,9 @@
-import { httpError } from "../utility/httpUtility.js";
-import { validatePositiveInt } from "../utility/validateUtility.js";
+import { httpError } from "../src/utility/httpUtility.js";
+import { validatePositiveInt } from "../src/utility/validateUtility.js";
 import {
   enroll_in_course,
   unenroll_in_course,
-} from "../service/enrollService.js";
+} from "../src/service/enrollService.js";
 
 function resolveStudentId(req) {
   const { id: authUserId, role } = req.user;
