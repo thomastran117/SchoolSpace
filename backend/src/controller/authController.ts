@@ -31,13 +31,9 @@ import {
   sendCookie,
 } from "../utility/httpUtility";
 import { isBoolean, validateEmail } from "../utility/validateUtility";
-import { LoginRequestDTO } from "../dto/authDTO";
+import { LoginRequestDTO, SignupRequestDTO, MicrosoftRequest, GoogleRequest } from "../dto/authDTO";
 
-/* -------------------------------------------------------------
- * Controllers
- * ----------------------------------------------------------- */
-
-export const login = async (
+const login = async (
   req: Request<{}, {}, LoginRequestDTO>,
   res: Response,
   next: NextFunction,
@@ -64,17 +60,13 @@ export const login = async (
   }
 };
 
-export const signup = async (
-  req: Request,
+const signup = async (
+  req: Request<{}, {}, SignupRequestDTO>,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    requireFields(["email", "password", "role", "captcha"], req.body);
     const { email, password, role, captcha } = req.body;
-
-    assertAllowed(role, ["student", "teacher", "assistant"], "role");
-    if (!validateEmail(email)) httpError(400, "Invalid email format");
 
     await signupUser(email, password, role, captcha);
 
@@ -84,8 +76,8 @@ export const signup = async (
   }
 };
 
-export const verify_email = async (
-  req: Request,
+const verify_email = async (
+  req: Request<{}, {}, {}>,
   res: Response,
   next: NextFunction,
 ) => {
@@ -111,8 +103,8 @@ export const verify_email = async (
   }
 };
 
-export const microsoftVerify = async (
-  req: Request,
+const microsoftVerify = async (
+  req: Request<{}, {}, MicrosoftRequest>,
   res: Response,
   next: NextFunction,
 ) => {
@@ -145,8 +137,8 @@ export const microsoftVerify = async (
   }
 };
 
-export const googleVerify = async (
-  req: Request,
+const googleVerify = async (
+  req: Request<{}, {}, GoogleRequest>,
   res: Response,
   next: NextFunction,
 ) => {
@@ -171,7 +163,7 @@ export const googleVerify = async (
   }
 };
 
-export const newAccessToken = async (
+const newAccessToken = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -196,7 +188,7 @@ export const newAccessToken = async (
   }
 };
 
-export const logout = async (
+const logout = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -221,3 +213,5 @@ export const logout = async (
     next(err);
   }
 };
+
+export { login, signup, verify_email, microsoftVerify, googleVerify, logout, newAccessToken }
