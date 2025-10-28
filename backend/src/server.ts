@@ -10,6 +10,7 @@
  */
 import app from "./app";
 import logger from "./utility/logger";
+import "reflect-metadata";
 
 const port = process.env.PORT || 8040;
 app.listen(port, () => logger.info(`Express server has started`));

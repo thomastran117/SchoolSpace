@@ -19,6 +19,7 @@ import fileRoute from "./fileRoute";
 */
 import { makeRequireAuth } from "../middleware/authTokenMiddleware";
 import { httpError } from "../utility/httpUtility";
+import { AuthMetadataGuard } from "../middleware/authMiddleware";
 
 const router: Router = express.Router();
 
@@ -29,6 +30,7 @@ const router: Router = express.Router();
  */
 router.use("/auth", authRoute);
 
+router.use(AuthMetadataGuard);
 /**
  * @route /courses
  * @description Handles courses

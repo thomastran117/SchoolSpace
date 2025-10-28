@@ -30,31 +30,25 @@ import {
   assertAllowed,
   sendCookie,
 } from "../utility/httpUtility";
-import {
-  isBoolean,
-  validateEmail,
-} from "../utility/validateUtility";
+import { isBoolean, validateEmail } from "../utility/validateUtility";
+import { LoginRequestDTO } from "../dto/authDTO";
 
 /* -------------------------------------------------------------
  * Controllers
  * ----------------------------------------------------------- */
 
-export const login = async (req: Request, res: Response, next: NextFunction) => {
+export const login = async (
+  req: Request<{}, {}, LoginRequestDTO>,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    requireFields(["email", "password", "captcha"], req.body);
     const { email, password, remember, captcha } = req.body;
 
-    if (!validateEmail(email)) httpError(400, "Invalid email format");
+    const rememberFlag = remember ?? false;
 
-    const rememberBool = isBoolean(remember);
-
-    const {
-      accessToken,
-      refreshToken,
-      role,
-      username,
-      avatar,
-    } = await loginUser(email, password, rememberBool, captcha );
+    const { accessToken, refreshToken, username, avatar, role } =
+      await loginUser(email, password, rememberFlag, captcha);
 
     sendCookie(res, refreshToken);
 
@@ -70,7 +64,11 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
-export const signup = async (req: Request, res: Response, next: NextFunction) => {
+export const signup = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     requireFields(["email", "password", "role", "captcha"], req.body);
     const { email, password, role, captcha } = req.body;
@@ -78,7 +76,7 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
     assertAllowed(role, ["student", "teacher", "assistant"], "role");
     if (!validateEmail(email)) httpError(400, "Invalid email format");
 
-    await signupUser( email, password, role, captcha );
+    await signupUser(email, password, role, captcha);
 
     res.status(201).json({ message: "Email sent. Please verify." });
   } catch (err) {
@@ -86,13 +84,17 @@ export const signup = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-export const verify_email = async (req: Request, res: Response, next: NextFunction) => {
+export const verify_email = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     if (!config.isEmailEnabled()) {
       logger.warn("Email verification is not available");
       httpError(
         503,
-        "Email verification is not available. You don't need to access this route at this time."
+        "Email verification is not available. You don't need to access this route at this time.",
       );
     }
 
@@ -109,26 +111,25 @@ export const verify_email = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-export const microsoftVerify = async (req: Request, res: Response, next: NextFunction) => {
+export const microsoftVerify = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     if (!config.isMicrosoftEnabled()) {
       logger.warn("Microsoft OAuth is not available");
       httpError(
         503,
-        "Microsoft OAuth is not available. Please use another login method."
+        "Microsoft OAuth is not available. Please use another login method.",
       );
     }
 
     const { id_token: idToken } = req.body ?? {};
     if (!idToken) httpError(400, "Missing id_token");
 
-    const {
-      accessToken,
-      refreshToken,
-      role,
-      username,
-      avatar,
-    } = await verifyMicrosoftIdTokenAndSignIn(idToken);
+    const { accessToken, refreshToken, role, username, avatar } =
+      await verifyMicrosoftIdTokenAndSignIn(idToken);
 
     sendCookie(res, refreshToken);
 
@@ -144,18 +145,17 @@ export const microsoftVerify = async (req: Request, res: Response, next: NextFun
   }
 };
 
-export const googleVerify = async (req: Request, res: Response, next: NextFunction) => {
+export const googleVerify = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    const { token: googleToken } = req.body;
+    const { id_token: googleToken } = req.body;
     if (!googleToken) httpError(400, "Google token missing");
 
-    const {
-      accessToken,
-      refreshToken,
-      role,
-      username,
-      avatar,
-    } = await loginOrCreateFromGoogle(googleToken);
+    const { accessToken, refreshToken, role, username, avatar } =
+      await loginOrCreateFromGoogle(googleToken);
 
     sendCookie(res, refreshToken);
 
@@ -171,18 +171,17 @@ export const googleVerify = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-export const newAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+export const newAccessToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const token = req.cookies.refreshToken;
     if (!token) httpError(401, "Missing refresh token");
 
-    const {
-      accessToken,
-      refreshToken,
-      role,
-      username,
-      avatar,
-    } = await generateNewTokens(token);
+    const { accessToken, refreshToken, role, username, avatar } =
+      await generateNewTokens(token);
 
     sendCookie(res, refreshToken);
 
@@ -197,7 +196,11 @@ export const newAccessToken = async (req: Request, res: Response, next: NextFunc
   }
 };
 
-export const logout = async (req: Request, res: Response, next: NextFunction) => {
+export const logout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const token = req.cookies.refreshToken;
 

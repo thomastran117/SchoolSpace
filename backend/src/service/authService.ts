@@ -263,4 +263,12 @@ const authLogout = async (token: string): Promise<boolean> => {
   return await logoutToken(token);
 };
 
-export { loginUser, signupUser, verifyUser, verifyMicrosoftIdTokenAndSignIn, loginOrCreateFromGoogle, generateNewTokens, authLogout}
+export {
+  loginUser,
+  signupUser,
+  verifyUser,
+  verifyMicrosoftIdTokenAndSignIn,
+  loginOrCreateFromGoogle,
+  generateNewTokens,
+  authLogout,
+};

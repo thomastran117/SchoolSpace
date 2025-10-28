@@ -21,6 +21,8 @@ import {
   newAccessToken,
   logout,
 } from "../controller/authController";
+import { LoginRequestDTO } from "../dto/authDTO";
+import { validateDTO } from "../middleware/dtoMiddleware";
 
 const router: Router = express.Router();
 
@@ -29,7 +31,7 @@ const router: Router = express.Router();
  * @description Logs in a user with email and password.
  * @access Public
  */
-router.post("/login", login);
+router.post("/login", validateDTO(LoginRequestDTO), login);
 
 /**
  * @route POST /auth/signup
