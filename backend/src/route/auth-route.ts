@@ -1,5 +1,5 @@
 /**
- * @file authRoute.js
+ * @file auth-route.ts
  * @description Defines all authentication-related routes (login, signup, OAuth providers, email verification).
  *
  * @module route
@@ -20,9 +20,9 @@ import {
   googleVerify,
   newAccessToken,
   logout,
-} from "../controller/authController";
-import { LoginRequestDTO } from "../dto/authDTO";
-import { validateDTO } from "../middleware/dtoMiddleware";
+} from "../controller/auth-controller";
+import { LoginRequestDTO } from "../dto/auth-dto";
+import { validateDTO } from "../middleware/dto-validate-middleware";
 
 const router: Router = express.Router();
 

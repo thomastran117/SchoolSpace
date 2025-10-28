@@ -19,19 +19,18 @@ import {
   loginOrCreateFromGoogle,
   generateNewTokens,
   authLogout,
-} from "../service/authService";
+} from "../service/auth-service";
 
 // Utilities
 import logger from "../utility/logger";
 import config from "../config/envManager";
+import { httpError, sendCookie } from "../utility/httpUtility";
 import {
-  requireFields,
-  httpError,
-  assertAllowed,
-  sendCookie,
-} from "../utility/httpUtility";
-import { isBoolean, validateEmail } from "../utility/validateUtility";
-import { LoginRequestDTO, SignupRequestDTO, MicrosoftRequest, GoogleRequest } from "../dto/authDTO";
+  LoginRequestDTO,
+  SignupRequestDTO,
+  MicrosoftRequest,
+  GoogleRequest,
+} from "../dto/auth-dto";
 
 const login = async (
   req: Request<{}, {}, LoginRequestDTO>,
@@ -188,11 +187,7 @@ const newAccessToken = async (
   }
 };
 
-const logout = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const logout = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.cookies.refreshToken;
 
@@ -214,4 +209,12 @@ const logout = async (
   }
 };
 
-export { login, signup, verify_email, microsoftVerify, googleVerify, logout, newAccessToken }
+export {
+  login,
+  signup,
+  verify_email,
+  microsoftVerify,
+  googleVerify,
+  logout,
+  newAccessToken,
+};

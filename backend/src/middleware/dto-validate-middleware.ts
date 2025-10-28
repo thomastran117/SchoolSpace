@@ -8,8 +8,8 @@ export function validateDTO(dtoClass: any) {
     const errors = await validate(dtoObject);
 
     if (errors.length > 0) {
-      const formattedErrors = errors.flatMap(e => 
-        Object.values(e.constraints ?? {})
+      const formattedErrors = errors.flatMap((e) =>
+        Object.values(e.constraints ?? {}),
       );
       return res.status(400).json({
         message: "Bad request",

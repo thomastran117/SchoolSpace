@@ -6,21 +6,16 @@ import "reflect-metadata";
 export function AuthMetadataGuard(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const routeHandler = req.route?.stack?.slice(-1)[0]?.handle;
 
   if (!routeHandler) return next();
 
-  const requireAuth = Reflect.getMetadata(
-    META_REQUIRE_AUTH,
-    routeHandler
-  );
+  const requireAuth = Reflect.getMetadata(META_REQUIRE_AUTH, routeHandler);
 
-  const requiredRoles: string[] = Reflect.getMetadata(
-    META_ROLES,
-    routeHandler
-  ) || [];
+  const requiredRoles: string[] =
+    Reflect.getMetadata(META_ROLES, routeHandler) || [];
 
   try {
     if (requireAuth) {
@@ -33,7 +28,9 @@ export function AuthMetadataGuard(
       req.user = user;
 
       if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
-        return res.status(403).json({ message: "Forbidden: Insufficient role" });
+        return res
+          .status(403)
+          .json({ message: "Forbidden: Insufficient role" });
       }
     }
 

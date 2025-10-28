@@ -10,7 +10,7 @@
 
 import express, { Request, Response, NextFunction, Router } from "express";
 
-import authRoute from "./authRoute";
+import authRoute from "./auth-route";
 /*
 import courseRoute from "./courseRoute";
 import enrollRoute from "./enrollRoute";
@@ -19,7 +19,7 @@ import fileRoute from "./fileRoute";
 */
 import { makeRequireAuth } from "../middleware/authTokenMiddleware";
 import { httpError } from "../utility/httpUtility";
-import { AuthMetadataGuard } from "../middleware/authMiddleware";
+import { AuthMetadataGuard } from "../middleware/auth-middleware";
 
 const router: Router = express.Router();
 

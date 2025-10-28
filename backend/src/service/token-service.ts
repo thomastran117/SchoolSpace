@@ -1,5 +1,5 @@
 /**
- * @file tokenService.ts
+ * @file Tok.ts
  * @description
  * Handles JWT lifecycle — access, refresh, and email verification tokens:
  * - Access/refresh generation & validation

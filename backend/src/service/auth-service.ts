@@ -23,17 +23,17 @@ import {
   generateTokens,
   rotateRefreshToken,
   logoutToken,
-} from "./tokenService";
+} from "./token-service";
 
 // Email service imports
 import {
   sendVerificationEmail,
   sendWelcomeEmail,
-} from "../service/emailService";
+} from "../service/email-service";
 
 // OAuth services
-import { verifyMicrosoftIdToken } from "./oauth/microsoftService";
-import { verifyGoogleToken, verifyGoogleCaptcha } from "./oauth/googleService";
+import { verifyMicrosoftIdToken } from "./oauth/microsoft-service";
+import { verifyGoogleToken, verifyGoogleCaptcha } from "./oauth/google-service";
 
 interface AuthResponse {
   accessToken: string;
