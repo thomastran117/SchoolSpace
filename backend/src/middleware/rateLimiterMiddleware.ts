@@ -62,10 +62,11 @@ function limiterMiddleware(
   next: NextFunction,
 ) => Promise<void | Response> {
   return async (req, res, next) => {
-    const key = (req.user as { id?: string })?.id || req.ip;
+    const userId = (req.user as unknown as { id?: string | number })?.id;
+    const key = userId != null ? String(userId) : req.ip;
 
     try {
-      const rlRes: RateLimiterRes = await limiter.consume(key, 1);
+      const rlRes: RateLimiterRes = await limiter.consume(String(key), 1);
 
       res.setHeader("X-RateLimit-Limit", limiter.points.toString());
       res.setHeader("X-RateLimit-Remaining", rlRes.remainingPoints.toString());

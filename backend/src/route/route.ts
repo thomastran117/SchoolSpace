@@ -11,11 +11,12 @@
 import express, { Request, Response, NextFunction, Router } from "express";
 
 import authRoute from "./authRoute";
+/*
 import courseRoute from "./courseRoute";
 import enrollRoute from "./enrollRoute";
 import userRoute from "./userRoute";
 import fileRoute from "./fileRoute";
-
+*/
 import { makeRequireAuth } from "../middleware/authTokenMiddleware";
 import { httpError } from "../utility/httpUtility";
 
@@ -33,28 +34,28 @@ router.use("/auth", authRoute);
  * @description Handles courses
  * @access Private
  */
-router.use("/courses", makeRequireAuth, courseRoute);
+//router.use("/courses", makeRequireAuth, courseRoute);
 
 /**
  * @route /course-enroll
  * @description Handles course enrollment
  * @access Private
  */
-router.use("/course-enroll", makeRequireAuth, enrollRoute);
+//router.use("/course-enroll", makeRequireAuth, enrollRoute);
 
 /**
  * @route /users
  * @description Handles user management + deletion
  * @access Private
  */
-router.use("/users", makeRequireAuth, userRoute);
+//Router.use("/users", makeRequireAuth, userRoute);
 
 /**
  * @route /files
  * @description Handles file uploads and retrieval
  * @access Private
  */
-router.use("/files", makeRequireAuth, fileRoute);
+//router.use("/files", makeRequireAuth, fileRoute);
 
 /**
  * Catch-all for undefined routes

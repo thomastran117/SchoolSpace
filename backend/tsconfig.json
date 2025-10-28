@@ -6,6 +6,7 @@
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "typeRoots": ["./src/types", "./node_modules/@types"]
   }
 }

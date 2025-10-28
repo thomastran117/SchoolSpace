@@ -9,7 +9,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
-  "type": "commonjs",
   "keywords": [],
   "author": "",
   "license": "ISC",
