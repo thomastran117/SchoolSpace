@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { META_REQUIRE_AUTH, META_ROLES } from "../constants/metadata";
-import { getUserPayload } from "../service/tokenService";
+import { getUserPayload } from "../service/token-service";
 import "reflect-metadata";
 
 export function AuthMetadataGuard(

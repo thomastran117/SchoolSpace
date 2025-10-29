@@ -20,9 +20,14 @@ import {
   googleVerify,
   newAccessToken,
   logout,
-} from "../controller/auth-controller";
-import { LoginRequestDTO } from "../dto/auth-dto";
-import { validateDTO } from "../middleware/dto-validate-middleware";
+} from "../controller/authController";
+import { validate } from "../middleware/validateMiddleware";
+import {
+  LoginSchema,
+  SignupSchema,
+  MicrosoftSchema,
+  GoogleSchema,
+} from "../dto/authSchema";
 
 const router: Router = express.Router();
 
@@ -31,14 +36,14 @@ const router: Router = express.Router();
  * @description Logs in a user with email and password.
  * @access Public
  */
-router.post("/login", validateDTO(LoginRequestDTO), login);
+router.post("/login", validate(LoginSchema), login);
 
 /**
  * @route POST /auth/signup
  * @description Registers a new user with email and password.
  * @access Public
  */
-router.post("/signup", signup);
+router.post("/signup", validate(SignupSchema), signup);
 
 /**
  * @route GET /auth/verify
@@ -52,14 +57,14 @@ router.get("/verify", verify_email);
  * @description Initiates Microsoft OAuth login flow.
  * @access Public
  */
-router.post("/microsoft/verify", microsoftVerify);
+router.post("/microsoft/verify", validate(MicrosoftSchema), microsoftVerify);
 
 /**
  * @route POST /auth/google/verify
  * @description Initiates Google OAuth login flow.
  * @access Public
  */
-router.post("/google/verify", googleVerify);
+router.post("/google/verify", validate(GoogleSchema), googleVerify);
 
 /**
  * @route GET /auth/refresh

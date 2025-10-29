@@ -25,15 +25,16 @@ import {
 import logger from "../utility/logger";
 import config from "../config/envManager";
 import { httpError, sendCookie } from "../utility/httpUtility";
+import { TypedRequest } from "../types/express";
 import {
-  LoginRequestDTO,
-  SignupRequestDTO,
-  MicrosoftRequest,
-  GoogleRequest,
-} from "../dto/auth-dto";
+  LoginDto,
+  SignupDto,
+  MicrosoftDto,
+  GoogleDto,
+} from "../dto/authSchema";
 
 const login = async (
-  req: Request<{}, {}, LoginRequestDTO>,
+  req: TypedRequest<LoginDto>,
   res: Response,
   next: NextFunction,
 ) => {
@@ -60,7 +61,7 @@ const login = async (
 };
 
 const signup = async (
-  req: Request<{}, {}, SignupRequestDTO>,
+  req: TypedRequest<SignupDto>,
   res: Response,
   next: NextFunction,
 ) => {
@@ -103,7 +104,7 @@ const verify_email = async (
 };
 
 const microsoftVerify = async (
-  req: Request<{}, {}, MicrosoftRequest>,
+  req: TypedRequest<MicrosoftDto>,
   res: Response,
   next: NextFunction,
 ) => {
@@ -137,7 +138,7 @@ const microsoftVerify = async (
 };
 
 const googleVerify = async (
-  req: Request<{}, {}, GoogleRequest>,
+  req: TypedRequest<GoogleDto>,
   res: Response,
   next: NextFunction,
 ) => {

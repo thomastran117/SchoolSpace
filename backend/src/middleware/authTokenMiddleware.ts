@@ -10,7 +10,7 @@
  */
 
 import { Request, Response, NextFunction } from "express";
-import { getUserPayload } from "../service/tokenService";
+import { getUserPayload } from "../service/token-service";
 /**
  * Express middleware that enforces authentication via JWT access token.
  *
