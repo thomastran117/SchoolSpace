@@ -1,3 +1,6 @@
-import { Request } from "express";
+import { Response, Request } from "express";
 
-export type TypedRequest<T> = Request<{}, {}, T>;
+type TypedRequest<T> = Request<{}, {}, T>;
+type TypedResponse<T> = Response<T>;
+
+export { TypedRequest, TypedResponse };

@@ -13,13 +13,13 @@
  */
 import express, { Router } from "express";
 import {
-  login,
-  signup,
-  microsoftVerify,
-  verify_email,
-  googleVerify,
-  newAccessToken,
-  logout,
+  localAuthenticate,
+  localSignup,
+  localVerifyEmail,
+  microsoftAuthenticate,
+  googleAuthenticate,
+  logoutRefreshToken,
+  refreshAccessToken,
 } from "../controller/authController";
 import { validate } from "../middleware/validateMiddleware";
 import {
@@ -36,49 +36,53 @@ const router: Router = express.Router();
  * @description Logs in a user with email and password.
  * @access Public
  */
-router.post("/login", validate(LoginSchema), login);
+router.post("/login", validate(LoginSchema), localAuthenticate);
 
 /**
  * @route POST /auth/signup
  * @description Registers a new user with email and password.
  * @access Public
  */
-router.post("/signup", validate(SignupSchema), signup);
+router.post("/signup", validate(SignupSchema), localSignup);
 
 /**
  * @route GET /auth/verify
  * @description Verifies a user's email address via a token.
  * @access Public
  */
-router.get("/verify", verify_email);
+router.get("/verify", localVerifyEmail);
 
 /**
  * @route POST /auth/microsoft/verify
  * @description Initiates Microsoft OAuth login flow.
  * @access Public
  */
-router.post("/microsoft/verify", validate(MicrosoftSchema), microsoftVerify);
+router.post(
+  "/microsoft/verify",
+  validate(MicrosoftSchema),
+  microsoftAuthenticate,
+);
 
 /**
  * @route POST /auth/google/verify
  * @description Initiates Google OAuth login flow.
  * @access Public
  */
-router.post("/google/verify", validate(GoogleSchema), googleVerify);
+router.post("/google/verify", validate(GoogleSchema), googleAuthenticate);
 
 /**
  * @route GET /auth/refresh
  * @description Refreshes access token
  * @access Public
  */
-router.get("/refresh", newAccessToken);
+router.get("/refresh", refreshAccessToken);
 
 /**
  * @route GET /auth/logout
  * @description Clears refresh token
  * @access Public
  */
-router.post("/logout", logout);
+router.post("/logout", logoutRefreshToken);
 
 // Export the router
 export default router;

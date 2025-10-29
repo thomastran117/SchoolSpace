@@ -13,6 +13,7 @@ import bcrypt from "bcrypt";
 import prisma from "../resource/prisma";
 import type { Role } from "@prisma/client";
 import config from "../config/envManager";
+import { OAuth2Client, TokenPayload } from "google-auth-library";
 import logger from "../utility/logger";
 import { httpError } from "../utility/httpUtility";
 
@@ -33,7 +34,7 @@ import {
 
 // OAuth services
 import { verifyMicrosoftIdToken } from "./oauth/microsoft-service";
-import { verifyGoogleToken, verifyGoogleCaptcha } from "./oauth/google-service";
+import { verifyGoogleCaptcha } from "./webService"
 
 interface AuthResponse {
   accessToken: string;
@@ -44,7 +45,10 @@ interface AuthResponse {
   avatar?: string | null;
 }
 
-const { frontend_client: FRONTEND_CLIENT } = config;
+const { frontend_client: FRONTEND_CLIENT, google_client_id: GOOGLE_CLIENT_ID } =
+  config;
+
+const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const loginUser = async (
   email: string,
@@ -141,9 +145,7 @@ const verifyUser = async (token: string) => {
 /**
  * Authenticates or registers user via Microsoft OAuth.
  */
-const verifyMicrosoftIdTokenAndSignIn = async (
-  idToken: string,
-): Promise<AuthResponse> => {
+const microsoftOAuth = async (idToken: string): Promise<AuthResponse> => {
   const claims = await verifyMicrosoftIdToken(idToken);
 
   const microsoftSub = (claims as any).sub || (claims as any).oid;
@@ -199,10 +201,25 @@ const verifyMicrosoftIdTokenAndSignIn = async (
   };
 };
 
-const loginOrCreateFromGoogle = async (
-  googleToken: string,
-): Promise<AuthResponse> => {
-  const googleUser = await verifyGoogleToken(googleToken);
+const googleOAuth = async (googleToken: string): Promise<AuthResponse> => {
+  const ticket = await client.verifyIdToken({
+    idToken: googleToken,
+    audience: GOOGLE_CLIENT_ID,
+  });
+
+  const payload: TokenPayload | undefined = ticket.getPayload();
+
+  if (!payload || !payload.sub) {
+    httpError(401, "Invalid Google token payload");
+  }
+
+  const googleUser = {
+    email: payload.email,
+    name: payload.name,
+    picture: payload.picture,
+    sub: payload.sub,
+  };
+
   if (!googleUser?.email) httpError(401, "Invalid Google token");
 
   let user = await prisma.user.findUnique({
@@ -267,8 +284,8 @@ export {
   loginUser,
   signupUser,
   verifyUser,
-  verifyMicrosoftIdTokenAndSignIn,
-  loginOrCreateFromGoogle,
+  microsoftOAuth,
+  googleOAuth,
   generateNewTokens,
   authLogout,
 };

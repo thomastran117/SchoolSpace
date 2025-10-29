@@ -15,8 +15,8 @@ import {
   loginUser,
   signupUser,
   verifyUser,
-  verifyMicrosoftIdTokenAndSignIn,
-  loginOrCreateFromGoogle,
+  microsoftOAuth,
+  googleOAuth,
   generateNewTokens,
   authLogout,
 } from "../service/auth-service";
@@ -25,17 +25,18 @@ import {
 import logger from "../utility/logger";
 import config from "../config/envManager";
 import { httpError, sendCookie } from "../utility/httpUtility";
-import { TypedRequest } from "../types/express";
+import { TypedRequest, TypedResponse } from "../types/express";
 import {
   LoginDto,
   SignupDto,
   MicrosoftDto,
   GoogleDto,
+  AuthResponseDto,
 } from "../dto/authSchema";
 
-const login = async (
+const localAuthenticate = async (
   req: TypedRequest<LoginDto>,
-  res: Response,
+  res: TypedResponse<AuthResponseDto>,
   next: NextFunction,
 ) => {
   try {
@@ -48,19 +49,19 @@ const login = async (
 
     sendCookie(res, refreshToken);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
       accessToken,
       role,
-      avatar,
-      username,
+      avatar: avatar ?? undefined,
+      username: username ?? undefined,
     });
   } catch (err) {
     next(err);
   }
 };
 
-const signup = async (
+const localSignup = async (
   req: TypedRequest<SignupDto>,
   res: Response,
   next: NextFunction,
@@ -76,7 +77,7 @@ const signup = async (
   }
 };
 
-const verify_email = async (
+const localVerifyEmail = async (
   req: Request<{}, {}, {}>,
   res: Response,
   next: NextFunction,
@@ -103,9 +104,9 @@ const verify_email = async (
   }
 };
 
-const microsoftVerify = async (
+const microsoftAuthenticate = async (
   req: TypedRequest<MicrosoftDto>,
-  res: Response,
+  res: TypedResponse<AuthResponseDto>,
   next: NextFunction,
 ) => {
   try {
@@ -121,25 +122,25 @@ const microsoftVerify = async (
     if (!idToken) httpError(400, "Missing id_token");
 
     const { accessToken, refreshToken, role, username, avatar } =
-      await verifyMicrosoftIdTokenAndSignIn(idToken);
+      await microsoftOAuth(idToken);
 
     sendCookie(res, refreshToken);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
       accessToken,
       role,
-      avatar,
-      username,
+      avatar: avatar ?? undefined,
+      username: username ?? undefined,
     });
   } catch (err) {
     next(err);
   }
 };
 
-const googleVerify = async (
+const googleAuthenticate = async (
   req: TypedRequest<GoogleDto>,
-  res: Response,
+  res: TypedResponse<AuthResponseDto>,
   next: NextFunction,
 ) => {
   try {
@@ -147,25 +148,25 @@ const googleVerify = async (
     if (!googleToken) httpError(400, "Google token missing");
 
     const { accessToken, refreshToken, role, username, avatar } =
-      await loginOrCreateFromGoogle(googleToken);
+      await googleOAuth(googleToken);
 
     sendCookie(res, refreshToken);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
       accessToken,
       role,
-      avatar,
-      username,
+      avatar: avatar ?? undefined,
+      username: username ?? undefined,
     });
   } catch (err) {
     next(err);
   }
 };
 
-const newAccessToken = async (
+const refreshAccessToken = async (
   req: Request,
-  res: Response,
+  res: TypedResponse<AuthResponseDto>,
   next: NextFunction,
 ) => {
   try {
@@ -177,18 +178,23 @@ const newAccessToken = async (
 
     sendCookie(res, refreshToken);
 
-    res.status(200).json({
+    return res.status(200).json({
+      message: "Granting new access token",
       accessToken,
       role,
-      avatar,
-      username,
+      avatar: avatar ?? undefined,
+      username: username ?? undefined,
     });
   } catch (err) {
     next(err);
   }
 };
 
-const logout = async (req: Request, res: Response, next: NextFunction) => {
+const logoutRefreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const token = req.cookies.refreshToken;
 
@@ -211,11 +217,11 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 export {
-  login,
-  signup,
-  verify_email,
-  microsoftVerify,
-  googleVerify,
-  logout,
-  newAccessToken,
+  localAuthenticate,
+  localSignup,
+  localVerifyEmail,
+  microsoftAuthenticate,
+  googleAuthenticate,
+  logoutRefreshToken,
+  refreshAccessToken,
 };

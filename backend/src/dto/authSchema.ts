@@ -25,6 +25,14 @@ type SignupDto = z.infer<typeof SignupSchema>;
 type MicrosoftDto = z.infer<typeof MicrosoftSchema>;
 type GoogleDto = z.infer<typeof GoogleSchema>;
 
+interface AuthResponseDto {
+  message: string;
+  accessToken: string;
+  role: string;
+  avatar?: string;
+  username?: string;
+}
+
 export {
   LoginSchema,
   SignupSchema,
@@ -34,4 +42,5 @@ export {
   SignupDto,
   MicrosoftDto,
   GoogleDto,
+  AuthResponseDto,
 };
