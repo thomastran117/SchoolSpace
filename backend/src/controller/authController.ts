@@ -29,6 +29,13 @@ class AuthController {
 
   constructor(authService: AuthService) {
     this.authService = authService;
+    this.localAuthenticate = this.localAuthenticate.bind(this);
+    this.localSignup = this.localSignup.bind(this);
+    this.localVerifyEmail = this.localVerifyEmail.bind(this);
+    this.googleAuthenticate = this.googleAuthenticate.bind(this);
+    this.microsoftAuthenticate = this.microsoftAuthenticate.bind(this);
+    this.refreshAccessToken = this.refreshAccessToken.bind(this);
+    this.logoutRefreshToken = this.logoutRefreshToken.bind(this);
   }
 
   public async localAuthenticate(

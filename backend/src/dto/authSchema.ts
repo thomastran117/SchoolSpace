@@ -15,7 +15,7 @@ const SignupSchema = AuthSchema.extend({
 });
 
 const MicrosoftSchema = z.object({
-  id_token: z.string().min(10).max(100),
+  id_token: z.string().min(10).max(1500),
 });
 
 const GoogleSchema = MicrosoftSchema;
