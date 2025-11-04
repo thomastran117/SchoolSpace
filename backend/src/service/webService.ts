@@ -16,9 +16,6 @@ const {
   google_captcha_secret: GOOGLE_CAPTCHA_SECRET,
 } = config;
 
-/**
- * Represents the Google reCAPTCHA verification API response.
- */
 interface GoogleCaptchaResponse {
   success: boolean;
   challenge_ts?: string;
@@ -28,16 +25,6 @@ interface GoogleCaptchaResponse {
   "error-codes"?: string[];
 }
 
-/**
- * Verifies a Google reCAPTCHA token with the official Google API.
- *
- * @param token - The reCAPTCHA response token received from the client.
- * @returns True if the captcha is valid, false otherwise.
- *
- * @example
- * const isValid = await verifyGoogleCaptcha(token);
- * if (!isValid) throw new Error("Captcha validation failed");
- */
 export async function verifyGoogleCaptcha(token: string): Promise<boolean> {
   if (!GOOGLE_CAPTCHA_SECRET) {
     throw new Error("Missing GOOGLE_CAPTCHA_SECRET in environment");

@@ -8,9 +8,18 @@
  * @version 1.0.0
  *
  */
-import app from "./app";
-import logger from "./utility/logger";
 import "reflect-metadata";
+import { initializeApp } from "./app";
+import logger from "./utility/logger";
 
-const port = process.env.PORT || 8040;
-app.listen(port, () => logger.info(`Express server has started`));
+const PORT = process.env.PORT || 4000;
+
+(async () => {
+  try {
+    const app = await initializeApp();
+    app.listen(PORT, () => logger.info(`🚀 Server running on port ${PORT}`));
+  } catch (err: any) {
+    logger.error(`Failed to start server: ${err.message}`);
+    process.exit(1);
+  }
+})();

@@ -6,7 +6,7 @@
     "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
     "typeRoots": ["./src/types", "./node_modules/@types"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true

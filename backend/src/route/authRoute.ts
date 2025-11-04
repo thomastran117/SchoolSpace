@@ -12,15 +12,7 @@
  * Imports
  */
 import express, { Router } from "express";
-import {
-  localAuthenticate,
-  localSignup,
-  localVerifyEmail,
-  microsoftAuthenticate,
-  googleAuthenticate,
-  logoutRefreshToken,
-  refreshAccessToken,
-} from "../controller/authController";
+import container from "../resource/container";
 import { validate } from "../middleware/validateMiddleware";
 import {
   LoginSchema,
@@ -28,29 +20,30 @@ import {
   MicrosoftSchema,
   GoogleSchema,
 } from "../dto/authSchema";
-
+import { AuthController } from "../controller/authController";
 const router: Router = express.Router();
+const authController: AuthController = container.authController;
 
 /**
  * @route POST /auth/login
  * @description Logs in a user with email and password.
  * @access Public
  */
-router.post("/login", validate(LoginSchema), localAuthenticate);
+router.post("/login", validate(LoginSchema), authController.localAuthenticate);
 
 /**
  * @route POST /auth/signup
  * @description Registers a new user with email and password.
  * @access Public
  */
-router.post("/signup", validate(SignupSchema), localSignup);
+router.post("/signup", validate(SignupSchema), authController.localSignup);
 
 /**
  * @route GET /auth/verify
  * @description Verifies a user's email address via a token.
  * @access Public
  */
-router.get("/verify", localVerifyEmail);
+router.get("/verify", authController.localVerifyEmail);
 
 /**
  * @route POST /auth/microsoft/verify
@@ -60,7 +53,7 @@ router.get("/verify", localVerifyEmail);
 router.post(
   "/microsoft/verify",
   validate(MicrosoftSchema),
-  microsoftAuthenticate,
+  authController.microsoftAuthenticate,
 );
 
 /**
@@ -68,21 +61,25 @@ router.post(
  * @description Initiates Google OAuth login flow.
  * @access Public
  */
-router.post("/google/verify", validate(GoogleSchema), googleAuthenticate);
+router.post(
+  "/google/verify",
+  validate(GoogleSchema),
+  authController.googleAuthenticate,
+);
 
 /**
  * @route GET /auth/refresh
  * @description Refreshes access token
  * @access Public
  */
-router.get("/refresh", refreshAccessToken);
+router.get("/refresh", authController.refreshAccessToken);
 
 /**
  * @route GET /auth/logout
  * @description Clears refresh token
  * @access Public
  */
-router.post("/logout", logoutRefreshToken);
+router.post("/logout", authController.logoutRefreshToken);
 
 // Export the router
 export default router;
