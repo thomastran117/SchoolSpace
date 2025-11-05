@@ -69,9 +69,6 @@ describe("TokenService", () => {
 
     const result = await tokenService.generateTokens(1, "testuser", "user");
 
-    console.log("generateTokens result:", result);
-    console.log("jwt.sign call history:", spySign.mock.calls);
-
     expect(result.accessToken).toBe("mockAccessToken");
     expect(result.refreshToken).toBe("mockRefreshToken");
 

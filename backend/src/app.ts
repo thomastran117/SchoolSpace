@@ -39,9 +39,7 @@ const app: Application = express();
  * Ensures cache, email, and token services are ready.
  */
 export async function initializeApp(): Promise<Application> {
-  logger.info("Initializing dependency container...");
   await container.initialize();
-  logger.info("Container ready — continuing app setup.");
 
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));

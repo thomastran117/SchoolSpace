@@ -1,17 +1,9 @@
 /**
  * @file auth-route.ts
- * @description Defines all authentication-related routes (login, signup, OAuth providers, email verification).
- *
- * @module route
- *
- * @version 1.0.0
- * @author Thomas
+ * @description Authentication routes (login, signup, OAuth, etc.)
  */
 
-/**
- * Imports
- */
-import express, { Router } from "express";
+import express, { Router, Request, Response, NextFunction } from "express";
 import container from "../resource/container";
 import { validate } from "../middleware/validateMiddleware";
 import {
@@ -21,65 +13,103 @@ import {
   GoogleSchema,
 } from "../dto/authSchema";
 import { AuthController } from "../controller/authController";
+
 const router: Router = express.Router();
-const authController: AuthController = container.authController;
+
+const useScopedController =
+  (
+    handler: (
+      controller: AuthController,
+      req: Request,
+      res: Response,
+      next: NextFunction,
+    ) => Promise<any> | any,
+  ) =>
+  async (req: Request, res: Response, next: NextFunction) => {
+    const scope = container.createScope();
+    const controller = scope.resolve<AuthController>("AuthController");
+
+    try {
+      await handler(controller, req, res, next);
+    } catch (err) {
+      next(err);
+    } finally {
+      scope.dispose();
+    }
+  };
 
 /**
  * @route POST /auth/login
- * @description Logs in a user with email and password.
- * @access Public
  */
-router.post("/login", validate(LoginSchema), authController.localAuthenticate);
+router.post(
+  "/login",
+  validate(LoginSchema),
+  useScopedController((controller, req, res, next) =>
+    controller.localAuthenticate(req, res, next),
+  ),
+);
 
 /**
  * @route POST /auth/signup
- * @description Registers a new user with email and password.
- * @access Public
  */
-router.post("/signup", validate(SignupSchema), authController.localSignup);
+router.post(
+  "/signup",
+  validate(SignupSchema),
+  useScopedController((controller, req, res, next) =>
+    controller.localSignup(req, res, next),
+  ),
+);
 
 /**
  * @route GET /auth/verify
- * @description Verifies a user's email address via a token.
- * @access Public
  */
-router.get("/verify", authController.localVerifyEmail);
+router.get(
+  "/verify",
+  useScopedController((controller, req, res, next) =>
+    controller.localVerifyEmail(req, res, next),
+  ),
+);
 
 /**
  * @route POST /auth/microsoft/verify
- * @description Initiates Microsoft OAuth login flow.
- * @access Public
  */
 router.post(
   "/microsoft/verify",
   validate(MicrosoftSchema),
-  authController.microsoftAuthenticate,
+  useScopedController((controller, req, res, next) =>
+    controller.microsoftAuthenticate(req, res, next),
+  ),
 );
 
 /**
  * @route POST /auth/google/verify
- * @description Initiates Google OAuth login flow.
- * @access Public
  */
 router.post(
   "/google/verify",
   validate(GoogleSchema),
-  authController.googleAuthenticate,
+  useScopedController((controller, req, res, next) =>
+    controller.googleAuthenticate(req, res, next),
+  ),
 );
 
 /**
  * @route GET /auth/refresh
- * @description Refreshes access token
- * @access Public
  */
-router.get("/refresh", authController.refreshAccessToken);
+router.get(
+  "/refresh",
+  useScopedController((controller, req, res, next) =>
+    controller.refreshAccessToken(req, res, next),
+  ),
+);
 
 /**
- * @route GET /auth/logout
- * @description Clears refresh token
- * @access Public
+ * @route POST /auth/logout
  */
-router.post("/logout", authController.logoutRefreshToken);
+router.post(
+  "/logout",
+  useScopedController((controller, req, res, next) =>
+    controller.logoutRefreshToken(req, res, next),
+  ),
+);
 
-// Export the router
 export default router;

@@ -42,7 +42,7 @@ export default function GoogleCallback() {
         setStatus("Verifying your Google account…");
 
         const resp = await PublicApi.post("/auth/google/verify", {
-          token: id_token,
+          id_token: id_token,
         });
 
         const { accessToken, username, avatar, role } = resp.data;
