@@ -94,6 +94,14 @@ class Container {
     return new ScopedContainer(this);
   }
 
+  public __registerForTest<T>(
+    key: string,
+    factory: (...deps: unknown[]) => T | Promise<T>,
+    lifetime: Lifetime = "singleton",
+  ): void {
+    this.register(key, factory, lifetime);
+  }
+
   public async initialize(): Promise<void> {
     if (this.initialized) return;
     this.initialized = true;

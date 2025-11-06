@@ -23,6 +23,12 @@ docker compose up -d --build
 Write-Host "Waiting for MySQL health..."
 Wait-For-Health "schoolspace-mysql" 180
 
+Write-Host "Waiting for Redis health..."
+Wait-For-Health "schoolspace-redis" 120
+
+Write-Host "Waiting for Mongo health..."
+Wait-For-Health "schoolspace-mongodb" 180
+
 Write-Host "Running Prisma migrations..."
 docker compose run --rm backend npx prisma migrate deploy
 

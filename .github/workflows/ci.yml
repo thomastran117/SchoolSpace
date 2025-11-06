@@ -60,16 +60,16 @@ jobs:
             if curl -s -f http://localhost:8040/health > /dev/null 2>&1 || \
                curl -s -f http://localhost:8040/ping > /dev/null 2>&1 || \
                curl -s -f http://localhost:8040/api > /dev/null 2>&1; then
-              echo "✅ Backend is responding!"
+              echo "Backend is responding!"
               exit 0
             fi
             echo "Backend not ready yet... retrying ($i/10)"
             sleep 5
           done
-          echo "❌ Backend did not respond!"
+          echo "Backend did not respond"
           docker compose logs backend
           exit 1
 
-      - name: 🧹 Stop containers
+      - name: Stop containers
         if: always()
         run: docker compose down
