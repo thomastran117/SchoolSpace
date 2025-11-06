@@ -34,23 +34,23 @@ class Container {
 
     this.register(
       "TokenService",
-      () => new TokenService(this.resolve("CacheService")),
+      (scope) => new TokenService(scope.resolve("CacheService")),
       "scoped",
     );
 
     this.register(
       "AuthService",
-      () =>
+      (scope) =>
         new AuthService(
-          this.resolve("EmailService"),
-          this.resolve("TokenService"),
+          scope.resolve("EmailService"),
+          scope.resolve("TokenService"),
         ),
       "scoped",
     );
 
     this.register(
       "AuthController",
-      () => new AuthController(this.resolve("AuthService")),
+      (scope) => new AuthController(scope.resolve("AuthService")),
       "transient",
     );
   }
@@ -188,13 +188,13 @@ class ScopedContainer {
 
       case "scoped":
         if (!this.scopeInstances.has(key)) {
-          const instance = reg.factory();
+          const instance = reg.factory(this) as T;
           this.scopeInstances.set(key, instance);
         }
         return this.scopeInstances.get(key);
 
       case "transient":
-        return reg.factory() as T;
+        return reg.factory(this) as T;
     }
   }
 
