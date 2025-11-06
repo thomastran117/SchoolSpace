@@ -5,7 +5,7 @@ import container from "../resource/container";
 export async function AuthMetadataGuard(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   const routeHandler = req.route?.stack?.slice(-1)[0]?.handle;
   if (!routeHandler) return next();
@@ -24,7 +24,9 @@ export async function AuthMetadataGuard(
       (req as any).user = user;
 
       if (roles.length > 0 && !roles.includes(user.role)) {
-        return res.status(403).json({ message: "Forbidden: Insufficient role" });
+        return res
+          .status(403)
+          .json({ message: "Forbidden: Insufficient role" });
       }
     }
 
