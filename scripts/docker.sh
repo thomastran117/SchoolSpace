@@ -36,7 +36,7 @@ echo "Waiting for MySQL health..."
 wait_for_health "schoolspace-mysql" 180
 
 echo "Running Prisma migrations..."
-docker compose run --rm backend npx prisma migrate deploy
+docker compose exec -T backend npx prisma migrate deploy
 
 echo "✅ Migrations applied. Switching to attached mode..."
 docker compose up backend frontend redis mysql
