@@ -14,9 +14,9 @@
 
 import Redis from "ioredis";
 import logger from "../utility/logger";
-import config from "../config/envManager";
+import env from "../config/envConfigs";
 
-const redis = new Redis(config.redis_url, {
+const redis = new Redis(env.redis_url, {
   lazyConnect: true,
   maxRetriesPerRequest: 2,
 });

@@ -10,7 +10,7 @@
 
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import axios from "axios";
-import config from "../../config/envManager";
+import env from "../../config/envConfigs";
 
 const {
   google_client_id: GOOGLE_CLIENT_ID,

@@ -9,12 +9,12 @@
  */
 
 import axios from "axios";
-import config from "../config/envManager";
+import env from "../config/envConfigs";
 
 const {
   google_client_id: GOOGLE_CLIENT_ID,
   google_captcha_secret: GOOGLE_CAPTCHA_SECRET,
-} = config;
+} = env;
 
 interface GoogleCaptchaResponse {
   success: boolean;

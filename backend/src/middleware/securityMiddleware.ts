@@ -17,7 +17,7 @@ import mongoSanitize from "express-mongo-sanitize";
 import csurf, { CookieOptions } from "csurf";
 import type { Request, Response, NextFunction } from "express";
 
-import config from "../config/envManager";
+import env from "../config/envConfigs";
 import logger from "../utility/logger";
 
 /* -------------------------------------------------------------
@@ -32,13 +32,13 @@ function normalizeOrigin(o: string | null | undefined): string | null {
  * Parse CORS whitelist
  * ----------------------------------------------------------- */
 const raw =
-  config.cors_whitelist
+  env.cors_whitelist
     ?.split(",")
     .map((s: string) => s.trim())
     .filter(Boolean) || [];
 
-if (config.frontend_client && !raw.length) {
-  raw.push(config.frontend_client.trim());
+if (env.frontend_client && !raw.length) {
+  raw.push(env.frontend_client.trim());
 }
 
 const whitelist = new Set(raw.map(normalizeOrigin).filter(Boolean) as string[]);

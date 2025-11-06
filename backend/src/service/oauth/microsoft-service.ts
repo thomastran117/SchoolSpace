@@ -11,10 +11,10 @@
 
 import jwksClient, { JwksClient } from "jwks-rsa";
 import jwt, { JwtHeader, JwtPayload } from "jsonwebtoken";
-import config from "../../config/envManager";
+import env from "../../config/envConfigs";
 import { httpError } from "../../utility/httpUtility";
 
-const MS_CLIENT_ID = config.ms_client_id;
+const MS_CLIENT_ID = env.ms_client_id;
 
 /**
  * Creates a JWKS client for a given Microsoft issuer.
