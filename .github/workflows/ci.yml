@@ -18,6 +18,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Generate environment file
+        run: |
+          chmod +x ./scripts/create-env.sh
+          ./app.sh env
+
       - name: Run Docker Compose via app.sh
         run: |
           chmod +x ./app.sh
