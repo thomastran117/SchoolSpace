@@ -30,6 +30,7 @@ function log(level: LogLevel, message: string) {
     log: chalk.white("[LOG]"),
   } as const;
 
+  // eslint-disable-next-line no-console
   console.log(`${t} ${map[level]} ${message}`);
 
   if (level === "warn" || level === "error") {

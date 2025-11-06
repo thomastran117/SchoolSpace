@@ -7,6 +7,9 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  # ---------------------------------------------------
+  # 1️⃣ Unit Tests (Fast CI)
+  # ---------------------------------------------------
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -22,12 +25,22 @@ jobs:
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
+      - name: Make scripts executable
+        run: |
+          chmod +x ./app.sh
+          chmod -R +x ./scripts
+
+      - name: ⚙️ Generate environment file
+        run: ./app.sh env
+
       - name: Install dependencies
         working-directory: backend
         run: npm ci
 
       - name: Backend unit tests
         working-directory: backend
+        env:
+          NODE_ENV: test
         run: npm test
 
   integration:
@@ -66,7 +79,7 @@ jobs:
             echo "Backend not ready yet... retrying ($i/10)"
             sleep 5
           done
-          echo "Backend did not respond"
+          echo "Backend did not respond!"
           docker compose logs backend
           exit 1
 
