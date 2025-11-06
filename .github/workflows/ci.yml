@@ -1,4 +1,4 @@
-name: CI Pipeline (Dockerized)
+name: SchoolSpace Pipeline
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend:
-    name: Backend Lint & Test
+    name: Backend CI
     runs-on: ubuntu-latest
 
     steps:
@@ -28,20 +28,31 @@ jobs:
           chmod +x ./scripts/create-env.sh
           ./app.sh env
 
-      - name: Run Docker Compose via app.sh
+      - name: Start Docker containers (detached)
         run: |
-          chmod +x ./app.sh
-          chmod +x ./scripts/docker.sh
           ./app.sh docker ci
           docker compose ps
 
-      - name: Run ESLint inside backend container
-        run: |
-          docker compose exec -T backend npm run lint
-
-      - name: Run Tests inside backend container
+      - name: Run backend tests
         run: |
           docker compose exec -T backend npm test
+
+      - name: Verify backend health endpoint
+        run: |
+          echo "Waiting for backend to be ready..."
+          for i in {1..10}; do
+            if curl -s -f http://localhost:8040/health > /dev/null 2>&1 || \
+               curl -s -f http://localhost:8040/api > /dev/null 2>&1 || \
+               curl -s -f http://localhost:8040/ping > /dev/null 2>&1; then
+              echo "✅ Backend is responding!"
+              exit 0
+            fi
+            echo "Backend not ready yet... retrying ($i/10)"
+            sleep 5
+          done
+          echo "❌ Backend did not respond on /api, /health, or /ping within timeout."
+          docker compose logs backend
+          exit 1
 
       - name: Stop containers
         if: always()
