@@ -11,7 +11,6 @@
 
 import bcrypt from "bcrypt";
 import prisma from "../resource/prisma";
-import type { Role } from "@prisma/client";
 import env from "../config/envConfigs";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import logger from "../utility/logger";
@@ -117,7 +116,7 @@ class AuthService {
     } else {
       logger.warn("Email verification is not available");
       await prisma.user.create({
-        data: { email, password: hashedPassword, role: role as Role },
+        data: { email, password: hashedPassword, role: role as any },
       });
     }
 
@@ -128,7 +127,7 @@ class AuthService {
     const { email, password, role } =
       await this.tokenService.validateVerifyToken(token);
     const user = await prisma.user.create({
-      data: { email, password, role: role as Role },
+      data: { email, password, role: role as any },
     });
 
     if (env.isEmailEnabled()) {
