@@ -72,6 +72,14 @@ export async function initializeApp(): Promise<Application> {
     res.send("API is running!");
   });
 
+  app.get("/ping", (_req: Request, res: Response) => {
+    res.send("pong");
+  });
+
+  app.get("/api/health", (_req: Request, res: Response) => {
+    res.send("Health check is good");
+  });
+
   app.use("/api", serverRoutes);
 
   app.use(errorHandler);
