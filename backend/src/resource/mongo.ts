@@ -28,7 +28,8 @@ export async function initMongo(): Promise<void> {
     if (!res || res.ok !== 1) {
       throw new Error("MongoDB ping returned non-ok result");
     }
-    (logger.info("MongoDB is connected"), setupGracefulShutdown());
+    logger.info("MongoDB is connected");
+    setupGracefulShutdown();
   } catch (err: any) {
     logger.error(err);
     throw err;
@@ -36,7 +37,7 @@ export async function initMongo(): Promise<void> {
 }
 
 function setupGracefulShutdown(): void {
-  const close = async (signal: string): Promise<void> => {
+  const close = async (): Promise<void> => {
     try {
       await mongoose.disconnect();
     } catch (e: any) {
@@ -45,9 +46,6 @@ function setupGracefulShutdown(): void {
       process.exit(0);
     }
   };
-
-  process.once("SIGINT", () => void close("SIGINT"));
-  process.once("SIGTERM", () => void close("SIGTERM"));
 }
 
 export default mongoose;

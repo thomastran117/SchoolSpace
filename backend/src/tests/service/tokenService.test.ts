@@ -15,10 +15,9 @@ jest.mock("../../config/envConfigs", () => ({
 
 import { TokenService } from "../../service/tokenService";
 import jwt from "jsonwebtoken";
-import {
+import type {
   RefreshTokenPayload,
   VerifyTokenPayload,
-  TokenPayloadBase,
 } from "../../models/token";
 
 const mockCacheService = {

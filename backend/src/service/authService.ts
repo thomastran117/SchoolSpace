@@ -12,15 +12,16 @@
 import bcrypt from "bcrypt";
 import prisma from "../resource/prisma";
 import env from "../config/envConfigs";
-import { OAuth2Client, TokenPayload } from "google-auth-library";
+import type { TokenPayload } from "google-auth-library";
+import { OAuth2Client } from "google-auth-library";
 import logger from "../utility/logger";
 import { httpError } from "../utility/httpUtility";
 
 import { verifyMicrosoftIdToken } from "./oauth/microsoft-service";
 import { verifyGoogleCaptcha } from "./webService";
 
-import { TokenService } from "./tokenService";
-import { EmailService } from "./emailService";
+import type { TokenService } from "./tokenService";
+import type { EmailService } from "./emailService";
 
 interface AuthResponse {
   accessToken: string;

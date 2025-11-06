@@ -8,7 +8,8 @@
  * @auth Thomas
  */
 
-import express, { Request, Response, NextFunction, Router } from "express";
+import type { Request, Response, NextFunction, Router } from "express";
+import express from "express";
 
 import authRoute from "./authRoute";
 /*

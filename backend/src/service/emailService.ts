@@ -8,7 +8,8 @@
  * @auth Thomas
  */
 
-import nodemailer, { Transporter, SendMailOptions } from "nodemailer";
+import type { Transporter, SendMailOptions } from "nodemailer";
+import nodemailer from "nodemailer";
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 import { httpError } from "../utility/httpUtility";

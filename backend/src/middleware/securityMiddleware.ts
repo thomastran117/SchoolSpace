@@ -9,28 +9,24 @@
  * @auth Thomas
  */
 
-import cors, { CorsOptionsDelegate } from "cors";
+import type { CorsOptionsDelegate } from "cors";
+import cors from "cors";
 import sanitizeHtml from "sanitize-html";
 import hpp from "hpp";
 import helmet from "helmet";
 import mongoSanitize from "express-mongo-sanitize";
-import csurf, { CookieOptions } from "csurf";
+import type { CookieOptions } from "csurf";
+import csurf from "csurf";
 import type { Request, Response, NextFunction } from "express";
 
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 
-/* -------------------------------------------------------------
- * Origin Normalization Helper
- * ----------------------------------------------------------- */
 function normalizeOrigin(o: string | null | undefined): string | null {
   if (!o) return null;
   return o.trim().replace(/\/+$/, "").toLowerCase();
 }
 
-/* -------------------------------------------------------------
- * Parse CORS whitelist
- * ----------------------------------------------------------- */
 const raw =
   env.cors_whitelist
     ?.split(",")
@@ -43,19 +39,16 @@ if (env.frontend_client && !raw.length) {
 
 const whitelist = new Set(raw.map(normalizeOrigin).filter(Boolean) as string[]);
 
-/* -------------------------------------------------------------
- * CORS Middleware
- * ----------------------------------------------------------- */
 const corsOptionsDelegate: CorsOptionsDelegate<Request> = (req, cb) => {
   const originHdr = req.header("Origin");
-  let isAllowed = !originHdr; // allow curl/Postman (no Origin)
+  let isAllowed = !originHdr;
 
   if (originHdr) {
     const norm = normalizeOrigin(originHdr);
     if (norm && whitelist.has(norm)) {
       isAllowed = true;
     } else if (process.env.NODE_ENV !== "production") {
-      console.warn(
+      logger.warn(
         `[CORS BLOCKED] ${req.method} ${req.originalUrl} from Origin: ${originHdr}`,
       );
     }
@@ -74,9 +67,6 @@ const corsOptionsDelegate: CorsOptionsDelegate<Request> = (req, cb) => {
 
 const corsMiddleware = cors(corsOptionsDelegate);
 
-/* -------------------------------------------------------------
- * Helmet: Secure HTTP Headers
- * ----------------------------------------------------------- */
 const securityHeaders = helmet({
   contentSecurityPolicy: {
     useDefaults: true,
@@ -92,50 +82,54 @@ const securityHeaders = helmet({
   frameguard: { action: "deny" },
 });
 
-/* -------------------------------------------------------------
- * HPP Protection
- * ----------------------------------------------------------- */
 const preventHpp = hpp({
   whitelist: ["tags", "categories", "filters"],
 });
 
-/* -------------------------------------------------------------
- * Mongo / NoSQL Injection Sanitization
- * ----------------------------------------------------------- */
 function preventNoSqlInjection(
   req: Request,
   _res: Response,
   next: NextFunction,
 ): void {
   try {
-    mongoSanitize.sanitize(req.body, { replaceWith: "_" });
-    mongoSanitize.sanitize(req.query, { replaceWith: "_" });
-    mongoSanitize.sanitize(req.params, { replaceWith: "_" });
-  } catch (err: any) {
-    console.warn("[MongoSanitize] Warning:", err.message);
+    mongoSanitize.sanitize(req.body as Record<string, unknown>, {
+      replaceWith: "_",
+    });
+    mongoSanitize.sanitize(req.query as Record<string, unknown>, {
+      replaceWith: "_",
+    });
+    mongoSanitize.sanitize(req.params as Record<string, unknown>, {
+      replaceWith: "_",
+    });
+  } catch (err) {
+    if (err instanceof Error) {
+      logger.warn(`[MongoSanitize] Warning: ${err.message}`);
+    }
   }
   next();
 }
 
-/* -------------------------------------------------------------
- * XSS and Input Sanitization
- * ----------------------------------------------------------- */
 function sanitizeInput(req: Request, _res: Response, next: NextFunction): void {
-  const clean = (obj: any): any => {
-    if (!obj || typeof obj !== "object") return obj;
+  const clean = (obj: unknown): unknown => {
+    if (obj === null || typeof obj !== "object") return obj;
 
-    for (const key of Object.keys(obj)) {
-      const val = obj[key];
+    if (Array.isArray(obj)) {
+      return obj.map((v) => clean(v));
+    }
+
+    const record = obj as Record<string, unknown>;
+    for (const key of Object.keys(record)) {
+      const val = record[key];
       if (typeof val === "string") {
-        obj[key] = sanitizeHtml(val, {
+        record[key] = sanitizeHtml(val, {
           allowedTags: [],
           allowedAttributes: {},
         });
-      } else if (typeof val === "object") {
-        clean(val);
+      } else if (typeof val === "object" && val !== null) {
+        record[key] = clean(val);
       }
     }
-    return obj;
+    return record;
   };
 
   if (req.body) clean(req.body);
@@ -145,9 +139,6 @@ function sanitizeInput(req: Request, _res: Response, next: NextFunction): void {
   next();
 }
 
-/* -------------------------------------------------------------
- * CSRF Protection (with safe dev fallback)
- * ----------------------------------------------------------- */
 let csrfProtection: (req: Request, res: Response, next: NextFunction) => void;
 
 if (process.env.NODE_ENV === "production") {
@@ -164,9 +155,6 @@ if (process.env.NODE_ENV === "production") {
   logger.warn("[CSRF] Skipped for development");
 }
 
-/* -------------------------------------------------------------
- * Aggregated Middleware Bundle
- * ----------------------------------------------------------- */
 function securityMiddlewareBundle(): Array<
   (req: Request, res: Response, next: NextFunction) => void
 > {

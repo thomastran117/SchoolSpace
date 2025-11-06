@@ -1,12 +1,14 @@
 import { setRouteMetadata } from "./registry";
 
-export function requireAuth(handler: Function): Function {
+export function requireAuth<T extends (...args: unknown[]) => unknown>(
+  handler: T,
+): T {
   setRouteMetadata(handler, { requireAuth: true });
   return handler;
 }
 
-export function requireRoles(roles: string[]): (handler: Function) => Function {
-  return (handler: Function): Function => {
+export function requireRoles(roles: string[]) {
+  return <T extends (...args: unknown[]) => unknown>(handler: T): T => {
     setRouteMetadata(handler, { requireAuth: true, roles });
     return handler;
   };

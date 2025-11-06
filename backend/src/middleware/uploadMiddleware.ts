@@ -12,7 +12,8 @@
  * @auth Thomas
  */
 
-import multer, { FileFilterCallback } from "multer";
+import type { FileFilterCallback } from "multer";
+import multer from "multer";
 import path from "path";
 import sanitize from "sanitize-filename";
 import type { Request } from "express";

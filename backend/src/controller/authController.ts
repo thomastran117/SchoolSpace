@@ -10,13 +10,13 @@
 
 import type { Request, Response, NextFunction } from "express";
 
-import { AuthService } from "../service/authService";
+import type { AuthService } from "../service/authService";
 // Utilities
 import logger from "../utility/logger";
 import env from "../config/envConfigs";
 import { httpError, sendCookie } from "../utility/httpUtility";
-import { TypedRequest, TypedResponse } from "../types/express";
-import {
+import type { TypedRequest, TypedResponse } from "../types/express";
+import type {
   LoginDto,
   SignupDto,
   MicrosoftDto,
@@ -87,7 +87,7 @@ class AuthController {
   }
 
   public async localVerifyEmail(
-    req: Request<{}, {}, {}>,
+    req: Request<object, object, object>,
     res: Response,
     next: NextFunction,
   ) {

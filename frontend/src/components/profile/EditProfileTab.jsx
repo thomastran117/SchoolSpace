@@ -68,7 +68,9 @@ const EditProfileTab = ({ onCancel }) => {
   };
 
   // ✅ Detect if anything changed
-  const hasChanges = Object.keys(form).some((key) => form[key] !== originalForm[key]);
+  const hasChanges = Object.keys(form).some(
+    (key) => form[key] !== originalForm[key],
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -119,10 +121,10 @@ const EditProfileTab = ({ onCancel }) => {
           isSuccess
             ? "bg-success-subtle text-success border border-success-subtle"
             : isError
-            ? "bg-danger-subtle text-danger border border-danger-subtle"
-            : isWarning
-            ? "bg-warning-subtle text-warning border border-warning-subtle"
-            : "bg-light text-muted border border-secondary-subtle"
+              ? "bg-danger-subtle text-danger border border-danger-subtle"
+              : isWarning
+                ? "bg-warning-subtle text-warning border border-warning-subtle"
+                : "bg-light text-muted border border-secondary-subtle"
         }`}
         style={{ fontSize: "0.9rem", transition: "all 0.2s ease" }}
       >

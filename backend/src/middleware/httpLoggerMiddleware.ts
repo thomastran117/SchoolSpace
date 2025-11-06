@@ -9,7 +9,7 @@
  * @author Thomas
  */
 
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import chalk from "chalk";
 
 /**
@@ -66,6 +66,7 @@ function requestLogger(req: Request, res: Response, next: NextFunction): void {
       `${methodColor(req.method)} ${req.originalUrl} ` +
       `${statusColor(res.statusCode)} - ${duration}ms`;
 
+    // eslint-disable-next-line no-console
     console.log(log);
   });
 

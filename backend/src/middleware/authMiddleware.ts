@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { getRouteMetadata } from "../metadata/registry";
 import container from "../resource/container";
 
@@ -21,7 +21,7 @@ export async function AuthMetadataGuard(
       }
 
       const user = basicTokenService.getUserPayload(authHeader);
-      (req as any).user = user;
+      req.user = user;
 
       if (roles.length > 0 && !roles.includes(user.role)) {
         return res

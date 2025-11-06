@@ -11,10 +11,7 @@
 import axios from "axios";
 import env from "../config/envConfigs";
 
-const {
-  google_client_id: GOOGLE_CLIENT_ID,
-  google_captcha_secret: GOOGLE_CAPTCHA_SECRET,
-} = env;
+const { google_captcha_secret: GOOGLE_CAPTCHA_SECRET } = env;
 
 interface GoogleCaptchaResponse {
   success: boolean;
@@ -46,11 +43,9 @@ export async function verifyGoogleCaptcha(token: string): Promise<boolean> {
     if (data.success) {
       return true;
     } else {
-      console.warn("Captcha verification failed:", data["error-codes"]);
       return false;
     }
-  } catch (error: any) {
-    console.error("Error verifying Google reCAPTCHA:", error.message);
+  } catch {
     return false;
   }
 }

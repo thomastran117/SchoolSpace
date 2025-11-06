@@ -9,8 +9,10 @@
  * @auth Thomas
  */
 
-import jwksClient, { JwksClient } from "jwks-rsa";
-import jwt, { JwtHeader, JwtPayload } from "jsonwebtoken";
+import type { JwksClient } from "jwks-rsa";
+import jwksClient from "jwks-rsa";
+import type { JwtHeader, JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import env from "../../config/envConfigs";
 import { httpError } from "../../utility/httpUtility";
 

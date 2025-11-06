@@ -3,12 +3,19 @@ type RouteMetadata = {
   roles?: string[];
 };
 
-const metadataRegistry = new WeakMap<Function, RouteMetadata>();
+type AnyFunction = (...args: unknown[]) => unknown;
 
-export function setRouteMetadata(handler: Function, meta: RouteMetadata): void {
+const metadataRegistry = new WeakMap<AnyFunction, RouteMetadata>();
+
+export function setRouteMetadata<T extends AnyFunction>(
+  handler: T,
+  meta: RouteMetadata,
+): void {
   metadataRegistry.set(handler, meta);
 }
 
-export function getRouteMetadata(handler: Function): RouteMetadata {
-  return metadataRegistry.get(handler) || {};
+export function getRouteMetadata<T extends AnyFunction>(
+  handler: T,
+): RouteMetadata {
+  return metadataRegistry.get(handler) ?? {};
 }

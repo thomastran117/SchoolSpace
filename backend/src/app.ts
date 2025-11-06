@@ -12,12 +12,12 @@
  * @author Thomas
  */
 
-import express, { Application, Request, Response } from "express";
+import type { Application, Request, Response } from "express";
+import express from "express";
 import cookieParser from "cookie-parser";
 import path from "path";
 
 // Utilities
-import logger from "./utility/logger";
 import container from "./resource/container";
 
 // Middleware

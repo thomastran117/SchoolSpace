@@ -8,7 +8,8 @@
  * @auth Thomas
  */
 
-import { OAuth2Client, TokenPayload } from "google-auth-library";
+import type { TokenPayload } from "google-auth-library";
+import { OAuth2Client } from "google-auth-library";
 import axios from "axios";
 import env from "../../config/envConfigs";
 
@@ -113,11 +114,9 @@ export async function verifyGoogleCaptcha(token: string): Promise<boolean> {
     if (data.success) {
       return true;
     } else {
-      console.warn("Captcha verification failed:", data["error-codes"]);
       return false;
     }
-  } catch (error: any) {
-    console.error("Error verifying Google reCAPTCHA:", error.message);
+  } catch {
     return false;
   }
 }

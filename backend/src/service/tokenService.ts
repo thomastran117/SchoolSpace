@@ -15,13 +15,13 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { randomBytes } from "crypto";
 import { httpError } from "../utility/httpUtility";
-import {
+import type {
   TokenPayloadBase,
   RefreshTokenPayload,
   VerifyTokenPayload,
   UserPayload,
 } from "../models/token";
-import { CacheService } from "../service/cacheService";
+import type { CacheService } from "../service/cacheService";
 import env from "../config/envConfigs";
 
 const {
