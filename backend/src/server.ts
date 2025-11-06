@@ -8,7 +8,6 @@
  * @version 1.0.0
  *
  */
-import "reflect-metadata";
 import { initializeApp } from "./app";
 import logger from "./utility/logger";
 

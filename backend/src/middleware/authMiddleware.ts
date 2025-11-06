@@ -1,20 +1,16 @@
 import { Request, Response, NextFunction } from "express";
-import { META_REQUIRE_AUTH, META_ROLES } from "../constants/metadata";
+import { getRouteMetadata } from "../metadata/registry";
 import container from "../resource/container";
-import "reflect-metadata";
 
 export async function AuthMetadataGuard(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   const routeHandler = req.route?.stack?.slice(-1)[0]?.handle;
   if (!routeHandler) return next();
 
-  const requireAuth = Reflect.getMetadata(META_REQUIRE_AUTH, routeHandler);
-  const requiredRoles: string[] =
-    Reflect.getMetadata(META_ROLES, routeHandler) || [];
-
+  const { requireAuth, roles = [] } = getRouteMetadata(routeHandler);
   const basicTokenService = container.basicTokenService;
 
   try {
@@ -27,15 +23,13 @@ export async function AuthMetadataGuard(
       const user = basicTokenService.getUserPayload(authHeader);
       (req as any).user = user;
 
-      if (requiredRoles.length > 0 && !requiredRoles.includes(user.role)) {
-        return res
-          .status(403)
-          .json({ message: "Forbidden: Insufficient role" });
+      if (roles.length > 0 && !roles.includes(user.role)) {
+        return res.status(403).json({ message: "Forbidden: Insufficient role" });
       }
     }
 
     next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 }
