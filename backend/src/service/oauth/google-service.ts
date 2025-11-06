@@ -15,7 +15,7 @@ import env from "../../config/envConfigs";
 const {
   google_client_id: GOOGLE_CLIENT_ID,
   google_captcha_secret: GOOGLE_CAPTCHA_SECRET,
-} = config;
+} = env;
 
 if (!GOOGLE_CLIENT_ID) {
   throw new Error("Missing GOOGLE_CLIENT_ID in environment");
