@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+MODE="${1:-local}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "$REPO_ROOT"
@@ -38,5 +40,9 @@ wait_for_health "schoolspace-mysql" 180
 echo "Running Prisma migrations..."
 docker compose exec -T backend npx prisma migrate deploy
 
-echo "✅ Migrations applied. Switching to attached mode..."
-docker compose up backend frontend redis mysql
+if [[ "$MODE" == "ci" ]]; then
+  echo "✅ Migrations applied (CI mode). Containers stay detached."
+else
+  echo "✅ Migrations applied. Switching to attached mode..."
+  docker compose up backend frontend redis mysql
+fi
