@@ -1,12 +1,14 @@
-import { CacheService } from "../service/cacheService";
-import { EmailService } from "../service/emailService";
-import { AuthService } from "../service/authService";
-import { BasicTokenService, TokenService } from "../service/tokenService";
-import { AuthController } from "../controller/authController";
-import logger from "../utility/logger";
-
 import { initRedis } from "./redis";
 import { initPrisma } from "./prisma";
+import { initMongo } from "./mongo";
+import { AuthController } from "../controller/authController";
+
+import { AuthService } from "../service/authService";
+import { BasicTokenService, TokenService } from "../service/tokenService";
+import { CacheService } from "../service/cacheService";
+import { EmailService } from "../service/emailService";
+
+import logger from "../utility/logger";
 
 type Lifetime = "singleton" | "transient" | "scoped";
 
@@ -16,9 +18,6 @@ interface Registration<T> {
   instance?: T;
 }
 
-/**
- * Base dependency injection container supporting singleton, transient, and scoped lifetimes.
- */
 class Container {
   private static _instance: Container;
   protected readonly services = new Map<string, Registration<any>>();
@@ -129,9 +128,34 @@ class Container {
     try {
       await initPrisma();
       await initRedis();
+      await initMongo();
     } catch (err: any) {
       process.exit(1);
     }
+  }
+
+  public printDiagnostics(): void {
+    logger.info("Container Diagnostics");
+
+    const padKey =
+      Math.max(...Array.from(this.services.keys()).map((k) => k.length)) + 2;
+
+    for (const [key, reg] of this.services.entries()) {
+      const status = reg.instance ? "✔ instantiated" : "⏳ pending";
+
+      const lifetimeColored =
+        reg.lifetime === "singleton"
+          ? "🟦 singleton"
+          : reg.lifetime === "scoped"
+            ? "🟨 scoped"
+            : "🟪 transient";
+
+      logger.info(
+        `  • ${key.padEnd(padKey)} | Lifetime: ${lifetimeColored.padEnd(14)} | Status: ${status}`,
+      );
+    }
+
+    logger.info("Diagnostic report complete");
   }
 
   get cacheService(): CacheService {

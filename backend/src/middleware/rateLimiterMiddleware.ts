@@ -1,115 +1,90 @@
 /**
  * @file rateLimiterMiddleware.ts
  * @description
- * Express middleware for rate limiting using `rate-limiter-flexible`.
- * Provides separate general and authentication limiters with Redis as the backend
- * and an in-memory insurance limiter as fallback.
+ * Lightweight, dependency-injected rate limiter built entirely on CacheService.
+ *
+ * Tracks request counts per key (user ID or IP) using Redis via CacheService.
+ * Resets counters automatically after `duration` seconds.
  *
  * @module middleware
- * @version 1.0.0
- * @author Thomas
+ * @version 3.0.0
  */
 
-import {
-  RateLimiterRedis,
-  RateLimiterMemory,
-  RateLimiterRes,
-} from "rate-limiter-flexible";
 import type { Request, Response, NextFunction } from "express";
-import redis from "../resource/redis";
+import container from "../resource/container";
+import logger from "../utility/logger";
 
-/**
- * Builds a Redis-backed rate limiter with an in-memory insurance fallback.
- *
- * @param points - Number of points per duration.
- * @param duration - Duration in seconds before points reset.
- * @param blockDuration - Optional block time (in seconds) after consuming all points.
- */
-function buildLimiter({
-  points,
-  duration,
-  blockDuration = 0,
-}: {
+interface RateLimiterOptions {
   points: number;
   duration: number;
   blockDuration?: number;
-}): RateLimiterRedis {
-  const insuranceLimiter = new RateLimiterMemory({ points, duration });
-
-  return new RateLimiterRedis({
-    storeClient: redis,
-    points,
-    duration,
-    blockDuration,
-    execEvenly: false,
-    insuranceLimiter,
-    keyPrefix: "rlf",
-  });
+  prefix?: string;
+  message?: string;
 }
 
 /**
- * Wraps a rate limiter in an Express middleware function.
- *
- * @param limiter - The rate limiter instance.
- * @param message - The message returned when the rate limit is exceeded.
+ * Creates a rate limiter middleware using CacheService.
  */
-function limiterMiddleware(
-  limiter: RateLimiterRedis,
-  message: string,
-): (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => Promise<void | Response> {
-  return async (req, res, next) => {
-    const userId = (req.user as unknown as { id?: string | number })?.id;
-    const key = userId != null ? String(userId) : req.ip;
+function createRateLimiter({
+  points,
+  duration,
+  blockDuration = 0,
+  prefix = "rlf",
+  message = "Too many requests. Please try again later.",
+}: RateLimiterOptions) {
+  const cache = container.cacheService;
 
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const rlRes: RateLimiterRes = await limiter.consume(String(key), 1);
+      const userId = (req.user as unknown as { id?: string | number })?.id;
+      const key = `${prefix}:${userId ?? req.ip}`;
 
-      res.setHeader("X-RateLimit-Limit", limiter.points.toString());
-      res.setHeader("X-RateLimit-Remaining", rlRes.remainingPoints.toString());
-      res.setHeader(
-        "X-RateLimit-Reset",
-        Math.ceil((Date.now() + rlRes.msBeforeNext) / 1000).toString(),
-      );
-
-      next();
-    } catch (err: any) {
-      if (err instanceof Error) {
-        return next();
+      const blocked = await cache.get<boolean>(`${key}:blocked`);
+      if (blocked) {
+        res.setHeader("Retry-After", blockDuration.toString());
+        return res.status(429).json({ error: message });
       }
 
-      const retrySecs = Math.max(
-        1,
-        Math.ceil((err.msBeforeNext || 1000) / 1000),
-      );
-      res.setHeader("Retry-After", retrySecs.toString());
-      res.status(429).json({ error: message });
+      const count = await cache.increment(key);
+      if (count === 1) {
+        await cache.set(key, count, duration);
+      }
+
+      const remaining = Math.max(points - count, 0);
+
+      res.setHeader("X-RateLimit-Limit", points.toString());
+      res.setHeader("X-RateLimit-Remaining", remaining.toString());
+
+      if (remaining <= 0) {
+        logger.warn(`Rate limit exceeded for key: ${key}`);
+
+        if (blockDuration > 0) {
+          await cache.set(`${key}:blocked`, true, blockDuration);
+        }
+
+        return res.status(429).json({ error: message });
+      }
+
+      next();
+    } catch (err) {
+      logger.error(`RateLimiter error: ${String(err)}`);
+      next();
     }
   };
 }
 
-const generalLimiter = buildLimiter({
+const generalRateLimiter = createRateLimiter({
   points: 1000,
   duration: 15 * 60,
+  prefix: "rlf_general",
 });
 
-const authLimiter = buildLimiter({
+const authRateLimiter = createRateLimiter({
   points: 100,
   duration: 10 * 60,
   blockDuration: 60,
+  prefix: "rlf_auth",
+  message: "Too many attempts. Please wait and try again.",
 });
 
-const generalRateLimiter = limiterMiddleware(
-  generalLimiter,
-  "Too many requests. Please try again later.",
-);
-
-const authRateLimiter = limiterMiddleware(
-  authLimiter,
-  "Too many attempts. Please wait and try again.",
-);
-
-export { generalRateLimiter, authRateLimiter };
+export { generalRateLimiter, authRateLimiter, createRateLimiter };

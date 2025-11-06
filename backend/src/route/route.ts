@@ -17,7 +17,6 @@ import enrollRoute from "./enrollRoute";
 import userRoute from "./userRoute";
 import fileRoute from "./fileRoute";
 */
-import { makeRequireAuth } from "../middleware/authTokenMiddleware";
 import { httpError } from "../utility/httpUtility";
 import { AuthMetadataGuard } from "../middleware/authMiddleware";
 
