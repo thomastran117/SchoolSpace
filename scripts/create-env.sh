@@ -60,7 +60,7 @@ PORT=8040
 
 DATABASE_URL="mysql://root:password123@localhost:3306/database"
 REDIS_URL="redis://127.0.0.1:6379"
-MONGO_URL="mongodb://localhost:27017/app";
+MONGO_URL="mongodb://localhost:27017/app"
 
 ##############################################
 # Security / JWT
