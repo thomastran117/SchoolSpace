@@ -17,11 +17,11 @@ import { OAuth2Client } from "google-auth-library";
 import logger from "../utility/logger";
 import { httpError } from "../utility/httpUtility";
 
-import { verifyMicrosoftIdToken } from "./oauth/microsoft-service";
 import { verifyGoogleCaptcha } from "./webService";
 
 import type { TokenService } from "./tokenService";
 import type { EmailService } from "./emailService";
+import type { OAuthService } from "./oauthService";
 
 interface AuthResponse {
   accessToken: string;
@@ -32,18 +32,18 @@ interface AuthResponse {
   avatar?: string | null;
 }
 
-const { frontend_client: FRONTEND_CLIENT, google_client_id: GOOGLE_CLIENT_ID } =
+const { frontend_client: FRONTEND_CLIENT } =
   env;
-
-const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 class AuthService {
   private readonly emailService: EmailService;
   private readonly tokenService: TokenService;
+  private readonly oauthService: OAuthService;
 
-  constructor(emailService: EmailService, tokenService: TokenService) {
+  constructor(emailService: EmailService, tokenService: TokenService, oauthService: OAuthService) {
     this.emailService = emailService;
     this.tokenService = tokenService;
+    this.oauthService = oauthService;
   }
 
   public async loginUser(
@@ -139,7 +139,7 @@ class AuthService {
   }
 
   public async microsoftOAuth(idToken: string): Promise<AuthResponse> {
-    const claims = await verifyMicrosoftIdToken(idToken);
+    const claims = await this.oauthService.verifyMicrosoftToken(idToken);
 
     const microsoftSub = (claims as any).sub || (claims as any).oid;
     const email = (claims as any).email || (claims as any).preferred_username;
@@ -196,24 +196,7 @@ class AuthService {
   }
 
   public async googleOAuth(googleToken: string): Promise<AuthResponse> {
-    const ticket = await client.verifyIdToken({
-      idToken: googleToken,
-      audience: GOOGLE_CLIENT_ID,
-    });
-
-    const payload: TokenPayload | undefined = ticket.getPayload();
-
-    if (!payload || !payload.sub) {
-      httpError(401, "Invalid Google token payload");
-    }
-
-    const googleUser = {
-      email: payload.email,
-      name: payload.name,
-      picture: payload.picture,
-      sub: payload.sub,
-    };
-
+    const googleUser = await this.oauthService.verifyGoogleToken(googleToken);
     if (!googleUser?.email) httpError(401, "Invalid Google token");
 
     let user = await prisma.user.findUnique({

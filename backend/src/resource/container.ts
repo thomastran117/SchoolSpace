@@ -7,6 +7,7 @@ import { AuthService } from "../service/authService";
 import { BasicTokenService, TokenService } from "../service/tokenService";
 import { CacheService } from "../service/cacheService";
 import { EmailService } from "../service/emailService";
+import { OAuthService } from "../service/oauthService";
 
 import logger from "../utility/logger";
 
@@ -39,11 +40,18 @@ class Container {
     );
 
     this.register(
+      "OAuthService",
+      () => new OAuthService(),
+      "scoped",
+    ); 
+
+    this.register(
       "AuthService",
       (scope) =>
         new AuthService(
           scope.resolve("EmailService"),
           scope.resolve("TokenService"),
+          scope.resolve("OAuthService")
         ),
       "scoped",
     );

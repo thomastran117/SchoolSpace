@@ -11,7 +11,6 @@
 import type { Request, Response, NextFunction } from "express";
 
 import type { AuthService } from "../service/authService";
-// Utilities
 import logger from "../utility/logger";
 import env from "../config/envConfigs";
 import { httpError, sendCookie } from "../utility/httpUtility";
