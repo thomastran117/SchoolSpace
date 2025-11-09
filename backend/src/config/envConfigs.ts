@@ -28,20 +28,30 @@ function asBool(v: string | undefined | null, fallback: boolean): boolean {
 class EnvConfig {
   private static _instance: EnvConfig;
 
+  public readonly cors_whitelist: string;
+  public readonly frontend_client: string;
+  public readonly zod_configuration?: string;
   public readonly database_url: string;
   public readonly redis_url: string;
   public readonly mongo_url: string;
+
   public readonly jwt_secret_access: string;
   public readonly jwt_secret_refresh: string;
   public readonly jwt_secret_verify: string;
-  public readonly cors_whitelist: string;
-  public readonly frontend_client: string;
+
   public readonly google_client_id?: string;
   public readonly google_captcha_secret?: string;
+
   public readonly ms_client_id?: string;
   public readonly ms_tenant_id?: string;
+
   public readonly email_user?: string;
   public readonly email_pass?: string;
+
+  public readonly paypal_client_id?: string;
+  public readonly paypal_secret_key?: string;
+  public readonly paypal_api?: string;
+  public readonly paypal_currency?: string;
 
   private constructor() {
     this.database_url = this.req("DATABASE_URL");
@@ -55,13 +65,20 @@ class EnvConfig {
       "FRONTEND_CLIENT",
       "http://localhost:3040",
     )!;
+    this.zod_configuration = this.opt("ZOD_CONFIGURATION", "passthrough")
     this.google_client_id = this.opt("GOOGLE_CLIENT_ID");
     this.google_captcha_secret = this.opt("GOOGLE_CAPTCHA_SECRET");
     this.ms_client_id = this.opt("MS_CLIENT_ID");
     this.ms_tenant_id = this.opt("MS_TENANT_ID");
     this.email_user = this.opt("EMAIL_USER");
     this.email_pass = this.opt("EMAIL_PASS");
-
+    this.paypal_client_id = this.opt("PAYPAL_CLIENT_ID");
+    this.paypal_secret_key = this.opt("PAYPAL_SECRET_KEY");
+    this.paypal_api = this.opt(
+      "PAYPAL_API",
+      "https://api-m.sandbox.paypal.com",
+    );
+    this.paypal_currency=this.opt("PAYMENT_CURRENCY", "CAD")
     Object.freeze(this);
   }
 
