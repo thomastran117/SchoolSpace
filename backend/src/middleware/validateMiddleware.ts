@@ -1,4 +1,4 @@
-import type { ZodSchema } from "zod";
+import { ZodObject, ZodSchema } from "zod";
 import type { Request, Response, NextFunction } from "express";
 
 export const validate =
@@ -9,11 +9,18 @@ export const validate =
       req.body === null ||
       (typeof req.body === "object" && Object.keys(req.body).length === 0)
     ) {
+      const expectedFields =
+        schema instanceof ZodObject
+          ? Object.keys(schema.shape)
+          : undefined;
+
       return res.status(400).json({
         errors: [
           {
             field: "body",
-            message: "Missing or empty JSON body. Please provide valid JSON input.",
+            message:
+              "Missing or empty JSON body. Please provide valid JSON input.",
+            expectedFields: expectedFields ?? [],
           },
         ],
       });
@@ -33,4 +40,3 @@ export const validate =
     req.body = parseResult.data;
     next();
   };
-
