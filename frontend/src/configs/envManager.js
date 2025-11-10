@@ -5,6 +5,7 @@ const config = {
   RECAPTCHA_SITE_KEY: import.meta.env.VITE_RECAPTCHA_SITE_KEY || "",
   backend_url: import.meta.env.VITE_BACKEND_URL || "http://localhost:8040",
   frontend_url: import.meta.env.VITE_FRONTEND_URL || "http://localhost:3040",
+  paypal_client_id: import.meta.env.PAYPAL_CLIENT_ID
 };
 
 if (!config.google_client) {
