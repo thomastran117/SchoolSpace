@@ -12,6 +12,7 @@ import type { Request, Response, NextFunction, Router } from "express";
 import express from "express";
 
 import authRoute from "./authRoute";
+import paymentRoute from "./paymentRoute";
 /*
 import courseRoute from "./courseRoute";
 import enrollRoute from "./enrollRoute";
@@ -29,7 +30,7 @@ const router: Router = express.Router();
  * @access Public
  */
 router.use("/auth", authRoute);
-
+router.use("/payment", paymentRoute);
 router.use(AuthMetadataGuard);
 /**
  * @route /courses

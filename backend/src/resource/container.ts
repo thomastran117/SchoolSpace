@@ -1,13 +1,16 @@
 import { initRedis } from "./redis";
 import { initPrisma } from "./prisma";
 import { initMongo } from "./mongo";
+
 import { AuthController } from "../controller/authController";
+import { PaymentController } from "../controller/paymentController";
 
 import { AuthService } from "../service/authService";
 import { BasicTokenService, TokenService } from "../service/tokenService";
 import { CacheService } from "../service/cacheService";
 import { EmailService } from "../service/emailService";
 import { OAuthService } from "../service/oauthService";
+import { PaymentService } from "../service/paymentService";
 
 import logger from "../utility/logger";
 
@@ -39,11 +42,8 @@ class Container {
       "scoped",
     );
 
-    this.register(
-      "OAuthService",
-      () => new OAuthService(),
-      "scoped",
-    ); 
+    this.register("PaymentService", () => new PaymentService(), "scoped");
+    this.register("OAuthService", () => new OAuthService(), "scoped");
 
     this.register(
       "AuthService",
@@ -51,7 +51,7 @@ class Container {
         new AuthService(
           scope.resolve("EmailService"),
           scope.resolve("TokenService"),
-          scope.resolve("OAuthService")
+          scope.resolve("OAuthService"),
         ),
       "scoped",
     );
@@ -59,6 +59,11 @@ class Container {
     this.register(
       "AuthController",
       (scope) => new AuthController(scope.resolve("AuthService")),
+      "transient",
+    );
+    this.register(
+      "PaymentController",
+      (scope) => new PaymentController(scope.resolve("PaymentService")),
       "transient",
     );
   }
