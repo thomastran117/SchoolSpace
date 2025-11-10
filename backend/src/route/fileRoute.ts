@@ -12,7 +12,7 @@ import type { Router, Request, Response, NextFunction } from "express";
 import express from "express";
 import container from "../resource/container";import multer from "multer";
 import type { FileController } from "../controller/fileController";
-import { uploadAvatar } from "../middleware/uploadMiddleware";
+import { safeUploadAvatar } from "../middleware/uploadMiddleware";
 const router: Router = express.Router();
 
 const useScopedController =
@@ -41,7 +41,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.post(
   "/upload",
-  uploadAvatar.single("avatar"),
+  safeUploadAvatar(),
   useScopedController((controller, req, res, next) =>
     controller.handleUpload(req, res, next),
   ),
