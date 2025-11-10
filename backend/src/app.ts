@@ -24,6 +24,7 @@ import container from "./resource/container";
 import {
   generalRateLimiter,
   authRateLimiter,
+  softRateLimiter,
 } from "./middleware/rateLimiterMiddleware";
 import requestLogger from "./middleware/httpLoggerMiddleware";
 import { errorHandler } from "./middleware/errorHandlerMiddleware";
@@ -61,6 +62,7 @@ export async function initializeApp(): Promise<Application> {
     ],
     authRateLimiter,
   );
+  app.use(["/api/auth/refresh", "/api/files"], softRateLimiter);
 
   app.use(requestLogger);
 
