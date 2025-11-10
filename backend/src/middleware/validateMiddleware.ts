@@ -2,8 +2,7 @@ import { ZodObject, ZodSchema } from "zod";
 import type { Request, Response, NextFunction } from "express";
 import env from "../config/envConfigs";
 
-const VALIDATION_MODE =
-  env.zod_configuration
+const VALIDATION_MODE = env.zod_configuration;
 
 export const validate =
   <T extends ZodSchema>(schema: T) =>

@@ -8,20 +8,30 @@
  * - Logs connection status and errors.
  *
  * @module resource
- * @version 2.0.0
+ * @version 3.0.0
  * @auth Thomas
  */
-
+import { URL } from "url";
 import Redis from "ioredis";
+import IORedis from "ioredis";
 import logger from "../utility/logger";
 import env from "../config/envConfigs";
 
-const redis = new Redis(env.redis_url, {
+const baseUrl = new URL(env.redis_url);
+const redisCacheUrl = baseUrl.toString();
+baseUrl.searchParams.set("db", "1");
+const redisBullUrl = baseUrl.toString();
+
+const redis = new Redis(redisCacheUrl, {
   lazyConnect: true,
   maxRetriesPerRequest: 2,
 });
 
-export async function initRedis(): Promise<void> {
+const connectionWorker = new IORedis(redisBullUrl, {
+  maxRetriesPerRequest: null,
+});
+
+async function initRedis(): Promise<void> {
   try {
     await redis.connect();
     await redis.ping();
@@ -32,4 +42,4 @@ export async function initRedis(): Promise<void> {
   }
 }
 
-export default redis;
+export { redis, connectionWorker, initRedis };

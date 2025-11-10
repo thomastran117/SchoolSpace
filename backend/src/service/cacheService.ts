@@ -1,4 +1,4 @@
-import redis from "../resource/redis";
+import { redis } from "../resource/redis";
 import logger from "../utility/logger";
 
 class CacheService {

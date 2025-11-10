@@ -5,11 +5,10 @@ import logger from "../utility/logger";
 const { paypal_client_id, paypal_secret_key, paypal_api, paypal_currency } =
   env;
 
-interface PayPalOrderCapture {
+interface PayPalOrder {
   id: string;
   status: string;
-  payer?: { email_address?: string };
-  purchase_units?: Array<{ amount: { currency_code: string; value: string } }>;
+  links?: Array<{ rel: string; href: string; method: string }>;
 }
 
 class PaymentService {
@@ -25,7 +24,6 @@ class PaymentService {
       !paypal_api ||
       !paypal_currency
     ) {
-      logger.error("Payment service is missing environment variables");
       throw new Error("Missing PayPal environment variables");
     }
 
@@ -50,34 +48,69 @@ class PaymentService {
       );
       return res.data.access_token;
     } catch (err: any) {
-      logger.error(`[PayPal] Failed to generate access token: ${err.message}`);
-      throw new Error("Failed to generate PayPal access token");
+      logger.error(`[PayPal] Failed to generate token: ${err.message}`);
+      throw new Error("PayPal authentication failed");
     }
   }
 
-  async createOrder(amount: string): Promise<string> {
+  async createOrder(
+    amount: string,
+  ): Promise<{ id: string; approveLink: string }> {
     const token = await this.generateAccessToken();
 
-    const res = await axios.post(
+    const res = await axios.post<PayPalOrder>(
       `${this.PAYPAL_API}/v2/checkout/orders`,
       {
         intent: "CAPTURE",
         purchase_units: [
           { amount: { currency_code: this.PAYMENT_CURRENCY, value: amount } },
         ],
+        application_context: {
+          return_url: "http://localhost:8040/api/payment/success",
+          cancel_url: "http://localhost:8040/api/payment/cancel",
+        },
       },
       { headers: { Authorization: `Bearer ${token}` } },
     );
 
-    return res.data.id;
+    const approveLink =
+      res.data.links?.find((l) => l.rel === "approve")?.href ?? "";
+
+    return { id: res.data.id, approveLink };
   }
 
-  async captureOrder(orderId: string): Promise<PayPalOrderCapture> {
+  async captureOrder(orderId: string) {
     const token = await this.generateAccessToken();
-    const res = await axios.post<PayPalOrderCapture>(
+    const res = await axios.post(
       `${this.PAYPAL_API}/v2/checkout/orders/${orderId}/capture`,
       {},
       { headers: { Authorization: `Bearer ${token}` } },
+    );
+    return res.data;
+  }
+
+  async cancelOrder(orderId: string) {
+    const token = await this.generateAccessToken();
+    try {
+      const res = await axios.post(
+        `${this.PAYPAL_API}/v2/checkout/orders/${orderId}/cancel`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      return res.data;
+    } catch (err: any) {
+      logger.warn(`[PayPal] Cancel order ${orderId} failed: ${err.message}`);
+      throw new Error("PayPal cancellation failed");
+    }
+  }
+
+  async getOrderDetails(orderId: string) {
+    const token = await this.generateAccessToken();
+    const res = await axios.get(
+      `${this.PAYPAL_API}/v2/checkout/orders/${orderId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
     );
     return res.data;
   }

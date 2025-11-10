@@ -65,7 +65,7 @@ class EnvConfig {
       "FRONTEND_CLIENT",
       "http://localhost:3040",
     )!;
-    this.zod_configuration = this.opt("ZOD_CONFIGURATION", "passthrough")
+    this.zod_configuration = this.opt("ZOD_CONFIGURATION", "passthrough");
     this.google_client_id = this.opt("GOOGLE_CLIENT_ID");
     this.google_captcha_secret = this.opt("GOOGLE_CAPTCHA_SECRET");
     this.ms_client_id = this.opt("MS_CLIENT_ID");
@@ -78,7 +78,7 @@ class EnvConfig {
       "PAYPAL_API",
       "https://api-m.sandbox.paypal.com",
     );
-    this.paypal_currency=this.opt("PAYMENT_CURRENCY", "CAD")
+    this.paypal_currency = this.opt("PAYMENT_CURRENCY", "CAD");
     Object.freeze(this);
   }
 

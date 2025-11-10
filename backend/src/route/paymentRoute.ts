@@ -37,11 +37,40 @@ router.post(
   ),
 );
 
+router.get(
+  "/success",
+  useScopedController((controller, req, res, next) =>
+    controller.approveOrder(req, res, next),
+  ),
+);
+
 router.post(
-  "/capture",
+  "/cancel",
   validate(ViewOrderSchema),
   useScopedController((controller, req, res, next) =>
-    controller.viewOrder(req, res, next),
+    controller.cancelOrder(req, res, next),
+  ),
+);
+
+router.post(
+  "/status",
+  validate(ViewOrderSchema),
+  useScopedController((controller, req, res, next) =>
+    controller.getOrderStatus(req, res, next),
+  ),
+);
+
+router.get(
+  "/admin/queue",
+  useScopedController((controller, req, res, next) =>
+    controller.getQueueSummary(req, res, next),
+  ),
+);
+
+router.delete(
+  "/admin/queue",
+  useScopedController((controller, req, res, next) =>
+    controller.flushQueue(req, res, next),
   ),
 );
 
