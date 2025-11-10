@@ -4,6 +4,7 @@ import type { CreateOrderDto, ViewOrderDto } from "../dto/paymentSchema";
 import type { PaymentService } from "../service/paymentService";
 import { paymentQueue } from "../queues/paymentQueue";
 import logger from "../utility/logger";
+import { isWorkerHealthy } from "../resource/workerHealth";
 
 class PaymentController {
   private readonly paymentService: PaymentService;
@@ -18,6 +19,14 @@ class PaymentController {
     next: NextFunction,
   ) {
     try {
+      const healthy = await isWorkerHealthy();
+      if (!healthy) {
+        logger.warn("[Payment] Worker not available — blocking operation.");
+        return res.status(503).json({
+          error:
+            "Payment worker is currently offline. Please try again shortly.",
+        });
+      }
       const { amount } = req.body;
       const result = await this.paymentService.createOrder(amount);
 
@@ -34,6 +43,14 @@ class PaymentController {
 
   public async approveOrder(req: any, res: Response, next: NextFunction) {
     try {
+      const healthy = await isWorkerHealthy();
+      if (!healthy) {
+        logger.warn("[Payment] Worker not available — blocking operation.");
+        return res.status(503).json({
+          error:
+            "Payment worker is currently offline. Please try again shortly.",
+        });
+      }
       const { token } = req.query;
       if (!token) return res.status(400).json({ error: "Missing order token" });
 
@@ -78,6 +95,14 @@ class PaymentController {
     next: NextFunction,
   ) {
     try {
+      const healthy = await isWorkerHealthy();
+      if (!healthy) {
+        logger.warn("[Payment] Worker not available — blocking operation.");
+        return res.status(503).json({
+          error:
+            "Payment worker is currently offline. Please try again shortly.",
+        });
+      }
       const { orderId } = req.body;
 
       const job = await paymentQueue.getJob(orderId);
@@ -103,6 +128,14 @@ class PaymentController {
     next: NextFunction,
   ) {
     try {
+      const healthy = await isWorkerHealthy();
+      if (!healthy) {
+        logger.warn("[Payment] Worker not available — blocking operation.");
+        return res.status(503).json({
+          error:
+            "Payment worker is currently offline. Please try again shortly.",
+        });
+      }
       const { orderId } = req.body;
       const job = await paymentQueue.getJob(orderId);
 

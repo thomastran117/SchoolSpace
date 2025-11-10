@@ -3,6 +3,7 @@ import { Worker } from "bullmq";
 import { PaymentService } from "../service/paymentService";
 import { connectionWorker } from "../resource/redis";
 import logger from "../utility/logger";
+import { markWorkerAlive, markWorkerDead } from "../resource/workerHealth";
 
 interface PaymentJobData {
   paypalOrderId: string;
@@ -51,7 +52,12 @@ const worker = new Worker<PaymentJobData>(
 );
 
 worker.on("ready", () => {
+  markWorkerAlive();
   logger.info("[Worker] Payment worker started");
+
+  setInterval(() => {
+    markWorkerAlive();
+  }, 15_000);
 });
 
 worker.on("failed", async (job, err) => {
@@ -80,6 +86,12 @@ worker.on("completed", (job, result) => {
 
 worker.on("error", (err) => {
   logger.error(`[Worker] Global error: ${err.message}`);
+  markWorkerDead();
+});
+
+worker.on("closed", () => {
+  logger.warn("[Worker] Payment worker stopped");
+  markWorkerDead();
 });
 
 export default worker;
