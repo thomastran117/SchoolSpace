@@ -21,30 +21,39 @@ function Assert-Package([string]$Path) {
 Assert-Package $FrontendPath
 Assert-Package $BackendPath
 
-Write-Host ("Starting frontend in {0} (quiet)" -f $FrontendPath) -ForegroundColor Cyan
-$frontendCmd = 'npm run dev 1>nul 2>nul'
+Write-Host ("Starting frontend in {0}" -f $FrontendPath) -ForegroundColor Cyan
+$frontendCmd = 'npm run dev'
 $feProc = Start-Process -FilePath $env:ComSpec `
   -ArgumentList '/c', $frontendCmd `
   -WorkingDirectory $FrontendPath `
   -WindowStyle Hidden `
   -PassThru
 
-$env:FORCE_COLOR  = "1"
-$env:DEBUG_COLORS = "1"
+Write-Host ("Starting backend in new window...") -ForegroundColor Cyan
+$beProc = Start-Process -FilePath "powershell.exe" `
+  -ArgumentList "-NoExit", "-Command", "cd '$BackendPath'; npm run dev" `
+  -PassThru
 
-Write-Host ("Starting backend in {0}" -f $BackendPath) -ForegroundColor Cyan
-Push-Location $BackendPath
+Write-Host ("Starting payment worker...") -ForegroundColor Cyan
+$workerCmd = "cd '$BackendPath'; npx ts-node ./src/workers/paymentWorker.ts"
+$wkProc = Start-Process -FilePath "powershell.exe" `
+  -ArgumentList "-NoExit", "-Command", $workerCmd `
+  -PassThru
+
+Write-Host "`nAll services running. Press Ctrl+C or close this window to stop everything..." -ForegroundColor Green
 try {
-  & $env:ComSpec /c "npm run dev"
+  while ($true) { Start-Sleep -Seconds 2 }
 } finally {
-  Pop-Location
-  Write-Host "`nStopping frontend..." -ForegroundColor Yellow
-  try {
-    if ($feProc -and -not $feProc.HasExited) {
-      & taskkill /T /PID $feProc.Id /F | Out-Null
+  Write-Host "`nStopping all services..." -ForegroundColor Yellow
+  foreach ($p in @($feProc, $beProc, $wkProc)) {
+    try {
+      if ($p -and -not $p.HasExited) {
+        & taskkill /T /PID $p.Id /F | Out-Null
+        Write-Host "Killed PID $($p.Id)" -ForegroundColor DarkYellow
+      }
+    } catch {
+      Write-Host "Note: could not kill PID $($p.Id): $($_.Exception.Message)" -ForegroundColor DarkGray
     }
-  } catch {
-    Write-Host "Frontend stop note: $($_.Exception.Message)" -ForegroundColor DarkYellow
   }
-  Write-Host "Done." -ForegroundColor Green
+  Write-Host "All services stopped. Done." -ForegroundColor Green
 }
