@@ -12,8 +12,6 @@
 import bcrypt from "bcrypt";
 import prisma from "../resource/prisma";
 import env from "../config/envConfigs";
-import type { TokenPayload } from "google-auth-library";
-import { OAuth2Client } from "google-auth-library";
 import logger from "../utility/logger";
 import { httpError } from "../utility/httpUtility";
 
@@ -32,15 +30,18 @@ interface AuthResponse {
   avatar?: string | null;
 }
 
-const { frontend_client: FRONTEND_CLIENT } =
-  env;
+const { frontend_client: FRONTEND_CLIENT } = env;
 
 class AuthService {
   private readonly emailService: EmailService;
   private readonly tokenService: TokenService;
   private readonly oauthService: OAuthService;
 
-  constructor(emailService: EmailService, tokenService: TokenService, oauthService: OAuthService) {
+  constructor(
+    emailService: EmailService,
+    tokenService: TokenService,
+    oauthService: OAuthService,
+  ) {
     this.emailService = emailService;
     this.tokenService = tokenService;
     this.oauthService = oauthService;

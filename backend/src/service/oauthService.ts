@@ -61,7 +61,7 @@ export class OAuthService {
    */
   private async getSigningKey(
     client: JwksClient,
-    header: JwtHeader
+    header: JwtHeader,
   ): Promise<string> {
     return new Promise((resolve, reject) => {
       if (!header.kid) return reject(new Error("Missing KID in header"));
@@ -97,14 +97,25 @@ export class OAuthService {
     }
 
     const decoded = jwt.decode(idToken, { complete: true });
-    if (!decoded || typeof decoded !== "object" || !decoded.header || !decoded.payload) {
+    if (
+      !decoded ||
+      typeof decoded !== "object" ||
+      !decoded.header ||
+      !decoded.payload
+    ) {
       throw httpError(401, "Invalid Microsoft token: cannot decode");
     }
 
-    const { header, payload } = decoded as { header: JwtHeader; payload: JwtPayload };
+    const { header, payload } = decoded as {
+      header: JwtHeader;
+      payload: JwtPayload;
+    };
     const { iss, aud } = payload;
 
-    if (!iss || !/^https:\/\/login\.microsoftonline\.com\/[^/]+\/v2\.0$/i.test(iss)) {
+    if (
+      !iss ||
+      !/^https:\/\/login\.microsoftonline\.com\/[^/]+\/v2\.0$/i.test(iss)
+    ) {
       throw httpError(401, "Invalid issuer in token");
     }
 
@@ -134,7 +145,7 @@ export class OAuthService {
           }
 
           resolve(payload);
-        }
+        },
       );
     });
   }
