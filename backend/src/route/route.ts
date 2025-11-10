@@ -13,11 +13,11 @@ import express from "express";
 
 import authRoute from "./authRoute";
 import paymentRoute from "./paymentRoute";
+import fileRoute from "./fileRoute";
 /*
 import courseRoute from "./courseRoute";
 import enrollRoute from "./enrollRoute";
 import userRoute from "./userRoute";
-import fileRoute from "./fileRoute";
 */
 import { httpError } from "../utility/httpUtility";
 import { AuthMetadataGuard } from "../middleware/authMiddleware";
@@ -58,7 +58,7 @@ router.use(AuthMetadataGuard);
  * @description Handles file uploads and retrieval
  * @access Private
  */
-//router.use("/files", makeRequireAuth, fileRoute);
+router.use("/files", fileRoute);
 
 /**
  * Catch-all for undefined routes

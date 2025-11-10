@@ -4,11 +4,13 @@ import { initMongo } from "./mongo";
 
 import { AuthController } from "../controller/authController";
 import { PaymentController } from "../controller/paymentController";
+import { FileController } from "../controller/fileController";
 
 import { AuthService } from "../service/authService";
 import { BasicTokenService, TokenService } from "../service/tokenService";
 import { CacheService } from "../service/cacheService";
 import { EmailService } from "../service/emailService";
+import { FileService } from "../service/fileService";
 import { OAuthService } from "../service/oauthService";
 import { PaymentService } from "../service/paymentService";
 
@@ -30,6 +32,7 @@ class Container {
   protected constructor() {
     this.register("CacheService", () => new CacheService(), "singleton");
     this.register("EmailService", () => new EmailService(), "singleton");
+    this.register("FileService", () => new FileService(), "singleton");
     this.register(
       "BasicTokenService",
       () => new BasicTokenService(),
@@ -55,7 +58,6 @@ class Container {
         ),
       "scoped",
     );
-
     this.register(
       "AuthController",
       (scope) => new AuthController(scope.resolve("AuthService")),
@@ -64,6 +66,11 @@ class Container {
     this.register(
       "PaymentController",
       (scope) => new PaymentController(scope.resolve("PaymentService")),
+      "transient",
+    );
+    this.register(
+      "FileController",
+      (scope) => new FileController(scope.resolve("FileService")),
       "transient",
     );
   }
@@ -189,6 +196,10 @@ class Container {
 
   get basicTokenService(): BasicTokenService {
     return this.resolve("BasicTokenService");
+  }
+
+  get fileService(): FileService {
+    return this.resolve("FileService");
   }
 }
 
