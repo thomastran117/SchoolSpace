@@ -45,7 +45,14 @@ export class CatalogueService {
     term?: Term,
     available?: boolean,
     search?: string,
-  ): Promise<ICatalogue[]> {
+    page = 1,
+    limit = 15,
+  ): Promise<{
+    data: ICatalogue[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
     try {
       const filter: Record<string, unknown> = {};
       if (term) filter.term = term;
@@ -57,18 +64,43 @@ export class CatalogueService {
         ];
       }
 
-      const cacheKey = `catalogue:filter:${term ?? "all"}:${available ?? "any"}:${search ?? "none"}`;
-      const cached = await this.cache.get<ICatalogue[]>(cacheKey);
+      const skip = (page - 1) * limit;
+      const cacheKey = `catalogue:filter:${term ?? "all"}:${available ?? "any"}:${
+        search ?? "none"
+      }:${page}:${limit}`;
+
+      const cached = await this.cache.get<{
+        data: ICatalogue[];
+        total: number;
+        totalPages: number;
+        currentPage: number;
+      }>(cacheKey);
+
       if (cached) {
         return cached;
       }
 
-      const results = await CatalogueModel.find(filter)
-        .sort({ createdAt: -1 })
-        .lean();
-      await this.cache.set(cacheKey, results, this.ttl);
+      const [results, total] = await Promise.all([
+        CatalogueModel.find(filter)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        CatalogueModel.countDocuments(filter),
+      ]);
 
-      return results;
+      const totalPages = Math.ceil(total / limit);
+
+      const response = {
+        data: results,
+        total,
+        totalPages,
+        currentPage: page,
+      };
+
+      await this.cache.set(cacheKey, response, this.ttl);
+
+      return response;
     } catch (err) {
       throw httpError(500, `Failed to fetch courses: ${String(err)}`);
     }

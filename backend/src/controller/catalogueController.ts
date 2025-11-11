@@ -140,27 +140,34 @@ class CatalogueController {
     req: TypedRequest<QueryCatalogueDto>,
     res: TypedResponse<{
       message: string;
+      total: number;
+      totalPages: number;
+      currentPage: number;
       count: number;
       data: CatalogueListResponseDto;
     }>,
     next: NextFunction,
   ) {
     try {
-      const { term, available, search } = req.query;
-      const result = await this.catalogueService.getCourses(
-        term as Term,
-        available as boolean,
-        search as string,
-      );
+      const { term, available, search, page, limit } = req.query as any;
+      const pageNum = page ? Number(page) : 1;
+      const limitNum = limit ? Number(limit) : 15;
 
-      const safeData = result.map((result) =>
-        CatalogueResponseSchema.parse(result),
+      const result = await this.catalogueService.getCourses(
+        term,
+        available,
+        search,
+        pageNum,
+        limitNum,
       );
 
       return res.status(200).json({
         message: "Courses retrieved successfully.",
-        count: safeData.length,
-        data: safeData as any,
+        total: result.total,
+        totalPages: result.totalPages,
+        currentPage: result.currentPage,
+        count: result.data.length,
+        data: result.data as any,
       });
     } catch (err) {
       next(err);
