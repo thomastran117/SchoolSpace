@@ -13,8 +13,9 @@
  */
 
 import type { Request, Response, NextFunction } from "express";
-import container from "../resource/container";
+import container from "../container";
 import logger from "../utility/logger";
+import type { CacheService } from "../service/cacheService";
 
 interface RateLimiterOptions {
   points: number;
@@ -35,7 +36,7 @@ function createRateLimiter({
   weight = () => 1,
   strictAuthHandling = false,
 }: RateLimiterOptions) {
-  const cache = container.cacheService;
+    const cache = container.basicTokenService as CacheService;
 
   return async (req: Request, res: Response, next: NextFunction) => {
     const userId = (req.user as any)?.id;

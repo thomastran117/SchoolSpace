@@ -11,7 +11,6 @@ export class Container {
   private initialized = false;
 
   protected constructor() {
-    // Register modules
     for (const [k, v] of registerServiceModules()) this.services.set(k, v);
     for (const [k, v] of registerControllerModules()) this.services.set(k, v);
   }
@@ -59,6 +58,22 @@ export class Container {
         logger.info(`Initialized singleton: ${key}`);
       }
     }
+  }
+
+  get cacheService() {
+    return this.resolve("CacheService");
+  }
+
+  get emailService() {
+    return this.resolve("EmailService");
+  }
+
+  get fileService() {
+    return this.resolve("FileService");
+  }
+
+  get basicTokenService() {
+    return this.resolve("BasicTokenService");
   }
 
   printDiagnostics(): void {
