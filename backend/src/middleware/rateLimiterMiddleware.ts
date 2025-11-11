@@ -19,7 +19,7 @@ import type { CacheService } from "../service/cacheService";
 
 interface RateLimiterOptions {
   points: number;
-  duration: number;
+  duration: number; // seconds
   blockDuration?: number;
   prefix?: string;
   message?: string;
@@ -46,20 +46,25 @@ function createRateLimiter({
     try {
       const blocked = await cache.get<boolean>(blockedKey);
       if (blocked) {
-        res.setHeader("Retry-After", blockDuration.toString());
+        const ttl = await cache.ttl(blockedKey);
+        if (ttl > 0) res.setHeader("Retry-After", ttl.toString());
         return res.status(429).json({ error: message });
       }
 
-      const count = await cache.increment(key, weight(req), duration);
-      const remaining = Math.max(points - count, 0);
+      const count = await cache.increment(key, weight(req));
 
+      if (count === weight(req)) {
+        await cache.expire(key, duration);
+      }
+
+      const remaining = Math.max(points - count, 0);
       res.setHeader("X-RateLimit-Limit", points.toString());
       res.setHeader("X-RateLimit-Remaining", remaining.toString());
 
       if (remaining <= 0) {
         logger.warn(`Rate limit exceeded: ${key}`);
         if (blockDuration > 0) {
-          await cache.set(`${blockedKey}`, true, blockDuration);
+          await cache.set(blockedKey, true, blockDuration);
         }
         return res.status(429).json({ error: message });
       }
@@ -70,7 +75,9 @@ function createRateLimiter({
           if (code === 401 || code === 403) {
             (async () => {
               const failKey = `${key}:unauth`;
-              const fails = await cache.increment(failKey, 1, 300);
+              const fails = await cache.increment(failKey, 1);
+              if (fails === 1) await cache.expire(failKey, 300);
+
               if (fails > 5) {
                 logger.warn(
                   `Temporarily blocking key after repeated unauthorized: ${key}`,
