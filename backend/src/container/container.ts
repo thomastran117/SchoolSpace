@@ -1,6 +1,6 @@
-import { initRedis } from "./redis";
-import { initPrisma } from "./prisma";
-import { initMongo } from "./mongo";
+import { initRedis } from "../resource/redis";
+import { initPrisma } from "../resource/prisma";
+import { initMongo } from "../resource/mongo";
 
 import { AuthController } from "../controller/authController";
 import { PaymentController } from "../controller/paymentController";

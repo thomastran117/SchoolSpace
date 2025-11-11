@@ -10,7 +10,7 @@
 
 import type { Router, Request, Response, NextFunction } from "express";
 import express from "express";
-import container from "../resource/container";
+import container from "../container/container";
 import multer from "multer";
 import type { FileController } from "../controller/fileController";
 import { safeUploadAvatar } from "../middleware/uploadMiddleware";
