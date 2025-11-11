@@ -18,7 +18,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 // Utilities
-import container from "./resource/container";
+import container from "./container";
 
 // Middleware
 import {
