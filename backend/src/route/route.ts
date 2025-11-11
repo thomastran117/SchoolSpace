@@ -15,6 +15,7 @@ import authRoute from "./authRoute";
 import paymentRoute from "./paymentRoute";
 import fileRoute from "./fileRoute";
 import userRoute from "./userRoute";
+import catalogueRoute from "./catalogueRoute";
 import { httpError } from "../utility/httpUtility";
 import { AuthGuard } from "../middleware/authMiddleware";
 
@@ -24,6 +25,7 @@ router.use("/auth", authRoute);
 router.use("/payment", AuthGuard, paymentRoute);
 router.use("/files", AuthGuard, fileRoute);
 router.use("/users", AuthGuard, userRoute);
+router.use("/catalogues", catalogueRoute);
 
 router.use((req: Request, _res: Response, _next: NextFunction) => {
   httpError(404, `Route '${req.originalUrl}' does not exist`);

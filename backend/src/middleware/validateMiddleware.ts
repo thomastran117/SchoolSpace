@@ -3,7 +3,6 @@ import type { Request, Response, NextFunction } from "express";
 import env from "../config/envConfigs";
 
 const VALIDATION_MODE = env.zod_configuration ?? "strict";
-
 type ValidationSource = "body" | "params" | "query";
 
 export const validate =
@@ -17,6 +16,7 @@ export const validate =
           effectiveSchema = schema.strip() as unknown as T;
           break;
         case "passthrough":
+          effectiveSchema = schema.passthrough() as unknown as T;
           break;
         case "strict":
         default:
@@ -26,12 +26,16 @@ export const validate =
 
     const data = (req as any)[source];
 
-    if (
-      source === "body" &&
-      (data === undefined ||
-        data === null ||
-        (typeof data === "object" && Object.keys(data).length === 0))
-    ) {
+    const isEmptyObject =
+      data === undefined ||
+      data === null ||
+      (typeof data === "object" && Object.keys(data).length === 0);
+
+    if (source === "query" && isEmptyObject) {
+      return next();
+    }
+
+    if (isEmptyObject && (source === "body" || source === "params")) {
       const expectedFields =
         effectiveSchema instanceof ZodObject
           ? Object.keys(effectiveSchema.shape)
@@ -41,8 +45,7 @@ export const validate =
         errors: [
           {
             field: source,
-            message:
-              "Missing or empty JSON body. Please provide valid JSON input.",
+            message: `Missing or empty ${source}. Please provide valid input.`,
             expectedFields,
           },
         ],
@@ -54,12 +57,19 @@ export const validate =
     if (!parseResult.success) {
       return res.status(400).json({
         errors: parseResult.error.issues.map((issue) => ({
-          field: issue.path.join("."),
+          field: issue.path.join(".") || source,
           message: issue.message,
         })),
       });
     }
 
-    (req as any)[source] = parseResult.data;
+    if (source === "query") {
+      Object.assign(req.query, parseResult.data);
+    } else if (source === "params") {
+      Object.assign(req.params, parseResult.data);
+    } else {
+      (req as any).body = parseResult.data;
+    }
+
     next();
   };

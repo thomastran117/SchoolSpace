@@ -103,6 +103,11 @@ class CacheService {
       logger.error(`Redis EXPIRE error: ${String(err)}`);
     }
   }
+
+  async deletePattern(pattern: string): Promise<void> {
+    const keys = await redis.keys(pattern);
+    if (keys.length) await redis.del(keys);
+  }
 }
 
 export { CacheService };

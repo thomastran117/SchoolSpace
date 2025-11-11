@@ -7,6 +7,7 @@ import { PaymentService } from "../service/paymentService";
 import { WebService } from "../service/webService";
 import { AuthService } from "../service/authService";
 import { UserService } from "../service/userService";
+import { CatalogueService } from "../service/catalogueService";
 import type { Registration } from "./container.types";
 
 export function registerServiceModules(): Map<string, Registration<any>> {
@@ -46,6 +47,11 @@ export function registerServiceModules(): Map<string, Registration<any>> {
 
   services.set("PaymentService", {
     factory: (scope) => new PaymentService(scope.resolve("WebService")),
+    lifetime: "scoped",
+  });
+
+  services.set("CatalogueService", {
+    factory: (scope) => new CatalogueService(scope.resolve("CacheService")),
     lifetime: "scoped",
   });
 

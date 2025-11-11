@@ -6,7 +6,7 @@
  * and exports the configured `mongoose` client.
  *
  * @module resource
- * @version 2.0.0
+ * @version 2.0.1
  */
 
 import mongoose from "mongoose";
@@ -28,10 +28,11 @@ export async function initMongo(): Promise<void> {
     if (!res || res.ok !== 1) {
       throw new Error("MongoDB ping returned non-ok result");
     }
+
     logger.info("MongoDB is connected");
     setupGracefulShutdown();
   } catch (err: any) {
-    logger.error(err);
+    logger.error(`MongoDB connection error: ${err.message}`);
     throw err;
   }
 }
@@ -40,12 +41,17 @@ function setupGracefulShutdown(): void {
   const close = async (): Promise<void> => {
     try {
       await mongoose.disconnect();
+      logger.info("MongoDB connection closed gracefully");
     } catch (e: any) {
       logger.error(`MongoDB close error: ${e.message}`);
     } finally {
       process.exit(0);
     }
   };
+
+  process.on("SIGINT", close);
+  process.on("SIGTERM", close);
+  process.on("SIGQUIT", close);
 }
 
 export default mongoose;
