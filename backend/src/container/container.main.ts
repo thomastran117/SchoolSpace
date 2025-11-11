@@ -30,7 +30,9 @@ export class Container {
         if (!reg.instance) reg.instance = reg.factory() as T;
         return reg.instance;
       case "scoped":
-        throw new Error(`Cannot resolve scoped service '${key}' directly from root container.`);
+        throw new Error(
+          `Cannot resolve scoped service '${key}' directly from root container.`,
+        );
       case "transient":
         return reg.factory() as T;
     }
@@ -63,7 +65,9 @@ export class Container {
     logger.info("Container Diagnostics:");
     for (const [key, reg] of this.services.entries()) {
       const status = reg.instance ? "✔ instantiated" : "⏳ pending";
-      logger.info(`  • ${key.padEnd(20)} | Lifetime: ${reg.lifetime.padEnd(10)} | ${status}`);
+      logger.info(
+        `  • ${key.padEnd(20)} | Lifetime: ${reg.lifetime.padEnd(10)} | ${status}`,
+      );
     }
   }
 }

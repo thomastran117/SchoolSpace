@@ -28,12 +28,15 @@ interface PaymentJobData {
       "payment",
       async (job: Job<PaymentJobData>) => {
         const { paypalOrderId } = job.data;
-        if (!paypalOrderId) throw new Error("Missing paypalOrderId in job data");
+        if (!paypalOrderId)
+          throw new Error("Missing paypalOrderId in job data");
 
         const scope = container.createScope();
         const paymentService = scope.resolve<PaymentService>("PaymentService");
 
-        logger.info(`[Worker] Processing payment for order ${paypalOrderId}...`);
+        logger.info(
+          `[Worker] Processing payment for order ${paypalOrderId}...`,
+        );
 
         try {
           const result = await paymentService.captureOrder(paypalOrderId);
@@ -76,7 +79,9 @@ interface PaymentJobData {
           await job.remove();
         } catch (e) {
           const error = e instanceof Error ? e : new Error(String(e));
-          logger.error(`[Worker] Failed to remove job ${job.id}: ${error.message}`);
+          logger.error(
+            `[Worker] Failed to remove job ${job.id}: ${error.message}`,
+          );
         }
       }
     });

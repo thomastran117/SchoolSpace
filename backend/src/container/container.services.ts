@@ -11,12 +11,27 @@ import type { Registration } from "./container.types";
 export function registerServiceModules(): Map<string, Registration<any>> {
   const services = new Map<string, Registration<any>>();
 
-  services.set("CacheService", { factory: () => new CacheService(), lifetime: "singleton" });
-  services.set("EmailService", { factory: () => new EmailService(), lifetime: "singleton" });
-  services.set("FileService", { factory: () => new FileService(), lifetime: "singleton" });
-  services.set("BasicTokenService", { factory: () => new BasicTokenService(), lifetime: "singleton" });
+  services.set("CacheService", {
+    factory: () => new CacheService(),
+    lifetime: "singleton",
+  });
+  services.set("EmailService", {
+    factory: () => new EmailService(),
+    lifetime: "singleton",
+  });
+  services.set("FileService", {
+    factory: () => new FileService(),
+    lifetime: "singleton",
+  });
+  services.set("BasicTokenService", {
+    factory: () => new BasicTokenService(),
+    lifetime: "singleton",
+  });
 
-  services.set("WebService", { factory: () => new WebService(), lifetime: "scoped" });
+  services.set("WebService", {
+    factory: () => new WebService(),
+    lifetime: "scoped",
+  });
 
   services.set("TokenService", {
     factory: (scope) => new TokenService(scope.resolve("CacheService")),
@@ -28,7 +43,10 @@ export function registerServiceModules(): Map<string, Registration<any>> {
     lifetime: "scoped",
   });
 
-  services.set("OAuthService", { factory: () => new OAuthService(), lifetime: "scoped" });
+  services.set("OAuthService", {
+    factory: () => new OAuthService(),
+    lifetime: "scoped",
+  });
 
   services.set("AuthService", {
     factory: (scope) =>
