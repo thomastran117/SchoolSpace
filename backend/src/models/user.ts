@@ -1,7 +1,7 @@
-export type Provider = "local" | "google" | "microsoft";
-export type Role = "notdefined" | "student" | "teacher" | "assistant" | "admin";
+type Provider = "local" | "google" | "microsoft";
+type Role = "notdefined" | "student" | "teacher" | "assistant" | "admin";
 
-export interface UserModel {
+interface User {
   id: number;
   email: string;
   password?: string | null;
@@ -22,3 +22,5 @@ export interface UserModel {
 
   provider: Provider;
 }
+
+export { Provider, Role, User };

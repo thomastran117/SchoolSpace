@@ -17,6 +17,7 @@ export function AuthGuard(req: Request, res: Response, next: NextFunction) {
 
     next();
   } catch (err) {
+    console.log(err);
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 }

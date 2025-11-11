@@ -2,10 +2,12 @@ import { ZodObject, ZodSchema } from "zod";
 import type { Request, Response, NextFunction } from "express";
 import env from "../config/envConfigs";
 
-const VALIDATION_MODE = env.zod_configuration;
+const VALIDATION_MODE = env.zod_configuration ?? "strict";
+
+type ValidationSource = "body" | "params" | "query";
 
 export const validate =
-  <T extends ZodSchema>(schema: T) =>
+  <T extends ZodSchema>(schema: T, source: ValidationSource = "body") =>
   (req: Request, res: Response, next: NextFunction) => {
     let effectiveSchema = schema;
 
@@ -22,10 +24,13 @@ export const validate =
       }
     }
 
+    const data = (req as any)[source];
+
     if (
-      req.body === undefined ||
-      req.body === null ||
-      (typeof req.body === "object" && Object.keys(req.body).length === 0)
+      source === "body" &&
+      (data === undefined ||
+        data === null ||
+        (typeof data === "object" && Object.keys(data).length === 0))
     ) {
       const expectedFields =
         effectiveSchema instanceof ZodObject
@@ -35,7 +40,7 @@ export const validate =
       return res.status(400).json({
         errors: [
           {
-            field: "body",
+            field: source,
             message:
               "Missing or empty JSON body. Please provide valid JSON input.",
             expectedFields,
@@ -44,7 +49,8 @@ export const validate =
       });
     }
 
-    const parseResult = effectiveSchema.safeParse(req.body);
+    const parseResult = effectiveSchema.safeParse(data);
+
     if (!parseResult.success) {
       return res.status(400).json({
         errors: parseResult.error.issues.map((issue) => ({
@@ -54,6 +60,6 @@ export const validate =
       });
     }
 
-    req.body = parseResult.data;
+    (req as any)[source] = parseResult.data;
     next();
   };

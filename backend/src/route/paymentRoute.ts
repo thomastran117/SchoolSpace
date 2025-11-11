@@ -31,7 +31,7 @@ const useScopedController =
 
 router.post(
   "/create",
-  validate(CreateOrderSchema),
+  validate(CreateOrderSchema, "body"),
   useScopedController((controller, req, res, next) =>
     controller.createOrder(req, res, next),
   ),
@@ -46,7 +46,7 @@ router.get(
 
 router.post(
   "/cancel",
-  validate(ViewOrderSchema),
+  validate(ViewOrderSchema, "body"),
   useScopedController((controller, req, res, next) =>
     controller.cancelOrder(req, res, next),
   ),
@@ -54,7 +54,7 @@ router.post(
 
 router.post(
   "/status",
-  validate(ViewOrderSchema),
+  validate(ViewOrderSchema, "body"),
   useScopedController((controller, req, res, next) =>
     controller.getOrderStatus(req, res, next),
   ),

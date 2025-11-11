@@ -44,7 +44,7 @@ const useScopedController =
  */
 router.post(
   "/login",
-  validate(LoginSchema),
+  validate(LoginSchema, "body"),
   useScopedController((controller, req, res, next) =>
     controller.localAuthenticate(req, res, next),
   ),
@@ -55,7 +55,7 @@ router.post(
  */
 router.post(
   "/signup",
-  validate(SignupSchema),
+  validate(SignupSchema, "body"),
   useScopedController((controller, req, res, next) =>
     controller.localSignup(req, res, next),
   ),
@@ -76,7 +76,7 @@ router.get(
  */
 router.post(
   "/microsoft/verify",
-  validate(MicrosoftSchema),
+  validate(MicrosoftSchema, "body"),
   useScopedController((controller, req, res, next) =>
     controller.microsoftAuthenticate(req, res, next),
   ),
@@ -87,7 +87,7 @@ router.post(
  */
 router.post(
   "/google/verify",
-  validate(GoogleSchema),
+  validate(GoogleSchema, "body"),
   useScopedController((controller, req, res, next) =>
     controller.googleAuthenticate(req, res, next),
   ),

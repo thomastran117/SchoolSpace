@@ -6,6 +6,7 @@ import { OAuthService } from "../service/oauthService";
 import { PaymentService } from "../service/paymentService";
 import { WebService } from "../service/webService";
 import { AuthService } from "../service/authService";
+import { UserService } from "../service/userService";
 import type { Registration } from "./container.types";
 
 export function registerServiceModules(): Map<string, Registration<any>> {
@@ -33,6 +34,11 @@ export function registerServiceModules(): Map<string, Registration<any>> {
     lifetime: "scoped",
   });
 
+  services.set("OAuthService", {
+    factory: () => new OAuthService(),
+    lifetime: "scoped",
+  });
+
   services.set("TokenService", {
     factory: (scope) => new TokenService(scope.resolve("CacheService")),
     lifetime: "scoped",
@@ -43,8 +49,12 @@ export function registerServiceModules(): Map<string, Registration<any>> {
     lifetime: "scoped",
   });
 
-  services.set("OAuthService", {
-    factory: () => new OAuthService(),
+  services.set("UserService", {
+    factory: (scope) =>
+      new UserService(
+        scope.resolve("TokenService"),
+        scope.resolve("FileService"),
+      ),
     lifetime: "scoped",
   });
 

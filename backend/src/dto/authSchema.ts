@@ -3,7 +3,7 @@ import { z } from "zod";
 const AuthSchema = z.object({
   email: z.string().email().max(100),
   password: z.string().min(6).max(128),
-  captcha: z.string().min(10).max(100),
+  captcha: z.string(),
 });
 
 const LoginSchema = AuthSchema.extend({

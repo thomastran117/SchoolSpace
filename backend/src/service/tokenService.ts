@@ -35,12 +35,7 @@ const SHORT_REFRESH_EXPIRY = "1d";
 const LONG_REFRESH_EXPIRY = "7d";
 
 class BasicTokenService {
-  public getUserPayload(authHeader: string): UserPayload {
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      httpError(401, "Missing or malformed Authorization header");
-    }
-
-    const token = authHeader.split(" ")[1];
+  public getUserPayload(token: string): UserPayload {
     const decoded = this.validateAccessToken(token);
     return { id: decoded.userId, role: decoded.role, email: decoded.username };
   }
