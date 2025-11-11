@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import container from "../container";
-import type { BasicTokenService  } from "../service/tokenService";
+import type { BasicTokenService } from "../service/tokenService";
 export function AuthGuard(req: Request, res: Response, next: NextFunction) {
   try {
     const authHeader = req.headers.authorization;
