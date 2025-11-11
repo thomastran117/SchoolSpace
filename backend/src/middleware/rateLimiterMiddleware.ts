@@ -36,7 +36,7 @@ function createRateLimiter({
   weight = () => 1,
   strictAuthHandling = false,
 }: RateLimiterOptions) {
-  const cache = container.basicTokenService as CacheService;
+  const cache = container.cacheService as CacheService;
 
   return async (req: Request, res: Response, next: NextFunction) => {
     const userId = (req.user as any)?.id;

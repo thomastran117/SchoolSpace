@@ -49,7 +49,6 @@ export async function initializeApp(): Promise<Application> {
 
   app.use(securityMiddlewareBundle());
 
-  /*
   app.use(generalRateLimiter);
   app.use(
     [
@@ -64,7 +63,7 @@ export async function initializeApp(): Promise<Application> {
     authRateLimiter,
   );
   app.use(["/api/auth/refresh", "/api/files"], softRateLimiter);
-*/
+
   app.use(requestLogger);
 
   app.get("/", (_req: Request, res: Response) => {
