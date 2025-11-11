@@ -1,5 +1,6 @@
 import type { Job, WorkerOptions } from "bullmq";
 import { Worker } from "bullmq";
+import { WebService } from "../service/webService";
 import { PaymentService } from "../service/paymentService";
 import { connectionWorker } from "../resource/redis";
 import logger from "../utility/logger";
@@ -9,7 +10,8 @@ interface PaymentJobData {
   paypalOrderId: string;
 }
 
-const paymentService = new PaymentService();
+const webService = new WebService();
+const paymentService = new PaymentService(webService);
 
 const workerOptions: WorkerOptions = {
   connection: connectionWorker,

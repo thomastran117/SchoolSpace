@@ -15,20 +15,11 @@ import env from "../config/envConfigs";
 import logger from "../utility/logger";
 import { httpError } from "../utility/httpUtility";
 
-import { verifyGoogleCaptcha } from "./webService";
-
+import type { WebService } from "./webService";
 import type { TokenService } from "./tokenService";
 import type { EmailService } from "./emailService";
 import type { OAuthService } from "./oauthService";
-
-interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  role: string;
-  id: number;
-  username?: string | null;
-  avatar?: string | null;
-}
+import type { AuthResponse } from "../models/auth";
 
 const { frontend_client: FRONTEND_CLIENT } = env;
 
@@ -36,15 +27,18 @@ class AuthService {
   private readonly emailService: EmailService;
   private readonly tokenService: TokenService;
   private readonly oauthService: OAuthService;
+  private readonly webService: WebService;
 
   constructor(
     emailService: EmailService,
     tokenService: TokenService,
     oauthService: OAuthService,
+    webService: WebService,
   ) {
     this.emailService = emailService;
     this.tokenService = tokenService;
     this.oauthService = oauthService;
+    this.webService = webService;
   }
 
   public async loginUser(
@@ -54,7 +48,7 @@ class AuthService {
     captcha: string,
   ): Promise<AuthResponse> {
     if (env.isCaptchaEnabled()) {
-      const result = await verifyGoogleCaptcha(captcha ?? "");
+      const result = this.webService.verifyGoogleCaptcha(captcha ?? "");
       if (!result) httpError(401, "Invalid captcha");
     } else {
       logger.warn("Google Captcha is not available");
@@ -94,7 +88,7 @@ class AuthService {
     captcha: string,
   ): Promise<boolean> {
     if (env.isCaptchaEnabled()) {
-      const result = await verifyGoogleCaptcha(captcha ?? "");
+      const result = await this.webService.verifyGoogleCaptcha(captcha ?? "");
       if (!result) httpError(401, "Invalid captcha");
     } else {
       logger.warn("Google Captcha is not available");

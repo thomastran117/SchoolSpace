@@ -13,6 +13,7 @@ import { EmailService } from "../service/emailService";
 import { FileService } from "../service/fileService";
 import { OAuthService } from "../service/oauthService";
 import { PaymentService } from "../service/paymentService";
+import { WebService } from "../service/webService";
 
 import logger from "../utility/logger";
 
@@ -45,7 +46,13 @@ class Container {
       "scoped",
     );
 
-    this.register("PaymentService", () => new PaymentService(), "scoped");
+    this.register("WebService", () => new WebService(), "scoped");
+
+    this.register(
+      "PaymentService",
+      (scope) => new PaymentService(scope.resolve("WebService")),
+      "scoped",
+    );
     this.register("OAuthService", () => new OAuthService(), "scoped");
 
     this.register(
@@ -55,6 +62,7 @@ class Container {
           scope.resolve("EmailService"),
           scope.resolve("TokenService"),
           scope.resolve("OAuthService"),
+          scope.resolve("WebService"),
         ),
       "scoped",
     );
