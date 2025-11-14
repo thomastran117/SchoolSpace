@@ -3,6 +3,7 @@ import { PaymentController } from "../controller/paymentController";
 import { FileController } from "../controller/fileController";
 import { UserController } from "../controller/userController";
 import { CatalogueController } from "../controller/catalogueController";
+import { CourseController } from "../controller/courseController";
 import type { Registration } from "./container.types";
 
 export function registerControllerModules(): Map<string, Registration<any>> {
@@ -31,6 +32,18 @@ export function registerControllerModules(): Map<string, Registration<any>> {
   controllers.set("CatalogueController", {
     factory: (scope) =>
       new CatalogueController(scope.resolve("CatalogueService")),
+    lifetime: "transient",
+  });
+
+  controllers.set("CatalogueController", {
+    factory: (scope) =>
+      new CatalogueController(scope.resolve("CatalogueService")),
+    lifetime: "transient",
+  });
+
+  controllers.set("CourseController", {
+    factory: (scope) =>
+      new CourseController(scope.resolve("CourseService")),
     lifetime: "transient",
   });
 
