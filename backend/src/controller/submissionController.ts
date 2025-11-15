@@ -1,11 +1,11 @@
 import type { SubmissionService } from "../service/submissionService";
 
-class SubmissionController{
-    private readonly submissionService: SubmissionService;
+class SubmissionController {
+  private readonly submissionService: SubmissionService;
 
-    constructor(submissionService: SubmissionService){
-        this.submissionService = submissionService;
-    }
+  constructor(submissionService: SubmissionService) {
+    this.submissionService = submissionService;
+  }
 }
 
-export { SubmissionController }
+export { SubmissionController };

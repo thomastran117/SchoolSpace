@@ -1,43 +1,43 @@
 import type { CacheService } from "./cacheService";
 
-class GradeService{
-    private readonly cacheService: CacheService;
+class GradeService {
+  private readonly cacheService: CacheService;
 
-    constructor(cacheService: CacheService){
-        this.cacheService = cacheService;
-    }
+  constructor(cacheService: CacheService) {
+    this.cacheService = cacheService;
+  }
 
-    public async createGrade(){
-        return;
-    }
+  public async createGrade() {
+    return;
+  }
 
-    public async updateGrade(){
-        return;
-    }
+  public async updateGrade() {
+    return;
+  }
 
-    public async deleteGrade(){
-        return;
-    }
+  public async deleteGrade() {
+    return;
+  }
 
-    public async getGrade(){
-        return;
-    }
+  public async getGrade() {
+    return;
+  }
 
-    public async getAllGrades(){
-        return;
-    }
+  public async getAllGrades() {
+    return;
+  }
 
-    public async getAllGradesForCourse(){
-        return;
-    }
+  public async getAllGradesForCourse() {
+    return;
+  }
 
-    public async getAllGradeForUser(){
-        return;
-    }
+  public async getAllGradeForUser() {
+    return;
+  }
 
-    public async getTranscript(){
-        return;
-    }
+  public async getTranscript() {
+    return;
+  }
 }
 
-export { GradeService }
+export { GradeService };

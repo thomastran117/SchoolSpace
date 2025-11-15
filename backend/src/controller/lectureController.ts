@@ -1,11 +1,11 @@
 import type { LectureService } from "../service/lectureService";
 
-class LectureController{
-    private readonly lectureService: LectureService;
+class LectureController {
+  private readonly lectureService: LectureService;
 
-    constructor(lectureService: LectureService){
-        this.lectureService = lectureService;
-    }
+  constructor(lectureService: LectureService) {
+    this.lectureService = lectureService;
+  }
 }
 
-export { LectureController }
+export { LectureController };

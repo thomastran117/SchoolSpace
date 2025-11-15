@@ -1,11 +1,11 @@
 import type { AppointmentService } from "../service/appointmentService";
 
-class AppointmentController{
-    private readonly appointmentService: AppointmentService;
+class AppointmentController {
+  private readonly appointmentService: AppointmentService;
 
-    constructor(appointmentService: AppointmentService){
-        this.appointmentService = appointmentService;
-    }
+  constructor(appointmentService: AppointmentService) {
+    this.appointmentService = appointmentService;
+  }
 }
 
-export { AppointmentController }
+export { AppointmentController };

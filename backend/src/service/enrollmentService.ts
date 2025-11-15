@@ -1,14 +1,13 @@
-class EnrollmentService{
-    constructor(){
-    }
+class EnrollmentService {
+  constructor() {}
 
-    public async enrollCourse(){
-        return;
-    }
+  public async enrollCourse() {
+    return;
+  }
 
-    public async unenrollCourse(){
-        return;
-    }
+  public async unenrollCourse() {
+    return;
+  }
 }
 
-export { EnrollmentService }
+export { EnrollmentService };

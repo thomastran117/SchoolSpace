@@ -1,11 +1,11 @@
 import type { BookingService } from "../service/bookingService";
 
-class BookingController{
-    private readonly bookingService: BookingService;
+class BookingController {
+  private readonly bookingService: BookingService;
 
-    constructor(bookingService: BookingService){
-        this.bookingService = bookingService;
-    }
+  constructor(bookingService: BookingService) {
+    this.bookingService = bookingService;
+  }
 }
 
-export { BookingController }
+export { BookingController };

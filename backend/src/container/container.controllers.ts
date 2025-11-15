@@ -49,8 +49,7 @@ export function registerControllerModules(): Map<string, Registration<any>> {
   });
 
   controllers.set("CourseController", {
-    factory: (scope) =>
-      new CourseController(scope.resolve("CourseService")),
+    factory: (scope) => new CourseController(scope.resolve("CourseService")),
     lifetime: "transient",
   });
 
@@ -72,27 +71,24 @@ export function registerControllerModules(): Map<string, Registration<any>> {
     lifetime: "transient",
   });
 
-    controllers.set("EnrollmentController", {
+  controllers.set("EnrollmentController", {
     factory: (scope) =>
       new EnrollmentController(scope.resolve("EnrollmentService")),
     lifetime: "transient",
   });
 
   controllers.set("GradeController", {
-    factory: (scope) =>
-      new GradeController(scope.resolve("GradeService")),
+    factory: (scope) => new GradeController(scope.resolve("GradeService")),
     lifetime: "transient",
   });
 
   controllers.set("LectureController", {
-    factory: (scope) =>
-      new LectureController(scope.resolve("LectureService")),
+    factory: (scope) => new LectureController(scope.resolve("LectureService")),
     lifetime: "transient",
   });
 
   controllers.set("ReviewController", {
-    factory: (scope) =>
-      new ReviewController(scope.resolve("ReviewService")),
+    factory: (scope) => new ReviewController(scope.resolve("ReviewService")),
     lifetime: "transient",
   });
 
@@ -103,8 +99,7 @@ export function registerControllerModules(): Map<string, Registration<any>> {
   });
 
   controllers.set("BookingController", {
-    factory: (scope) =>
-      new BookingController(scope.resolve("BookingService")),
+    factory: (scope) => new BookingController(scope.resolve("BookingService")),
     lifetime: "transient",
   });
 
@@ -115,14 +110,12 @@ export function registerControllerModules(): Map<string, Registration<any>> {
   });
 
   controllers.set("TutorController", {
-    factory: (scope) =>
-      new TutorController(scope.resolve("TutorService")),
+    factory: (scope) => new TutorController(scope.resolve("TutorService")),
     lifetime: "transient",
   });
 
   controllers.set("OfficeController", {
-    factory: (scope) =>
-      new OfficeController(scope.resolve("OfficeService")),
+    factory: (scope) => new OfficeController(scope.resolve("OfficeService")),
     lifetime: "transient",
   });
   return controllers;

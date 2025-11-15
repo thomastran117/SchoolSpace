@@ -1,11 +1,11 @@
 import type { AnnoucementService } from "../service/annoucementService";
 
-class AnnouncementController{
-    private readonly annoucementService: AnnoucementService;
+class AnnouncementController {
+  private readonly annoucementService: AnnoucementService;
 
-    constructor(annoucementService: AnnoucementService){
-        this.annoucementService = annoucementService;
-    }
+  constructor(annoucementService: AnnoucementService) {
+    this.annoucementService = annoucementService;
+  }
 }
 
-export { AnnouncementController }
+export { AnnouncementController };
