@@ -12,6 +12,10 @@ import { GradeController } from "../controller/gradeController";
 import { LectureController } from "../controller/lectureController";
 import { ReviewController } from "../controller/reviewController";
 import { SubmissionController } from "../controller/submissionController";
+import { AppointmentController } from "../controller/appointmentController";
+import { BookingController } from "../controller/bookingController";
+import { OfficeController } from "../controller/officeController";
+import { TutorController } from "../controller/tutorController";
 
 import type { Registration } from "./container.types";
 
@@ -98,6 +102,28 @@ export function registerControllerModules(): Map<string, Registration<any>> {
     lifetime: "transient",
   });
 
+  controllers.set("BookingController", {
+    factory: (scope) =>
+      new BookingController(scope.resolve("BookingService")),
+    lifetime: "transient",
+  });
 
+  controllers.set("AppointmentController", {
+    factory: (scope) =>
+      new AppointmentController(scope.resolve("AppointmentService")),
+    lifetime: "transient",
+  });
+
+  controllers.set("TutorController", {
+    factory: (scope) =>
+      new TutorController(scope.resolve("TutorService")),
+    lifetime: "transient",
+  });
+
+  controllers.set("OfficeController", {
+    factory: (scope) =>
+      new OfficeController(scope.resolve("OfficeService")),
+    lifetime: "transient",
+  });
   return controllers;
 }

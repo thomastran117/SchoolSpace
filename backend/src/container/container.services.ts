@@ -17,6 +17,10 @@ import { GradeService } from "../service/gradeService";
 import { LectureService } from "../service/lectureService";
 import { ReviewService } from "../service/reviewService";
 import { SubmissionService } from "../service/submissionService";
+import { AppointmentService } from "../service/appointmentService";
+import { BookingService } from "../service/bookingService";
+import { TutorService } from "../service/tutorService";
+import { OfficeService } from "../service/officeService";
 
 import type { Registration } from "./container.types";
 
@@ -92,6 +96,26 @@ export function registerServiceModules(): Map<string, Registration<any>> {
 
   services.set("ReviewService", {
     factory: (scope) => new ReviewService(scope.resolve("CacheService")),
+    lifetime: "scoped",
+  });
+
+  services.set("AppointmentService", {
+    factory: (scope) => new AppointmentService(scope.resolve("CacheService")),
+    lifetime: "scoped",
+  });
+
+  services.set("TutorService", {
+    factory: (scope) => new TutorService(scope.resolve("CacheService")),
+    lifetime: "scoped",
+  });
+
+  services.set("OfficeService", {
+    factory: (scope) => new OfficeService(scope.resolve("CacheService")),
+    lifetime: "scoped",
+  });
+
+  services.set("BookingService", {
+    factory: (scope) => new BookingService(scope.resolve("CacheService")),
     lifetime: "scoped",
   });
 
