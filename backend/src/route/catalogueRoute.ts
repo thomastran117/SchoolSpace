@@ -13,13 +13,10 @@ import {
   UpdateCatalogueSchema,
   QueryCatalogueSchema,
 } from "../dto/catalogueSchema";
-import { IdParamSchema } from "../dto/idSchema";
+import { MongoIdParamSchema } from "../dto/idSchema";
 
 const router: Router = express.Router();
 
-/* -------------------------------------------------------------
- * Scoped controller helper (mirrors Auth/User routes)
- * ----------------------------------------------------------- */
 const useScopedController =
   (
     handler: (
@@ -44,10 +41,6 @@ const useScopedController =
     }
   };
 
-/* -------------------------------------------------------------
- * Routes
- * ----------------------------------------------------------- */
-
 /**
  * @route POST /catalogue
  * @desc Create a new course template (Admin only)
@@ -68,7 +61,7 @@ router.post(
 router.put(
   "/:id",
   AuthGuard,
-  validate(IdParamSchema, "params"),
+  validate(MongoIdParamSchema, "params"),
   validate(UpdateCatalogueSchema, "body"),
   useScopedController((controller, req, res, next) =>
     controller.updateCourseTemplate(req, res, next),
@@ -82,7 +75,7 @@ router.put(
 router.delete(
   "/:id",
   AuthGuard,
-  validate(IdParamSchema, "params"),
+  validate(MongoIdParamSchema, "params"),
   useScopedController((controller, req, res, next) =>
     controller.deleteCourseTemplate(req, res, next),
   ),
@@ -94,7 +87,7 @@ router.delete(
  */
 router.get(
   "/:id",
-  validate(IdParamSchema, "params"),
+  validate(MongoIdParamSchema, "params"),
   useScopedController((controller, req, res, next) =>
     controller.getCourseTemplate(req, res, next),
   ),

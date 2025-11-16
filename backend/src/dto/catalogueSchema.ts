@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Term } from "../resource/schema_mongo";
+import { Term } from "../templates/mongoTemplate";
 
 const CreateCatalogueSchema = z.object({
   course_name: z.string().min(3).max(100),
@@ -17,38 +17,19 @@ const QueryCatalogueSchema = z.object({
     .union([z.boolean(), z.string().transform((v) => v === "true")])
     .optional(),
   search: z.string().min(1).max(100).optional(),
-});
-
-const CatalogueResponseSchema = z.object({
-  id: z.number(),
-  course_name: z.string(),
-  description: z.string(),
-  available: z.boolean(),
-  course_code: z.string(),
-  term: z.nativeEnum(Term),
-});
-
-const CatalogueListResponseSchema = z.object({
-  message: z.string(),
-  count: z.number(),
-  data: z.array(CatalogueResponseSchema),
+  page: z.string().optional(),
+  limit: z.string().optional(),
 });
 
 type CreateCatalogueDto = z.infer<typeof CreateCatalogueSchema>;
 type UpdateCatalogueDto = z.infer<typeof UpdateCatalogueSchema>;
 type QueryCatalogueDto = z.infer<typeof QueryCatalogueSchema>;
-type CatalogueResponseDto = z.infer<typeof CatalogueResponseSchema>;
-type CatalogueListResponseDto = z.infer<typeof CatalogueListResponseSchema>;
 
 export {
   CreateCatalogueSchema,
   UpdateCatalogueSchema,
   QueryCatalogueSchema,
-  CatalogueListResponseSchema,
-  CatalogueResponseSchema,
   CreateCatalogueDto,
   UpdateCatalogueDto,
   QueryCatalogueDto,
-  CatalogueResponseDto,
-  CatalogueListResponseDto,
 };

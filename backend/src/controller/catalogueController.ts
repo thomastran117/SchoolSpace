@@ -8,12 +8,7 @@ import type {
   UpdateCatalogueDto,
   QueryCatalogueDto,
 } from "../dto/catalogueSchema";
-import type {
-  CatalogueResponseDto,
-  CatalogueListResponseDto,
-} from "../dto/catalogueSchema";
-import { CatalogueResponseSchema } from "../dto/catalogueSchema";
-import type { Term } from "../resource/schema_mongo";
+import logger from "../utility/logger";
 
 class CatalogueController {
   private readonly catalogueService: CatalogueService;
@@ -30,7 +25,7 @@ class CatalogueController {
 
   public async createCourseTemplate(
     req: TypedRequest<CreateCatalogueDto>,
-    res: TypedResponse<{ message: string; data: CatalogueResponseDto }>,
+    res: TypedResponse<{ message: string; data: any }>,
     next: NextFunction,
   ) {
     try {
@@ -41,18 +36,17 @@ class CatalogueController {
       const { course_name, description, course_code, term, available } =
         req.body;
 
-      const result = await this.catalogueService.createCourse(
+      const result = await this.catalogueService.createCourseTemplate(
         course_name,
         description,
         course_code,
         term,
         available,
       );
-      const safeData = CatalogueResponseSchema.parse(result);
 
       return res.status(201).json({
         message: "Course template created successfully.",
-        data: safeData,
+        data: result,
       });
     } catch (err) {
       next(err);
@@ -61,7 +55,7 @@ class CatalogueController {
 
   public async updateCourseTemplate(
     req: TypedRequest<UpdateCatalogueDto>,
-    res: TypedResponse<{ message: string; data: CatalogueResponseDto }>,
+    res: TypedResponse<{ message: string; data: any }>,
     next: NextFunction,
   ) {
     try {
@@ -69,12 +63,12 @@ class CatalogueController {
       if (userRole !== "admin")
         throw httpError(403, "You lack permissions to perform this action.");
 
-      const { id: courseId } = req.params as unknown as { id: number };
+      const { id: courseId } = req.params as unknown as { id: string };
 
       const { course_name, description, course_code, term, available } =
         req.body;
 
-      const result = await this.catalogueService.updateCourse(
+      const result = await this.catalogueService.updateCourseTemplate(
         courseId,
         course_name,
         description,
@@ -83,11 +77,9 @@ class CatalogueController {
         available,
       );
 
-      const safeData = CatalogueResponseSchema.parse(result);
-
-      return res.status(201).json({
-        message: "Course template created successfully.",
-        data: safeData,
+      return res.status(200).json({
+        message: "Course template updated successfully.",
+        data: result,
       });
     } catch (err) {
       next(err);
@@ -104,9 +96,9 @@ class CatalogueController {
       if (userRole !== "admin")
         throw httpError(403, "You lack permissions to perform this action.");
 
-      const { id: courseId } = req.params as unknown as { id: number };
+      const { id: courseId } = req.params as unknown as { id: string };
 
-      await this.catalogueService.deleteCourse(courseId);
+      await this.catalogueService.deleteCourseTemplate(courseId);
 
       return res.status(200).json({
         message: "Course template deleted successfully.",
@@ -118,18 +110,17 @@ class CatalogueController {
 
   public async getCourseTemplate(
     req: Request,
-    res: TypedResponse<{ message: string; data: CatalogueResponseDto }>,
+    res: TypedResponse<{ message: string; data: any }>,
     next: NextFunction,
   ) {
     try {
-      const { id: courseId } = req.params as unknown as { id: number };
+      const { id: courseId } = req.params as unknown as { id: string };
+      const course =
+        await this.catalogueService.getCourseTemplateById(courseId);
 
-      const course = await this.catalogueService.getCourseById(courseId);
-      const safeData = CatalogueResponseSchema.parse(course);
-
-      return res.status(201).json({
+      return res.status(200).json({
         message: "Course template fetched successfully.",
-        data: safeData,
+        data: course,
       });
     } catch (err) {
       next(err);
@@ -138,25 +129,19 @@ class CatalogueController {
 
   public async getCourseTemplates(
     req: TypedRequest<QueryCatalogueDto>,
-    res: TypedResponse<{
-      message: string;
-      total: number;
-      totalPages: number;
-      currentPage: number;
-      count: number;
-      data: CatalogueListResponseDto;
-    }>,
+    res: Response,
     next: NextFunction,
   ) {
     try {
-      const { term, available, search, page, limit } = req.query as any;
+      const { term, available, search, page, limit } = req.query;
+
       const pageNum = page ? Number(page) : 1;
       const limitNum = limit ? Number(limit) : 15;
 
-      const result = await this.catalogueService.getCourses(
-        term,
-        available,
-        search,
+      const result = await this.catalogueService.getCourseTemplates(
+        term as any,
+        available as any,
+        search as any,
         pageNum,
         limitNum,
       );

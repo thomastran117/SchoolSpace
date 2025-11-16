@@ -5,14 +5,13 @@ import mongoose, {
   type HydratedDocument,
 } from "mongoose";
 
-export enum Term {
+enum Term {
   SUMMER = "SUMMER",
   WINTER = "WINTER",
   FALL = "FALL",
 }
 
-export interface ICatalogue extends Document {
-  id: number;
+interface ICatalogue extends Document {
   course_name: string;
   description: string;
   available: boolean;
@@ -24,12 +23,6 @@ export interface ICatalogue extends Document {
 
 const CatalogueSchema = new Schema<ICatalogue>(
   {
-    id: {
-      type: Number,
-      unique: true,
-      index: true,
-    },
-
     course_name: {
       type: String,
       required: true,
@@ -64,32 +57,17 @@ const CatalogueSchema = new Schema<ICatalogue>(
   { timestamps: true },
 );
 
-CatalogueSchema.pre("validate", async function (next) {
-  const doc = this as HydratedDocument<ICatalogue>;
-
-  if (!doc.isNew || (doc.id !== undefined && doc.id !== null)) {
-    return next();
-  }
-
-  try {
-    const Model = doc.constructor as Model<ICatalogue>;
-    const last = await Model.findOne({}, { id: 1 }).sort({ id: -1 }).lean();
-
-    doc.id = last ? last.id + 1 : 1;
-    next();
-  } catch (err) {
-    next(err as any);
-  }
-});
-
 CatalogueSchema.set("toJSON", {
   virtuals: true,
   versionKey: false,
   transform: (_, ret) => {
+    ret.id = ret._id;
     delete ret._id;
   },
 });
 
-export const CatalogueModel: Model<ICatalogue> =
+const CatalogueModel: Model<ICatalogue> =
   mongoose.models.Catalogue ||
   mongoose.model<ICatalogue>("Catalogue", CatalogueSchema);
+
+export { Term, ICatalogue, CatalogueModel };
