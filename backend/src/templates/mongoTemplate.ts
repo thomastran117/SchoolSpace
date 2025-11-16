@@ -70,4 +70,5 @@ const CatalogueModel: Model<ICatalogue> =
   mongoose.models.Catalogue ||
   mongoose.model<ICatalogue>("Catalogue", CatalogueSchema);
 
-export { Term, ICatalogue, CatalogueModel };
+export { Term, CatalogueModel };
+export type { ICatalogue };
