@@ -29,7 +29,10 @@ export {
   CreateCatalogueSchema,
   UpdateCatalogueSchema,
   QueryCatalogueSchema,
+};
+
+export type {
   CreateCatalogueDto,
   UpdateCatalogueDto,
   QueryCatalogueDto,
-};
+}

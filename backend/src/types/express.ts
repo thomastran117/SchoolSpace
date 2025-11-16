@@ -8,4 +8,4 @@ type TypedRequest<
 
 type TypedResponse<ResponseBody = unknown> = Response<ResponseBody>;
 
-export { TypedRequest, TypedResponse };
+export type { TypedRequest, TypedResponse };

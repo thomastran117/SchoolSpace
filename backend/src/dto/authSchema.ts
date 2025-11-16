@@ -38,9 +38,12 @@ export {
   SignupSchema,
   MicrosoftSchema,
   GoogleSchema,
+};
+
+export type {
   LoginDto,
   SignupDto,
   MicrosoftDto,
   GoogleDto,
   AuthResponseDto,
-};
+}

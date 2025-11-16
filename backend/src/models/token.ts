@@ -26,7 +26,7 @@ interface VerifyTokenPayload {
   iat: number;
 }
 
-export {
+export type {
   UserPayload,
   TokenPayloadBase,
   RefreshTokenPayload,

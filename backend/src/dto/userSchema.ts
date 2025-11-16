@@ -72,4 +72,5 @@ const UserSchema = z
 type RoleUpdateDto = z.infer<typeof RoleSchema>;
 type UserUpdateDto = z.infer<typeof UserSchema>;
 
-export { RoleSchema, UserSchema, RoleUpdateDto, UserUpdateDto };
+export { RoleSchema, UserSchema };
+export type { RoleUpdateDto, UserUpdateDto }

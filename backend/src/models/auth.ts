@@ -7,4 +7,4 @@ interface AuthResponse {
   avatar?: string | null;
 }
 
-export { AuthResponse };
+export type { AuthResponse };

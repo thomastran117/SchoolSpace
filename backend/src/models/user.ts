@@ -23,4 +23,4 @@ interface User {
   provider: Provider;
 }
 
-export { Provider, Role, User };
+export type { Provider, Role, User };
