@@ -1,30 +1,16 @@
-import mongoose from "mongoose";
 import { CatalogueModel } from "../templates/mongoTemplate";
 import { httpError } from "../utility/httpUtility";
 import type { ICatalogue, Term } from "../templates/mongoTemplate";
 import type { CacheService } from "./cacheService";
+import { BasicService } from "./basicService";
 
-class CatalogueService {
+class CatalogueService extends BasicService {
   private readonly cache: CacheService;
   private readonly ttl = 300;
 
   constructor(cacheService: CacheService) {
+    super();
     this.cache = cacheService;
-  }
-
-  private toSafe(doc: any) {
-    if (!doc) return doc;
-
-    const { _id, __v, ...rest } = doc;
-
-    return {
-      id: _id.toString(),
-      ...rest,
-    };
-  }
-
-  private toSafeArray(docs: any[]) {
-    return docs.map((d) => this.toSafe(d));
   }
 
   public async createCourseTemplate(
@@ -36,7 +22,7 @@ class CatalogueService {
   ): Promise<ICatalogue> {
     try {
       const existing = await CatalogueModel.findOne({ course_code }).lean();
-      if (existing) throw httpError(409, "Course already exists");
+      if (existing) httpError(409, "Course template already exists");
 
       const course = await CatalogueModel.create({
         course_name,
@@ -51,7 +37,7 @@ class CatalogueService {
 
       return this.toSafe(course.toObject());
     } catch (err) {
-      throw httpError(500, `Failed to create course: ${String(err)}`);
+      throw httpError(500, `Failed to create course template: ${String(err)}`);
     }
   }
 
@@ -115,22 +101,18 @@ class CatalogueService {
       await this.cache.set(cacheKey, response, this.ttl);
       return response;
     } catch (err) {
-      throw httpError(500, `Failed to fetch courses: ${String(err)}`);
+      httpError(500, `Failed to fetch course templates: ${String(err)}`);
     }
   }
 
   public async getCourseTemplateById(id: string): Promise<ICatalogue> {
-    if (!mongoose.isValidObjectId(id)) {
-      throw httpError(400, "Invalid course ID");
-    }
-
     const cacheKey = `catalogue:id:${id}`;
 
     const cached = await this.cache.get<ICatalogue>(cacheKey);
     if (cached) return cached;
 
     const course = await CatalogueModel.findById(id).lean();
-    if (!course) throw httpError(404, "Course not found");
+    if (!course) httpError(404, "Course not found");
 
     const safe = this.toSafe(course);
     await this.cache.set(cacheKey, safe, this.ttl);
@@ -146,10 +128,6 @@ class CatalogueService {
     term?: Term,
     available?: boolean,
   ): Promise<ICatalogue> {
-    if (!mongoose.isValidObjectId(id)) {
-      throw httpError(400, "Invalid course ID");
-    }
-
     try {
       const updates: Partial<ICatalogue> = {};
       if (course_name) updates.course_name = course_name;
@@ -164,7 +142,7 @@ class CatalogueService {
         lean: true,
       });
 
-      if (!course) throw httpError(404, "Course not found");
+      if (!course) httpError(404, "Course template not found");
 
       const safe = this.toSafe(course);
 
@@ -174,19 +152,15 @@ class CatalogueService {
 
       return safe;
     } catch (err) {
-      throw httpError(500, `Failed to update course: ${String(err)}`);
+      httpError(500, `Failed to update course template: ${String(err)}`);
     }
   }
 
   public async deleteCourseTemplate(id: string): Promise<boolean> {
-    if (!mongoose.isValidObjectId(id)) {
-      throw httpError(400, "Invalid course ID");
-    }
-
     try {
       const result = await CatalogueModel.findByIdAndDelete(id).lean();
 
-      if (!result) throw httpError(404, "Course not found");
+      if (!result) httpError(404, "Course template not found");
 
       await this.cache.delete(`catalogue:id:${id}`);
       await this.cache.deletePattern("catalogue:filter:*");
@@ -194,7 +168,7 @@ class CatalogueService {
 
       return true;
     } catch (err) {
-      throw httpError(500, `Failed to delete course: ${String(err)}`);
+      httpError(500, `Failed to delete course: ${String(err)}`);
     }
   }
 }

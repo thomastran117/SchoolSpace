@@ -54,11 +54,6 @@ export function registerServiceModules(): Map<string, Registration<any>> {
     lifetime: "scoped",
   });
 
-  services.set("EnrollmentService", {
-    factory: () => new EnrollmentService(),
-    lifetime: "scoped",
-  });
-
   services.set("TokenService", {
     factory: (scope) => new TokenService(scope.resolve("CacheService")),
     lifetime: "scoped",
@@ -149,8 +144,19 @@ export function registerServiceModules(): Map<string, Registration<any>> {
   services.set("CourseService", {
     factory: (scope) =>
       new CourseService(
+        scope.resolve("UserService"),
+        scope.resolve("CatalogueService"),
         scope.resolve("CacheService"),
         scope.resolve("FileService"),
+      ),
+    lifetime: "scoped",
+  });
+
+  services.set("EnrollmentService", {
+    factory: (scope) =>
+      new EnrollmentService(
+        scope.resolve("UserService"),
+        scope.resolve("CourseService"),
       ),
     lifetime: "scoped",
   });

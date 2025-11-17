@@ -49,7 +49,11 @@ class CacheService {
     }
   }
 
-  async increment(key: string, amount = 1, ttlSeconds?: number): Promise<number> {
+  async increment(
+    key: string,
+    amount = 1,
+    ttlSeconds?: number,
+  ): Promise<number> {
     try {
       const count = await redis.incrby(key, amount);
 
@@ -75,7 +79,11 @@ class CacheService {
     }
   }
 
-  async setIfNotExists<T>(key: string, value: T, ttlSeconds?: number): Promise<boolean> {
+  async setIfNotExists<T>(
+    key: string,
+    value: T,
+    ttlSeconds?: number,
+  ): Promise<boolean> {
     try {
       const serialized = JSON.stringify(value);
       const result = ttlSeconds
@@ -85,7 +93,9 @@ class CacheService {
       return result === "OK";
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-      logger.error(`[CacheService] setIfNotExists failed: ${err?.message ?? err}`);
+      logger.error(
+        `[CacheService] setIfNotExists failed: ${err?.message ?? err}`,
+      );
       httpError(500, "Internal server error");
     }
   }
@@ -116,7 +126,9 @@ class CacheService {
       if (keys.length) await redis.del(keys);
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-      logger.error(`[CacheService] deletePattern failed: ${err?.message ?? err}`);
+      logger.error(
+        `[CacheService] deletePattern failed: ${err?.message ?? err}`,
+      );
       httpError(500, "Internal server error");
     }
   }

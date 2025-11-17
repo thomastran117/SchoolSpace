@@ -13,6 +13,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "isolatedModules": true,
-    "skipLibCheck": true,   
+    "skipLibCheck": true
   }
 }

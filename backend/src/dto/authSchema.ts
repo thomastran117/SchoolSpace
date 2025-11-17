@@ -33,17 +33,6 @@ interface AuthResponseDto {
   username?: string;
 }
 
-export {
-  LoginSchema,
-  SignupSchema,
-  MicrosoftSchema,
-  GoogleSchema,
-};
+export { LoginSchema, SignupSchema, MicrosoftSchema, GoogleSchema };
 
-export type {
-  LoginDto,
-  SignupDto,
-  MicrosoftDto,
-  GoogleDto,
-  AuthResponseDto,
-}
+export type { LoginDto, SignupDto, MicrosoftDto, GoogleDto, AuthResponseDto };
