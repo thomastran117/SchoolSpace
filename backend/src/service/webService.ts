@@ -1,17 +1,23 @@
 /**
  * @file webService.ts
  * @description
- * Provides general-purpose HTTP utilities and third-party API methods
- * (e.g., Google reCAPTCHA, PayPal API interactions).
+ * Provides general-purpose HTTP utilities and third-party API calls.
+ * Includes consistent error logging and correct error propagation:
+ *
+ * - External service unreachable → 503
+ * - External service returns error → 503
+ * - Internal error → 500
  *
  * @module service
- * @version 2.0.0
+ * @version 2.0.1
  * @auth Thomas
  */
 
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
 import env from "../config/envConfigs";
+import logger from "../utility/logger";
+import { HttpError, httpError } from "../utility/httpUtility";
 
 const { google_captcha_secret: GOOGLE_CAPTCHA_SECRET } = env;
 
@@ -44,11 +50,19 @@ export interface PayPalOrder {
 
 class WebService {
   async post<T = any>(url: string, data?: any, config?: AxiosRequestConfig) {
-    return axios.post<T>(url, data, config);
+    try {
+      return await axios.post<T>(url, data, config);
+    } catch (err: any) {
+      this.handleAxiosError("POST", url, err);
+    }
   }
 
   async get<T = any>(url: string, config?: AxiosRequestConfig) {
-    return axios.get<T>(url, config);
+    try {
+      return await axios.get<T>(url, config);
+    } catch (err: any) {
+      this.handleAxiosError("GET", url, err);
+    }
   }
 
   async verifyGoogleCaptcha(token: string): Promise<boolean> {
@@ -64,9 +78,13 @@ class WebService {
           response: token,
         }),
       );
+
       return response.data.success === true;
-    } catch {
-      return false;
+    } catch (err: any) {
+      logger.error(
+        `[WebService] verifyGoogleCaptcha failed: ${err?.message ?? err}\n${err.stack || ""}`,
+      );
+      httpError(503, "Captcha verification unavailable");
     }
   }
 
@@ -75,15 +93,23 @@ class WebService {
     secret: string,
     apiUrl: string,
   ): Promise<string> {
-    const response = await axios.post<PayPalAuthResponse>(
-      `${apiUrl}/v1/oauth2/token`,
-      "grant_type=client_credentials",
-      {
-        auth: { username: clientId, password: secret },
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      },
-    );
-    return response.data.access_token;
+    try {
+      const resp = await axios.post<PayPalAuthResponse>(
+        `${apiUrl}/v1/oauth2/token`,
+        "grant_type=client_credentials",
+        {
+          auth: { username: clientId, password: secret },
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        },
+      );
+      return resp.data.access_token;
+    } catch (err: any) {
+      this.handleAxiosError(
+        "requestPayPalToken",
+        `${apiUrl}/v1/oauth2/token`,
+        err,
+      );
+    }
   }
 
   async createPayPalOrder(
@@ -94,44 +120,111 @@ class WebService {
     returnUrl: string,
     cancelUrl: string,
   ): Promise<PayPalOrder> {
-    const response = await axios.post<PayPalOrder>(
-      `${apiUrl}/v2/checkout/orders`,
-      {
-        intent: "CAPTURE",
-        purchase_units: [
-          { amount: { currency_code: currency, value: amount } },
-        ],
-        application_context: { return_url: returnUrl, cancel_url: cancelUrl },
-      },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    return response.data;
+    try {
+      const resp = await axios.post<PayPalOrder>(
+        `${apiUrl}/v2/checkout/orders`,
+        {
+          intent: "CAPTURE",
+          purchase_units: [
+            { amount: { currency_code: currency, value: amount } },
+          ],
+          application_context: { return_url: returnUrl, cancel_url: cancelUrl },
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      return resp.data;
+    } catch (err: any) {
+      this.handleAxiosError(
+        "createPayPalOrder",
+        `${apiUrl}/v2/checkout/orders`,
+        err,
+      );
+    }
   }
 
   async capturePayPalOrder(token: string, apiUrl: string, orderId: string) {
-    const response = await axios.post(
-      `${apiUrl}/v2/checkout/orders/${orderId}/capture`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    return response.data;
+    try {
+      const resp = await axios.post(
+        `${apiUrl}/v2/checkout/orders/${orderId}/capture`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      return resp.data;
+    } catch (err: any) {
+      this.handleAxiosError(
+        "capturePayPalOrder",
+        `${apiUrl}/v2/checkout/orders/${orderId}/capture`,
+        err,
+      );
+    }
   }
 
   async cancelPayPalOrder(token: string, apiUrl: string, orderId: string) {
-    const response = await axios.post(
-      `${apiUrl}/v2/checkout/orders/${orderId}/cancel`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    return response.data;
+    try {
+      const resp = await axios.post(
+        `${apiUrl}/v2/checkout/orders/${orderId}/cancel`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      return resp.data;
+    } catch (err: any) {
+      this.handleAxiosError(
+        "cancelPayPalOrder",
+        `${apiUrl}/v2/checkout/orders/${orderId}/cancel`,
+        err,
+      );
+    }
   }
 
   async getPayPalOrder(token: string, apiUrl: string, orderId: string) {
-    const response = await axios.get(
-      `${apiUrl}/v2/checkout/orders/${orderId}`,
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    return response.data;
+    try {
+      const resp = await axios.get(`${apiUrl}/v2/checkout/orders/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return resp.data;
+    } catch (err: any) {
+      this.handleAxiosError(
+        "getPayPalOrder",
+        `${apiUrl}/v2/checkout/orders/${orderId}`,
+        err,
+      );
+    }
+  }
+
+  private handleAxiosError(method: string, url: string, err: any): never {
+    const prefix = `[WebService] ${method} failed`;
+
+    if (err instanceof HttpError) throw err;
+
+    const isAxios = !!err.isAxiosError;
+    const message = err?.message ?? String(err);
+    const stack = err.stack || "";
+
+    if (
+      err.code === "ECONNREFUSED" ||
+      err.code === "ENOTFOUND" ||
+      err.code === "ETIMEDOUT"
+    ) {
+      logger.error(`${prefix}: ${message}\n${stack}`);
+      httpError(503, "External service unavailable");
+    }
+
+    if (isAxios) {
+      const status = err.response?.status;
+
+      if (status && status >= 500) {
+        logger.error(`${prefix}: ${message}\n${stack}`);
+        httpError(503, "External service unavailable");
+      }
+
+      if (status && status >= 400 && status < 500) {
+        logger.error(`${prefix}: ${message}\n${stack}`);
+        httpError(503, "External service unavailable");
+      }
+    }
+
+    logger.error(`${prefix}: ${message}\n${stack}`);
+    httpError(500, "Internal server error");
   }
 }
 
