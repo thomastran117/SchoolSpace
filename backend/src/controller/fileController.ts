@@ -1,7 +1,8 @@
 import mime from "mime-types";
 import type { FileService } from "../service/fileService.js";
 import type { Request, Response, NextFunction } from "express";
-import { httpError } from "../utility/httpUtility";
+import { httpError, HttpError } from "../utility/httpUtility";
+import logger from "../utility/logger.js";
 
 class FileController {
   private readonly fileService: FileService;
@@ -26,8 +27,16 @@ class FileController {
       res
         .status(201)
         .json({ message: "File uploaded successfully", ...result });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[FileController] handleUpload failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -38,8 +47,16 @@ class FileController {
       const contentType = mime.lookup(fileName) || "application/octet-stream";
       res.setHeader("Content-Type", contentType);
       res.sendFile(filePath);
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[FileController] handleFetch failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
   public async handleDelete(req: Request, res: Response, next: NextFunction) {
@@ -47,8 +64,16 @@ class FileController {
       const { type, fileName } = req.params;
       await this.fileService.deleteFile(type, fileName);
       res.status(200).json({ message: "File deleted successfully" });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[FileController] handleDelete failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 }
