@@ -16,16 +16,17 @@ import jwt from "jsonwebtoken";
 import type { TokenPayload } from "google-auth-library";
 import { OAuth2Client } from "google-auth-library";
 import env from "../config/envConfigs";
-import { httpError } from "../utility/httpUtility";
+import { httpError, HttpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 
-export interface GoogleUserInfo {
+interface GoogleUserInfo {
   email?: string;
   name?: string;
   picture?: string;
   sub?: string;
 }
 
-export class OAuthService {
+class OAuthService {
   private readonly googleClient?: OAuth2Client;
   private readonly GOOGLE_CLIENT_ID?: string | null;
   private readonly MS_CLIENT_ID?: string | null;
@@ -43,17 +44,27 @@ export class OAuthService {
    * Create a JWKS client for a given Microsoft issuer (tenant).
    */
   private createJwksClient(issuer: string): JwksClient {
-    if (!issuer) throw new Error("Missing issuer");
-    const tenantBase = issuer.replace(/\/v2\.0\/?$/, "");
-    const jwksUri = `${tenantBase}/discovery/v2.0/keys`;
+    try {
+      if (!issuer) httpError(400, "Missing issuer");
+      const tenantBase = issuer.replace(/\/v2\.0\/?$/, "");
+      const jwksUri = `${tenantBase}/discovery/v2.0/keys`;
 
-    return jwksClient({
-      jwksUri,
-      cache: true,
-      cacheMaxEntries: 10,
-      cacheMaxAge: 10 * 60 * 1000, // 10 minutes
-      timeout: 8000,
-    });
+      return jwksClient({
+        jwksUri,
+        cache: true,
+        cacheMaxEntries: 10,
+        cacheMaxAge: 10 * 60 * 1000,
+        timeout: 8000,
+      });
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[OAuthService] createJwksClient failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
   }
 
   /**
@@ -63,24 +74,34 @@ export class OAuthService {
     client: JwksClient,
     header: JwtHeader,
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      if (!header.kid) return reject(new Error("Missing KID in header"));
-      client.getSigningKey(header.kid, (err, key) => {
-        if (err) return reject(err);
-        if (!key || typeof (key as any).getPublicKey !== "function") {
-          return reject(new Error("Invalid signing key"));
-        }
-        try {
-          const pubKey = (key as any).getPublicKey();
-          if (!pubKey || typeof pubKey !== "string") {
-            return reject(new Error("Invalid public key"));
+    try {
+      return new Promise((resolve, reject) => {
+        if (!header.kid) return reject(new Error("Missing KID in header"));
+        client.getSigningKey(header.kid, (err, key) => {
+          if (err) return reject(err);
+          if (!key || typeof (key as any).getPublicKey !== "function") {
+            return reject(new Error("Invalid signing key"));
           }
-          resolve(pubKey);
-        } catch (e) {
-          reject(e);
-        }
+          try {
+            const pubKey = (key as any).getPublicKey();
+            if (!pubKey || typeof pubKey !== "string") {
+              return reject(new Error("Invalid public key"));
+            }
+            resolve(pubKey);
+          } catch (e) {
+            reject(e);
+          }
+        });
       });
-    });
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[OAuthService] getSigningKey failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
   }
 
   /**
@@ -88,66 +109,76 @@ export class OAuthService {
    * Checks if MS_CLIENT_ID is defined in .env before verifying.
    */
   async verifyMicrosoftToken(idToken: string): Promise<JwtPayload> {
-    if (!this.MS_CLIENT_ID) {
-      throw httpError(400, "Microsoft client ID not configured in environment");
-    }
+    try {
+      if (!this.MS_CLIENT_ID) {
+        httpError(503, "Microsoft client ID not configured in environment");
+      }
 
-    if (!idToken || typeof idToken !== "string") {
-      throw httpError(400, "Missing or invalid id_token");
-    }
+      if (!idToken || typeof idToken !== "string") {
+        httpError(400, "Missing or invalid id_token");
+      }
 
-    const decoded = jwt.decode(idToken, { complete: true });
-    if (
-      !decoded ||
-      typeof decoded !== "object" ||
-      !decoded.header ||
-      !decoded.payload
-    ) {
-      throw httpError(401, "Invalid Microsoft token: cannot decode");
-    }
+      const decoded = jwt.decode(idToken, { complete: true });
+      if (
+        !decoded ||
+        typeof decoded !== "object" ||
+        !decoded.header ||
+        !decoded.payload
+      ) {
+        httpError(401, "Invalid Microsoft token: cannot decode");
+      }
 
-    const { header, payload } = decoded as {
-      header: JwtHeader;
-      payload: JwtPayload;
-    };
-    const { iss, aud } = payload;
+      const { header, payload } = decoded as {
+        header: JwtHeader;
+        payload: JwtPayload;
+      };
+      const { iss, aud } = payload;
 
-    if (
-      !iss ||
-      !/^https:\/\/login\.microsoftonline\.com\/[^/]+\/v2\.0$/i.test(iss)
-    ) {
-      throw httpError(401, "Invalid issuer in token");
-    }
+      if (
+        !iss ||
+        !/^https:\/\/login\.microsoftonline\.com\/[^/]+\/v2\.0$/i.test(iss)
+      ) {
+        httpError(401, "Invalid issuer in token");
+      }
 
-    if (aud !== this.MS_CLIENT_ID) {
-      throw httpError(401, "Audience mismatch");
-    }
+      if (aud !== this.MS_CLIENT_ID) {
+        httpError(401, "Audience mismatch");
+      }
 
-    const client = this.createJwksClient(iss);
-    const publicKey = await this.getSigningKey(client, header);
+      const client = this.createJwksClient(iss);
+      const publicKey = await this.getSigningKey(client, header);
 
-    return new Promise<JwtPayload>((resolve, reject) => {
-      jwt.verify(
-        idToken,
-        publicKey,
-        {
-          algorithms: ["RS256"],
-          issuer: iss,
-          audience: this.MS_CLIENT_ID as string,
-          clockTolerance: 5,
-        },
-        (err, verified) => {
-          if (err) return reject(httpError(401, "Invalid Microsoft Token"));
+      return new Promise<JwtPayload>((resolve, reject) => {
+        jwt.verify(
+          idToken,
+          publicKey,
+          {
+            algorithms: ["RS256"],
+            issuer: iss,
+            audience: this.MS_CLIENT_ID as string,
+            clockTolerance: 5,
+          },
+          (err, verified) => {
+            if (err) return reject(httpError(401, "Invalid Microsoft Token"));
 
-          const payload = verified as JwtPayload | undefined;
-          if (!payload || (!payload.sub && !(payload as any).oid)) {
-            return reject(httpError(401, "Invalid Microsoft Token"));
-          }
+            const payload = verified as JwtPayload | undefined;
+            if (!payload || (!payload.sub && !(payload as any).oid)) {
+              return reject(httpError(401, "Invalid Microsoft Token"));
+            }
 
-          resolve(payload);
-        },
+            resolve(payload);
+          },
+        );
+      });
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[OAuthService] verifyMicrosoftToken failed: ${err?.message ?? err}`,
       );
-    });
+      httpError(500, "Internal server error");
+    }
   }
 
   /**
@@ -155,33 +186,45 @@ export class OAuthService {
    * Checks if GOOGLE_CLIENT_ID is defined in .env before verifying.
    */
   async verifyGoogleToken(idToken: string): Promise<GoogleUserInfo> {
-    if (!this.GOOGLE_CLIENT_ID) {
-      throw httpError(400, "Google client ID not configured in environment");
+    try {
+      if (!this.GOOGLE_CLIENT_ID) {
+        httpError(503, "Google client ID not configured in environment");
+      }
+
+      if (!this.googleClient) {
+        httpError(503, "Google OAuth2 client not initialized");
+      }
+
+      if (!idToken || typeof idToken !== "string") {
+        httpError(400, "Missing or invalid Google ID token");
+      }
+
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: this.GOOGLE_CLIENT_ID,
+      });
+
+      const payload: TokenPayload | undefined = ticket.getPayload();
+      if (!payload || !payload.sub) {
+        httpError(401, "Invalid Google token payload");
+      }
+
+      return {
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+        sub: payload.sub,
+      };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[OAuthService] verifyGoogleToken failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
     }
-
-    if (!this.googleClient) {
-      throw httpError(500, "Google OAuth2 client not initialized");
-    }
-
-    if (!idToken || typeof idToken !== "string") {
-      throw httpError(400, "Missing or invalid Google ID token");
-    }
-
-    const ticket = await this.googleClient.verifyIdToken({
-      idToken,
-      audience: this.GOOGLE_CLIENT_ID,
-    });
-
-    const payload: TokenPayload | undefined = ticket.getPayload();
-    if (!payload || !payload.sub) {
-      throw httpError(401, "Invalid Google token payload");
-    }
-
-    return {
-      email: payload.email,
-      name: payload.name,
-      picture: payload.picture,
-      sub: payload.sub,
-    };
   }
 }
+
+export { OAuthService };
