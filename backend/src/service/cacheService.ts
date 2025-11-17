@@ -1,5 +1,6 @@
 import { redis } from "../resource/redis";
 import logger from "../utility/logger";
+import { HttpError, httpError } from "../utility/httpUtility";
 
 class CacheService {
   async set<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
@@ -10,8 +11,10 @@ class CacheService {
       } else {
         await redis.set(key, serialized);
       }
-    } catch (err) {
-      logger.error(`Redis SET error: ${String(err)}`);
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] set failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
@@ -19,34 +22,34 @@ class CacheService {
     try {
       const data = await redis.get(key);
       return data ? (JSON.parse(data) as T) : null;
-    } catch (err) {
-      logger.error(`Redis GET error: ${String(err)}`);
-      return null;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] get failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
   async delete(key: string): Promise<void> {
     try {
       await redis.del(key);
-    } catch (err) {
-      logger.error(`Redis DEL error: ${String(err)}`);
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] delete failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
   async exists(key: string): Promise<boolean> {
     try {
       return (await redis.exists(key)) === 1;
-    } catch (err) {
-      logger.error(`Redis EXISTS error: ${String(err)}`);
-      return false;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] exist failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
-  async increment(
-    key: string,
-    amount = 1,
-    ttlSeconds?: number,
-  ): Promise<number> {
+  async increment(key: string, amount = 1, ttlSeconds?: number): Promise<number> {
     try {
       const count = await redis.incrby(key, amount);
 
@@ -55,58 +58,108 @@ class CacheService {
       }
 
       return count;
-    } catch (err) {
-      logger.error(`Redis INCRBY error: ${String(err)}`);
-      return 0;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] increment failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
   async decrement(key: string, amount = 1): Promise<number> {
     try {
       return await redis.decrby(key, amount);
-    } catch (err) {
-      logger.error(`Redis DECRBY error: ${String(err)}`);
-      return 0;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] decrement failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
-  async setIfNotExists<T>(
-    key: string,
-    value: T,
-    ttlSeconds?: number,
-  ): Promise<boolean> {
+  async setIfNotExists<T>(key: string, value: T, ttlSeconds?: number): Promise<boolean> {
     try {
       const serialized = JSON.stringify(value);
       const result = ttlSeconds
         ? await redis.set(key, serialized, "EX", ttlSeconds, "NX")
         : await redis.set(key, serialized, "NX");
+
       return result === "OK";
-    } catch (err) {
-      logger.error(`Redis SETNX error: ${String(err)}`);
-      return false;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] setIfNotExists failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
   async ttl(key: string): Promise<number> {
     try {
       return await redis.ttl(key);
-    } catch (err) {
-      logger.error(`Redis TTL error: ${String(err)}`);
-      return -2;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] ttl failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
   async expire(key: string, ttlSeconds: number): Promise<void> {
     try {
       await redis.expire(key, ttlSeconds);
-    } catch (err) {
-      logger.error(`Redis EXPIRE error: ${String(err)}`);
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] expire failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
   async deletePattern(pattern: string): Promise<void> {
-    const keys = await redis.keys(pattern);
-    if (keys.length) await redis.del(keys);
+    try {
+      const keys = await redis.keys(pattern);
+      if (keys.length) await redis.del(keys);
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] deletePattern failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
+  }
+
+  async clearAll(): Promise<void> {
+    try {
+      await redis.flushall();
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] clearAll failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
+  }
+
+  async flushPrefix(prefix: string): Promise<void> {
+    try {
+      const keys = await redis.keys(`${prefix}*`);
+      if (keys.length) await redis.del(keys);
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] flushPrefix failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
+  }
+
+  async getKeys(pattern = "*"): Promise<string[]> {
+    try {
+      return await redis.keys(pattern);
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] getKeys failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
+  }
+
+  async size(): Promise<number> {
+    try {
+      return await redis.dbsize();
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(`[CacheService] size failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
   }
 }
 
