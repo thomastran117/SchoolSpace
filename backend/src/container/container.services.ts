@@ -24,153 +24,164 @@ import { OfficeService } from "../service/officeService";
 
 import type { Registration } from "./container.types";
 
-export function registerServiceModules(): Map<string, Registration<any>> {
-  const services = new Map<string, Registration<any>>();
+import logger from "../utility/logger";
 
-  services.set("CacheService", {
-    factory: () => new CacheService(),
-    lifetime: "singleton",
-  });
-  services.set("EmailService", {
-    factory: () => new EmailService(),
-    lifetime: "singleton",
-  });
-  services.set("FileService", {
-    factory: () => new FileService(),
-    lifetime: "singleton",
-  });
-  services.set("BasicTokenService", {
-    factory: () => new BasicTokenService(),
-    lifetime: "singleton",
-  });
+function registerServiceModules(): Map<string, Registration<any>> {
+  try {
+    const services = new Map<string, Registration<any>>();
 
-  services.set("WebService", {
-    factory: () => new WebService(),
-    lifetime: "scoped",
-  });
+    services.set("CacheService", {
+      factory: () => new CacheService(),
+      lifetime: "singleton",
+    });
+    services.set("EmailService", {
+      factory: () => new EmailService(),
+      lifetime: "singleton",
+    });
+    services.set("FileService", {
+      factory: () => new FileService(),
+      lifetime: "singleton",
+    });
+    services.set("BasicTokenService", {
+      factory: () => new BasicTokenService(),
+      lifetime: "singleton",
+    });
 
-  services.set("OAuthService", {
-    factory: () => new OAuthService(),
-    lifetime: "scoped",
-  });
+    services.set("WebService", {
+      factory: () => new WebService(),
+      lifetime: "scoped",
+    });
 
-  services.set("TokenService", {
-    factory: (scope) => new TokenService(scope.resolve("CacheService")),
-    lifetime: "scoped",
-  });
+    services.set("OAuthService", {
+      factory: () => new OAuthService(),
+      lifetime: "scoped",
+    });
 
-  services.set("PaymentService", {
-    factory: (scope) => new PaymentService(scope.resolve("WebService")),
-    lifetime: "scoped",
-  });
+    services.set("TokenService", {
+      factory: (scope) => new TokenService(scope.resolve("CacheService")),
+      lifetime: "scoped",
+    });
 
-  services.set("SubmissionService", {
-    factory: (scope) => new SubmissionService(scope.resolve("FileService")),
-    lifetime: "scoped",
-  });
+    services.set("PaymentService", {
+      factory: (scope) => new PaymentService(scope.resolve("WebService")),
+      lifetime: "scoped",
+    });
 
-  services.set("CatalogueService", {
-    factory: (scope) => new CatalogueService(scope.resolve("CacheService")),
-    lifetime: "scoped",
-  });
+    services.set("SubmissionService", {
+      factory: (scope) => new SubmissionService(scope.resolve("FileService")),
+      lifetime: "scoped",
+    });
 
-  services.set("AnnoucementService", {
-    factory: (scope) => new AnnoucementService(scope.resolve("CacheService")),
-    lifetime: "scoped",
-  });
+    services.set("CatalogueService", {
+      factory: (scope) => new CatalogueService(scope.resolve("CacheService")),
+      lifetime: "scoped",
+    });
 
-  services.set("DiscussionService", {
-    factory: (scope) => new DiscussionService(scope.resolve("CacheService")),
-    lifetime: "scoped",
-  });
+    services.set("AnnoucementService", {
+      factory: (scope) => new AnnoucementService(scope.resolve("CacheService")),
+      lifetime: "scoped",
+    });
 
-  services.set("GradeService", {
-    factory: (scope) => new GradeService(scope.resolve("CacheService")),
-    lifetime: "scoped",
-  });
+    services.set("DiscussionService", {
+      factory: (scope) => new DiscussionService(scope.resolve("CacheService")),
+      lifetime: "scoped",
+    });
 
-  services.set("ReviewService", {
-    factory: (scope) => new ReviewService(scope.resolve("CacheService")),
-    lifetime: "scoped",
-  });
+    services.set("GradeService", {
+      factory: (scope) => new GradeService(scope.resolve("CacheService")),
+      lifetime: "scoped",
+    });
 
-  services.set("AppointmentService", {
-    factory: (scope) => new AppointmentService(scope.resolve("CacheService")),
-    lifetime: "scoped",
-  });
+    services.set("ReviewService", {
+      factory: (scope) => new ReviewService(scope.resolve("CacheService")),
+      lifetime: "scoped",
+    });
 
-  services.set("TutorService", {
-    factory: (scope) => new TutorService(scope.resolve("CacheService")),
-    lifetime: "scoped",
-  });
+    services.set("AppointmentService", {
+      factory: (scope) => new AppointmentService(scope.resolve("CacheService")),
+      lifetime: "scoped",
+    });
 
-  services.set("OfficeService", {
-    factory: (scope) => new OfficeService(scope.resolve("CacheService")),
-    lifetime: "scoped",
-  });
+    services.set("TutorService", {
+      factory: (scope) => new TutorService(scope.resolve("CacheService")),
+      lifetime: "scoped",
+    });
 
-  services.set("BookingService", {
-    factory: (scope) => new BookingService(scope.resolve("CacheService")),
-    lifetime: "scoped",
-  });
+    services.set("OfficeService", {
+      factory: (scope) => new OfficeService(scope.resolve("CacheService")),
+      lifetime: "scoped",
+    });
 
-  services.set("UserService", {
-    factory: (scope) =>
-      new UserService(
-        scope.resolve("TokenService"),
-        scope.resolve("FileService"),
-      ),
-    lifetime: "scoped",
-  });
+    services.set("BookingService", {
+      factory: (scope) => new BookingService(scope.resolve("CacheService")),
+      lifetime: "scoped",
+    });
 
-  services.set("AssignmentService", {
-    factory: (scope) =>
-      new AssignmentService(
-        scope.resolve("CacheService"),
-        scope.resolve("FileService"),
-      ),
-    lifetime: "scoped",
-  });
+    services.set("UserService", {
+      factory: (scope) =>
+        new UserService(
+          scope.resolve("TokenService"),
+          scope.resolve("FileService"),
+        ),
+      lifetime: "scoped",
+    });
 
-  services.set("LectureService", {
-    factory: (scope) =>
-      new LectureService(
-        scope.resolve("CacheService"),
-        scope.resolve("FileService"),
-      ),
-    lifetime: "scoped",
-  });
+    services.set("AssignmentService", {
+      factory: (scope) =>
+        new AssignmentService(
+          scope.resolve("CacheService"),
+          scope.resolve("FileService"),
+        ),
+      lifetime: "scoped",
+    });
 
-  services.set("CourseService", {
-    factory: (scope) =>
-      new CourseService(
-        scope.resolve("UserService"),
-        scope.resolve("CatalogueService"),
-        scope.resolve("CacheService"),
-        scope.resolve("FileService"),
-      ),
-    lifetime: "scoped",
-  });
+    services.set("LectureService", {
+      factory: (scope) =>
+        new LectureService(
+          scope.resolve("CacheService"),
+          scope.resolve("FileService"),
+        ),
+      lifetime: "scoped",
+    });
 
-  services.set("EnrollmentService", {
-    factory: (scope) =>
-      new EnrollmentService(
-        scope.resolve("UserService"),
-        scope.resolve("CourseService"),
-      ),
-    lifetime: "scoped",
-  });
+    services.set("CourseService", {
+      factory: (scope) =>
+        new CourseService(
+          scope.resolve("UserService"),
+          scope.resolve("CatalogueService"),
+          scope.resolve("CacheService"),
+          scope.resolve("FileService"),
+        ),
+      lifetime: "scoped",
+    });
 
-  services.set("AuthService", {
-    factory: (scope) =>
-      new AuthService(
-        scope.resolve("EmailService"),
-        scope.resolve("TokenService"),
-        scope.resolve("OAuthService"),
-        scope.resolve("WebService"),
-      ),
-    lifetime: "scoped",
-  });
+    services.set("EnrollmentService", {
+      factory: (scope) =>
+        new EnrollmentService(
+          scope.resolve("UserService"),
+          scope.resolve("CourseService"),
+        ),
+      lifetime: "scoped",
+    });
 
-  return services;
+    services.set("AuthService", {
+      factory: (scope) =>
+        new AuthService(
+          scope.resolve("EmailService"),
+          scope.resolve("TokenService"),
+          scope.resolve("OAuthService"),
+          scope.resolve("WebService"),
+        ),
+      lifetime: "scoped",
+    });
+
+    return services;
+  } catch (err: any) {
+    logger.error(
+      `[Container] Services registration failed: ${err?.message ?? err}`,
+    );
+    process.exit(1);
+  }
 }
+
+export { registerServiceModules };

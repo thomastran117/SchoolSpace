@@ -3,7 +3,7 @@ import { initRedis } from "../resource/redis";
 import { initMongo } from "../resource/mongo";
 import logger from "../utility/logger";
 
-export class CoreInitializer {
+class CoreInitializer {
   private initialized = false;
 
   async initialize(): Promise<void> {
@@ -18,8 +18,12 @@ export class CoreInitializer {
       await initMongo();
       logger.info("Core infrastructure initialized successfully.");
     } catch (err: any) {
-      logger.error(`Infrastructure initialization failed: ${err.message}`);
+      logger.error(
+        `[Container] Core registration failed: ${err?.message ?? err}`,
+      );
       process.exit(1);
     }
   }
 }
+
+export { CoreInitializer };

@@ -2,7 +2,7 @@ import mime from "mime-types";
 import type { FileService } from "../service/fileService.js";
 import type { Request, Response, NextFunction } from "express";
 import { httpError, HttpError } from "../utility/httpUtility";
-import logger from "../utility/logger.js";
+import logger from "../utility/logger";
 
 class FileController {
   private readonly fileService: FileService;
