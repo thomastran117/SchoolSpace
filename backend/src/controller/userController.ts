@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import type { UserService } from "../service/userService";
 import logger from "../utility/logger";
-import { httpError, sendCookie } from "../utility/httpUtility";
+import { httpError, HttpError, sendCookie } from "../utility/httpUtility";
 import { sanitizeProfileImage } from "../utility/imageUtility";
 import type { TypedRequest, TypedResponse } from "../types/express";
 import type { UserUpdateDto, RoleUpdateDto } from "../dto/userSchema";
@@ -37,8 +37,14 @@ class UserController {
         message: "User retrieved successfully",
         data: user,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(`[UserController] getUser failed: ${err?.message ?? err}`);
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -86,7 +92,7 @@ class UserController {
   ) {
     try {
       const token = req.cookies.refreshToken;
-      if (!token) throw httpError(401, "Missing refresh token");
+      if (!token) httpError(401, "Missing refresh token");
 
       const { id: userId, role: userRole } = req.user as UserPayload;
       const { id: queryUserId } = req.params as unknown as { id?: number };
@@ -121,8 +127,16 @@ class UserController {
         avatar: avatar ?? undefined,
         username: newUsername ?? undefined,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[UserController] updateUser failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -133,7 +147,7 @@ class UserController {
   ) {
     try {
       const token = req.cookies.refreshToken;
-      if (!token) throw httpError(401, "Missing refresh token");
+      if (!token) httpError(401, "Missing refresh token");
 
       const { id: userId, role: userRole } = req.user as UserPayload;
       const { id: queryUserId } = req.params as unknown as { id?: number };
@@ -163,8 +177,16 @@ class UserController {
         avatar: avatar ?? undefined,
         username: newUsername ?? undefined,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[UserController] updateRole failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -175,12 +197,12 @@ class UserController {
   ) {
     try {
       const token = req.cookies.refreshToken;
-      if (!token) throw httpError(401, "Missing refresh token");
+      if (!token) httpError(401, "Missing refresh token");
 
       const { id: userId, role: userRole } = req.user as UserPayload;
       const { id: queryUserId } = req.params as unknown as { id?: number };
       const file = req.file;
-      if (!file) throw httpError(400, "Missing file");
+      if (!file) httpError(400, "Missing file");
 
       const effectiveUserId =
         userRole === "admin" && queryUserId ? queryUserId : userId;
@@ -201,8 +223,16 @@ class UserController {
         avatar: avatar ?? undefined,
         username: username ?? undefined,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[UserController] updateAvatar failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -216,8 +246,16 @@ class UserController {
       await this.userService.deleteUser(effectiveUserId);
 
       return res.status(200).json({ message: "User deleted successfully" });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[UserController] deleteUser failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 }
