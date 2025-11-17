@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import type { TypedRequest, TypedResponse } from "../types/express";
 import type { CatalogueService } from "../service/catalogueService";
-import { httpError } from "../utility/httpUtility";
+import { httpError, HttpError } from "../utility/httpUtility";
 import type { UserPayload } from "../models/token";
 import type {
   CreateCatalogueDto,
@@ -31,7 +31,7 @@ class CatalogueController {
     try {
       const { role: userRole } = req.user as UserPayload;
       if (userRole !== "admin")
-        throw httpError(403, "You lack permissions to perform this action.");
+        httpError(403, "You lack permissions to perform this action.");
 
       const { course_name, description, course_code, term, available } =
         req.body;
@@ -48,8 +48,16 @@ class CatalogueController {
         message: "Course template created successfully.",
         data: result,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[CatalogueController] createCourseTemplate failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -61,7 +69,7 @@ class CatalogueController {
     try {
       const { role: userRole } = req.user as UserPayload;
       if (userRole !== "admin")
-        throw httpError(403, "You lack permissions to perform this action.");
+        httpError(403, "You lack permissions to perform this action.");
 
       const { id: courseId } = req.params as unknown as { id: string };
 
@@ -81,8 +89,16 @@ class CatalogueController {
         message: "Course template updated successfully.",
         data: result,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[CatalogueController] updateCourseTemplate failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -94,7 +110,7 @@ class CatalogueController {
     try {
       const { role: userRole } = req.user as UserPayload;
       if (userRole !== "admin")
-        throw httpError(403, "You lack permissions to perform this action.");
+        httpError(403, "You lack permissions to perform this action.");
 
       const { id: courseId } = req.params as unknown as { id: string };
 
@@ -103,8 +119,16 @@ class CatalogueController {
       return res.status(200).json({
         message: "Course template deleted successfully.",
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[CatalogueController] deleteCourseTemplate failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -122,8 +146,16 @@ class CatalogueController {
         message: "Course template fetched successfully.",
         data: course,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[CatalogueController] getCourseTemplate failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -154,8 +186,16 @@ class CatalogueController {
         count: result.data.length,
         data: result.data as any,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[CatalogueController] getCourseTemplates failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 }
