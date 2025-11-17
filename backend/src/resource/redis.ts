@@ -34,7 +34,7 @@ async function initRedis(): Promise<void> {
   try {
     await redis.connect();
     await redis.ping();
-    logger.info("Redis is connected");
+    // logger.info("Redis is connected");
   } catch (err: any) {
     logger.error(`Unable to connect to Redis: ${err.message}`);
     process.exit(1);

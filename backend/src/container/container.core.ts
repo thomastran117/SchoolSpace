@@ -10,17 +10,15 @@ class CoreInitializer {
     if (this.initialized) return;
     this.initialized = true;
 
-    logger.info("Initializing core infrastructure...");
+    logger.info("Initializing connections");
 
     try {
       await initPrisma();
       await initRedis();
       await initMongo();
-      logger.info("Core infrastructure initialized successfully.");
+      logger.info("Core connections successful");
     } catch (err: any) {
-      logger.error(
-        `[Container] Core registration failed: ${err?.message ?? err}`,
-      );
+      logger.error(`[Container] Connections failed: ${err?.message ?? err}`);
       process.exit(1);
     }
   }

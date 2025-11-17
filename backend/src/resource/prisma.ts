@@ -20,7 +20,7 @@ const prisma = new PrismaClient();
 export async function initPrisma(): Promise<void> {
   try {
     await prisma.$connect();
-    logger.info("MySQL database is connected");
+    // logger.info("MySQL database is connected");
   } catch (err: any) {
     logger.error(`Failed to connect to DB: ${err.message}`);
     process.exit(1);

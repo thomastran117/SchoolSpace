@@ -40,7 +40,7 @@ class Container {
       logger.error(
         `[Container] Resolving dependencies failed: ${err?.message ?? err}`,
       );
-      throw new Error(`Service failed to registered: ${key}`);
+      throw new Error(`Service failed to resolved: ${key}`);
     }
   }
 
@@ -56,28 +56,31 @@ class Container {
   }
 
   async initialize(): Promise<void> {
-    try {
-      if (this.initialized) return;
-      this.initialized = true;
+    if (this.initialized) return;
+    this.initialized = true;
 
-      logger.info("Initializing container...");
-      await this.coreInitializer.initialize();
+    await this.coreInitializer.initialize();
 
-      for (const [key, reg] of this.services.entries()) {
-        if (reg.lifetime === "singleton") {
+    for (const [key, reg] of this.services) {
+      if (reg.lifetime === "singleton") {
+        try {
           const instance = reg.factory();
           reg.instance =
             instance instanceof Promise ? await instance : instance;
-          if (typeof (reg.instance as any).init === "function") {
-            await (reg.instance as any).init();
+
+          if (typeof reg.instance.init === "function") {
+            await reg.instance.init();
           }
-          logger.info(`Initialized singleton: ${key}`);
+        } catch (err: any) {
+          logger.error(
+            `[Container] Failed to initialize required Singleton '${key}': ${err?.message ?? err}`,
+          );
+          throw new Error(`Failed to initialize required singleton: ${key}`);
         }
       }
-    } catch (err: any) {
-      logger.error(`[Container] Initialization failed: ${err?.message ?? err}`);
-      throw new Error(`Creating Container failed`);
     }
+
+    logger.info("Container initialized successfully.");
   }
 
   get cacheService() {
@@ -137,7 +140,7 @@ class Container {
       logger.error(
         `[Container] Printing diagnostics failed: ${err?.message ?? err}`,
       );
-      throw new Error(`Printing diagnostics failed`);
+      return;
     }
   }
 }
@@ -148,27 +151,46 @@ class ScopedContainer {
   constructor(private readonly root: Container) {}
 
   resolve<T>(key: string): T {
-    const reg = (this.root as any).services.get(key) as Registration<T>;
-    if (!reg) throw new Error(`Service not registered: ${key}`);
+    try {
+      const reg = (this.root as any).services.get(key) as Registration<T>;
+      if (!reg) throw new Error(`Service not registered: ${key}`);
 
-    switch (reg.lifetime) {
-      case "singleton":
-        return this.root.resolve<T>(key);
-      case "scoped":
-        if (!this.scopeInstances.has(key)) {
-          const instance = reg.factory(this) as T;
-          this.scopeInstances.set(key, instance);
-        }
-        return this.scopeInstances.get(key);
-      case "transient":
-        return reg.factory(this) as T;
+      switch (reg.lifetime) {
+        case "singleton":
+          if (!reg.instance) {
+            throw new Error(
+              `Singleton '${key}' was not initialized correctly.`,
+            );
+          }
+          return reg.instance;
+        case "scoped":
+          if (!this.scopeInstances.has(key)) {
+            const instance = reg.factory(this) as T;
+            this.scopeInstances.set(key, instance);
+          }
+          return this.scopeInstances.get(key);
+        case "transient":
+          return reg.factory(this) as T;
+      }
+    } catch (err: any) {
+      logger.error(
+        `[Container] Resolving dependencies failed: ${err?.message ?? err}`,
+      );
+      throw new Error(`Service failed to resolved: ${key}`);
     }
   }
 
   dispose(): void {
-    for (const [key, instance] of this.scopeInstances.entries()) {
-      if (typeof instance.dispose === "function") instance.dispose();
-      this.scopeInstances.delete(key);
+    try {
+      for (const [key, instance] of this.scopeInstances.entries()) {
+        if (typeof instance.dispose === "function") instance.dispose();
+        this.scopeInstances.delete(key);
+      }
+    } catch (err: any) {
+      logger.error(
+        `[Container] Disposing dependencies failed: ${err?.message ?? err}`,
+      );
+      throw new Error(`Service failed to disposed`);
     }
   }
 }

@@ -29,7 +29,7 @@ export async function initMongo(): Promise<void> {
       throw new Error("MongoDB ping returned non-ok result");
     }
 
-    logger.info("MongoDB is connected");
+    // logger.info("MongoDB is connected");
     setupGracefulShutdown();
   } catch (err: any) {
     logger.error(`MongoDB connection error: ${err.message}`);

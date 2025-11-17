@@ -87,7 +87,9 @@ export async function initializeApp(): Promise<Application> {
 
     return app;
   } catch (err: any) {
-    logger.error(`[Server] Application failed to start: ${err?.message ?? err}`);
+    logger.error(
+      `[Server] Application failed to start: ${err?.message ?? err}`,
+    );
     process.exit(1);
   }
 }
