@@ -13,7 +13,7 @@ import type { Request, Response, NextFunction } from "express";
 import type { AuthService } from "../service/authService";
 import logger from "../utility/logger";
 import env from "../config/envConfigs";
-import { httpError, sendCookie } from "../utility/httpUtility";
+import { httpError, sendCookie, HttpError } from "../utility/httpUtility";
 import type { TypedRequest, TypedResponse } from "../types/express";
 import type {
   LoginDto,
@@ -64,8 +64,16 @@ class AuthController {
         avatar: avatar ?? undefined,
         username: username ?? undefined,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[AuthController] localAuthenticate failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -80,8 +88,16 @@ class AuthController {
       await this.authService.signupUser(email, password, role, captcha);
 
       res.status(201).json({ message: "Email sent. Please verify." });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[AuthController] localSignup failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -107,8 +123,16 @@ class AuthController {
       res.status(201).json({
         message: "User verified — please log in.",
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -141,8 +165,16 @@ class AuthController {
         avatar: avatar ?? undefined,
         username: username ?? undefined,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[AuthController] microsoftAuthenticate failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -167,8 +199,16 @@ class AuthController {
         avatar: avatar ?? undefined,
         username: username ?? undefined,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[AuthController] googleAuthenticate failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -193,8 +233,16 @@ class AuthController {
         avatar: avatar ?? undefined,
         username: username ?? undefined,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[AuthController] refreshAccessToken failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -219,8 +267,16 @@ class AuthController {
       });
 
       res.json({ message: "Logged out successfully" });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[AuthController] logoutRefreshToken failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 }
