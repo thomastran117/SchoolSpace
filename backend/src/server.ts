@@ -16,9 +16,9 @@ const PORT = process.env.PORT || 4000;
 (async () => {
   try {
     const app = await initializeApp();
-    app.listen(PORT, () => logger.info(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
   } catch (err: any) {
-    logger.error(`Failed to start server: ${err.message}`);
+    logger.error(`[Server] Failed to start: ${err.message}`);
     process.exit(1);
   }
 })();
