@@ -1,30 +1,18 @@
-/**
- * @file fileService.ts
- * @description
- * Provides low-level file management for uploads, retrieval, and deletion.
- *
- * - Automatically creates the `uploads` directory on startup.
- * - Hashes uploaded files for deduplication.
- * - Returns standardized metadata for uploaded files.
- * - Logs every action (create/read/delete).
- *
- * @module service
- * @version 1.0.0
- * @auth Thomas
- */
-
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import logger from "../utility/logger";
 import type { UploadResult, GetFileResult } from "../models/file";
+import { HttpError, httpError } from "../utility/httpUtility";
 
 const UPLOADS_DIR = path.resolve(__dirname, "../../../uploads");
 
 class FileService {
   constructor() {
     this.init().catch((err) =>
-      logger.error(`[FileService] Initialization failed: ${err.message}`),
+      logger.error(
+        `[FileService:init] Initialization failed: ${err.stack || err}`,
+      ),
     );
   }
 
@@ -44,7 +32,6 @@ class FileService {
 
       try {
         await fs.access(filePath);
-        logger.info(`Duplicate detected (${type}): ${fileName}`);
         return {
           fileName,
           filePath,
@@ -52,11 +39,10 @@ class FileService {
           isDuplicate: true,
         };
       } catch {
-        // File does not exist yet — proceed to write
+        // not found → normal
       }
 
       await fs.writeFile(filePath, buffer);
-      logger.info(`File uploaded (${type}): ${fileName}`);
 
       return {
         fileName,
@@ -65,8 +51,10 @@ class FileService {
         isDuplicate: false,
       };
     } catch (err: any) {
-      logger.error(`Upload failed: ${err.message}`);
-      throw new Error("File upload failed");
+      if (err instanceof HttpError) throw err;
+
+      logger.error(`[FileService] uploadFile failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
@@ -76,8 +64,14 @@ class FileService {
       const file = await fs.readFile(filePath);
       return { file, filePath };
     } catch (err: any) {
-      logger.error(`Failed to read ${type}/${fileName}: ${err.message}`);
-      throw new Error("File not found");
+      if (err.code === "ENOENT") {
+        httpError(404, "File not found");
+      }
+
+      if (err instanceof HttpError) throw err;
+
+      logger.error(`[FileService] getFile failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
   }
 
@@ -86,24 +80,20 @@ class FileService {
 
     try {
       const prefix = `/files/${type}/`;
-      if (fileName.startsWith(prefix)) {
-        fileName = fileName.replace(prefix, "");
-      }
+      if (fileName.startsWith(prefix)) fileName = fileName.replace(prefix, "");
 
       if (fileName.includes("..") || fileName.includes("/")) {
-        throw new Error("Invalid file name");
+        httpError(400, "Invalid file name");
       }
 
       const filePath = path.join(UPLOADS_DIR, type, fileName);
       await fs.unlink(filePath);
-      logger.info(`Deleted file: ${fileName}`);
     } catch (err: any) {
-      if (err.code === "ENOENT") {
-        logger.warn(`Tried to delete missing file: ${fileNameOrUrl}`);
-        throw new Error("File not found");
-      }
-      logger.error(`Delete failed: ${err.message}`);
-      throw new Error("File delete failed");
+      if (err.code === "ENOENT") httpError(404, "File not found");
+
+      logger.error(`[FileService] deleteFile failed: ${err?.message ?? err}`);
+
+      httpError(500, "Internal server error");
     }
   }
 
@@ -113,9 +103,9 @@ class FileService {
     } catch {
       try {
         await fs.mkdir(UPLOADS_DIR, { recursive: true });
-        logger.info(`Uploads directory created at: ${UPLOADS_DIR}`);
       } catch (err: any) {
-        logger.error(`Failed to create uploads directory: ${err.message}`);
+        logger.error(`[FileService] init failed: ${err?.message ?? err}`);
+        httpError(500, "Internal server error");
       }
     }
   }
