@@ -5,6 +5,7 @@ import type { PaymentService } from "../service/paymentService";
 import { paymentQueue } from "../queues/paymentQueue";
 import logger from "../utility/logger";
 import { isWorkerHealthy } from "../resource/workerHealth";
+import { HttpError } from "../utility/httpUtility";
 
 class PaymentController {
   private readonly paymentService: PaymentService;
@@ -36,8 +37,16 @@ class PaymentController {
         paypalOrderId: result.id,
         approveLink: result.approveLink,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[PaymentController] createOrder failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -84,8 +93,16 @@ class PaymentController {
         paypalOrderId: orderId,
         graceMinutes: delayMinutes,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[PaymentController] approveOrder failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -117,8 +134,16 @@ class PaymentController {
 
       logger.info(`[Payment] Cancelled order ${orderId} successfully`);
       res.json({ message: `Order ${orderId} cancelled.` });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[PaymentController] cancelOrder failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -155,8 +180,16 @@ class PaymentController {
         orderId,
         status: order.status,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[PaymentController] getOrderStatus failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -188,8 +221,16 @@ class PaymentController {
         delayed: delayed.map(serializeJob),
         waiting: waiting.map(serializeJob),
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[PaymentController] getQueueSummary failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 
@@ -214,8 +255,16 @@ class PaymentController {
         message: "Payment queue has been flushed.",
         previousCounts: countsBefore,
       });
-    } catch (err) {
-      next(err);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[PaymentController] flushQueue failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
     }
   }
 }
