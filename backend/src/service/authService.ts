@@ -13,7 +13,7 @@ import bcrypt from "bcrypt";
 import prisma from "../resource/prisma";
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
-import { httpError } from "../utility/httpUtility";
+import { HttpError, httpError } from "../utility/httpUtility";
 
 import type { WebService } from "./webService";
 import type { TokenService } from "./tokenService";
@@ -47,38 +47,46 @@ class AuthService {
     remember: boolean,
     captcha: string,
   ): Promise<AuthResponse> {
-    if (env.isCaptchaEnabled()) {
-      const result = this.webService.verifyGoogleCaptcha(captcha ?? "");
-      if (!result) httpError(401, "Invalid captcha");
-    } else {
-      logger.warn("Google Captcha is not available");
+    try {
+      if (env.isCaptchaEnabled()) {
+        const result = this.webService.verifyGoogleCaptcha(captcha ?? "");
+        if (!result) httpError(401, "Invalid captcha");
+      } else {
+        logger.warn("Google Captcha is not available");
+      }
+
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) httpError(401, "Invalid credentials");
+
+      if (!user.password) httpError(401, "This account uses OAuth login only");
+
+      const passwordMatches = await bcrypt.compare(password, user.password);
+      if (!passwordMatches) httpError(401, "Invalid credentials");
+
+      const { accessToken, refreshToken } =
+        await this.tokenService.generateTokens(
+          user.id,
+          user.username || user.email,
+          user.role,
+          user.avatar ?? undefined,
+          remember,
+        );
+
+      return {
+        accessToken,
+        refreshToken,
+        role: user.role,
+        id: user.id,
+        username: user.username,
+        avatar: user.avatar,
+      };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[AuthService] loginUser failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
-
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) httpError(401, "Invalid credentials");
-
-    if (!user.password) httpError(401, "This account uses OAuth login only");
-
-    const passwordMatches = await bcrypt.compare(password, user.password);
-    if (!passwordMatches) httpError(401, "Invalid credentials");
-
-    const { accessToken, refreshToken } =
-      await this.tokenService.generateTokens(
-        user.id,
-        user.username || user.email,
-        user.role,
-        user.avatar ?? undefined,
-        remember,
-      );
-
-    return {
-      accessToken,
-      refreshToken,
-      role: user.role,
-      id: user.id,
-      username: user.username,
-      avatar: user.avatar,
-    };
   }
 
   public async signupUser(
@@ -87,146 +95,180 @@ class AuthService {
     role: string,
     captcha: string,
   ): Promise<boolean> {
-    if (env.isCaptchaEnabled()) {
-      const result = await this.webService.verifyGoogleCaptcha(captcha ?? "");
-      if (!result) httpError(401, "Invalid captcha");
-    } else {
-      logger.warn("Google Captcha is not available");
-    }
+    try {
+      if (env.isCaptchaEnabled()) {
+        const result = await this.webService.verifyGoogleCaptcha(captcha ?? "");
+        if (!result) httpError(401, "Invalid captcha");
+      } else {
+        logger.warn("Google Captcha is not available");
+      }
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) httpError(409, "Email already in use");
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser) httpError(409, "Email already in use");
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const token = await this.tokenService.createVerifyToken(
-      email,
-      hashedPassword,
-      role,
-    );
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const token = await this.tokenService.createVerifyToken(
+        email,
+        hashedPassword,
+        role,
+      );
 
-    if (env.isEmailEnabled()) {
-      const url = `${FRONTEND_CLIENT}/auth/verify?token=${encodeURIComponent(
-        token,
-      )}`;
-      await this.emailService.sendVerificationEmail(email, url);
-    } else {
-      logger.warn("Email verification is not available");
-      await prisma.user.create({
-        data: { email, password: hashedPassword, role: role as any },
-      });
+      if (env.isEmailEnabled()) {
+        const url = `${FRONTEND_CLIENT}/auth/verify?token=${encodeURIComponent(
+          token,
+        )}`;
+        await this.emailService.sendVerificationEmail(email, url);
+      } else {
+        logger.warn("Email verification is not available");
+        await prisma.user.create({
+          data: { email, password: hashedPassword, role: role as any },
+        });
+      }
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[AuthService] signupUser failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
 
     return true;
   }
 
   public async verifyUser(token: string) {
-    const { email, password, role } =
-      await this.tokenService.validateVerifyToken(token);
-    const user = await prisma.user.create({
-      data: { email, password, role: role as any },
-    });
+    try {
+      const { email, password, role } =
+        await this.tokenService.validateVerifyToken(token);
+      const user = await prisma.user.create({
+        data: { email, password, role: role as any },
+      });
 
-    if (env.isEmailEnabled()) {
-      await this.emailService.sendWelcomeEmail(email);
+      if (env.isEmailEnabled()) {
+        await this.emailService.sendWelcomeEmail(email);
+      }
+
+      return user;
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[AuthService] verifyUser failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
-
-    return user;
   }
 
   public async microsoftOAuth(idToken: string): Promise<AuthResponse> {
-    const claims = await this.oauthService.verifyMicrosoftToken(idToken);
+    try {
+      const claims = await this.oauthService.verifyMicrosoftToken(idToken);
 
-    const microsoftSub = (claims as any).sub || (claims as any).oid;
-    const email = (claims as any).email || (claims as any).preferred_username;
-    const name = (claims as any).name || "";
+      const microsoftSub = (claims as any).sub || (claims as any).oid;
+      const email = (claims as any).email || (claims as any).preferred_username;
+      const name = (claims as any).name || "";
 
-    if (!email) httpError(400, "Microsoft email missing");
-    if (!microsoftSub) httpError(400, "Microsoft subject missing");
+      if (!email) httpError(400, "Microsoft email missing");
+      if (!microsoftSub) httpError(400, "Microsoft subject missing");
 
-    let user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      user = await prisma.user.findFirst({
-        where: { microsoftId: microsoftSub },
-      });
-    }
+      let user = await prisma.user.findUnique({ where: { email } });
+      if (!user) {
+        user = await prisma.user.findFirst({
+          where: { microsoftId: microsoftSub },
+        });
+      }
 
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email,
-          name,
-          provider: "microsoft",
-          password: null,
-          microsoftId: microsoftSub,
-          role: "notdefined",
-        },
-      });
-    } else if (!user.microsoftId) {
-      user = await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          microsoftId: microsoftSub,
-          provider: "microsoft",
-          name: user.name || name,
-        },
-      });
-    }
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email,
+            name,
+            provider: "microsoft",
+            password: null,
+            microsoftId: microsoftSub,
+            role: "notdefined",
+          },
+        });
+      } else if (!user.microsoftId) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            microsoftId: microsoftSub,
+            provider: "microsoft",
+            name: user.name || name,
+          },
+        });
+      }
 
-    const { accessToken, refreshToken } =
-      await this.tokenService.generateTokens(
-        user.id,
-        user.username || user.email,
-        user.role,
-        user.avatar ?? undefined,
+      const { accessToken, refreshToken } =
+        await this.tokenService.generateTokens(
+          user.id,
+          user.username || user.email,
+          user.role,
+          user.avatar ?? undefined,
+        );
+
+      return {
+        accessToken,
+        refreshToken,
+        role: user.role,
+        id: user.id,
+        username: user.username || user.email,
+        avatar: user.avatar,
+      };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[AuthService] microsoftOauth failed: ${err?.message ?? err}`,
       );
-
-    return {
-      accessToken,
-      refreshToken,
-      role: user.role,
-      id: user.id,
-      username: user.username || user.email,
-      avatar: user.avatar,
-    };
+      httpError(500, "Internal server error");
+    }
   }
 
   public async googleOAuth(googleToken: string): Promise<AuthResponse> {
-    const googleUser = await this.oauthService.verifyGoogleToken(googleToken);
-    if (!googleUser?.email) httpError(401, "Invalid Google token");
+    try {
+      const googleUser = await this.oauthService.verifyGoogleToken(googleToken);
+      if (!googleUser?.email) httpError(401, "Invalid Google token");
 
-    let user = await prisma.user.findUnique({
-      where: { email: googleUser.email },
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: googleUser.email!,
-          name: googleUser.name,
-          avatar: googleUser.picture,
-          googleId: googleUser.sub,
-          provider: "google",
-          role: "notdefined",
-        },
+      let user = await prisma.user.findUnique({
+        where: { email: googleUser.email },
       });
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email: googleUser.email!,
+            name: googleUser.name,
+            avatar: googleUser.picture,
+            googleId: googleUser.sub,
+            provider: "google",
+            role: "notdefined",
+          },
+        });
+      }
+
+      const { accessToken, refreshToken } =
+        await this.tokenService.generateTokens(
+          user.id,
+          user.username || user.email,
+          user.role,
+          user.avatar ?? undefined,
+        );
+
+      return {
+        accessToken,
+        refreshToken,
+        role: user.role,
+        id: user.id,
+        username: user.username || user.email,
+        avatar: user.avatar,
+      };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[AuthService] googleOAuth failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
-
-    const { accessToken, refreshToken } =
-      await this.tokenService.generateTokens(
-        user.id,
-        user.username || user.email,
-        user.role,
-        user.avatar ?? undefined,
-      );
-
-    return {
-      accessToken,
-      refreshToken,
-      role: user.role,
-      id: user.id,
-      username: user.username || user.email,
-      avatar: user.avatar,
-    };
   }
 
   public async generateNewTokens(oldToken: string): Promise<{
@@ -236,13 +278,31 @@ class AuthService {
     username: string;
     avatar?: string;
   }> {
-    const { accessToken, refreshToken, role, username, avatar } =
-      await this.tokenService.rotateRefreshToken(oldToken);
-    return { accessToken, refreshToken, role, username, avatar };
+    try {
+      const { accessToken, refreshToken, role, username, avatar } =
+        await this.tokenService.rotateRefreshToken(oldToken);
+      return { accessToken, refreshToken, role, username, avatar };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[AuthService] generateNewTokens failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
   }
 
   public async authLogout(token: string): Promise<boolean> {
-    return await this.tokenService.logoutToken(token);
+    try {
+      return await this.tokenService.logoutToken(token);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[AuthService] authLogout failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
   }
 }
 
