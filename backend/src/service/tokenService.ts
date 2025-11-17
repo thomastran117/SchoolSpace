@@ -14,7 +14,7 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { randomBytes } from "crypto";
-import { httpError } from "../utility/httpUtility";
+import { httpError, HttpError } from "../utility/httpUtility";
 import type {
   TokenPayloadBase,
   RefreshTokenPayload,
@@ -23,6 +23,7 @@ import type {
 } from "../models/token";
 import type { CacheService } from "../service/cacheService";
 import env from "../config/envConfigs";
+import logger from "../utility/logger";
 
 const {
   jwt_secret_access: JWT_SECRET_ACCESS,
@@ -36,8 +37,22 @@ const LONG_REFRESH_EXPIRY = "7d";
 
 class BasicTokenService {
   public getUserPayload(token: string): UserPayload {
-    const decoded = this.validateAccessToken(token);
-    return { id: decoded.userId, role: decoded.role, email: decoded.username };
+    try {
+      const decoded = this.validateAccessToken(token);
+      return {
+        id: decoded.userId,
+        role: decoded.role,
+        email: decoded.username,
+      };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[BasicTokenService] getUserPayload failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
   }
 
   public validateAccessToken(token: string): TokenPayloadBase {
@@ -46,7 +61,14 @@ class BasicTokenService {
     } catch (err: any) {
       if (err.name === "TokenExpiredError")
         httpError(401, "Expired access token");
-      httpError(401, "Invalid access token");
+      else if (err.name === "JsonWebTokenError")
+        httpError(401, "Invalid access token");
+
+      logger.error(
+        `[BasicTokenService] validateAccessToken failed: ${err?.message ?? err}`,
+      );
+
+      httpError(500, "Internal server error");
     }
   }
 }
@@ -65,19 +87,29 @@ class TokenService extends BasicTokenService {
     avatar?: string,
     remember?: boolean,
   ): Promise<{ accessToken: string; refreshToken: string }> {
-    const accessToken = this.createAccessToken(id, username, role, avatar);
-    const refreshToken = this.createRefreshToken(
-      id,
-      username,
-      role,
-      avatar,
-      remember,
-    );
+    try {
+      const accessToken = this.createAccessToken(id, username, role, avatar);
+      const refreshToken = this.createRefreshToken(
+        id,
+        username,
+        role,
+        avatar,
+        remember,
+      );
 
-    const decoded = jwt.decode(refreshToken) as RefreshTokenPayload;
-    await this.saveRefreshToken(decoded.jti, id, decoded.exp);
+      const decoded = jwt.decode(refreshToken) as RefreshTokenPayload;
+      await this.saveRefreshToken(decoded.jti, id, decoded.exp);
 
-    return { accessToken, refreshToken };
+      return { accessToken, refreshToken };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[TokenService] generateTokens failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
   }
 
   private createAccessToken(
@@ -86,8 +118,18 @@ class TokenService extends BasicTokenService {
     role: string,
     avatar?: string,
   ): string {
-    const payload = { userId, username, role, avatar };
-    return jwt.sign(payload, JWT_SECRET_ACCESS, { expiresIn: ACCESS_EXPIRY });
+    try {
+      const payload = { userId, username, role, avatar };
+      return jwt.sign(payload, JWT_SECRET_ACCESS, { expiresIn: ACCESS_EXPIRY });
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[TokenService] createAccessToken failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
   }
 
   private createRefreshToken(
@@ -97,17 +139,27 @@ class TokenService extends BasicTokenService {
     avatar?: string,
     remember?: boolean,
   ): string {
-    const jti = uuidv4();
-    const payload: TokenPayloadBase & { jti: string } = {
-      userId,
-      username,
-      role,
-      avatar,
-      remember,
-      jti,
-    };
-    const expiresIn = remember ? LONG_REFRESH_EXPIRY : SHORT_REFRESH_EXPIRY;
-    return jwt.sign(payload, JWT_SECRET_REFRESH, { expiresIn });
+    try {
+      const jti = uuidv4();
+      const payload: TokenPayloadBase & { jti: string } = {
+        userId,
+        username,
+        role,
+        avatar,
+        remember,
+        jti,
+      };
+      const expiresIn = remember ? LONG_REFRESH_EXPIRY : SHORT_REFRESH_EXPIRY;
+      return jwt.sign(payload, JWT_SECRET_REFRESH, { expiresIn });
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[TokenService] createRefreshToken failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
   }
 
   public async validateRefreshToken(
@@ -126,10 +178,16 @@ class TokenService extends BasicTokenService {
       }
       return decoded;
     } catch (err: any) {
-      if (err.name === "TokenExpiredError") {
+      if (err.name === "TokenExpiredError")
         httpError(401, "Expired refresh token");
-      }
-      httpError(401, "Invalid refresh token");
+      else if (err.name === "JsonWebTokenError")
+        httpError(401, "Invalid refresh token");
+
+      logger.error(
+        `[TokenService] validateRefreshToken failed: ${err?.message ?? err}`,
+      );
+
+      httpError(500, "Internal server error");
     }
   }
 
@@ -138,8 +196,18 @@ class TokenService extends BasicTokenService {
     userId: number,
     exp: number,
   ): Promise<void> {
-    const ttl = exp - Math.floor(Date.now() / 1000);
-    await this.cacheService.set(`refresh:${jti}`, userId.toString(), ttl);
+    try {
+      const ttl = exp - Math.floor(Date.now() / 1000);
+      await this.cacheService.set(`refresh:${jti}`, userId.toString(), ttl);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[TokenService] saveRefreshToken failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
   }
 
   public async rotateRefreshToken(oldToken: string): Promise<{
@@ -150,34 +218,48 @@ class TokenService extends BasicTokenService {
     avatar?: string;
     id: number;
   }> {
-    const decoded = await this.validateRefreshToken(oldToken);
-    await this.cacheService.delete(`refresh:${decoded.jti}`);
+    try {
+      const decoded = await this.validateRefreshToken(oldToken);
+      await this.cacheService.delete(`refresh:${decoded.jti}`);
 
-    const accessToken = this.createAccessToken(
-      decoded.userId,
-      decoded.username,
-      decoded.role,
-      decoded.avatar,
-    );
-    const refreshToken = this.createRefreshToken(
-      decoded.userId,
-      decoded.username,
-      decoded.role,
-      decoded.avatar,
-      decoded.remember,
-    );
+      const accessToken = this.createAccessToken(
+        decoded.userId,
+        decoded.username,
+        decoded.role,
+        decoded.avatar,
+      );
+      const refreshToken = this.createRefreshToken(
+        decoded.userId,
+        decoded.username,
+        decoded.role,
+        decoded.avatar,
+        decoded.remember,
+      );
 
-    const newDecoded = jwt.decode(refreshToken) as RefreshTokenPayload;
-    await this.saveRefreshToken(newDecoded.jti, decoded.userId, newDecoded.exp);
+      const newDecoded = jwt.decode(refreshToken) as RefreshTokenPayload;
+      await this.saveRefreshToken(
+        newDecoded.jti,
+        decoded.userId,
+        newDecoded.exp,
+      );
 
-    return {
-      accessToken,
-      refreshToken,
-      role: decoded.role,
-      username: decoded.username,
-      avatar: decoded.avatar,
-      id: decoded.userId,
-    };
+      return {
+        accessToken,
+        refreshToken,
+        role: decoded.role,
+        username: decoded.username,
+        avatar: decoded.avatar,
+        id: decoded.userId,
+      };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[TokenService] rotateRefreshToken failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
   }
 
   public async createVerifyToken(
@@ -185,13 +267,23 @@ class TokenService extends BasicTokenService {
     passwordHash: string,
     role: string,
   ): Promise<string> {
-    const jti = randomBytes(32).toString("base64url");
-    const verifyData = { email, passwordHash, role };
+    try {
+      const jti = randomBytes(32).toString("base64url");
+      const verifyData = { email, passwordHash, role };
 
-    await this.cacheService.set(`verify:${jti}`, verifyData, 15 * 60);
+      await this.cacheService.set(`verify:${jti}`, verifyData, 15 * 60);
 
-    const tokenPayload = { sub: email, jti, purpose: "email-verify" };
-    return jwt.sign(tokenPayload, JWT_SECRET_VERIFY, { expiresIn: "15m" });
+      const tokenPayload = { sub: email, jti, purpose: "email-verify" };
+      return jwt.sign(tokenPayload, JWT_SECRET_VERIFY, { expiresIn: "15m" });
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[TokenService] createVerifyToken failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
   }
 
   public async validateVerifyToken(
@@ -201,44 +293,59 @@ class TokenService extends BasicTokenService {
 
     try {
       payload = jwt.verify(token, JWT_SECRET_VERIFY) as VerifyTokenPayload;
+
+      if (payload.purpose !== "email-verify") {
+        httpError(400, "Invalid token purpose");
+      }
+
+      const data = await this.cacheService.get<{
+        email: string;
+        passwordHash: string;
+        role: string;
+      }>(`verify:${payload.jti}`);
+
+      if (!data) {
+        httpError(400, "Token missing or already used");
+      }
+
+      await this.cacheService.delete(`verify:${payload.jti}`);
+      await this.cacheService.set(`used:${payload.jti}`, "1", 24 * 60 * 60);
+
+      if (data!.email !== payload.sub) {
+        httpError(401, "Email mismatch");
+      }
+
+      return {
+        email: data!.email,
+        password: data!.passwordHash,
+        role: data!.role,
+      };
     } catch (err: any) {
       if (err.name === "TokenExpiredError")
-        httpError(400, "Expired verify token");
-      httpError(400, "Invalid verify token");
+        httpError(401, "Expired verify token");
+      else if (err.name === "JsonWebTokenError")
+        httpError(401, "Invalid verify token");
+
+      logger.error(
+        `[TokenService] validateVerifyToken failed: ${err?.message ?? err}`,
+      );
+
+      httpError(500, "Internal server error");
     }
-
-    if (payload.purpose !== "email-verify") {
-      httpError(400, "Invalid token purpose");
-    }
-
-    const data = await this.cacheService.get<{
-      email: string;
-      passwordHash: string;
-      role: string;
-    }>(`verify:${payload.jti}`);
-
-    if (!data) {
-      httpError(400, "Token missing or already used");
-    }
-
-    await this.cacheService.delete(`verify:${payload.jti}`);
-    await this.cacheService.set(`used:${payload.jti}`, "1", 24 * 60 * 60);
-
-    if (data!.email !== payload.sub) {
-      httpError(401, "Email mismatch");
-    }
-
-    return {
-      email: data!.email,
-      password: data!.passwordHash,
-      role: data!.role,
-    };
   }
 
   public async logoutToken(token: string): Promise<boolean> {
-    const decoded = await this.validateRefreshToken(token);
-    await this.cacheService.delete(`refresh:${decoded.jti}`);
-    return true;
+    try {
+      const decoded = await this.validateRefreshToken(token);
+      await this.cacheService.delete(`refresh:${decoded.jti}`);
+      return true;
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[TokenService] logoutToken failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
   }
 }
 
