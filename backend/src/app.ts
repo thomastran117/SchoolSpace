@@ -12,22 +12,17 @@
  * @author Thomas
  */
 
+import cookieParser from "cookie-parser";
 import type { Application, Request, Response } from "express";
 import express from "express";
-import cookieParser from "cookie-parser";
 import path from "path";
 
 // Utilities
 import container from "./container";
 
 // Middleware
-import {
-  generalRateLimiter,
-  authRateLimiter,
-  softRateLimiter,
-} from "./middleware/rateLimiterMiddleware";
-import requestLogger from "./middleware/httpLoggerMiddleware";
 import { errorHandler } from "./middleware/errorHandlerMiddleware";
+import requestLogger from "./middleware/httpLoggerMiddleware";
 import { securityMiddlewareBundle } from "./middleware/securityMiddleware";
 
 // Routes

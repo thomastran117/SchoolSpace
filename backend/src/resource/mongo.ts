@@ -10,8 +10,8 @@
  */
 
 import mongoose from "mongoose";
-import logger from "../utility/logger";
 import config from "../config/envConfigs";
+import logger from "../utility/logger";
 
 const MONGO_URL = config.mongo_url;
 

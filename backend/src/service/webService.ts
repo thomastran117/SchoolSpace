@@ -16,8 +16,8 @@
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
 import env from "../config/envConfigs";
-import logger from "../utility/logger";
 import { HttpError, httpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 
 const { google_captcha_secret: GOOGLE_CAPTCHA_SECRET } = env;
 

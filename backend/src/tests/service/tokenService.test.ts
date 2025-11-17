@@ -13,12 +13,12 @@ jest.mock("../../config/envConfigs", () => ({
   },
 }));
 
-import { TokenService } from "../../service/tokenService";
 import jwt from "jsonwebtoken";
 import type {
   RefreshTokenPayload,
   VerifyTokenPayload,
 } from "../../models/token";
+import { TokenService } from "../../service/tokenService";
 
 const mockCacheService = {
   get: jest.fn(),

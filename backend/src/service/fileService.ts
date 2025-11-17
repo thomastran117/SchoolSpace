@@ -1,9 +1,9 @@
+import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
-import crypto from "crypto";
-import logger from "../utility/logger";
-import type { UploadResult, GetFileResult } from "../models/file";
+import type { GetFileResult, UploadResult } from "../models/file";
 import { HttpError, httpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 
 const UPLOADS_DIR = path.resolve(__dirname, "../../../uploads");
 

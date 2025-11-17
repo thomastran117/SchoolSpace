@@ -1,6 +1,5 @@
-import type { UserService } from "./userService";
 import type { CourseService } from "./courseService";
-import { HttpError, httpError } from "../utility/httpUtility";
+import type { UserService } from "./userService";
 
 class EnrollmentService {
   private readonly userService: UserService;

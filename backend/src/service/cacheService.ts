@@ -1,6 +1,6 @@
 import { redis } from "../resource/redis";
-import logger from "../utility/logger";
 import { HttpError, httpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 
 class CacheService {
   async set<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {

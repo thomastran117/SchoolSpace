@@ -2,18 +2,18 @@
  * @file catalogueRoutes.ts
  * @description Routes for managing course catalogue templates
  */
-import { AuthGuard } from "../middleware/authMiddleware";
-import type { Router, Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response, Router } from "express";
 import express from "express";
 import container from "../container";
-import { validate } from "../middleware/validateMiddleware";
 import type { CatalogueController } from "../controller/catalogueController";
 import {
   CreateCatalogueSchema,
-  UpdateCatalogueSchema,
   QueryCatalogueSchema,
+  UpdateCatalogueSchema,
 } from "../dto/catalogueSchema";
 import { MongoIdParamSchema } from "../dto/idSchema";
+import { AuthGuard } from "../middleware/authMiddleware";
+import { validate } from "../middleware/validateMiddleware";
 
 const router: Router = express.Router();
 

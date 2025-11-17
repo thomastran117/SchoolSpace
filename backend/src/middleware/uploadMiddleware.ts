@@ -13,11 +13,11 @@
  * @auth Thomas
  */
 
+import type { NextFunction, Request, Response } from "express";
 import type { FileFilterCallback } from "multer";
 import multer from "multer";
 import path from "path";
 import sanitize from "sanitize-filename";
-import type { Request, Response, NextFunction } from "express";
 import logger from "../utility/logger";
 
 const allowedMimeTypes = ["image/jpeg", "image/png"];

@@ -1,13 +1,13 @@
-import type { Request, Response, NextFunction } from "express";
-import type { TypedRequest, TypedResponse } from "../types/express";
-import type { CatalogueService } from "../service/catalogueService";
-import { httpError, HttpError } from "../utility/httpUtility";
-import type { UserPayload } from "../models/token";
+import type { NextFunction, Request, Response } from "express";
 import type {
   CreateCatalogueDto,
-  UpdateCatalogueDto,
   QueryCatalogueDto,
+  UpdateCatalogueDto,
 } from "../dto/catalogueSchema";
+import type { UserPayload } from "../models/token";
+import type { CatalogueService } from "../service/catalogueService";
+import type { TypedRequest, TypedResponse } from "../types/express";
+import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 class CatalogueController {

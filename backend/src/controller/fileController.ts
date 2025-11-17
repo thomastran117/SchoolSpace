@@ -1,6 +1,6 @@
+import type { NextFunction, Request, Response } from "express";
 import mime from "mime-types";
 import type { FileService } from "../service/fileService.js";
-import type { Request, Response, NextFunction } from "express";
 import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 

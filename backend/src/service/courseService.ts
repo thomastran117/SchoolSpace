@@ -1,12 +1,11 @@
 import type { CacheService } from "./cacheService";
+import type { CatalogueService } from "./catalogueService";
 import type { FileService } from "./fileService";
 import type { UserService } from "./userService";
-import type { CatalogueService } from "./catalogueService";
 
-import { BasicService } from "./basicService";
 import type { ICourse } from "../templates/mongoTemplate";
 import { CourseModel } from "../templates/mongoTemplate";
-import { httpError } from "../utility/httpUtility";
+import { BasicService } from "./basicService";
 
 class CourseService extends BasicService {
   private readonly cacheService: CacheService;

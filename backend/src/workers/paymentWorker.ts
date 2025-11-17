@@ -1,10 +1,10 @@
 import type { Job, WorkerOptions } from "bullmq";
 import { Worker } from "bullmq";
 import container from "../container";
-import logger from "../utility/logger";
 import { connectionWorker } from "../resource/redis";
 import { markWorkerAlive, markWorkerDead } from "../resource/workerHealth";
 import type { PaymentService } from "../service/paymentService";
+import logger from "../utility/logger";
 
 interface PaymentJobData {
   paypalOrderId: string;

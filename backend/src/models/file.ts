@@ -10,4 +10,4 @@ interface GetFileResult {
   filePath: string;
 }
 
-export type { UploadResult, GetFileResult };
+export type { GetFileResult, UploadResult };

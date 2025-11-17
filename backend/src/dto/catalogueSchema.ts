@@ -25,6 +25,6 @@ type CreateCatalogueDto = z.infer<typeof CreateCatalogueSchema>;
 type UpdateCatalogueDto = z.infer<typeof UpdateCatalogueSchema>;
 type QueryCatalogueDto = z.infer<typeof QueryCatalogueSchema>;
 
-export { CreateCatalogueSchema, UpdateCatalogueSchema, QueryCatalogueSchema };
+export { CreateCatalogueSchema, QueryCatalogueSchema, UpdateCatalogueSchema };
 
-export type { CreateCatalogueDto, UpdateCatalogueDto, QueryCatalogueDto };
+export type { CreateCatalogueDto, QueryCatalogueDto, UpdateCatalogueDto };

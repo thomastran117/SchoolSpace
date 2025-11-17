@@ -1,5 +1,5 @@
-import { connectionWorker } from "./redis";
 import logger from "../utility/logger";
+import { connectionWorker } from "./redis";
 
 const HEALTH_KEY = "worker:payment:health";
 const HEARTBEAT_TTL_MS = 30_000;

@@ -1,11 +1,11 @@
-import type { Response, NextFunction } from "express";
-import type { TypedRequest } from "../types/express";
+import type { NextFunction, Response } from "express";
 import type { CreateOrderDto, ViewOrderDto } from "../dto/paymentSchema";
-import type { PaymentService } from "../service/paymentService";
 import { paymentQueue } from "../queues/paymentQueue";
-import logger from "../utility/logger";
 import { isWorkerHealthy } from "../resource/workerHealth";
+import type { PaymentService } from "../service/paymentService";
+import type { TypedRequest } from "../types/express";
 import { HttpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 
 class PaymentController {
   private readonly paymentService: PaymentService;

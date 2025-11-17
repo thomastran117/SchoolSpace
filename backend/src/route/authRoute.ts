@@ -3,17 +3,17 @@
  * @description Authentication routes (login, signup, OAuth, etc.)
  */
 
-import type { Router, Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response, Router } from "express";
 import express from "express";
 import container from "../container";
-import { validate } from "../middleware/validateMiddleware";
-import {
-  LoginSchema,
-  SignupSchema,
-  MicrosoftSchema,
-  GoogleSchema,
-} from "../dto/authSchema";
 import type { AuthController } from "../controller/authController";
+import {
+  GoogleSchema,
+  LoginSchema,
+  MicrosoftSchema,
+  SignupSchema,
+} from "../dto/authSchema";
+import { validate } from "../middleware/validateMiddleware";
 
 const router: Router = express.Router();
 

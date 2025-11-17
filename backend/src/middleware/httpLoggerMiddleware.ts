@@ -9,8 +9,8 @@
  * @author Thomas
  */
 
-import type { Request, Response, NextFunction } from "express";
 import chalk from "chalk";
+import type { NextFunction, Request, Response } from "express";
 
 /**
  * Express middleware for logging HTTP requests and responses.

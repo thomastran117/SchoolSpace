@@ -10,14 +10,14 @@
 /**
  * Imports
  */
-import type { Router, Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response, Router } from "express";
 import express from "express";
 import container from "../container";
-import { validate } from "../middleware/validateMiddleware";
-import { UserSchema, RoleSchema } from "../dto/userSchema";
 import type { UserController } from "../controller/userController";
-import { safeUploadAvatar } from "../middleware/uploadMiddleware";
 import { IdParamSchema } from "../dto/idSchema";
+import { RoleSchema, UserSchema } from "../dto/userSchema";
+import { safeUploadAvatar } from "../middleware/uploadMiddleware";
+import { validate } from "../middleware/validateMiddleware";
 const useScopedController =
   (
     handler: (

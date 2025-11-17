@@ -1,9 +1,9 @@
-import type { Router, Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response, Router } from "express";
 import express from "express";
 import container from "../container";
-import { validate } from "../middleware/validateMiddleware";
-import { CreateOrderSchema, ViewOrderSchema } from "../dto/paymentSchema";
 import type { PaymentController } from "../controller/paymentController";
+import { CreateOrderSchema, ViewOrderSchema } from "../dto/paymentSchema";
+import { validate } from "../middleware/validateMiddleware";
 
 const router: Router = express.Router();
 

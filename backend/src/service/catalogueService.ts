@@ -1,8 +1,8 @@
+import type { ICatalogue, Term } from "../templates/mongoTemplate";
 import { CatalogueModel } from "../templates/mongoTemplate";
 import { httpError } from "../utility/httpUtility";
-import type { ICatalogue, Term } from "../templates/mongoTemplate";
-import type { CacheService } from "./cacheService";
 import { BasicService } from "./basicService";
+import type { CacheService } from "./cacheService";
 
 class CatalogueService extends BasicService {
   private readonly cache: CacheService;

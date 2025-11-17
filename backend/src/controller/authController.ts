@@ -8,20 +8,20 @@
  * @auth Thomas
  */
 
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 
-import type { AuthService } from "../service/authService";
-import logger from "../utility/logger";
 import env from "../config/envConfigs";
-import { httpError, sendCookie, HttpError } from "../utility/httpUtility";
-import type { TypedRequest, TypedResponse } from "../types/express";
 import type {
-  LoginDto,
-  SignupDto,
-  MicrosoftDto,
-  GoogleDto,
   AuthResponseDto,
+  GoogleDto,
+  LoginDto,
+  MicrosoftDto,
+  SignupDto,
 } from "../dto/authSchema";
+import type { AuthService } from "../service/authService";
+import type { TypedRequest, TypedResponse } from "../types/express";
+import { httpError, HttpError, sendCookie } from "../utility/httpUtility";
+import logger from "../utility/logger";
 
 class AuthController {
   private readonly authService: AuthService;

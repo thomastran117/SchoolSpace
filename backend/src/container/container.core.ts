@@ -1,6 +1,6 @@
+import { initMongo } from "../resource/mongo";
 import { initPrisma } from "../resource/prisma";
 import { initRedis } from "../resource/redis";
-import { initMongo } from "../resource/mongo";
 import logger from "../utility/logger";
 
 class CoreInitializer {

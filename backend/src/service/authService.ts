@@ -10,16 +10,16 @@
  */
 
 import bcrypt from "bcrypt";
-import prisma from "../resource/prisma";
 import env from "../config/envConfigs";
-import logger from "../utility/logger";
+import prisma from "../resource/prisma";
 import { HttpError, httpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 
-import type { WebService } from "./webService";
-import type { TokenService } from "./tokenService";
+import type { AuthResponse } from "../models/auth";
 import type { EmailService } from "./emailService";
 import type { OAuthService } from "./oauthService";
-import type { AuthResponse } from "../models/auth";
+import type { TokenService } from "./tokenService";
+import type { WebService } from "./webService";
 
 const { frontend_client: FRONTEND_CLIENT } = env;
 

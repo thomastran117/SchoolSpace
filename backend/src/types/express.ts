@@ -1,4 +1,4 @@
-import type { Response, Request } from "express";
+import type { Request, Response } from "express";
 
 type TypedRequest<
   Body = unknown,

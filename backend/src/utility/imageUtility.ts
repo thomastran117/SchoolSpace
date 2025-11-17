@@ -13,11 +13,11 @@
  * @auth Thomas
  */
 
-import { httpError } from "../utility/httpUtility";
-import sharp from "sharp";
-import { fileTypeFromBuffer } from "file-type";
-import { v4 as uuidv4 } from "uuid";
 import type { Express } from "express";
+import { fileTypeFromBuffer } from "file-type";
+import sharp from "sharp";
+import { v4 as uuidv4 } from "uuid";
+import { httpError } from "../utility/httpUtility";
 
 const MAX_WIDTH = 2048;
 const MAX_HEIGHT = 2048;

@@ -27,8 +27,8 @@ interface VerifyTokenPayload {
 }
 
 export type {
-  UserPayload,
-  TokenPayloadBase,
   RefreshTokenPayload,
+  TokenPayloadBase,
+  UserPayload,
   VerifyTokenPayload,
 };

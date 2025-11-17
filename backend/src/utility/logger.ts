@@ -1,6 +1,6 @@
+import chalk from "chalk";
 import * as fs from "fs";
 import * as path from "path";
-import chalk from "chalk";
 
 const baseDir = path.resolve(process.cwd(), "logs");
 if (!fs.existsSync(baseDir)) {

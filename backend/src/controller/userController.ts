@@ -1,12 +1,12 @@
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
+import type { AuthResponseDto } from "../dto/authSchema";
+import type { RoleUpdateDto, UserUpdateDto } from "../dto/userSchema";
+import type { UserPayload } from "../models/token";
 import type { UserService } from "../service/userService";
-import logger from "../utility/logger";
+import type { TypedRequest, TypedResponse } from "../types/express";
 import { httpError, HttpError, sendCookie } from "../utility/httpUtility";
 import { sanitizeProfileImage } from "../utility/imageUtility";
-import type { TypedRequest, TypedResponse } from "../types/express";
-import type { UserUpdateDto, RoleUpdateDto } from "../dto/userSchema";
-import type { AuthResponseDto } from "../dto/authSchema";
-import type { UserPayload } from "../models/token";
+import logger from "../utility/logger";
 
 class UserController {
   private readonly userService: UserService;

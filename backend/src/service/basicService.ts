@@ -1,5 +1,5 @@
-import logger from "../utility/logger";
 import { httpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 
 class BasicService {
   protected toSafe(doc: any) {

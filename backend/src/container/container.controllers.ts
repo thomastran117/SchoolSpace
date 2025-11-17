@@ -1,21 +1,21 @@
+import { AnnouncementController } from "../controller/announcementController";
+import { AppointmentController } from "../controller/appointmentController";
+import { AssignmentController } from "../controller/assignmentController";
 import { AuthController } from "../controller/authController";
-import { PaymentController } from "../controller/paymentController";
-import { FileController } from "../controller/fileController";
-import { UserController } from "../controller/userController";
+import { BookingController } from "../controller/bookingController";
 import { CatalogueController } from "../controller/catalogueController";
 import { CourseController } from "../controller/courseController";
-import { AnnouncementController } from "../controller/announcementController";
-import { AssignmentController } from "../controller/assignmentController";
 import { DiscussionController } from "../controller/discussionController";
 import { EnrollmentController } from "../controller/enrollmentController";
+import { FileController } from "../controller/fileController";
 import { GradeController } from "../controller/gradeController";
 import { LectureController } from "../controller/lectureController";
+import { OfficeController } from "../controller/officeController";
+import { PaymentController } from "../controller/paymentController";
 import { ReviewController } from "../controller/reviewController";
 import { SubmissionController } from "../controller/submissionController";
-import { AppointmentController } from "../controller/appointmentController";
-import { BookingController } from "../controller/bookingController";
-import { OfficeController } from "../controller/officeController";
 import { TutorController } from "../controller/tutorController";
+import { UserController } from "../controller/userController";
 
 import type { Registration } from "./container.types";
 

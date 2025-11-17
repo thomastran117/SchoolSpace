@@ -11,13 +11,13 @@
 
 import type { CorsOptionsDelegate } from "cors";
 import cors from "cors";
-import sanitizeHtml from "sanitize-html";
-import hpp from "hpp";
-import helmet from "helmet";
-import mongoSanitize from "express-mongo-sanitize";
 import type { CookieOptions } from "csurf";
 import csurf from "csurf";
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
+import mongoSanitize from "express-mongo-sanitize";
+import helmet from "helmet";
+import hpp from "hpp";
+import sanitizeHtml from "sanitize-html";
 
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
@@ -169,11 +169,11 @@ function securityMiddlewareBundle(): Array<
 }
 
 export {
-  sanitizeInput,
   corsMiddleware,
-  preventHpp,
-  securityHeaders,
-  preventNoSqlInjection,
   csrfProtection,
+  preventHpp,
+  preventNoSqlInjection,
+  sanitizeInput,
+  securityHeaders,
   securityMiddlewareBundle,
 };

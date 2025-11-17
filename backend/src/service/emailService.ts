@@ -8,11 +8,11 @@
  * @auth Thomas
  */
 
-import type { Transporter, SendMailOptions } from "nodemailer";
+import type { SendMailOptions, Transporter } from "nodemailer";
 import nodemailer from "nodemailer";
 import env from "../config/envConfigs";
-import logger from "../utility/logger";
 import { httpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 interface MailPayload {
   to: string;
   subject: string;

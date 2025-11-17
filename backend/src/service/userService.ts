@@ -1,9 +1,9 @@
+import type { Role, User } from "@prisma/client";
+import type { AuthResponse } from "../models/auth";
 import prisma from "../resource/prisma";
 import { httpError } from "../utility/httpUtility";
-import type { TokenService } from "./tokenService";
 import type { FileService } from "./fileService";
-import type { AuthResponse } from "../models/auth";
-import type { User, Course, Enrollment, Role } from "@prisma/client";
+import type { TokenService } from "./tokenService";
 
 class UserService {
   private readonly tokenService: TokenService;

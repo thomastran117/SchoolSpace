@@ -12,10 +12,10 @@
  * @version 5.0.0
  */
 
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 import container from "../container";
-import logger from "../utility/logger";
 import type { CacheService } from "../service/cacheService";
+import logger from "../utility/logger";
 
 interface RateLimiterOptions {
   points: number;

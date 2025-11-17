@@ -11,18 +11,18 @@
  * @auth Thomas
  */
 
+import { randomBytes } from "crypto";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
-import { randomBytes } from "crypto";
-import { httpError, HttpError } from "../utility/httpUtility";
+import env from "../config/envConfigs";
 import type {
-  TokenPayloadBase,
   RefreshTokenPayload,
-  VerifyTokenPayload,
+  TokenPayloadBase,
   UserPayload,
+  VerifyTokenPayload,
 } from "../models/token";
 import type { CacheService } from "../service/cacheService";
-import env from "../config/envConfigs";
+import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 const {

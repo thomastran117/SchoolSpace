@@ -8,10 +8,10 @@
  * @auth Thomas
  */
 
-import type { Router, Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response, Router } from "express";
 import express from "express";
-import container from "../container";
 import multer from "multer";
+import container from "../container";
 import type { FileController } from "../controller/fileController";
 import { safeUploadAvatar } from "../middleware/uploadMiddleware";
 const router: Router = express.Router();

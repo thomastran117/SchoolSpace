@@ -11,11 +11,10 @@
  * @version 3.0.0
  * @auth Thomas
  */
+import { default as IORedis, default as Redis } from "ioredis";
 import { URL } from "url";
-import Redis from "ioredis";
-import IORedis from "ioredis";
-import logger from "../utility/logger";
 import env from "../config/envConfigs";
+import logger from "../utility/logger";
 
 const baseUrl = new URL(env.redis_url);
 const redisCacheUrl = baseUrl.toString();
@@ -42,4 +41,4 @@ async function initRedis(): Promise<void> {
   }
 }
 
-export { redis, connectionWorker, initRedis };
+export { connectionWorker, initRedis, redis };

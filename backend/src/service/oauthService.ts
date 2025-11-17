@@ -9,12 +9,12 @@
  * @auth Thomas
  */
 
-import type { JwksClient } from "jwks-rsa";
-import jwksClient from "jwks-rsa";
-import type { JwtHeader, JwtPayload } from "jsonwebtoken";
-import jwt from "jsonwebtoken";
 import type { TokenPayload } from "google-auth-library";
 import { OAuth2Client } from "google-auth-library";
+import type { JwtHeader, JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import type { JwksClient } from "jwks-rsa";
+import jwksClient from "jwks-rsa";
 import env from "../config/envConfigs";
 import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";

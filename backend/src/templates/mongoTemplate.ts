@@ -115,5 +115,5 @@ CourseSchema.set("toJSON", {
   },
 });
 
-export { Term, CatalogueModel, CourseModel };
+export { CatalogueModel, CourseModel, Term };
 export type { ICatalogue, ICourse };

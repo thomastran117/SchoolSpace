@@ -1,8 +1,8 @@
 import logger from "../utility/logger";
-import type { Lifetime, Registration } from "./container.types";
+import { registerControllerModules } from "./container.controllers";
 import { CoreInitializer } from "./container.core";
 import { registerServiceModules } from "./container.services";
-import { registerControllerModules } from "./container.controllers";
+import type { Registration } from "./container.types";
 
 class Container {
   private static _instance: Container;

@@ -8,16 +8,16 @@
  * @auth Thomas
  */
 
-import type { Request, Response, NextFunction, Router } from "express";
+import type { NextFunction, Request, Response, Router } from "express";
 import express from "express";
 
-import authRoute from "./authRoute";
-import paymentRoute from "./paymentRoute";
-import fileRoute from "./fileRoute";
-import userRoute from "./userRoute";
-import catalogueRoute from "./catalogueRoute";
-import { httpError } from "../utility/httpUtility";
 import { AuthGuard } from "../middleware/authMiddleware";
+import { httpError } from "../utility/httpUtility";
+import authRoute from "./authRoute";
+import catalogueRoute from "./catalogueRoute";
+import fileRoute from "./fileRoute";
+import paymentRoute from "./paymentRoute";
+import userRoute from "./userRoute";
 
 const router: Router = express.Router();
 
