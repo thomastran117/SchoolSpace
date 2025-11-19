@@ -5,13 +5,13 @@ import type { UserService } from "./userService";
 
 import type { ICourse } from "../templates/mongoTemplate";
 import { CourseModel } from "../templates/mongoTemplate";
-import { BasicService } from "./basicService";
+import { BaseService } from "./baseService";
 
-class CourseService extends BasicService {
+class CourseService extends BaseService {
   private readonly cacheService: CacheService;
-  private readonly fileService: FileService;
-  private readonly userService: UserService;
-  private readonly catalogueService: CatalogueService;
+  private readonly fileService?: FileService;
+  private readonly userService?: UserService;
+  private readonly catalogueService?: CatalogueService;
 
   constructor(
     userService: UserService,
@@ -32,14 +32,16 @@ class CourseService extends BasicService {
     image: Express.Multer.File,
     year?: number,
   ): Promise<ICourse> {
-    await this.userService.getUser(userId);
-    await this.catalogueService.getCourseTemplateById(templateId);
+    this.ensureDependencies("userService", "fileService", "catalogueService");
+    await this.userService!.getUser(userId);
+    await this.catalogueService!.getCourseTemplateById(templateId);
 
-    const { fileName, filePath, publicUrl } = await this.fileService.uploadFile(
-      image.buffer,
-      image.originalname,
-      "course",
-    );
+    const { fileName, filePath, publicUrl } =
+      await this.fileService!.uploadFile(
+        image.buffer,
+        image.originalname,
+        "course",
+      );
 
     const finalYear = year ?? new Date().getFullYear();
 

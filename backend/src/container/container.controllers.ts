@@ -27,102 +27,102 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("AuthController", {
       factory: (scope) => new AuthController(scope.resolve("AuthService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("PaymentController", {
       factory: (scope) =>
         new PaymentController(scope.resolve("PaymentService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("FileController", {
       factory: (scope) => new FileController(scope.resolve("FileService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("UserController", {
       factory: (scope) => new UserController(scope.resolve("UserService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("CatalogueController", {
       factory: (scope) =>
         new CatalogueController(scope.resolve("CatalogueService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("CourseController", {
       factory: (scope) => new CourseController(scope.resolve("CourseService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("AnnouncementController", {
       factory: (scope) =>
         new AnnouncementController(scope.resolve("AnnoucementService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("AssignmentController", {
       factory: (scope) =>
         new AssignmentController(scope.resolve("AssignmentService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("DiscussionController", {
       factory: (scope) =>
         new DiscussionController(scope.resolve("DiscussionService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("EnrollmentController", {
       factory: (scope) =>
         new EnrollmentController(scope.resolve("EnrollmentService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("GradeController", {
       factory: (scope) => new GradeController(scope.resolve("GradeService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("LectureController", {
       factory: (scope) =>
         new LectureController(scope.resolve("LectureService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("ReviewController", {
       factory: (scope) => new ReviewController(scope.resolve("ReviewService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("SubmissionController", {
       factory: (scope) =>
         new SubmissionController(scope.resolve("SubmissionService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("BookingController", {
       factory: (scope) =>
         new BookingController(scope.resolve("BookingService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("AppointmentController", {
       factory: (scope) =>
         new AppointmentController(scope.resolve("AppointmentService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("TutorController", {
       factory: (scope) => new TutorController(scope.resolve("TutorService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
 
     controllers.set("OfficeController", {
       factory: (scope) => new OfficeController(scope.resolve("OfficeService")),
-      lifetime: "transient",
+      lifetime: "scoped",
     });
     return controllers;
   } catch (err: any) {

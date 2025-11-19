@@ -34,10 +34,6 @@ function registerServiceModules(): Map<string, Registration<any>> {
       factory: () => new CacheService(),
       lifetime: "singleton",
     });
-    services.set("EmailService", {
-      factory: () => new EmailService(),
-      lifetime: "singleton",
-    });
     services.set("FileService", {
       factory: () => new FileService(),
       lifetime: "singleton",
@@ -46,20 +42,23 @@ function registerServiceModules(): Map<string, Registration<any>> {
       factory: () => new BasicTokenService(),
       lifetime: "singleton",
     });
-
+    services.set("EmailService", {
+      factory: () => new EmailService(),
+      lifetime: "transient",
+    });
     services.set("WebService", {
       factory: () => new WebService(),
-      lifetime: "scoped",
+      lifetime: "transient",
     });
 
     services.set("OAuthService", {
       factory: () => new OAuthService(),
-      lifetime: "scoped",
+      lifetime: "transient",
     });
 
     services.set("TokenService", {
       factory: (scope) => new TokenService(scope.resolve("CacheService")),
-      lifetime: "scoped",
+      lifetime: "transient",
     });
 
     services.set("PaymentService", {

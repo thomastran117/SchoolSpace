@@ -21,26 +21,70 @@ class Container {
   }
 
   public resolve<T>(key: string): T {
-    try {
-      const reg = this.services.get(key);
-      if (!reg) throw new Error(`Service not registered: ${key}`);
+    const reg = this.services.get(key);
+    if (!reg) {
+      logger.error(`[Container] Missing mandatory service: ${key}`);
+      throw new Error(`Service not registered: ${key}`);
+    }
 
+    try {
       switch (reg.lifetime) {
         case "singleton":
           if (!reg.instance) reg.instance = reg.factory() as T;
           return reg.instance;
+
+        case "transient":
+          return reg.factory() as T;
+
         case "scoped":
           throw new Error(
             `Cannot resolve scoped service '${key}' directly from root container.`,
           );
-        case "transient":
-          return reg.factory() as T;
+
+        default:
+          throw new Error(`Unknown lifetime: ${(reg as any).lifetime}`);
       }
     } catch (err: any) {
       logger.error(
-        `[Container] Resolving dependencies failed: ${err?.message ?? err}`,
+        `[Container] Failed to create mandatory service '${key}': ${err?.message ?? err}`,
       );
-      throw new Error(`Service failed to resolved: ${key}`);
+      throw new Error(`Service failed to resolve: ${key}`);
+    }
+  }
+
+  public resolveOptional<T>(key: string): T | undefined {
+    const reg = this.services.get(key);
+    if (!reg) {
+      logger.warn(`[Container] Optional service '${key}' not registered.`);
+      return undefined;
+    }
+
+    try {
+      switch (reg.lifetime) {
+        case "singleton":
+          if (!reg.instance) reg.instance = reg.factory() as T;
+          return reg.instance;
+
+        case "transient":
+          return reg.factory() as T;
+
+        case "scoped":
+          logger.warn(
+            `[Container] Optional scoped service '${key}' cannot be resolved from root container.`,
+          );
+          return undefined;
+
+        default:
+          logger.warn(
+            `[Container] Unknown lifetime for optional service '${key}'.`,
+          );
+          return undefined;
+      }
+    } catch (err: any) {
+      logger.error(
+        `[Container] Failed to resolve optional service '${key}': ${err?.message ?? err}`,
+      );
+      return undefined;
     }
   }
 

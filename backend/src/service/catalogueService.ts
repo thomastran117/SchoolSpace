@@ -1,10 +1,10 @@
 import type { ICatalogue, Term } from "../templates/mongoTemplate";
 import { CatalogueModel } from "../templates/mongoTemplate";
 import { httpError } from "../utility/httpUtility";
-import { BasicService } from "./basicService";
+import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
 
-class CatalogueService extends BasicService {
+class CatalogueService extends BaseService {
   private readonly cache: CacheService;
   private readonly ttl = 300;
 
