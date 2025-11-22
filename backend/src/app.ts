@@ -25,7 +25,7 @@ import logger from "./utility/logger";
 import { errorHandler } from "./middleware/errorHandlerMiddleware";
 import requestLogger from "./middleware/httpLoggerMiddleware";
 import { securityMiddlewareBundle } from "./middleware/securityMiddleware";
-
+import { requestScopeMiddleware } from "./middleware/scopeMiddleware";
 // Routes
 import serverRoutes from "./route/route";
 
@@ -46,6 +46,7 @@ export async function initializeApp(): Promise<Application> {
     app.use(express.static(path.join(__dirname, "public")));
 
     app.use(securityMiddlewareBundle());
+    app.use(requestScopeMiddleware());
 
     /*
   app.use(generalRateLimiter);

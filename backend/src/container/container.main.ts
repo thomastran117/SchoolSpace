@@ -103,6 +103,14 @@ class Container {
     if (this.initialized) return;
     this.initialized = true;
 
+    try {
+      this.resolve("EnvironmentManager");
+      logger.info("Environment variables loaded");
+    } catch (err: any) {
+      logger.error(`[Container] Failed to resolve EnvironmentManager: ${err?.message}`);
+      throw new Error("Failed to initialize EnvironmentManager");
+    }
+    
     await this.coreInitializer.initialize();
 
     for (const [key, reg] of this.services) {
@@ -135,17 +143,6 @@ class Container {
         `[Container] Resolving CacheService failed: ${err?.message ?? err}`,
       );
       throw new Error(`Resolving CacheService failed`);
-    }
-  }
-
-  get emailService() {
-    try {
-      return this.resolve("EmailService");
-    } catch (err: any) {
-      logger.error(
-        `[Container] Resolving EmailService failed: ${err?.message ?? err}`,
-      );
-      throw new Error(`Resolving EmailService failed`);
     }
   }
 

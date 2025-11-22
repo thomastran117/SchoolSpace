@@ -5,8 +5,6 @@
 
 import type { NextFunction, Request, Response, Router } from "express";
 import express from "express";
-import container from "../container";
-import type { AuthController } from "../controller/authController";
 import {
   GoogleSchema,
   LoginSchema,
@@ -14,30 +12,25 @@ import {
   SignupSchema,
 } from "../dto/authSchema";
 import { validate } from "../middleware/validateMiddleware";
+import type { ControllerInstance, ControllerKey } from "../types/controller";
 
 const router: Router = express.Router();
 
-const useScopedController =
-  (
-    handler: (
-      controller: AuthController,
-      req: Request,
-      res: Response,
-      next: NextFunction,
-    ) => Promise<any> | any,
-  ) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    const scope = container.createScope();
-    const controller = scope.resolve<AuthController>("AuthController");
-
+function useController<K extends ControllerKey>(
+  key: K,
+  selector: (instance: ControllerInstance<K>) => any
+) {
+  return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await handler(controller, req, res, next);
+      const controller = req.resolve<ControllerInstance<K>>(key);
+      const fn = selector(controller);
+
+      return await fn.call(controller, req, res, next);
     } catch (err) {
       next(err);
-    } finally {
-      scope.dispose();
     }
   };
+}
 
 /**
  * @route POST /auth/login
@@ -45,20 +38,15 @@ const useScopedController =
 router.post(
   "/login",
   validate(LoginSchema, "body"),
-  useScopedController((controller, req, res, next) =>
-    controller.localAuthenticate(req, res, next),
-  ),
+  useController("AuthController", c => c.localAuthenticate)
 );
-
 /**
  * @route POST /auth/signup
  */
 router.post(
   "/signup",
   validate(SignupSchema, "body"),
-  useScopedController((controller, req, res, next) =>
-    controller.localSignup(req, res, next),
-  ),
+  useController("AuthController", c => c.localSignup)
 );
 
 /**
@@ -66,9 +54,7 @@ router.post(
  */
 router.get(
   "/verify",
-  useScopedController((controller, req, res, next) =>
-    controller.localVerifyEmail(req, res, next),
-  ),
+  useController("AuthController", c => c.localVerifyEmail)
 );
 
 /**
@@ -77,9 +63,7 @@ router.get(
 router.post(
   "/microsoft/verify",
   validate(MicrosoftSchema, "body"),
-  useScopedController((controller, req, res, next) =>
-    controller.microsoftAuthenticate(req, res, next),
-  ),
+  useController("AuthController", c => c.microsoftAuthenticate)
 );
 
 /**
@@ -88,9 +72,7 @@ router.post(
 router.post(
   "/google/verify",
   validate(GoogleSchema, "body"),
-  useScopedController((controller, req, res, next) =>
-    controller.googleAuthenticate(req, res, next),
-  ),
+  useController("AuthController", c => c.googleAuthenticate)
 );
 
 /**
@@ -98,9 +80,7 @@ router.post(
  */
 router.get(
   "/refresh",
-  useScopedController((controller, req, res, next) =>
-    controller.refreshAccessToken(req, res, next),
-  ),
+  useController("AuthController", c => c.refreshAccessToken)
 );
 
 /**
@@ -108,9 +88,7 @@ router.get(
  */
 router.post(
   "/logout",
-  useScopedController((controller, req, res, next) =>
-    controller.logoutRefreshToken(req, res, next),
-  ),
+  useController("AuthController", c => c.logoutRefreshToken)
 );
 
 export default router;
