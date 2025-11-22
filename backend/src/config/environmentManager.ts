@@ -29,10 +29,26 @@ class EnvironmentManager {
     this.redis_url = this.req(env, "REDIS_URL");
     this.mongo_url = this.req(env, "MONGO_URL");
     this.jwt_secret_access = this.opt(env, "JWT_SECRET_ACCESS", "dev-secret")!;
-    this.jwt_secret_refresh = this.opt(env, "JWT_SECRET_REFRESH", "dev-secret-2")!;
-    this.jwt_secret_verify = this.opt(env, "JWT_SECRET_VERIFY", "dev-secret-3")!;
-    this.cors_whitelist = this.opt(env, "CORS_WHITELIST", "http://localhost:3040")!;
-    this.frontend_client = this.opt(env, "FRONTEND_CLIENT", "http://localhost:3040")!;
+    this.jwt_secret_refresh = this.opt(
+      env,
+      "JWT_SECRET_REFRESH",
+      "dev-secret-2",
+    )!;
+    this.jwt_secret_verify = this.opt(
+      env,
+      "JWT_SECRET_VERIFY",
+      "dev-secret-3",
+    )!;
+    this.cors_whitelist = this.opt(
+      env,
+      "CORS_WHITELIST",
+      "http://localhost:3040",
+    )!;
+    this.frontend_client = this.opt(
+      env,
+      "FRONTEND_CLIENT",
+      "http://localhost:3040",
+    )!;
     this.zod_configuration = this.opt(env, "ZOD_CONFIGURATION", "passthrough");
     this.google_client_id = this.opt(env, "GOOGLE_CLIENT_ID");
     this.google_captcha_secret = this.opt(env, "GOOGLE_CAPTCHA_SECRET");
@@ -42,7 +58,11 @@ class EnvironmentManager {
     this.email_pass = this.opt(env, "EMAIL_PASS");
     this.paypal_client_id = this.opt(env, "PAYPAL_CLIENT_ID");
     this.paypal_secret_key = this.opt(env, "PAYPAL_SECRET_KEY");
-    this.paypal_api = this.opt(env, "PAYPAL_API", "https://api-m.sandbox.paypal.com");
+    this.paypal_api = this.opt(
+      env,
+      "PAYPAL_API",
+      "https://api-m.sandbox.paypal.com",
+    );
     this.paypal_currency = this.opt(env, "PAYMENT_CURRENCY", "CAD");
 
     Object.freeze(this);
@@ -54,7 +74,11 @@ class EnvironmentManager {
     return v;
   }
 
-  private opt(env: NodeJS.ProcessEnv, key: string, def?: string): string | undefined {
+  private opt(
+    env: NodeJS.ProcessEnv,
+    key: string,
+    def?: string,
+  ): string | undefined {
     const v = env[key];
     return v ? v : def;
   }

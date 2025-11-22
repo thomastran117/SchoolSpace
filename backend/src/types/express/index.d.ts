@@ -1,5 +1,5 @@
-import type { UserPayload } from "../../models/token";
 import type container from "../../container";
+import type { UserPayload } from "../../models/token";
 
 declare global {
   namespace Express {

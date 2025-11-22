@@ -18,7 +18,7 @@ const router: Router = express.Router();
 
 function useController<K extends ControllerKey>(
   key: K,
-  selector: (instance: ControllerInstance<K>) => any
+  selector: (instance: ControllerInstance<K>) => any,
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -38,7 +38,7 @@ function useController<K extends ControllerKey>(
 router.post(
   "/login",
   validate(LoginSchema, "body"),
-  useController("AuthController", c => c.localAuthenticate)
+  useController("AuthController", (c) => c.localAuthenticate),
 );
 /**
  * @route POST /auth/signup
@@ -46,7 +46,7 @@ router.post(
 router.post(
   "/signup",
   validate(SignupSchema, "body"),
-  useController("AuthController", c => c.localSignup)
+  useController("AuthController", (c) => c.localSignup),
 );
 
 /**
@@ -54,7 +54,7 @@ router.post(
  */
 router.get(
   "/verify",
-  useController("AuthController", c => c.localVerifyEmail)
+  useController("AuthController", (c) => c.localVerifyEmail),
 );
 
 /**
@@ -63,7 +63,7 @@ router.get(
 router.post(
   "/microsoft/verify",
   validate(MicrosoftSchema, "body"),
-  useController("AuthController", c => c.microsoftAuthenticate)
+  useController("AuthController", (c) => c.microsoftAuthenticate),
 );
 
 /**
@@ -72,7 +72,7 @@ router.post(
 router.post(
   "/google/verify",
   validate(GoogleSchema, "body"),
-  useController("AuthController", c => c.googleAuthenticate)
+  useController("AuthController", (c) => c.googleAuthenticate),
 );
 
 /**
@@ -80,7 +80,7 @@ router.post(
  */
 router.get(
   "/refresh",
-  useController("AuthController", c => c.refreshAccessToken)
+  useController("AuthController", (c) => c.refreshAccessToken),
 );
 
 /**
@@ -88,7 +88,7 @@ router.get(
  */
 router.post(
   "/logout",
-  useController("AuthController", c => c.logoutRefreshToken)
+  useController("AuthController", (c) => c.logoutRefreshToken),
 );
 
 export default router;

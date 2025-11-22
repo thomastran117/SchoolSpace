@@ -24,8 +24,8 @@ import logger from "./utility/logger";
 // Middleware
 import { errorHandler } from "./middleware/errorHandlerMiddleware";
 import requestLogger from "./middleware/httpLoggerMiddleware";
-import { securityMiddlewareBundle } from "./middleware/securityMiddleware";
 import { requestScopeMiddleware } from "./middleware/scopeMiddleware";
+import { securityMiddlewareBundle } from "./middleware/securityMiddleware";
 // Routes
 import serverRoutes from "./route/route";
 

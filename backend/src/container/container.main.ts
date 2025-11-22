@@ -107,10 +107,12 @@ class Container {
       this.resolve("EnvironmentManager");
       logger.info("Environment variables loaded");
     } catch (err: any) {
-      logger.error(`[Container] Failed to resolve EnvironmentManager: ${err?.message}`);
+      logger.error(
+        `[Container] Failed to resolve EnvironmentManager: ${err?.message}`,
+      );
       throw new Error("Failed to initialize EnvironmentManager");
     }
-    
+
     await this.coreInitializer.initialize();
 
     for (const [key, reg] of this.services) {

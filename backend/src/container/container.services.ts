@@ -1,3 +1,4 @@
+import { EnvironmentManager } from "../config/environmentManager";
 import { AnnoucementService } from "../service/annoucementService";
 import { AppointmentService } from "../service/appointmentService";
 import { AssignmentService } from "../service/assignmentService";
@@ -21,7 +22,6 @@ import { BasicTokenService, TokenService } from "../service/tokenService";
 import { TutorService } from "../service/tutorService";
 import { UserService } from "../service/userService";
 import { WebService } from "../service/webService";
-import { EnvironmentManager } from "../config/environmentManager";
 
 import type { Registration } from "./container.types";
 

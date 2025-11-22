@@ -29,16 +29,17 @@ export const ControllerTypes = {
   GradeController,
   FileController,
   CourseController,
-    EnrollmentController,
-    DiscussionController,
-    BookingController,
-    CatalogueController,
-    AssignmentController,
-    AppointmentController,
-    AnnouncementController
+  EnrollmentController,
+  DiscussionController,
+  BookingController,
+  CatalogueController,
+  AssignmentController,
+  AppointmentController,
+  AnnouncementController,
 };
 
 export type ControllerKey = keyof typeof ControllerTypes;
 
-export type ControllerInstance<K extends ControllerKey> =
-  InstanceType<(typeof ControllerTypes)[K]>;
+export type ControllerInstance<K extends ControllerKey> = InstanceType<
+  (typeof ControllerTypes)[K]
+>;
