@@ -6,6 +6,9 @@
 import type { NextFunction, Request, Response, Router } from "express";
 import express from "express";
 import {
+  AppleSchema,
+  ChangePasswordSchema,
+  ForgotPasswordSchema,
   GoogleSchema,
   LoginSchema,
   MicrosoftSchema,
@@ -58,6 +61,24 @@ router.get(
 );
 
 /**
+ * @route POST /auth/forgot-password
+ */
+router.post(
+  "/post",
+  validate(ForgotPasswordSchema, "body"),
+  useController("AuthController", (c) => c.localForgotPassword),
+);
+
+/**
+ * @route POST /auth/change-password
+ */
+router.post(
+  "/post",
+  validate(ChangePasswordSchema, "body"),
+  useController("AuthController", (c) => c.localChangePassword),
+);
+
+/**
  * @route POST /auth/microsoft/verify
  */
 router.post(
@@ -73,6 +94,15 @@ router.post(
   "/google/verify",
   validate(GoogleSchema, "body"),
   useController("AuthController", (c) => c.googleAuthenticate),
+);
+
+/**
+ * @route POST /auth/apple/verify
+ */
+router.post(
+  "/apple/verify",
+  validate(AppleSchema, "body"),
+  useController("AuthController", (c) => c.appleAuthenticate),
 );
 
 /**

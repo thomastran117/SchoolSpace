@@ -4,24 +4,28 @@
  * Handles authentication API requests and responses
  *
  * @module controller
- * @version 1.0.0
+ * @version 2.0.0
  * @auth Thomas
  */
 
-import type { NextFunction, Request, Response } from "express";
-
 import env from "../config/envConfigs";
+import { httpError, HttpError, sendCookie } from "../utility/httpUtility";
+import logger from "../utility/logger";
+
+import type { NextFunction, Request, Response } from "express";
+import type { TypedRequest, TypedResponse } from "../types/express";
+
 import type {
+  AppleDto,
   AuthResponseDto,
+  ChangePasswordDto,
+  ForgotPasswordDto,
   GoogleDto,
   LoginDto,
   MicrosoftDto,
   SignupDto,
 } from "../dto/authSchema";
 import type { AuthService } from "../service/authService";
-import type { TypedRequest, TypedResponse } from "../types/express";
-import { httpError, HttpError, sendCookie } from "../utility/httpUtility";
-import logger from "../utility/logger";
 
 class AuthController {
   private readonly authService: AuthService;
@@ -31,8 +35,11 @@ class AuthController {
     this.localAuthenticate = this.localAuthenticate.bind(this);
     this.localSignup = this.localSignup.bind(this);
     this.localVerifyEmail = this.localVerifyEmail.bind(this);
+    this.localForgotPassword = this.localForgotPassword.bind(this);
+    this.localChangePassword = this.localChangePassword.bind(this);
     this.googleAuthenticate = this.googleAuthenticate.bind(this);
     this.microsoftAuthenticate = this.microsoftAuthenticate.bind(this);
+    this.appleAuthenticate = this.appleAuthenticate.bind(this);
     this.refreshAccessToken = this.refreshAccessToken.bind(this);
     this.logoutRefreshToken = this.logoutRefreshToken.bind(this);
   }
@@ -121,7 +128,61 @@ class AuthController {
       await this.authService.verifyUser(token);
 
       res.status(201).json({
-        message: "User verified — please log in.",
+        message: "User verified - please log in.",
+      });
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
+    }
+  }
+
+  public async localForgotPassword(
+    req: TypedRequest<ForgotPasswordDto>,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { email } = req.body;
+      await this.authService.forgotPassword(email);
+
+      res.status(200).json({
+        message:
+          "If the account with email exists, we sent a link to the email",
+      });
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
+    }
+  }
+
+  public async localChangePassword(
+    req: TypedRequest<ChangePasswordDto>,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const token = req.query.token as string | undefined;
+      if (!token) httpError(400, "Missing token");
+
+      const { password } = req.body;
+      await this.authService.changePassword(token, password);
+
+      res.status(200).json({
+        message: "Password changed successfully - please login now",
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
@@ -206,6 +267,40 @@ class AuthController {
 
       logger.error(
         `[AuthController] googleAuthenticate failed: ${err?.message ?? err}`,
+      );
+
+      return next(new HttpError(500, "Internal server error"));
+    }
+  }
+
+  public async appleAuthenticate(
+    req: TypedRequest<AppleDto>,
+    res: TypedResponse<AuthResponseDto>,
+    next: NextFunction,
+  ) {
+    try {
+      const { id_token: appleToken } = req.body;
+      if (!appleToken) httpError(400, "Apple token missing");
+
+      const { accessToken, refreshToken, role, username, avatar } =
+        await this.authService.appleOAuth(appleToken);
+
+      sendCookie(res, refreshToken);
+
+      return res.status(200).json({
+        message: "Login successful",
+        accessToken,
+        role,
+        avatar: avatar ?? undefined,
+        username: username ?? undefined,
+      });
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        return next(err);
+      }
+
+      logger.error(
+        `[AuthController] appleAuthenticate failed: ${err?.message ?? err}`,
       );
 
       return next(new HttpError(500, "Internal server error"));

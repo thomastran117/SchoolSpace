@@ -14,16 +14,28 @@ const SignupSchema = AuthSchema.extend({
   role: z.enum(["student", "teacher"]),
 });
 
+const ChangePasswordSchema = z.object({
+  password: z.string().min(6).max(128),
+});
+
+const ForgotPasswordSchema = z.object({
+  email: z.string().email().max(100),
+});
+
 const MicrosoftSchema = z.object({
   id_token: z.string().min(10).max(1500),
 });
 
 const GoogleSchema = MicrosoftSchema;
+const AppleSchema = MicrosoftSchema;
 
 type LoginDto = z.infer<typeof LoginSchema>;
 type SignupDto = z.infer<typeof SignupSchema>;
+type ForgotPasswordDto = z.infer<typeof ForgotPasswordSchema>;
+type ChangePasswordDto = z.infer<typeof ChangePasswordSchema>;
 type MicrosoftDto = z.infer<typeof MicrosoftSchema>;
 type GoogleDto = z.infer<typeof GoogleSchema>;
+type AppleDto = z.infer<typeof AppleSchema>;
 
 interface AuthResponseDto {
   message: string;
@@ -33,6 +45,22 @@ interface AuthResponseDto {
   username?: string;
 }
 
-export { GoogleSchema, LoginSchema, MicrosoftSchema, SignupSchema };
-
-export type { AuthResponseDto, GoogleDto, LoginDto, MicrosoftDto, SignupDto };
+export {
+  AppleSchema,
+  ChangePasswordSchema,
+  ForgotPasswordSchema,
+  GoogleSchema,
+  LoginSchema,
+  MicrosoftSchema,
+  SignupSchema,
+};
+export type {
+  AppleDto,
+  AuthResponseDto,
+  ChangePasswordDto,
+  ForgotPasswordDto,
+  GoogleDto,
+  LoginDto,
+  MicrosoftDto,
+  SignupDto,
+};

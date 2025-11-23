@@ -5,11 +5,13 @@
  * email/password, Google/Microsoft OAuth, and JWT lifecycle management.
  *
  * @module service
- * @version 1.0.0
+ * @version 2.0.0
  * @auth Thomas
  */
 
+// Imports
 import bcrypt from "bcrypt";
+
 import env from "../config/envConfigs";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
@@ -47,6 +49,23 @@ class AuthService {
     this.webService = webService;
   }
 
+/**
+ * Authenticates a user using email + password (local login).
+ *
+ * Performs optional Google reCAPTCHA verification, validates the user's
+ * credentials using a constant-time hash comparison, and issues both
+ * access and refresh tokens.
+ *
+ * @param email - The user's email address.
+ * @param password - The plaintext password provided by the user.
+ * @param remember - Whether the refresh token should expire later (persistent login).
+ * @param captcha - Google reCAPTCHA token to validate (if enabled).
+ *
+ * @returns AuthResponse containing access token, refresh token, and user metadata.
+ *
+ * @throws {HttpError} 401 - When captcha verification fails or credentials are invalid.
+ * @throws {HttpError} 500 - On unexpected internal errors.
+ */
   public async loginUser(
     email: string,
     password: string,
@@ -55,16 +74,16 @@ class AuthService {
   ): Promise<AuthResponse> {
     try {
       if (env.isCaptchaEnabled()) {
-        const result = this.webService.verifyGoogleCaptcha(captcha ?? "");
+        const result = await this.webService.verifyGoogleCaptcha(captcha);
         if (!result) httpError(401, "Invalid captcha");
       } else {
-        logger.warn("Google Captcha is not available");
+        logger.warn("[AuthService] Google Captcha is not available");
       }
 
       const user = await this.userRepository.findByEmail(email);
 
       const hashToCheck = user?.password ?? this.DUMMY_HASH;
-      const passwordMatches = await bcrypt.compare(password, hashToCheck);
+      const passwordMatches = await this.comparePassword(password, hashToCheck);
       if (!user || !passwordMatches || !user.password) {
         httpError(401, "Invalid credentials");
       }
@@ -95,6 +114,24 @@ class AuthService {
     }
   }
 
+/**
+ * Authenticates a user using email + password (local login).
+ *
+ * Performs optional Google reCAPTCHA verification, generates the signup information and
+ * sends the verification with an email
+ * 
+ * May skip email verification if configured to do so
+ *
+ * @param email - The user's email address.
+ * @param password - The plaintext password provided by the user.
+ * @param role - The user's desired role for the system.
+ * @param captcha - Google reCAPTCHA token to validate (if enabled).
+ *
+ * @returns boolean whether the signup process is successful.
+ *
+ * @throws {HttpError} 401 - When captcha verification fails or credentials are invalid.
+ * @throws {HttpError} 500 - On unexpected internal errors.
+ */
   public async signupUser(
     email: string,
     password: string,
@@ -103,16 +140,16 @@ class AuthService {
   ): Promise<boolean> {
     try {
       if (env.isCaptchaEnabled()) {
-        const result = await this.webService.verifyGoogleCaptcha(captcha ?? "");
+        const result = await this.webService.verifyGoogleCaptcha(captcha);
         if (!result) httpError(401, "Invalid captcha");
       } else {
-        logger.warn("Google Captcha is not available");
+        logger.warn("[AuthService] Google Captcha is not available");
       }
 
       const existingUser = await this.userRepository.findByEmail(email);
       if (existingUser) httpError(409, "Email already in use");
 
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await this.hashPassword(password);
       const token = await this.tokenService.createVerifyToken(
         email,
         hashedPassword,
@@ -125,7 +162,7 @@ class AuthService {
         )}`;
         await this.emailService.sendVerificationEmail(email, url);
       } else {
-        logger.warn("Email verification is not available");
+        logger.warn("[AuthService] Email verification is not available");
         await this.userRepository.create(email, role, "local", hashedPassword);
       }
     } catch (err: any) {
@@ -139,6 +176,14 @@ class AuthService {
     return true;
   }
 
+  /**
+   * Completes a user signup process by verifying whether the token was issued by theServer
+   *
+   * @param token - The verify token to validate
+   * @returns Returns the user metadata
+   *
+   * @throws {Error} If the verification fails
+   */
   public async verifyUser(token: string) {
     try {
       const { email, password, role } =
@@ -164,9 +209,88 @@ class AuthService {
     }
   }
 
-  public async microsoftOAuth(idToken: string): Promise<AuthResponse> {
+  /**
+   * Starts the forgot password chain - if the user email exist, the server will
+   * send a reset link
+   *
+   * @param email - Email provided by the user
+   * @returns Void - the service is designed to always return success
+   *
+   * @throws {Error} If the process fails
+   */
+  public async forgotPassword(email: string) {
     try {
-      const claims = await this.oauthService.verifyMicrosoftToken(idToken);
+      const user = await this.userRepository.findByEmail(email);
+      if (!user) {
+        return;
+      }
+
+      if (user.provider == "google" || user.provider == "microsoft") {
+        return;
+      }
+      const token = await this.tokenService.createVerifyToken(
+        email,
+        "empty",
+        "empty",
+      );
+      const url = `${FRONTEND_CLIENT}/auth/forgot-password?token=${encodeURIComponent(
+        token,
+      )}`;
+      await this.emailService.sendVerificationEmail(email, url); //change to forgot password
+
+      return;
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[AuthService] forgotPassword failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
+  }
+
+  /**
+   * Finishes the reset password chain
+   *
+   * @param token - The verify token to validate
+   * @param password - The new plaintext password provided by the user
+   * @returns Void
+   *
+   * @throws {Error} If the process fails
+   */
+  public async changePassword(token: string, password: string) {
+    try {
+      const { email } = await this.tokenService.validateVerifyToken(token);
+      const hashedPassword = await this.hashPassword(password);
+      const user = await this.userRepository.findByEmail(email);
+      if (!user) {
+        httpError(404, "User not found");
+      }
+      await this.userRepository.update(user.id, hashedPassword);
+      return;
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(
+        `[AuthService] changePassword failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
+  }
+
+  /**
+   * Authenicates an User using Microsoft OAuth 2.0
+   *
+   * @param microsoftToken - The microsoft token to validate using Microsoft's OAuth 2.0 service
+   * @returns access token, refreh token and user information
+   *
+   * @throws {Error} If the authenication fails or is not successful
+   */
+  public async microsoftOAuth(microsoftToken: string): Promise<AuthResponse> {
+    try {
+      const claims = await this.oauthService.verifyMicrosoftToken(microsoftToken);
 
       const microsoftSub = (claims as any).sub || (claims as any).oid;
       const email = (claims as any).email || (claims as any).preferred_username;
@@ -214,6 +338,14 @@ class AuthService {
     }
   }
 
+  /**
+   * Authenicates an User using Google OAuth 2.0
+   *
+   * @param googleToken - The google token to validate using Google's OAuth 2.0 service
+   * @returns access token, refreh token and user information
+   *
+   * @throws {Error} If the authenication fails or is not successful
+   */
   public async googleOAuth(googleToken: string): Promise<AuthResponse> {
     try {
       const googleUser = await this.oauthService.verifyGoogleToken(googleToken);
@@ -257,6 +389,34 @@ class AuthService {
     }
   }
 
+  /**
+   * Authenicates an User using Apple OAuth 2.0
+   *
+   * @param appletoken - The apple token to validate using Apple's OAuth 2.0 service
+   * @returns access token, refreh token and user information
+   *
+   * @throws {Error} If the authenication fails or is not successful
+   */
+  public async appleOAuth(appleToken: string) {
+    try {
+      return;
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[AuthService] appleOAuth failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
+  }
+
+  /**
+   * Logouts an User by invalidating their assigned refresh token
+   *
+   * @param token - The refresh token to invalidate
+   * @returns Boolean whether the logout was successful
+   *
+   * @throws {Error} If the invalidation fails
+   */
   public async generateNewTokens(oldToken: string): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -279,6 +439,14 @@ class AuthService {
     }
   }
 
+  /**
+   * Logouts an User by invalidating their assigned refresh token
+   *
+   * @param token - The refresh token to invalidate
+   * @returns Boolean whether the logout was successful
+   *
+   * @throws {Error} If the invalidation fails
+   */
   public async authLogout(token: string): Promise<boolean> {
     try {
       return await this.tokenService.logoutToken(token);
@@ -287,6 +455,50 @@ class AuthService {
         throw err;
       }
       logger.error(`[AuthService] authLogout failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
+  }
+
+  /**
+   * Compares a plain password against a bcrypt hashed password
+   *
+   * @param plainPassword - The plaintext password to compare
+   * @param hashPassword - The hashPassword from the Database
+   * @returns Boolean whether the two passwords matches
+   *
+   * @throws {Error} If the comparison operation fails
+   */
+  private async comparePassword(
+    plainPassword: string,
+    hashPassword: string,
+  ): Promise<boolean> {
+    try {
+      return await bcrypt.compare(plainPassword, hashPassword);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[AuthService] authLogout failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
+  }
+
+  /**
+   * Hashes a plaintext password using bcrypt with a cost factor of 10.
+   *
+   * @param password - The plaintext password to hash.
+   * @returns The hashed password string.
+   *
+   * @throws {Error} If the hashing operation fails.
+   */
+  private async hashPassword(password: string): Promise<string> {
+    try {
+      return await bcrypt.hash(password, 10);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[AuthService] hashPassword failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
   }
