@@ -283,7 +283,7 @@ class AuthController {
       if (!appleToken) httpError(400, "Apple token missing");
 
       const { accessToken, refreshToken, role, username, avatar } =
-        await this.authService.appleOAuth(appleToken);
+        await this.authService.googleOAuth(appleToken); //change to appleOAuth later
 
       sendCookie(res, refreshToken);
 
