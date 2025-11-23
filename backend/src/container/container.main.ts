@@ -2,6 +2,7 @@ import logger from "../utility/logger";
 import { registerControllerModules } from "./container.controllers";
 import { CoreInitializer } from "./container.core";
 import { registerServiceModules } from "./container.services";
+import { registerRepositoryModules } from "./container.repository";
 import type { Registration } from "./container.types";
 
 class Container {
@@ -11,6 +12,7 @@ class Container {
   private initialized = false;
 
   protected constructor() {
+    for (const [k, v] of registerRepositoryModules()) this.services.set(k, v);
     for (const [k, v] of registerServiceModules()) this.services.set(k, v);
     for (const [k, v] of registerControllerModules()) this.services.set(k, v);
   }

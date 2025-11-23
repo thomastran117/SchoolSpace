@@ -1,0 +1,36 @@
+import { UserRepository } from "../repository/userRepository";
+import { CourseRepository } from "../repository/courseRepository";
+import { CatalogueRepository } from "../repository/catalogueRepository";
+
+import type { Registration } from "./container.types";
+
+import logger from "../utility/logger";
+
+function registerRepositoryModules(): Map<string, Registration<any>> {
+  try {
+    const repositories = new Map<string, Registration<any>>();
+
+    repositories.set("UserRepository", {
+      factory: () => new UserRepository(),
+      lifetime: "singleton",
+    });
+    repositories.set("CourseRepository", {
+      factory: () => new CourseRepository(),
+      lifetime: "singleton",
+    });
+
+    repositories.set("CatalogueRepository", {
+      factory: () => new CatalogueRepository(),
+      lifetime: "singleton",
+    });
+
+    return repositories;
+  } catch (err: any) {
+    logger.error(
+      `[Container] Repositories registration failed: ${err?.message ?? err}`,
+    );
+    process.exit(1);
+  }
+}
+
+export { registerRepositoryModules };
