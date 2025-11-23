@@ -36,8 +36,6 @@ class EnvConfig {
   public readonly mongo_url: string;
 
   public readonly jwt_secret_access: string;
-  public readonly jwt_secret_refresh: string;
-  public readonly jwt_secret_verify: string;
 
   public readonly google_client_id?: string;
   public readonly google_captcha_secret?: string;
@@ -58,8 +56,6 @@ class EnvConfig {
     this.redis_url = this.req("REDIS_URL");
     this.mongo_url = this.req("MONGO_URL");
     this.jwt_secret_access = this.opt("JWT_SECRET_ACCESS", "dev-secret")!;
-    this.jwt_secret_refresh = this.opt("JWT_SECRET_REFRESH", "dev-secret-2")!;
-    this.jwt_secret_verify = this.opt("JWT_SECRET_VERIFY", "dev-secret-3")!;
     this.cors_whitelist = this.opt("CORS_WHITELIST", "http://localhost:3040")!;
     this.frontend_client = this.opt(
       "FRONTEND_CLIENT",

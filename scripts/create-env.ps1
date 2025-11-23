@@ -9,12 +9,6 @@ $envFilePathFrontend = Join-Path $frontendPath ".env"
 
 $envContent_frontend = @'
 ##############################################
-# Configuration
-##############################################
-
-VITE_ENVIRONMENT="development"
-
-##############################################
 # Server
 ##############################################
 
@@ -38,6 +32,7 @@ $envContent_backend = @'
 ##############################################
 
 ENVIRONMENT="development"
+ZOD_CONFIGURATION="strip"
 
 ##############################################
 # Server
@@ -55,12 +50,12 @@ REDIS_URL="redis://127.0.0.1:6379"
 MONGO_URL="mongodb://localhost:27017/app"
 
 ##############################################
-# Security / JWT
+# Security
 ##############################################
 
 JWT_SECRET_ACCESS="access-jwt-token"
-JWT_SECRET_REFRESH="refresh-jwt-token"
-JWT_SECRET_VERIFY="verify-jwt-token"
+GOOGLE_CAPTCHA_SECRET="google-captcha"
+
 
 ##############################################
 # CORS Configuration
@@ -82,6 +77,14 @@ EMAIL_PASS=""
 GOOGLE_CLIENT_ID=""
 MS_TENANT_ID=""
 MS_CLIENT_ID=""
+
+##############################################
+# Paypal
+##############################################
+PAYPAL_CLIENT_ID="paypal-clientid"
+PAYPAL_SECRET_KEY="secret-key"
+PAYPAL_API="https://api-m.sandbox.paypal.com"
+PAYMENT_CURRENCY="CAD"
 
 '@
 

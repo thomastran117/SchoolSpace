@@ -7,8 +7,6 @@ class EnvironmentManager {
   public readonly mongo_url: string;
 
   public readonly jwt_secret_access: string;
-  public readonly jwt_secret_refresh: string;
-  public readonly jwt_secret_verify: string;
 
   public readonly google_client_id?: string;
   public readonly google_captcha_secret?: string;
@@ -29,16 +27,6 @@ class EnvironmentManager {
     this.redis_url = this.req(env, "REDIS_URL");
     this.mongo_url = this.req(env, "MONGO_URL");
     this.jwt_secret_access = this.opt(env, "JWT_SECRET_ACCESS", "dev-secret")!;
-    this.jwt_secret_refresh = this.opt(
-      env,
-      "JWT_SECRET_REFRESH",
-      "dev-secret-2",
-    )!;
-    this.jwt_secret_verify = this.opt(
-      env,
-      "JWT_SECRET_VERIFY",
-      "dev-secret-3",
-    )!;
     this.cors_whitelist = this.opt(
       env,
       "CORS_WHITELIST",

@@ -19,7 +19,8 @@ ENV_CONTENT_FRONT=$(cat <<'EOF'
 # Configuration
 ##############################################
 
-VITE_ENVIRONMENT="development"
+ENVIRONMENT="development"
+ZOD_CONFIGURATION="strip"
 
 ##############################################
 # Server
@@ -37,10 +38,9 @@ VITE_MSAL_AUTHORITY="https://login.microsoftonline.com/common"
 VITE_MSAL_REDIRECT_URI="http://localhost:3040/auth/callback"
 VITE_GOOGLE_CLIENT_ID="google_client"
 
-EOF
-)
+'@
 
-ENV_CONTENT_BACK=$(cat <<'EOF'
+$envContent_backend = @'
 ##############################################
 # Configuration
 ##############################################
@@ -63,12 +63,12 @@ REDIS_URL="redis://127.0.0.1:6379"
 MONGO_URL="mongodb://localhost:27017/app"
 
 ##############################################
-# Security / JWT
+# Security
 ##############################################
 
 JWT_SECRET_ACCESS="access-jwt-token"
-JWT_SECRET_REFRESH="refresh-jwt-token"
-JWT_SECRET_VERIFY="verify-jwt-token"
+GOOGLE_CAPTCHA_SECRET="google-captcha"
+
 
 ##############################################
 # CORS Configuration
@@ -90,6 +90,14 @@ EMAIL_PASS=""
 GOOGLE_CLIENT_ID=""
 MS_TENANT_ID=""
 MS_CLIENT_ID=""
+
+##############################################
+# Paypal
+##############################################
+PAYPAL_CLIENT_ID="paypal-clientid"
+PAYPAL_SECRET_KEY="secret-key"
+PAYPAL_API="https://api-m.sandbox.paypal.com"
+PAYMENT_CURRENCY="CAD"
 
 EOF
 )
