@@ -11,11 +11,11 @@
 
 import bcrypt from "bcrypt";
 import env from "../config/envConfigs";
-import prisma from "../resource/prisma";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 import type { AuthResponse } from "../models/auth";
+import type { UserRepository } from "../repository/userRepository";
 import type { EmailService } from "./emailService";
 import type { OAuthService } from "./oauthService";
 import type { TokenService } from "./tokenService";
@@ -24,18 +24,23 @@ import type { WebService } from "./webService";
 const { frontend_client: FRONTEND_CLIENT } = env;
 
 class AuthService {
+  private readonly userRepository: UserRepository;
   private readonly emailService: EmailService;
   private readonly tokenService: TokenService;
   private readonly oauthService: OAuthService;
   private readonly webService: WebService;
-  private readonly DUMMY_HASH = "$2b$10$CwTycUXWue0Thq9StjUM0uJ8T8YtAUD3bFIxVYbcEdb87qfEzS1mS";
+
+  private readonly DUMMY_HASH =
+    "$2b$10$CwTycUXWue0Thq9StjUM0uJ8T8YtAUD3bFIxVYbcEdb87qfEzS1mS";
 
   constructor(
+    userRepository: UserRepository,
     emailService: EmailService,
     tokenService: TokenService,
     oauthService: OAuthService,
     webService: WebService,
   ) {
+    this.userRepository = userRepository;
     this.emailService = emailService;
     this.tokenService = tokenService;
     this.oauthService = oauthService;
@@ -56,8 +61,8 @@ class AuthService {
         logger.warn("Google Captcha is not available");
       }
 
-      const user = await prisma.user.findUnique({ where: { email } });
-      
+      const user = await this.userRepository.findByEmail(email);
+
       const hashToCheck = user?.password ?? this.DUMMY_HASH;
       const passwordMatches = await bcrypt.compare(password, hashToCheck);
       if (!user || !passwordMatches || !user.password) {
@@ -104,7 +109,7 @@ class AuthService {
         logger.warn("Google Captcha is not available");
       }
 
-      const existingUser = await prisma.user.findUnique({ where: { email } });
+      const existingUser = await this.userRepository.findByEmail(email);
       if (existingUser) httpError(409, "Email already in use");
 
       const hashedPassword = await bcrypt.hash(password, 10);
@@ -121,9 +126,7 @@ class AuthService {
         await this.emailService.sendVerificationEmail(email, url);
       } else {
         logger.warn("Email verification is not available");
-        await prisma.user.create({
-          data: { email, password: hashedPassword, role: role as any },
-        });
+        await this.userRepository.create(email, role, "local", hashedPassword);
       }
     } catch (err: any) {
       if (err instanceof HttpError) {
@@ -140,9 +143,12 @@ class AuthService {
     try {
       const { email, password, role } =
         await this.tokenService.validateVerifyToken(token);
-      const user = await prisma.user.create({
-        data: { email, password, role: role as any },
-      });
+      const user = await this.userRepository.create(
+        email,
+        role,
+        "local",
+        password,
+      );
 
       if (env.isEmailEnabled()) {
         await this.emailService.sendWelcomeEmail(email);
@@ -169,28 +175,16 @@ class AuthService {
       if (!email) httpError(400, "Microsoft email missing");
       if (!microsoftSub) httpError(400, "Microsoft subject missing");
 
-      let user = await prisma.user.findUnique({ where: { email } });
+      let user = await this.userRepository.findByEmail(email);
 
       if (!user) {
-        user = await prisma.user.create({
-          data: {
-            email,
-            name,
-            provider: "microsoft",
-            password: null,
-            microsoftId: microsoftSub,
-            role: "notdefined",
-          },
-        });
-      } else if (!user.microsoftId) {
-        user = await prisma.user.update({
-          where: { id: user.id },
-          data: {
-            microsoftId: microsoftSub,
-            provider: "microsoft",
-            name: user.name || name,
-          },
-        });
+        user = await this.userRepository.create(
+          email,
+          "notdefined",
+          "microsoft",
+          undefined,
+          microsoftSub,
+        );
       }
 
       const { accessToken, refreshToken } =
@@ -225,21 +219,17 @@ class AuthService {
       const googleUser = await this.oauthService.verifyGoogleToken(googleToken);
       if (!googleUser?.email) httpError(401, "Invalid Google token");
 
-      let user = await prisma.user.findUnique({
-        where: { email: googleUser.email },
-      });
+      let user = await this.userRepository.findByEmail(googleUser.email);
 
       if (!user) {
-        user = await prisma.user.create({
-          data: {
-            email: googleUser.email!,
-            name: googleUser.name,
-            avatar: googleUser.picture,
-            googleId: googleUser.sub,
-            provider: "google",
-            role: "notdefined",
-          },
-        });
+        user = await this.userRepository.create(
+          googleUser.email!,
+          "notdefined",
+          "google",
+          undefined,
+          undefined,
+          googleUser.sub,
+        );
       }
 
       const { accessToken, refreshToken } =
