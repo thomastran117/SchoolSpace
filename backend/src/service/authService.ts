@@ -28,6 +28,7 @@ class AuthService {
   private readonly tokenService: TokenService;
   private readonly oauthService: OAuthService;
   private readonly webService: WebService;
+  private readonly DUMMY_HASH = "$2b$10$CwTycUXWue0Thq9StjUM0uJ8T8YtAUD3bFIxVYbcEdb87qfEzS1mS";
 
   constructor(
     emailService: EmailService,
@@ -56,12 +57,12 @@ class AuthService {
       }
 
       const user = await prisma.user.findUnique({ where: { email } });
-      if (!user) httpError(401, "Invalid credentials");
-
-      if (!user.password) httpError(401, "This account uses OAuth login only");
-
-      const passwordMatches = await bcrypt.compare(password, user.password);
-      if (!passwordMatches) httpError(401, "Invalid credentials");
+      
+      const hashToCheck = user?.password ?? this.DUMMY_HASH;
+      const passwordMatches = await bcrypt.compare(password, hashToCheck);
+      if (!user || !passwordMatches || !user.password) {
+        httpError(401, "Invalid credentials");
+      }
 
       const { accessToken, refreshToken } =
         await this.tokenService.generateTokens(
@@ -169,11 +170,6 @@ class AuthService {
       if (!microsoftSub) httpError(400, "Microsoft subject missing");
 
       let user = await prisma.user.findUnique({ where: { email } });
-      if (!user) {
-        user = await prisma.user.findFirst({
-          where: { microsoftId: microsoftSub },
-        });
-      }
 
       if (!user) {
         user = await prisma.user.create({
