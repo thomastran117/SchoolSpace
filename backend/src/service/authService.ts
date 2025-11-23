@@ -49,23 +49,23 @@ class AuthService {
     this.webService = webService;
   }
 
-/**
- * Authenticates a user using email + password (local login).
- *
- * Performs optional Google reCAPTCHA verification, validates the user's
- * credentials using a constant-time hash comparison, and issues both
- * access and refresh tokens.
- *
- * @param email - The user's email address.
- * @param password - The plaintext password provided by the user.
- * @param remember - Whether the refresh token should expire later (persistent login).
- * @param captcha - Google reCAPTCHA token to validate (if enabled).
- *
- * @returns AuthResponse containing access token, refresh token, and user metadata.
- *
- * @throws {HttpError} 401 - When captcha verification fails or credentials are invalid.
- * @throws {HttpError} 500 - On unexpected internal errors.
- */
+  /**
+   * Authenticates a user using email + password (local login).
+   *
+   * Performs optional Google reCAPTCHA verification, validates the user's
+   * credentials using a constant-time hash comparison, and issues both
+   * access and refresh tokens.
+   *
+   * @param email - The user's email address.
+   * @param password - The plaintext password provided by the user.
+   * @param remember - Whether the refresh token should expire later (persistent login).
+   * @param captcha - Google reCAPTCHA token to validate (if enabled).
+   *
+   * @returns AuthResponse containing access token, refresh token, and user metadata.
+   *
+   * @throws {HttpError} 401 - When captcha verification fails or credentials are invalid.
+   * @throws {HttpError} 500 - On unexpected internal errors.
+   */
   public async loginUser(
     email: string,
     password: string,
@@ -114,24 +114,24 @@ class AuthService {
     }
   }
 
-/**
- * Authenticates a user using email + password (local login).
- *
- * Performs optional Google reCAPTCHA verification, generates the signup information and
- * sends the verification with an email
- * 
- * May skip email verification if configured to do so
- *
- * @param email - The user's email address.
- * @param password - The plaintext password provided by the user.
- * @param role - The user's desired role for the system.
- * @param captcha - Google reCAPTCHA token to validate (if enabled).
- *
- * @returns boolean whether the signup process is successful.
- *
- * @throws {HttpError} 401 - When captcha verification fails or credentials are invalid.
- * @throws {HttpError} 500 - On unexpected internal errors.
- */
+  /**
+   * Authenticates a user using email + password (local login).
+   *
+   * Performs optional Google reCAPTCHA verification, generates the signup information and
+   * sends the verification with an email
+   *
+   * May skip email verification if configured to do so
+   *
+   * @param email - The user's email address.
+   * @param password - The plaintext password provided by the user.
+   * @param role - The user's desired role for the system.
+   * @param captcha - Google reCAPTCHA token to validate (if enabled).
+   *
+   * @returns boolean whether the signup process is successful.
+   *
+   * @throws {HttpError} 401 - When captcha verification fails or credentials are invalid.
+   * @throws {HttpError} 500 - On unexpected internal errors.
+   */
   public async signupUser(
     email: string,
     password: string,
@@ -290,7 +290,8 @@ class AuthService {
    */
   public async microsoftOAuth(microsoftToken: string): Promise<AuthResponse> {
     try {
-      const claims = await this.oauthService.verifyMicrosoftToken(microsoftToken);
+      const claims =
+        await this.oauthService.verifyMicrosoftToken(microsoftToken);
 
       const microsoftSub = (claims as any).sub || (claims as any).oid;
       const email = (claims as any).email || (claims as any).preferred_username;
