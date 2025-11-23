@@ -1,8 +1,8 @@
 import logger from "../utility/logger";
 import { registerControllerModules } from "./container.controllers";
 import { CoreInitializer } from "./container.core";
-import { registerServiceModules } from "./container.services";
 import { registerRepositoryModules } from "./container.repository";
+import { registerServiceModules } from "./container.services";
 import type { Registration } from "./container.types";
 
 class Container {

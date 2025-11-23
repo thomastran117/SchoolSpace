@@ -1,6 +1,6 @@
-import { UserRepository } from "../repository/userRepository";
-import { CourseRepository } from "../repository/courseRepository";
 import { CatalogueRepository } from "../repository/catalogueRepository";
+import { CourseRepository } from "../repository/courseRepository";
+import { UserRepository } from "../repository/userRepository";
 
 import type { Registration } from "./container.types";
 
