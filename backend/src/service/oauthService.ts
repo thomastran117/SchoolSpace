@@ -108,17 +108,17 @@ class OAuthService {
    * Verify a Microsoft ID token (JWT) using JWKS.
    * Checks if MS_CLIENT_ID is defined in .env before verifying.
    */
-  async verifyMicrosoftToken(idToken: string): Promise<JwtPayload> {
+  async verifyMicrosoftToken(microsoftToken: string): Promise<JwtPayload> {
     try {
       if (!this.MS_CLIENT_ID) {
         httpError(503, "Microsoft client ID not configured in environment");
       }
 
-      if (!idToken || typeof idToken !== "string") {
+      if (!microsoftToken || typeof microsoftToken !== "string") {
         httpError(400, "Missing or invalid id_token");
       }
 
-      const decoded = jwt.decode(idToken, { complete: true });
+      const decoded = jwt.decode(microsoftToken, { complete: true });
       if (
         !decoded ||
         typeof decoded !== "object" ||
@@ -150,7 +150,7 @@ class OAuthService {
 
       return new Promise<JwtPayload>((resolve, reject) => {
         jwt.verify(
-          idToken,
+          microsoftToken,
           publicKey,
           {
             algorithms: ["RS256"],
@@ -185,7 +185,7 @@ class OAuthService {
    * Verify a Google ID token using Google's OAuth2Client.
    * Checks if GOOGLE_CLIENT_ID is defined in .env before verifying.
    */
-  async verifyGoogleToken(idToken: string): Promise<GoogleUserInfo> {
+  async verifyGoogleToken(googleToken: string): Promise<GoogleUserInfo> {
     try {
       if (!this.GOOGLE_CLIENT_ID) {
         httpError(503, "Google client ID not configured in environment");
@@ -195,12 +195,12 @@ class OAuthService {
         httpError(503, "Google OAuth2 client not initialized");
       }
 
-      if (!idToken || typeof idToken !== "string") {
+      if (!googleToken || typeof googleToken !== "string") {
         httpError(400, "Missing or invalid Google ID token");
       }
 
       const ticket = await this.googleClient.verifyIdToken({
-        idToken,
+        idToken: googleToken,
         audience: this.GOOGLE_CLIENT_ID,
       });
 
@@ -224,6 +224,10 @@ class OAuthService {
       );
       httpError(500, "Internal server error");
     }
+  }
+
+  async verifyAppleToken(appleToken: string) {
+    httpError(503, "Apple OAuth is not avaliable");
   }
 }
 

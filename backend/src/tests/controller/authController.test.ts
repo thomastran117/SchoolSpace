@@ -1,7 +1,5 @@
 import { AuthController } from "../../controller/authController";
-import { HttpError } from "../../utility/httpUtility";
-import env from "../../config/envConfigs";
-import { sendCookie } from "../../utility/httpUtility";
+import { HttpError, sendCookie } from "../../utility/httpUtility";
 
 // Mock environment features
 jest.mock("../../config/envConfigs", () => ({
@@ -311,7 +309,9 @@ describe("AuthController", () => {
 
       expect(authService.authLogout).toHaveBeenCalledWith("rt");
       expect(res.clearCookie).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith({ message: "Logged out successfully" });
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Logged out successfully",
+      });
     });
 
     it("returns early if already logged out", async () => {

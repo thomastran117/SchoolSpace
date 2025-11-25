@@ -1,35 +1,86 @@
+import type { Provider, Role, User } from "../models/user";
 import prisma from "../resource/prisma";
-
-import type { User } from "../models/user";
 
 class UserRepository {
   public async findById(id: number): Promise<User | null> {
     try {
-      const user = await prisma.user.findUnique({ where: { id } });
-      return user;
+      return await prisma.user.findUnique({ where: { id } });
     } catch (err: any) {
-      throw new Error(`[UserRepository] findById: ${err?.message ?? err}`);
+      throw new Error(
+        `[UserRepository] findById failed: ${err?.message ?? err}`,
+      );
     }
   }
 
-  public async findAll(role?: "student" | "teacher"): Promise<User[]> {
+  public async findByEmail(email: string): Promise<User | null> {
+    try {
+      return await prisma.user.findUnique({ where: { email } });
+    } catch (err: any) {
+      throw new Error(
+        `[UserRepository] findByEmail failed: ${err?.message ?? err}`,
+      );
+    }
+  }
+
+  public async findByUsername(username: string): Promise<User | null> {
+    try {
+      return await prisma.user.findUnique({ where: { username } });
+    } catch (err: any) {
+      throw new Error(
+        `[UserRepository] findByUsername failed: ${err?.message ?? err}`,
+      );
+    }
+  }
+
+  public async findByGoogleId(googleId: string): Promise<User | null> {
+    try {
+      return await prisma.user.findUnique({ where: { googleId } });
+    } catch (err: any) {
+      throw new Error(
+        `[UserRepository] findByGoogleId failed: ${err?.message ?? err}`,
+      );
+    }
+  }
+
+  public async findByMicrosoftId(msId: string): Promise<User | null> {
+    try {
+      return await prisma.user.findUnique({ where: { microsoftId: msId } });
+    } catch (err: any) {
+      throw new Error(
+        `[UserRepository] findByMicrosoftId failed: ${err?.message ?? err}`,
+      );
+    }
+  }
+
+  public async findMicrosoftUser(
+    msIssuer: string,
+    msTenantId: string,
+    microsoftId: string,
+  ): Promise<User | null> {
+    try {
+      return await prisma.user.findFirst({
+        where: {
+          microsoftId,
+          msIssuer,
+          msTenantId,
+        },
+      });
+    } catch (err: any) {
+      throw new Error(
+        `[UserRepository] findMicrosoftUser failed: ${err?.message ?? err}`,
+      );
+    }
+  }
+
+  public async findAll(role?: Role): Promise<User[]> {
     try {
       const where: any = {};
+      if (role) where.role = role;
 
-      if (role) {
-        if (role !== "student" && role !== "teacher") {
-          throw new Error(`Invalid role filter: '${role}'`);
-        }
-
-        where.role = role;
-      }
-
-      const users = await prisma.user.findMany({
+      return await prisma.user.findMany({
         where,
         orderBy: { id: "asc" },
       });
-
-      return users;
     } catch (err: any) {
       throw new Error(
         `[UserRepository] findAll failed: ${err?.message ?? err}`,
@@ -37,26 +88,55 @@ class UserRepository {
     }
   }
 
-  public async create(
-    email: string,
-    role: string = "undefined",
-    provider: string = "local",
-    password?: string,
-    microsoftId?: any,
-    googleId?: any,
-  ): Promise<User> {
+  public async filterUsers(opts: {
+    role?: Role;
+    provider?: Provider;
+    email?: string;
+    search?: string;
+  }): Promise<User[]> {
     try {
-      const user = await prisma.user.create({
-        data: {
-          email,
-          password,
-          role: role as any,
-          microsoftId,
-          googleId,
-          provider: provider as any,
-        },
+      const { role, provider, email, search } = opts;
+
+      const where: any = {};
+
+      if (role) where.role = role;
+      if (provider) where.provider = provider;
+      if (email) where.email = email;
+
+      if (search) {
+        where.OR = [
+          { email: { contains: search, mode: "insensitive" } },
+          { username: { contains: search, mode: "insensitive" } },
+          { name: { contains: search, mode: "insensitive" } },
+        ];
+      }
+
+      return await prisma.user.findMany({
+        where,
+        orderBy: { id: "asc" },
       });
-      return user;
+    } catch (err: any) {
+      throw new Error(
+        `[UserRepository] filterUsers failed: ${err?.message ?? err}`,
+      );
+    }
+  }
+
+  public async create(data: {
+    email: string;
+    provider: Provider;
+    role?: Role;
+    password?: string;
+    googleId?: string | null;
+    microsoftId?: string | null;
+    msTenantId?: string | null;
+    msIssuer?: string | null;
+    username?: string | null;
+    name?: string | null;
+    avatar?: string | null;
+  }): Promise<User> {
+    try {
+      return await prisma.user.create({ data });
     } catch (err: any) {
       throw new Error(`[UserRepository] create failed: ${err?.message ?? err}`);
     }
@@ -64,41 +144,21 @@ class UserRepository {
 
   public async update(
     id: number,
-    password?: string,
-    username?: string,
-    name?: string,
-    avatar?: string,
-    phone?: string,
-    address?: string,
-    faculty?: string,
-    school?: string,
+    data: Partial<Omit<User, "id">>,
   ): Promise<User> {
     try {
-      const data: any = {
-        password,
-        username,
-        name,
-        avatar,
-        phone,
-        address,
-        faculty,
-        school,
-      };
+      const cleanData = Object.fromEntries(
+        Object.entries(data).filter(([_, v]) => v !== undefined),
+      );
 
-      Object.keys(data).forEach((key) => {
-        if (data[key] === undefined) delete data[key];
-      });
-
-      if (Object.keys(data).length === 0) {
+      if (Object.keys(cleanData).length === 0) {
         throw new Error("No fields provided for update");
       }
 
-      const user = await prisma.user.update({
+      return await prisma.user.update({
         where: { id },
-        data,
+        data: cleanData,
       });
-
-      return user;
     } catch (err: any) {
       throw new Error(`[UserRepository] update failed: ${err?.message ?? err}`);
     }
@@ -109,16 +169,7 @@ class UserRepository {
       await prisma.user.delete({ where: { id } });
       return true;
     } catch (err: any) {
-      throw new Error(`[UserRepository] create failed: ${err?.message ?? err}`);
-    }
-  }
-
-  public async findByEmail(email: string): Promise<User | null> {
-    try {
-      const user = await prisma.user.findUnique({ where: { email } });
-      return user;
-    } catch (err: any) {
-      throw new Error(`[UserRepository] create failed: ${err?.message ?? err}`);
+      throw new Error(`[UserRepository] delete failed: ${err?.message ?? err}`);
     }
   }
 }

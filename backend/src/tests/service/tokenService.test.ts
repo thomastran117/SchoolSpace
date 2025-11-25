@@ -1,4 +1,4 @@
-import { TokenService, BasicTokenService } from "../../service/tokenService";
+import { TokenService } from "../../service/tokenService";
 import { HttpError } from "../../utility/httpUtility";
 
 import jwt from "jsonwebtoken";
@@ -54,8 +54,9 @@ describe("TokenService", () => {
         throw err;
       });
 
-      expect(() => tokenService.validateAccessToken("expired.jwt"))
-        .toThrow(HttpError);
+      expect(() => tokenService.validateAccessToken("expired.jwt")).toThrow(
+        HttpError,
+      );
     });
 
     it("throws 401 when access token is invalid", () => {
@@ -65,8 +66,9 @@ describe("TokenService", () => {
         throw err;
       });
 
-      expect(() => tokenService.validateAccessToken("bad.jwt"))
-        .toThrow(HttpError);
+      expect(() => tokenService.validateAccessToken("bad.jwt")).toThrow(
+        HttpError,
+      );
     });
   });
 
@@ -115,8 +117,9 @@ describe("TokenService", () => {
     it("throws 401 for missing/expired refresh token", async () => {
       mockCache.get.mockResolvedValue(null);
 
-      await expect(tokenService.validateRefreshToken("missing"))
-        .rejects.toBeInstanceOf(HttpError);
+      await expect(
+        tokenService.validateRefreshToken("missing"),
+      ).rejects.toBeInstanceOf(HttpError);
     });
 
     it("rotates refresh tokens correctly", async () => {
@@ -150,8 +153,9 @@ describe("TokenService", () => {
     it("throws 401 when rotating a missing refresh token", async () => {
       mockCache.get.mockResolvedValue(null);
 
-      await expect(tokenService.rotateRefreshToken("dead"))
-        .rejects.toBeInstanceOf(HttpError);
+      await expect(
+        tokenService.rotateRefreshToken("dead"),
+      ).rejects.toBeInstanceOf(HttpError);
     });
 
     it("logoutToken deletes refresh token", async () => {
@@ -216,15 +220,17 @@ describe("TokenService", () => {
     it("throws 400 when verify token is missing or reused", async () => {
       mockCache.get.mockResolvedValue(null);
 
-      await expect(tokenService.validateVerifyToken("bad-token"))
-        .rejects.toBeInstanceOf(HttpError);
+      await expect(
+        tokenService.validateVerifyToken("bad-token"),
+      ).rejects.toBeInstanceOf(HttpError);
     });
 
     it("throws 500 on Redis error during verify token validation", async () => {
       mockCache.get.mockRejectedValue(new Error("Redis down"));
 
-      await expect(tokenService.validateVerifyToken("uuid-token"))
-        .rejects.toBeInstanceOf(Error);
+      await expect(
+        tokenService.validateVerifyToken("uuid-token"),
+      ).rejects.toBeInstanceOf(Error);
     });
   });
 });

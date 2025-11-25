@@ -163,7 +163,12 @@ class AuthService {
         await this.emailService.sendVerificationEmail(email, url);
       } else {
         logger.warn("[AuthService] Email verification is not available");
-        await this.userRepository.create(email, role, "local", hashedPassword);
+        await this.userRepository.create({
+          email,
+          role: role as any,
+          provider: "local",
+          password: hashedPassword,
+        });
       }
     } catch (err: any) {
       if (err instanceof HttpError) {
@@ -188,12 +193,12 @@ class AuthService {
     try {
       const { email, password, role } =
         await this.tokenService.validateVerifyToken(token);
-      const user = await this.userRepository.create(
+      const user = await this.userRepository.create({
         email,
         role,
-        "local",
+        provider: "local",
         password,
-      );
+      });
 
       if (env.isEmailEnabled()) {
         await this.emailService.sendWelcomeEmail(email);
@@ -267,7 +272,7 @@ class AuthService {
       if (!user) {
         httpError(404, "User not found");
       }
-      await this.userRepository.update(user.id, hashedPassword);
+      await this.userRepository.update(user.id, { password: hashedPassword });
       return;
     } catch (err: any) {
       if (err instanceof HttpError) {
@@ -303,13 +308,12 @@ class AuthService {
       let user = await this.userRepository.findByEmail(email);
 
       if (!user) {
-        user = await this.userRepository.create(
+        user = await this.userRepository.create({
           email,
-          "notdefined",
-          "microsoft",
-          undefined,
-          microsoftSub,
-        );
+          role: "notdefined",
+          provider: "microsoft",
+          microsoftId: microsoftSub,
+        });
       }
 
       const { accessToken, refreshToken } =
@@ -355,14 +359,12 @@ class AuthService {
       let user = await this.userRepository.findByEmail(googleUser.email);
 
       if (!user) {
-        user = await this.userRepository.create(
-          googleUser.email!,
-          "notdefined",
-          "google",
-          undefined,
-          undefined,
-          googleUser.sub,
-        );
+        user = await this.userRepository.create({
+          email: googleUser.email!,
+          role: "notdefined",
+          provider: "google",
+          googleId: googleUser.sub,
+        });
       }
 
       const { accessToken, refreshToken } =

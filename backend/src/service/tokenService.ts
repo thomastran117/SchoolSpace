@@ -20,15 +20,13 @@ import type { CacheService } from "../service/cacheService";
 import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
-const {
-  jwt_secret_access: JWT_SECRET_ACCESS,
-} = env;
+const { jwt_secret_access: JWT_SECRET_ACCESS } = env;
 
 const ACCESS_EXPIRY = "30m";
-const SHORT_REFRESH_TTL = 24 * 60 * 60;      // 1 day
-const LONG_REFRESH_TTL = 7 * 24 * 60 * 60;   // 7 days
-const VERIFY_TOKEN_TTL = 15 * 60;            // 15 minutes
-const USED_VERIFY_TTL = 24 * 60 * 60;        // 24 hours
+const SHORT_REFRESH_TTL = 24 * 60 * 60; // 1 day
+const LONG_REFRESH_TTL = 7 * 24 * 60 * 60; // 7 days
+const VERIFY_TOKEN_TTL = 15 * 60; // 15 minutes
+const USED_VERIFY_TTL = 24 * 60 * 60; // 24 hours
 
 class BasicTokenService {
   /**
@@ -106,7 +104,7 @@ class TokenService extends BasicTokenService {
   }
 
   // ------------------------------------------------------
-  // REFRESH TOKEN 
+  // REFRESH TOKEN
   // ------------------------------------------------------
   private async saveRefreshToken(
     token: string,
