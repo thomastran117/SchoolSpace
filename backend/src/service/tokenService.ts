@@ -19,6 +19,7 @@ import type { CacheService } from "../service/cacheService";
 
 import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
+import { BasicTokenService } from "./basicTokenService";
 
 const { jwt_secret_access: JWT_SECRET_ACCESS } = env;
 
@@ -27,53 +28,6 @@ const SHORT_REFRESH_TTL = 24 * 60 * 60; // 1 day
 const LONG_REFRESH_TTL = 7 * 24 * 60 * 60; // 7 days
 const VERIFY_TOKEN_TTL = 15 * 60; // 15 minutes
 const USED_VERIFY_TTL = 24 * 60 * 60; // 24 hours
-
-class BasicTokenService {
-  /**
-   * Decodes + validates an access token.
-   */
-  public validateAccessToken(token: string) {
-    try {
-      return jwt.verify(token, JWT_SECRET_ACCESS) as {
-        userId: number;
-        username: string;
-        role: string;
-        avatar?: string;
-      };
-    } catch (err: any) {
-      if (err.name === "TokenExpiredError")
-        httpError(401, "Expired access token");
-      if (err.name === "JsonWebTokenError")
-        httpError(401, "Invalid access token");
-
-      logger.error(
-        `[BasicTokenService] validateAccessToken failed: ${err?.message ?? err}`,
-      );
-      httpError(500, "Internal server error");
-    }
-  }
-
-  /**
-   * Extract user info from access token
-   */
-  public getUserPayload(token: string) {
-    try {
-      const decoded = this.validateAccessToken(token);
-      return {
-        id: decoded.userId,
-        role: decoded.role,
-        email: decoded.username,
-      };
-    } catch (err: any) {
-      if (err instanceof HttpError) throw err;
-
-      logger.error(
-        `[BasicTokenService] getUserPayload failed: ${err?.message ?? err}`,
-      );
-      httpError(500, "Internal server error");
-    }
-  }
-}
 
 class TokenService extends BasicTokenService {
   private readonly cacheService: CacheService;
