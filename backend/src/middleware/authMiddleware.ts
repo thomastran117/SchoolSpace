@@ -4,9 +4,9 @@
  * Inspects the HTTP request to ensure the User is authorized to access this route via
  * the attached JWT token. The middleware uses the container's BasicTokenService singleton
  * in order to inspect and validate the bearer token
- * 
+ *
  * The middleware is attached in the route layer, not in app.ts
- * 
+ *
  * Future changes may include attaching role guard later to keep the controller layer cleaner.
  *
  * @module middleware

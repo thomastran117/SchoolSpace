@@ -34,7 +34,12 @@ export default function PayPalCheckout() {
 
       <PayPalScriptProvider options={initialOptions}>
         <PayPalButtons
-          style={{ layout: "vertical", color: "gold", shape: "pill", label: "paypal" }}
+          style={{
+            layout: "vertical",
+            color: "gold",
+            shape: "pill",
+            label: "paypal",
+          }}
           createOrder={async () => {
             try {
               const res = await axios.post(`${API_BASE}/create`, { amount });
