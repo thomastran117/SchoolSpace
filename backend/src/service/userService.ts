@@ -1,15 +1,22 @@
 import type { Role, User } from "@prisma/client";
 import type { AuthResponse } from "../models/auth";
+import type { UserRepository } from "../repository/userRepository";
 import prisma from "../resource/prisma";
 import { httpError } from "../utility/httpUtility";
 import type { FileService } from "./fileService";
 import type { TokenService } from "./tokenService";
 
 class UserService {
+  private readonly userRepository: UserRepository;
   private readonly tokenService: TokenService;
   private readonly fileService: FileService;
 
-  constructor(tokenService: TokenService, fileService: FileService) {
+  constructor(
+    userRepository: UserRepository,
+    tokenService: TokenService,
+    fileService: FileService,
+  ) {
+    this.userRepository = userRepository;
     this.tokenService = tokenService;
     this.fileService = fileService;
   }
