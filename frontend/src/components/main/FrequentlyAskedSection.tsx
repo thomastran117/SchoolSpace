@@ -15,7 +15,6 @@ const FrequentlyAskedSection: React.FC = () => {
 
       <div className="faq-wrapper mx-auto mt-4">
         <div className="accordion" id="faqAccordion">
-          {/* FAQ 1 */}
           <div className="accordion-item faq-card">
             <h2 className="accordion-header">
               <button
@@ -35,7 +34,6 @@ const FrequentlyAskedSection: React.FC = () => {
             </div>
           </div>
 
-          {/* FAQ 2 */}
           <div className="accordion-item faq-card mt-3">
             <h2 className="accordion-header">
               <button
@@ -55,7 +53,6 @@ const FrequentlyAskedSection: React.FC = () => {
             </div>
           </div>
 
-          {/* FAQ 3 */}
           <div className="accordion-item faq-card mt-3">
             <h2 className="accordion-header">
               <button
