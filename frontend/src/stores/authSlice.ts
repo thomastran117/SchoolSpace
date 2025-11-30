@@ -28,7 +28,7 @@ const authSlice = createSlice({
         role?: string | null;
         avatar?: string | null;
         id?: number | null;
-      }>
+      }>,
     ) => {
       if (action.payload.accessToken !== undefined) {
         state.accessToken = action.payload.accessToken;
