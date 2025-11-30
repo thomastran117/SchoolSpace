@@ -131,8 +131,8 @@ function registerServiceModules(): Map<string, Registration<any>> {
       factory: (scope) =>
         new UserService(
           scope.resolve("UserRepository"),
-          scope.resolve("TokenService"),
-          scope.resolve("FileService"),
+          scope.resolveOptional("TokenService"),
+          scope.resolveOptional("FileServices"),
         ),
       lifetime: "scoped",
     });

@@ -49,6 +49,8 @@ model User {
   ownedCourses Course[] @relation("CourseOwner")
 
   enrollments Enrollment[]
+  
+  @@index([avatar])
 }
 
 model Course {

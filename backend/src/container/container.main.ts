@@ -56,35 +56,17 @@ class Container {
 
   public resolveOptional<T>(key: string): T | undefined {
     const reg = this.services.get(key);
+
     if (!reg) {
       logger.warn(`[Container] Optional service '${key}' not registered.`);
       return undefined;
     }
 
     try {
-      switch (reg.lifetime) {
-        case "singleton":
-          if (!reg.instance) reg.instance = reg.factory() as T;
-          return reg.instance;
-
-        case "transient":
-          return reg.factory() as T;
-
-        case "scoped":
-          logger.warn(
-            `[Container] Optional scoped service '${key}' cannot be resolved from root container.`,
-          );
-          return undefined;
-
-        default:
-          logger.warn(
-            `[Container] Unknown lifetime for optional service '${key}'.`,
-          );
-          return undefined;
-      }
-    } catch (err: any) {
-      logger.error(
-        `[Container] Failed to resolve optional service '${key}': ${err?.message ?? err}`,
+      return this.resolve<T>(key);
+    } catch (err) {
+      logger.warn(
+        `[Container] Optional service '${key}' failed to resolve: ${err instanceof Error ? err.message : err}`,
       );
       return undefined;
     }
@@ -222,6 +204,24 @@ class ScopedContainer {
         `[Container] Resolving dependencies failed: ${err?.message ?? err}`,
       );
       throw new Error(`Service failed to resolved: ${key}`);
+    }
+  }
+
+  public resolveOptional<T>(key: string): T | undefined {
+    const reg = (this.root as any).services.get(key) as Registration<T>;
+
+    if (!reg) {
+      logger.warn(`[Container] Optional service '${key}' not registered.`);
+      return undefined;
+    }
+
+    try {
+      return this.resolve<T>(key);
+    } catch (err) {
+      logger.warn(
+        `[Container] Optional service '${key}' failed to resolve: ${err instanceof Error ? err.message : err}`,
+      );
+      return undefined;
     }
   }
 

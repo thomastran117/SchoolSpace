@@ -88,6 +88,18 @@ class UserRepository {
     }
   }
 
+  public async countByAvatar(url: string): Promise<number> {
+    try {
+      return prisma.user.count({
+        where: { avatar: url },
+      });
+    } catch (err: any) {
+      throw new Error(
+        `[UserRepository] countByAvatar failed: ${err?.message ?? err}`,
+      );
+    }
+  }
+
   public async filterUsers(opts: {
     role?: Role;
     provider?: Provider;

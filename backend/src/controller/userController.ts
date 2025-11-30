@@ -15,8 +15,6 @@ class UserController {
     this.userService = userService;
 
     this.getUser = this.getUser.bind(this);
-    this.getStudentsByCourse = this.getStudentsByCourse.bind(this);
-    this.getTeacherByCourse = this.getTeacherByCourse.bind(this);
     this.updateAvatar = this.updateAvatar.bind(this);
     this.updateRole = this.updateRole.bind(this);
     this.updateUser = this.updateUser.bind(this);
@@ -48,43 +46,6 @@ class UserController {
     }
   }
 
-  public async getStudentsByCourse(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) {
-    try {
-      const { id: queryCourseId } = req.params as unknown as { id: number };
-      const students =
-        await this.userService.getStudentsByCourse(queryCourseId);
-
-      return res.status(200).json({
-        message: "Students retrieved successfully",
-        data: students,
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  public async getTeacherByCourse(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) {
-    try {
-      const { id: queryCourseId } = req.params as unknown as { id: number };
-      const teacher = await this.userService.getTeacherByCourse(queryCourseId);
-
-      return res.status(200).json({
-        message: "Teacher retrieved successfully",
-        data: teacher,
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-
   public async updateUser(
     req: TypedRequest<UserUpdateDto>,
     res: TypedResponse<AuthResponseDto>,
@@ -98,6 +59,7 @@ class UserController {
       const { id: queryUserId } = req.params as unknown as { id?: number };
       const effectiveUserId =
         userRole === "admin" && queryUserId ? queryUserId : userId;
+      const effectiveToken = userRole === "admin" ? null : token;
 
       const { username, name, phone, address, faculty, school } = req.body;
 
@@ -107,16 +69,14 @@ class UserController {
         role,
         username: newUsername,
         avatar,
-      } = await this.userService.updateUser(
-        effectiveUserId,
-        token,
+      } = await this.userService.updateUser(effectiveUserId, effectiveToken, {
         username,
         name,
         phone,
         address,
         faculty,
         school,
-      );
+      });
 
       if (userRole !== "admin") sendCookie(res, refreshToken);
 
@@ -147,13 +107,19 @@ class UserController {
   ) {
     try {
       const token = req.cookies.refreshToken;
-      if (!token) httpError(401, "Missing refresh token");
 
       const { id: userId, role: userRole } = req.user as UserPayload;
       const { id: queryUserId } = req.params as unknown as { id?: number };
       const effectiveUserId =
         userRole === "admin" && queryUserId ? queryUserId : userId;
 
+      if (!(userRole === "admin" || userRole === "undefined"))
+        throw httpError(
+          409,
+          "The user role is set already. Contact support to change it",
+        );
+
+      const effectiveToken = userRole === "admin" ? null : token;
       const { role: requestedRole } = req.body;
 
       const {
@@ -165,7 +131,7 @@ class UserController {
       } = await this.userService.updateRole(
         effectiveUserId,
         requestedRole,
-        token,
+        effectiveToken,
       );
 
       if (userRole !== "admin") sendCookie(res, refreshToken);
@@ -197,7 +163,6 @@ class UserController {
   ) {
     try {
       const token = req.cookies.refreshToken;
-      if (!token) httpError(401, "Missing refresh token");
 
       const { id: userId, role: userRole } = req.user as UserPayload;
       const { id: queryUserId } = req.params as unknown as { id?: number };
@@ -206,13 +171,18 @@ class UserController {
 
       const effectiveUserId =
         userRole === "admin" && queryUserId ? queryUserId : userId;
+      const effectiveToken = userRole === "admin" ? null : token;
 
       const { fileName, sanitizedBuffer } = await sanitizeProfileImage(file);
       file.buffer = sanitizedBuffer;
       file.originalname = fileName;
 
       const { accessToken, refreshToken, role, username, avatar } =
-        await this.userService.updateAvatar(effectiveUserId, file, token);
+        await this.userService.updateAvatar(
+          effectiveUserId,
+          file,
+          effectiveToken,
+        );
 
       if (userRole !== "admin") sendCookie(res, refreshToken);
 
@@ -238,12 +208,14 @@ class UserController {
 
   public async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
+      const token = req.cookies.refreshToken;
       const { id: userId, role: userRole } = req.user as UserPayload;
       const { id: queryUserId } = req.params as unknown as { id?: number };
       const effectiveUserId =
         userRole === "admin" && queryUserId ? queryUserId : userId;
+      const effectiveToken = userRole === "admin" ? null : token;
 
-      await this.userService.deleteUser(effectiveUserId);
+      await this.userService.deleteUser(effectiveUserId, effectiveToken);
 
       return res.status(200).json({ message: "User deleted successfully" });
     } catch (err: any) {

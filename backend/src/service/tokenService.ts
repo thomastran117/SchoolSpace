@@ -140,6 +140,26 @@ class TokenService extends BasicTokenService {
     }
   }
 
+  public async isRefreshTokenValid(token: string): Promise<boolean> {
+    try {
+      await this.validateRefreshToken(token);
+      return true;
+    } catch (err: any) {
+      if (err instanceof HttpError && err.statusCode === 401) {
+        return false;
+      }
+
+      if (err instanceof HttpError) {
+        throw err;
+      }
+
+      logger.error(
+        `[TokenService] isRefreshTokenValid failed: ${err?.message ?? err}`,
+      );
+      httpError(500, "Internal server error");
+    }
+  }
+
   /**
    * Invalidates old refresh token and issues a new one.
    */

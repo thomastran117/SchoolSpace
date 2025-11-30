@@ -23,4 +23,16 @@ interface User {
   provider: Provider;
 }
 
-export type { Provider, Role, User };
+type SafeUser = Omit<
+  User,
+  | "password"
+  | "phone"
+  | "address"
+  | "googleId"
+  | "microsoftId"
+  | "msTenantId"
+  | "msIssuer"
+  | "provider"
+>;
+
+export type { Provider, Role, SafeUser, User };

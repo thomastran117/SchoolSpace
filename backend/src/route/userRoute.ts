@@ -96,22 +96,6 @@ router.delete(
 );
 
 router.get(
-  "/student/:id",
-  validate(IdParamSchema, "params"),
-  useScopedController((controller, req, res, next) =>
-    controller.getStudentsByCourse(req, res, next),
-  ),
-);
-
-router.get(
-  "/teacher/:id",
-  validate(IdParamSchema, "params"),
-  useScopedController((controller, req, res, next) =>
-    controller.getTeacherByCourse(req, res, next),
-  ),
-);
-
-router.get(
   "/:id",
   validate(IdParamSchema, "params"),
   useScopedController((controller, req, res, next) =>

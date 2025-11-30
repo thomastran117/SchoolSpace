@@ -1,280 +1,257 @@
-import type { Role, User } from "@prisma/client";
 import type { AuthResponse } from "../models/auth";
+import type { Role, SafeUser, User } from "../models/user";
 import type { UserRepository } from "../repository/userRepository";
-import prisma from "../resource/prisma";
-import { httpError } from "../utility/httpUtility";
+import { HttpError, httpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
+import { BaseService } from "./baseService";
 import type { FileService } from "./fileService";
 import type { TokenService } from "./tokenService";
 
-class UserService {
+class UserService extends BaseService {
   private readonly userRepository: UserRepository;
-  private readonly tokenService: TokenService;
-  private readonly fileService: FileService;
+  private readonly tokenService?: TokenService;
+  private readonly fileService?: FileService;
 
   constructor(
     userRepository: UserRepository,
-    tokenService: TokenService,
-    fileService: FileService,
+    tokenService?: TokenService,
+    fileService?: FileService,
   ) {
+    super();
     this.userRepository = userRepository;
     this.tokenService = tokenService;
     this.fileService = fileService;
   }
 
   public async updateAvatar(
-    id: number,
+    userID: number,
     image: Express.Multer.File,
-    token: string,
+    oldRefreshToken: string,
   ): Promise<AuthResponse> {
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) throw httpError(404, "User not found");
+    try {
+      if (!this.fileService || !this.tokenService)
+        httpError(503, `Service is not ready to serve this route`);
 
-    const { fileName, filePath, publicUrl } = await this.fileService.uploadFile(
-      image.buffer,
-      image.originalname,
-      "profile",
-    );
+      const user = await this.userRepository.findById(userID);
+      if (!user) httpError(404, `User with ID ${userID} is not found`);
 
-    const updated = await prisma.user.update({
-      where: { id },
-      data: { avatar: publicUrl, updatedAt: new Date() },
-    });
+      const oldAvatar = user.avatar;
 
-    const { accessToken, refreshToken } =
-      await this.tokenService.generateTokens(
-        updated.id,
-        updated.username || updated.email,
-        updated.role,
-        updated.avatar ?? undefined,
-        true,
+      const { publicUrl } = await this.fileService.uploadFile(
+        image.buffer,
+        image.originalname,
+        "profile",
       );
 
-    await this.tokenService.logoutToken(token);
+      const updated = await this.userRepository.update(userID, {
+        avatar: publicUrl,
+      });
 
-    return {
-      accessToken,
-      refreshToken,
-      role: updated.role,
-      id: updated.id,
-      username: updated.username,
-      avatar: updated.avatar,
-    };
+      if (
+        oldAvatar &&
+        (await this.userRepository.countByAvatar(oldAvatar)) <= 1
+      ) {
+        this.fileService.deleteFile("profile", oldAvatar);
+      }
+
+      const { accessToken, refreshToken } =
+        await this.tokenService.generateTokens(
+          updated.id,
+          updated.username || updated.email,
+          updated.role,
+          updated.avatar ?? undefined,
+          true,
+        );
+
+      if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
+
+      return {
+        accessToken,
+        refreshToken,
+        role: updated.role,
+        id: updated.id,
+        username: updated.username,
+        avatar: updated.avatar,
+      };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[UserService] updateAvatar failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
   }
 
   public async updateRole(
-    id: number,
+    userID: number,
     role: Role,
-    token: string,
+    oldRefreshToken: string,
   ): Promise<AuthResponse> {
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) throw httpError(404, "No user found");
+    try {
+      if (!this.tokenService)
+        httpError(503, `Service is not ready to serve this route`);
 
-    if (user.role !== "notdefined") {
-      throw httpError(
-        409,
-        "The user role is set already. Contact support to change it",
-      );
+      const user = await this.userRepository.findById(userID);
+      if (!user) httpError(404, `User with ID ${userID} is not found`);
+
+      const updated = await this.userRepository.update(userID, { role });
+
+      const { accessToken, refreshToken } =
+        await this.tokenService.generateTokens(
+          updated.id,
+          updated.username || updated.email,
+          updated.role,
+          updated.avatar ?? undefined,
+          true,
+        );
+
+      if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
+
+      return {
+        accessToken,
+        refreshToken,
+        role: updated.role,
+        id: updated.id,
+        username: updated.username,
+        avatar: updated.avatar,
+      };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[UserService] updateRole failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
     }
-
-    const updated = await prisma.user.update({
-      where: { id },
-      data: { role, updatedAt: new Date() },
-    });
-
-    const { accessToken, refreshToken } =
-      await this.tokenService.generateTokens(
-        updated.id,
-        updated.username || updated.email,
-        updated.role,
-        updated.avatar ?? undefined,
-        true,
-      );
-
-    await this.tokenService.logoutToken(token);
-
-    return {
-      accessToken,
-      refreshToken,
-      role: updated.role,
-      id: updated.id,
-      username: updated.username,
-      avatar: updated.avatar,
-    };
   }
 
   public async updateUser(
-    id: number,
-    token: string,
-    username?: string,
-    name?: string,
-    phone?: string,
-    address?: string,
-    faculty?: string,
-    school?: string,
+    userID: number,
+    oldRefreshToken: string,
+    data: {
+      username?: string;
+      name?: string;
+      phone?: string;
+      address?: string;
+      faculty?: string;
+      school?: string;
+    },
   ): Promise<AuthResponse> {
-    if (username) {
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          username,
-          NOT: { id },
-        },
-      });
+    try {
+      if (!this.tokenService)
+        httpError(503, `Service is not ready to serve this route`);
 
-      if (existingUser) {
-        throw httpError(
-          409,
-          `A user with the username "${username}" already exists. Choose another username.`,
+      if (data.username) {
+        const existingUser = await this.userRepository.findByUsername(
+          data.username,
         );
+        if (existingUser && existingUser?.id !== userID) {
+          throw httpError(
+            409,
+            `A user with the username "${data.username}" already exists. Choose another username.`,
+          );
+        }
       }
-    }
 
-    const data = Object.fromEntries(
-      Object.entries({
-        username,
-        name,
-        phone,
-        address,
-        faculty,
-        school,
-        updatedAt: new Date(),
-      }).filter(([_, v]) => v !== undefined && v !== null),
-    );
-
-    const updated = await prisma.user.update({
-      where: { id },
-      data,
-    });
-
-    const { accessToken, refreshToken } =
-      await this.tokenService.generateTokens(
-        updated.id,
-        updated.username || updated.email,
-        updated.role,
-        updated.avatar ?? undefined,
-        true,
+      const cleanData = Object.fromEntries(
+        Object.entries(data).filter(([_, v]) => v !== undefined),
       );
 
-    await this.tokenService.logoutToken(token);
+      const updated = await this.userRepository.update(userID, cleanData);
 
-    return {
-      accessToken,
-      refreshToken,
-      role: updated.role,
-      id: updated.id,
-      username: updated.username,
-      avatar: updated.avatar,
-    };
+      const { accessToken, refreshToken } =
+        await this.tokenService.generateTokens(
+          updated.id,
+          updated.username || updated.email,
+          updated.role,
+          updated.avatar ?? undefined,
+          true,
+        );
+
+      if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
+
+      return {
+        accessToken,
+        refreshToken,
+        role: updated.role,
+        id: updated.id,
+        username: updated.username,
+        avatar: updated.avatar,
+      };
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[UserService] updateUser failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
   }
 
-  public async deleteUser(id: number): Promise<boolean> {
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (!user) throw httpError(404, "User not found");
+  public async deleteUser(id: number, oldRefreshToken: string) {
+    try {
+      if (!this.tokenService)
+        httpError(503, `Service is not ready to serve this route`);
 
-    await prisma.user.delete({ where: { id } });
+      const user = await this.userRepository.findById(id);
+      if (!user) httpError(404, `User with the ID ${id} is not found`);
+      await this.userRepository.delete(id);
 
-    return true;
+      if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
+
+      return;
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[UserService] deleteUser failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
   }
 
-  public async getUser(
-    id: number,
-  ): Promise<
-    Pick<
-      User,
-      | "id"
-      | "username"
-      | "name"
-      | "phone"
-      | "address"
-      | "faculty"
-      | "school"
-      | "role"
-      | "avatar"
-      | "createdAt"
-      | "updatedAt"
-    >
-  > {
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        username: true,
-        name: true,
-        phone: true,
-        address: true,
-        faculty: true,
-        school: true,
-        role: true,
-        avatar: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+  public async getUser(id: number): Promise<SafeUser> {
+    try {
+      const user = await this.userRepository.findById(id);
+      if (!user) httpError(404, `User with the ID ${id} is not found`);
 
-    if (!user) throw httpError(404, "User not found");
-    return user;
+      return this.toSafeUser(user);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[UserService] getUser failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
   }
 
-  public async getUsers(): Promise<
-    Array<
-      Pick<
-        User,
-        | "id"
-        | "username"
-        | "name"
-        | "phone"
-        | "address"
-        | "faculty"
-        | "school"
-        | "role"
-        | "avatar"
-        | "createdAt"
-        | "updatedAt"
-      >
-    >
-  > {
-    return prisma.user.findMany({
-      select: {
-        id: true,
-        username: true,
-        name: true,
-        phone: true,
-        address: true,
-        faculty: true,
-        school: true,
-        role: true,
-        avatar: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+  public async getUsers(role?: Role): Promise<SafeUser[]> {
+    try {
+      const users = await this.userRepository.findAll(role);
+      return this.toSafeUsers(users);
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+      logger.error(`[UserService] getUsers failed: ${err?.message ?? err}`);
+      httpError(500, "Internal server error");
+    }
   }
 
-  public async getStudentsByCourse(courseId: number): Promise<User[]> {
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-      include: {
-        enrollments: { include: { user: true } },
-      },
-    });
-
-    if (!course) throw httpError(404, "Course not found");
-
-    return course.enrollments
-      .map((e) => e.user)
-      .filter((u) => u.role === "student");
+  private toSafeUser(user: User): SafeUser {
+    const {
+      password,
+      phone,
+      address,
+      googleId,
+      microsoftId,
+      msIssuer,
+      msTenantId,
+      provider,
+      ...safe
+    } = user;
+    return safe;
   }
 
-  public async getTeacherByCourse(courseId: number): Promise<User> {
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-      include: { owner: true },
-    });
-
-    if (!course) throw httpError(404, "Course not found");
-    if (!course.owner || course.owner.role !== "teacher")
-      throw httpError(404, "Teacher not found for this course");
-
-    return course.owner;
+  private toSafeUsers(users: User[]): SafeUser[] {
+    return users.map((u) => this.toSafeUser(u));
   }
 }
 
