@@ -29,8 +29,5 @@ Wait-For-Health "schoolspace-redis" 120
 Write-Host "Waiting for Mongo health..."
 Wait-For-Health "schoolspace-mongodb" 180
 
-Write-Host "Running Prisma migrations..."
-docker compose run --rm backend npx prisma migrate deploy
-
-Write-Host "✅ Migrations applied. Switching to attached mode..."
-docker compose up backend frontend redis mysql
+Write-Host "Switching to attached mode..."
+docker compose up backend frontend redis  mysql

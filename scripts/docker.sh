@@ -43,12 +43,10 @@ wait_for_health "schoolspace-mysql" 180
 wait_for_health "schoolspace-redis" 120
 wait_for_health "schoolspace-mongodb" 180
 
-echo "🗄️  Running Prisma migrations..."
-docker compose exec -T backend npx prisma migrate deploy
 
 if [[ "$MODE" == "ci" ]]; then
-  echo "✅ Migrations applied (CI mode). Containers remain detached."
+  echo "(CI mode). Containers remain detached."
 else
-  echo "✅ Migrations applied. Attaching to backend, frontend, redis, and mysql logs..."
+  echo "Attaching to backend, frontend, redis, and mysql logs..."
   docker compose up backend frontend redis mysql
 fi
