@@ -9,6 +9,7 @@
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "node10",
+    "ignoreDeprecations": "6.0",
     "typeRoots": ["./src/types", "./node_modules/@types"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
