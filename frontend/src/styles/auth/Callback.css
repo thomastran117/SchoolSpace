@@ -1,0 +1,125 @@
+.callback-page {
+  position: relative;
+  min-height: 100vh;
+  background: #f7f7f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px;
+  overflow: hidden;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.callback-gradient {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: 0.45;
+}
+
+.callback-gradient.gradient-1 {
+  width: 420px;
+  height: 420px;
+  top: -140px;
+  left: -90px;
+  background: radial-gradient(circle, #7a5af8 0%, transparent 60%);
+}
+
+.callback-gradient.gradient-2 {
+  width: 380px;
+  height: 380px;
+  bottom: -120px;
+  right: -60px;
+  background: radial-gradient(circle, #b598ff 0%, transparent 60%);
+}
+
+.callback-card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 22px;
+  padding: 48px 38px;
+  text-align: center;
+  box-shadow:
+    0 24px 50px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(122, 90, 248, 0.04);
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loader-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loader-circle {
+  width: 64px;
+  height: 64px;
+  border: 5px solid rgba(122, 90, 248, 0.25);
+  border-top-color: #7a5af8;
+  border-radius: 999px;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.callback-status {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e1e1e;
+}
+
+.callback-subtext {
+  font-size: 0.95rem;
+  color: #6f6f6f;
+}
+
+.callback-error-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.error-icon {
+  font-size: 2.6rem;
+}
+
+.callback-error-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #d20000;
+}
+
+.callback-error-text {
+  max-width: 360px;
+  margin: 0 auto;
+  font-size: 1rem;
+  color: #6f6f6f;
+}
+
+.callback-btn-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}

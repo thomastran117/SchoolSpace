@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 interface AuthState {
   accessToken: string | null;
-  email: string | null;
+  username: string | null;
   role: string | null;
   avatar: string | null;
   id: number | null;
@@ -10,7 +10,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   accessToken: null,
-  email: null,
+  username: null,
   role: null,
   avatar: null,
   id: null,
@@ -24,7 +24,7 @@ const authSlice = createSlice({
       state,
       action: PayloadAction<{
         accessToken?: string | null;
-        email?: string | null;
+        username?: string | null;
         role?: string | null;
         avatar?: string | null;
         id?: number | null;
@@ -33,8 +33,8 @@ const authSlice = createSlice({
       if (action.payload.accessToken !== undefined) {
         state.accessToken = action.payload.accessToken;
       }
-      if (action.payload.email !== undefined) {
-        state.email = action.payload.email;
+      if (action.payload.username !== undefined) {
+        state.username = action.payload.username;
       }
       if (action.payload.role !== undefined) {
         state.role = action.payload.role;
@@ -48,7 +48,7 @@ const authSlice = createSlice({
     },
     clearCredentials: (state) => {
       state.accessToken = null;
-      state.email = null;
+      state.username = null;
       state.role = null;
       state.avatar = null;
       state.id = null;

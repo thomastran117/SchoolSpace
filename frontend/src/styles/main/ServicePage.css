@@ -15,8 +15,6 @@
   overflow: hidden;
 }
 
-/* Ambient gradients */
-
 .service-page-gradient {
   position: absolute;
   border-radius: 999px;
@@ -42,8 +40,6 @@
   background: radial-gradient(circle at center, #b598ff 0, transparent 60%);
 }
 
-/* Sections */
-
 .service-section {
   position: relative;
   z-index: 1;
@@ -58,8 +54,6 @@
 .muted-section {
   background: rgba(255, 255, 255, 0.5);
 }
-
-/* Badge */
 
 .badge-pill {
   display: inline-flex;
@@ -86,8 +80,6 @@
   color: #6945e2;
   font-weight: 600;
 }
-
-/* Hero */
 
 .hero-content {
   max-width: 720px;
@@ -125,8 +117,6 @@
   font-size: 0.85rem;
 }
 
-/* Buttons */
-
 .pill-btn {
   border-radius: 999px !important;
   padding: 10px 22px !important;
@@ -134,8 +124,6 @@
   font-size: 0.95rem !important;
   border-width: 1.5px !important;
 }
-
-/* Primary button styling (override bootstrap) */
 
 .btn-primary {
   background-color: #7a5af8 !important;
@@ -153,8 +141,6 @@
   transform: translateY(-1px);
   box-shadow: 0 14px 32px rgba(122, 90, 248, 0.4);
 }
-
-/* Outline button */
 
 .btn-outline-primary {
   color: #6945e2;
@@ -175,8 +161,6 @@
   box-shadow: 0 12px 28px rgba(122, 90, 248, 0.35);
 }
 
-/* CTA secondary outline (light on purple) */
-
 .btn-outline-light {
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.7);
@@ -188,8 +172,6 @@
   background: rgba(255, 255, 255, 0.12);
   border-color: #ffffff;
 }
-
-/* Section headers */
 
 .section-header {
   max-width: 640px;
@@ -209,8 +191,6 @@
   font-size: 0.98rem;
   color: #6f6f6f;
 }
-
-/* Service cards */
 
 .service-card {
   background: #ffffff;
@@ -284,8 +264,6 @@
   margin-top: 4px;
 }
 
-/* Persona cards */
-
 .persona-card {
   background: #ffffff;
   border-radius: 20px;
@@ -330,8 +308,6 @@
   font-size: 0.9rem;
 }
 
-/* Steps */
-
 .step-card {
   background: #ffffff;
   border-radius: 20px;
@@ -375,8 +351,6 @@
   font-size: 0.92rem;
   color: #6f6f6f;
 }
-
-/* CTA section */
 
 .cta-section {
   padding-top: 40px;
@@ -445,8 +419,6 @@
   z-index: 1;
 }
 
-/* Animations */
-
 @keyframes liftIn {
   from {
     opacity: 0;
@@ -470,8 +442,6 @@
   animation-delay: 0.16s;
 }
 
-/* Responsive tweaks */
-
 @media (max-width: 767.98px) {
   .hero-title {
     font-size: 2.1rem;
@@ -484,4 +454,16 @@
   .cta-card {
     padding: 22px 18px;
   }
+}
+
+.auth-card {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.auth-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(122, 90, 248, 0.5);
+  box-shadow: 0 20px 50px rgba(122, 90, 248, 0.2);
 }

@@ -12,12 +12,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@azure/msal-browser": "^4.26.2",
     "@reduxjs/toolkit": "^2.11.0",
     "axios": "^1.13.2",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "google-one-tap": "^1.0.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-google-recaptcha": "^3.1.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.6"
   },
@@ -26,6 +29,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
+    "@types/react-google-recaptcha": "^2.1.9",
     "@vitejs/plugin-react": "^5.1.1",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",

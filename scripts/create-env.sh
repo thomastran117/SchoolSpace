@@ -35,9 +35,12 @@ VITE_BACKEND_URL="http://localhost:8040"
 
 VITE_MSAL_CLIENT_ID="ms_client"
 VITE_MSAL_AUTHORITY="https://login.microsoftonline.com/common"
-VITE_MSAL_REDIRECT_URI="http://localhost:3040/auth/callback"
 VITE_GOOGLE_CLIENT_ID="google_client"
 
+##############################################
+# Recaptcha
+##############################################
+VITE_GOOGLE_RECAPTCHA="captcha"
 '@
 
 $envContent_backend = @'

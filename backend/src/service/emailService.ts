@@ -104,10 +104,6 @@ class EmailService {
       </div>
     `;
 
-    if (this.emailEnabled()) {
-      httpError(503, "Email service is not avaliable");
-    }
-
     await this.sendEmail({
       to: email,
       subject: "Verify Your Email Address",
@@ -147,11 +143,7 @@ class EmailService {
         </div>
       </div>
     `;
-
-    if (this.emailEnabled()) {
-      httpError(503, "Email service is not avaliable");
-    }
-
+    
     await this.sendEmail({
       to: email,
       subject: "Welcome to SchoolSpace 🎉",
