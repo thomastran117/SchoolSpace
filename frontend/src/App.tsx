@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Footer from "./components/shared/Footer";
 import Navbar from "./components/shared/Navbar";
+import SessionManager from "./components/auth/SessionManager";
 import HomePage from "./pages/main/HomePage";
 import ServicePage from "./pages/main/ServicePage";
 import ContactPage from "./pages/main/ContactPage";
@@ -21,8 +22,8 @@ import VerifyCallbackPage from "./pages/auth/VerifyCallbackPage";
 
 function App() {
   return (
-    <>
-      <Router>
+    <Router>
+      <SessionManager>
         <Navbar />
         <div className="min-h-screen overflow-y-auto overflow-x-hidden">
           <Routes>
@@ -51,8 +52,8 @@ function App() {
           </Routes>
         </div>
         <Footer />
-      </Router>
-    </>
+      </SessionManager>
+    </Router>
   );
 }
 

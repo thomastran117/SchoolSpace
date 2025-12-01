@@ -14,7 +14,9 @@ export default function VerifyCallbackPage() {
   const token = searchParams.get("token");
 
   const [titleText, setTitleText] = useState("Verifying your email…");
-  const [subText, setSubText] = useState("Please wait while we confirm your verification link.");
+  const [subText, setSubText] = useState(
+    "Please wait while we confirm your verification link.",
+  );
   const [statusType, setStatusType] = useState<StatusType>("loading");
   const [retry, setRetry] = useState(0);
 
@@ -44,7 +46,6 @@ export default function VerifyCallbackPage() {
       });
 
       setTimeout(() => navigate("/auth"), 2200);
-
     } catch (err) {
       const error = err as AxiosError<any>;
 
@@ -63,7 +64,9 @@ export default function VerifyCallbackPage() {
           } else if (code >= 500) {
             setStatusType("retry");
             setTitleText("Server Error");
-            setSubText("Something went wrong on our end. You may retry verification.");
+            setSubText(
+              "Something went wrong on our end. You may retry verification.",
+            );
           } else {
             setStatusType("error");
             setTitleText("Verification Failed");
@@ -72,7 +75,9 @@ export default function VerifyCallbackPage() {
         } else {
           setStatusType("error");
           setTitleText("Network Error");
-          setSubText("Could not reach the server. Please check your connection.");
+          setSubText(
+            "Could not reach the server. Please check your connection.",
+          );
         }
       });
     }
@@ -88,7 +93,6 @@ export default function VerifyCallbackPage() {
       <div className="callback-gradient gradient-2"></div>
 
       <div className="callback-card fade-in">
-
         {statusType === "loading" && (
           <div className="loader-wrapper mb-4">
             <div className="loader-circle"></div>
@@ -97,7 +101,10 @@ export default function VerifyCallbackPage() {
 
         {statusType === "success" && (
           <div className="mb-4">
-            <i className="bi bi-check-circle-fill text-success" style={{ fontSize: "3rem" }}></i>
+            <i
+              className="bi bi-check-circle-fill text-success"
+              style={{ fontSize: "3rem" }}
+            ></i>
           </div>
         )}
 
