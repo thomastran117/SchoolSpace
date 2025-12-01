@@ -1,5 +1,7 @@
 import React, { useRef, useState } from "react";
-import GoogleRecaptcha, { type CaptchaRef } from "../../components/auth/GoogleRecaptcha";
+import GoogleRecaptcha, {
+  type CaptchaRef,
+} from "../../components/auth/GoogleRecaptcha";
 import { useNavigate } from "react-router-dom";
 
 import GoogleButton from "../../components/auth/GoogleButton";
@@ -50,13 +52,12 @@ const SignupPage: React.FC = () => {
       });
 
       setSuccessMessage(
-        `A verification link has been sent to ${email}. Please check your inbox to activate your account.`
+        `A verification link has been sent to ${email}. Please check your inbox to activate your account.`,
       );
 
       setTimeout(() => {
         navigate("/auth/login");
       }, 5000);
-
     } catch (err: any) {
       const msg =
         err.response?.data?.message ||
@@ -75,7 +76,6 @@ const SignupPage: React.FC = () => {
 
       <div className="container py-5">
         <div className="login-card mx-auto d-flex flex-wrap">
-
           <div className="col-lg-6 login-left text-white d-flex flex-column justify-content-center p-5">
             <h1 className="fw-bold display-5">Create Your Account</h1>
             <p className="subtitle mt-3">
@@ -94,10 +94,11 @@ const SignupPage: React.FC = () => {
 
           <div className="col-lg-6 bg-white p-5 login-right position-relative">
             <h2 className="fw-bold mb-2">Sign Up</h2>
-            <p className="text-muted mb-4">Start your journey with SchoolSpace.</p>
+            <p className="text-muted mb-4">
+              Start your journey with SchoolSpace.
+            </p>
 
             <form onSubmit={handleSignup} className="w-100">
-
               <div className="mb-3">
                 <label className="form-label fw-semibold">Email</label>
                 <div className="input-group">
@@ -136,7 +137,9 @@ const SignupPage: React.FC = () => {
                     className="input-group-text toggle-view"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`} />
+                    <i
+                      className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}
+                    />
                   </button>
                 </div>
               </div>
@@ -236,7 +239,6 @@ const SignupPage: React.FC = () => {
                 Login
               </button>
             </div>
-
           </div>
         </div>
       </div>

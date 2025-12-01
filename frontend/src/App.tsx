@@ -17,6 +17,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import GoogleCallbackPage from "./pages/auth/GoogleCallbackPage";
 import MicrosoftCallbackPage from "./pages/auth/MicrosoftCallbackPage";
 import SignupPage from "./pages/auth/SignupPage";
+import VerifyCallbackPage from "./pages/auth/VerifyCallbackPage";
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
             <Route path="/auth/microsoft" element={<MicrosoftCallbackPage />} />
             <Route path="/auth/login" element={<LoginPage />} />
             <Route path="/auth/signup" element={<SignupPage />} />
+            <Route path="/auth/verify" element={<VerifyCallbackPage />} />
             <Route path="/*" element={<NotFoundPage />} />
           </Routes>
         </div>

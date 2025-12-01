@@ -1,7 +1,8 @@
 import type {
   AxiosError,
   AxiosInstance,
-  InternalAxiosRequestConfig} from "axios";
+  InternalAxiosRequestConfig,
+} from "axios";
 import axios from "axios";
 import { store } from "../stores";
 import { setCredentials, clearCredentials } from "../stores/authSlice";
@@ -31,7 +32,7 @@ async function refreshToken(): Promise<string> {
         role,
         username,
         avatar,
-      })
+      }),
     );
 
     return accessToken;
@@ -70,7 +71,7 @@ ProtectedApi.interceptors.request.use(
 
     return config;
   },
-  (error: AxiosError) => Promise.reject(error)
+  (error: AxiosError) => Promise.reject(error),
 );
 
 ProtectedApi.interceptors.response.use(
@@ -88,7 +89,9 @@ ProtectedApi.interceptors.response.use(
 
       if (msg.includes("Invalid access token")) {
         store.dispatch(clearCredentials());
-        return Promise.reject(new Error("Invalid session. Please log in again."));
+        return Promise.reject(
+          new Error("Invalid session. Please log in again."),
+        );
       }
 
       if (!originalConfig._retry) {
@@ -116,12 +119,12 @@ ProtectedApi.interceptors.response.use(
     if (response?.status === 500) {
       console.error("Internal server error:", response.data);
       throw new Error(
-        "An unexpected server error occurred. Please try again later."
+        "An unexpected server error occurred. Please try again later.",
       );
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default ProtectedApi;
