@@ -223,13 +223,27 @@ class TokenService extends BasicTokenService {
     role: string,
   ): Promise<string> {
     try {
-      const token = uuidv4();
+      const existingToken = await this.cacheService.get<string>(
+        `verify:email:${email}`,
+      );
 
-      const verifyPayload = { email, passwordHash, role };
+      if (existingToken) {
+        await this.cacheService.expire(
+          `verify:${existingToken}`,
+          VERIFY_TOKEN_TTL,
+        );
+
+        return existingToken;
+      }
+
+      const token = uuidv4();
+      const payload = JSON.stringify({ email, passwordHash, role });
+
+      await this.cacheService.set(`verify:${token}`, payload, VERIFY_TOKEN_TTL);
 
       await this.cacheService.set(
-        `verify:${token}`,
-        JSON.stringify(verifyPayload),
+        `verify:email:${email}`,
+        token,
         VERIFY_TOKEN_TTL,
       );
 
@@ -252,13 +266,16 @@ class TokenService extends BasicTokenService {
       const data = await this.cacheService.get<string>(`verify:${token}`);
 
       if (!data) {
-        httpError(400, "Token missing or already used");
+        throw httpError(400, "Token missing, expired or already used");
       }
 
-      await this.cacheService.delete(`verify:${token}`);
-      await this.cacheService.set(`used:${token}`, "1", USED_VERIFY_TTL);
+      const parsed = JSON.parse(data);
+      const email = parsed.email;
 
-      const parsed = JSON.parse(data!);
+      await this.cacheService.delete(`verify:${token}`);
+      await this.cacheService.delete(`verify:email:${email}`);
+
+      await this.cacheService.set(`used:${token}`, "1", USED_VERIFY_TTL);
 
       return {
         email: parsed.email,

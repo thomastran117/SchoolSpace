@@ -11,7 +11,6 @@
 import type { SendMailOptions, Transporter } from "nodemailer";
 import nodemailer from "nodemailer";
 import env from "../config/envConfigs";
-import { httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 interface MailPayload {
   to: string;
@@ -143,7 +142,7 @@ class EmailService {
         </div>
       </div>
     `;
-    
+
     await this.sendEmail({
       to: email,
       subject: "Welcome to SchoolSpace 🎉",
