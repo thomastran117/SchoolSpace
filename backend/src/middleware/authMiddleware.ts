@@ -16,7 +16,7 @@
 
 import type { NextFunction, Request, Response } from "express";
 import container from "../container";
-import type { BasicTokenService } from "../service/tokenService";
+import type { BasicTokenService } from "../service/basicTokenService";
 
 function AuthGuard(req: Request, res: Response, next: NextFunction) {
   try {

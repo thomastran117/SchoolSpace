@@ -293,4 +293,4 @@ class TokenService extends BasicTokenService {
   }
 }
 
-export { BasicTokenService, TokenService };
+export { TokenService };
