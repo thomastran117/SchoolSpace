@@ -243,7 +243,11 @@ class TokenService extends BasicTokenService {
       const token = uuidv4();
       const payload = JSON.stringify({ email, passwordHash, role });
 
-      const res = await this.cacheService.set(`verify:${token}`, payload, VERIFY_TOKEN_TTL);
+      const res = await this.cacheService.set(
+        `verify:${token}`,
+        payload,
+        VERIFY_TOKEN_TTL,
+      );
       if (!res) httpError(503, "Service is not avaliable yet");
 
       const res1 = await this.cacheService.set(

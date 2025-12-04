@@ -1,5 +1,3 @@
-import prisma from "../resource/prisma";
-
 export abstract class BaseRepository {
   private readonly maxRetries: number;
   private readonly baseDelay: number;
@@ -16,17 +14,15 @@ export abstract class BaseRepository {
   private shouldRetry(err: any): boolean {
     if (!err?.code) return false;
 
-    const transientCodes = new Set([
-      "P1001",
-      "P1002",
-      "P1008",
-      "P1017",
-    ]);
+    const transientCodes = new Set(["P1001", "P1002", "P1008", "P1017"]);
 
     return transientCodes.has(err.code);
   }
 
-  protected async withRetry<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
+  protected async withRetry<T>(
+    operationName: string,
+    fn: () => Promise<T>,
+  ): Promise<T> {
     let attempt = 0;
 
     while (true) {
@@ -37,7 +33,7 @@ export abstract class BaseRepository {
 
         if (attempt > this.maxRetries || !this.shouldRetry(err)) {
           throw new Error(
-            `[${operationName}] failed after ${attempt} attempts: ${err?.message ?? err}`
+            `[${operationName}] failed after ${attempt} attempts: ${err?.message ?? err}`,
           );
         }
 
@@ -46,7 +42,7 @@ export abstract class BaseRepository {
         const wait = delay + jitter;
 
         console.warn(
-          `[${operationName}] attempt ${attempt} failed (${err.code}). Retrying in ${Math.round(wait)}ms...`
+          `[${operationName}] attempt ${attempt} failed (${err.code}). Retrying in ${Math.round(wait)}ms...`,
         );
 
         await this.sleep(wait);

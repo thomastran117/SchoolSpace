@@ -4,23 +4,41 @@ import type { UserRepository } from "../repository/userRepository";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
+import type { CacheService } from "./cacheService";
 import type { FileService } from "./fileService";
 import type { TokenService } from "./tokenService";
 
 class UserService extends BaseService {
   private readonly userRepository: UserRepository;
+  private readonly cacheService: CacheService;
   private readonly tokenService?: TokenService;
   private readonly fileService?: FileService;
+  private readonly ttl = 300;
 
   constructor(
     userRepository: UserRepository,
+    cacheService: CacheService,
     tokenService?: TokenService,
     fileService?: FileService,
   ) {
     super();
     this.userRepository = userRepository;
+    this.cacheService = cacheService;
     this.tokenService = tokenService;
     this.fileService = fileService;
+  }
+
+  private async invalidateUserCache(userID: number): Promise<void> {
+    const key = `user:id:${userID}`;
+    await this.cacheService.delete(key);
+  }
+
+  private async writeUserCache(
+    userID: number,
+    safeUser: SafeUser,
+  ): Promise<void> {
+    const key = `user:id:${userID}`;
+    await this.cacheService.set(key, safeUser, this.ttl);
   }
 
   public async updateAvatar(
@@ -30,7 +48,7 @@ class UserService extends BaseService {
   ): Promise<AuthResponse> {
     try {
       if (!this.fileService || !this.tokenService)
-        httpError(503, `Service is not ready to serve this route`);
+        httpError(503, "Service is not ready to serve this route");
 
       const user = await this.userRepository.findById(userID);
       if (!user) httpError(404, `User with ID ${userID} is not found`);
@@ -65,6 +83,9 @@ class UserService extends BaseService {
 
       if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
 
+      await this.invalidateUserCache(updated.id);
+      await this.writeUserCache(updated.id, this.toSafeUser(updated));
+
       return {
         accessToken,
         refreshToken,
@@ -74,9 +95,8 @@ class UserService extends BaseService {
         avatar: updated.avatar,
       };
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
+
       logger.error(`[UserService] updateAvatar failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
@@ -89,7 +109,7 @@ class UserService extends BaseService {
   ): Promise<AuthResponse> {
     try {
       if (!this.tokenService)
-        httpError(503, `Service is not ready to serve this route`);
+        httpError(503, "Service is not ready to serve this route");
 
       const user = await this.userRepository.findById(userID);
       if (!user) httpError(404, `User with ID ${userID} is not found`);
@@ -107,6 +127,9 @@ class UserService extends BaseService {
 
       if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
 
+      await this.invalidateUserCache(updated.id);
+      await this.writeUserCache(updated.id, this.toSafeUser(updated));
+
       return {
         accessToken,
         refreshToken,
@@ -116,9 +139,8 @@ class UserService extends BaseService {
         avatar: updated.avatar,
       };
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
+
       logger.error(`[UserService] updateRole failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
@@ -138,16 +160,16 @@ class UserService extends BaseService {
   ): Promise<AuthResponse> {
     try {
       if (!this.tokenService)
-        httpError(503, `Service is not ready to serve this route`);
+        httpError(503, "Service is not ready to serve this route");
 
       if (data.username) {
         const existingUser = await this.userRepository.findByUsername(
           data.username,
         );
-        if (existingUser && existingUser?.id !== userID) {
+        if (existingUser && existingUser.id !== userID) {
           throw httpError(
             409,
-            `A user with the username "${data.username}" already exists. Choose another username.`,
+            `A user with the username "${data.username}" already exists.`,
           );
         }
       }
@@ -169,6 +191,9 @@ class UserService extends BaseService {
 
       if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
 
+      await this.invalidateUserCache(updated.id);
+      await this.writeUserCache(updated.id, this.toSafeUser(updated));
+
       return {
         accessToken,
         refreshToken,
@@ -178,9 +203,8 @@ class UserService extends BaseService {
         avatar: updated.avatar,
       };
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
+
       logger.error(`[UserService] updateUser failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
@@ -189,19 +213,20 @@ class UserService extends BaseService {
   public async deleteUser(id: number, oldRefreshToken: string) {
     try {
       if (!this.tokenService)
-        httpError(503, `Service is not ready to serve this route`);
+        httpError(503, "Service is not ready to serve this route");
 
       const user = await this.userRepository.findById(id);
       if (!user) httpError(404, `User with the ID ${id} is not found`);
-      await this.userRepository.delete(id);
 
+      await this.userRepository.delete(id);
       if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
+
+      await this.invalidateUserCache(id);
 
       return;
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
+
       logger.error(`[UserService] deleteUser failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
@@ -209,14 +234,22 @@ class UserService extends BaseService {
 
   public async getUser(id: number): Promise<SafeUser> {
     try {
+      const cacheKey = `user:id:${id}`;
+
+      const cached = await this.cacheService.get<SafeUser>(cacheKey);
+      if (cached) return cached;
+
       const user = await this.userRepository.findById(id);
       if (!user) httpError(404, `User with the ID ${id} is not found`);
 
-      return this.toSafeUser(user);
+      const safe = this.toSafeUser(user);
+
+      await this.cacheService.set(cacheKey, safe, this.ttl);
+
+      return safe;
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
+
       logger.error(`[UserService] getUser failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
@@ -227,9 +260,8 @@ class UserService extends BaseService {
       const users = await this.userRepository.findAll(role);
       return this.toSafeUsers(users);
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
+
       logger.error(`[UserService] getUsers failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }

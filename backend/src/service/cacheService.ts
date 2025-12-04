@@ -33,22 +33,20 @@ class CacheService {
     while (true) {
       try {
         return await operation();
-
       } catch (err: any) {
         if (!this.isTransientError(err) || attempt >= this.maxRetries) {
           logger.error(
-            `[CacheService] fatal Redis error (no retry): ${err?.message ?? err}`
+            `[CacheService] fatal Redis error (no retry): ${err?.message ?? err}`,
           );
           return null;
         }
 
-        const delay =
-          Math.pow(2, attempt) * this.baseDelayMs * Math.random();
+        const delay = Math.pow(2, attempt) * this.baseDelayMs * Math.random();
 
         logger.warn(
           `[CacheService] transient redis error: ${err?.message ?? err}. Retrying in ${Math.round(
-            delay
-          )}ms (attempt ${attempt + 1}/${this.maxRetries})`
+            delay,
+          )}ms (attempt ${attempt + 1}/${this.maxRetries})`,
         );
 
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -58,7 +56,11 @@ class CacheService {
     }
   }
 
-  async set<T>(key: string, value: T, ttlSeconds?: number): Promise<boolean | null> {
+  async set<T>(
+    key: string,
+    value: T,
+    ttlSeconds?: number,
+  ): Promise<boolean | null> {
     return await this._retry(async () => {
       const serialized = JSON.stringify(value);
 
@@ -96,7 +98,7 @@ class CacheService {
   async increment(
     key: string,
     amount = 1,
-    ttlSeconds?: number
+    ttlSeconds?: number,
   ): Promise<number | null> {
     return await this._retry(async () => {
       const count = await redis.incrby(key, amount);
@@ -118,7 +120,7 @@ class CacheService {
   async setIfNotExists<T>(
     key: string,
     value: T,
-    ttlSeconds?: number
+    ttlSeconds?: number,
   ): Promise<boolean | null> {
     return await this._retry(async () => {
       const serialized = JSON.stringify(value);
