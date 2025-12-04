@@ -72,11 +72,12 @@ class TokenService extends BasicTokenService {
     ttlSeconds: number,
   ) {
     try {
-      await this.cacheService.set(
+      const res = await this.cacheService.set(
         `refresh:${token}`,
         JSON.stringify(payload),
         ttlSeconds,
       );
+      if (!res) httpError(503, "Service is not avaliable yet");
     } catch (err: any) {
       logger.error(
         `[TokenService] saveRefreshToken failed: ${err?.message ?? err}`,
@@ -167,7 +168,8 @@ class TokenService extends BasicTokenService {
     try {
       const payload = await this.validateRefreshToken(oldToken);
 
-      await this.cacheService.delete(`refresh:${oldToken}`);
+      const res = await this.cacheService.delete(`refresh:${oldToken}`);
+      if (!res) httpError(503, "Service is not avaliable yet");
 
       const accessToken = this.createAccessToken(
         payload.id,
@@ -204,7 +206,9 @@ class TokenService extends BasicTokenService {
    */
   public async logoutToken(token: string): Promise<boolean> {
     try {
-      await this.cacheService.delete(`refresh:${token}`);
+      const res = await this.cacheService.delete(`refresh:${token}`);
+      if (!res) httpError(503, "Service is not avaliable yet");
+
       return true;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
@@ -239,13 +243,15 @@ class TokenService extends BasicTokenService {
       const token = uuidv4();
       const payload = JSON.stringify({ email, passwordHash, role });
 
-      await this.cacheService.set(`verify:${token}`, payload, VERIFY_TOKEN_TTL);
+      const res = await this.cacheService.set(`verify:${token}`, payload, VERIFY_TOKEN_TTL);
+      if (!res) httpError(503, "Service is not avaliable yet");
 
-      await this.cacheService.set(
+      const res1 = await this.cacheService.set(
         `verify:email:${email}`,
         token,
         VERIFY_TOKEN_TTL,
       );
+      if (!res1) httpError(503, "Service is not avaliable yet");
 
       return token;
     } catch (err: any) {
