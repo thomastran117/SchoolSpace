@@ -8,6 +8,7 @@ import errorHandler from "./plugin/errorPlugin";
 import requestLogger from "./plugin/loggerPlugin";
 import requestScopePlugin from "./plugin/scopePlugin";
 import { registerRoutes } from "./route/route";
+import rateLimiter from "./plugin/limiterPlugin";
 
 export async function buildApp() {
   const app = Fastify({});
@@ -18,6 +19,14 @@ export async function buildApp() {
     credentials: true,
   });
 
+  app.register(rateLimiter, {
+    mode: "bucket",
+    capacity: 100,
+    refillRate: 10,
+    keyGenerator: (req) => req.user?.id ?? req.ip,
+    message: "Too many requests",
+  });
+  
   app.register(errorHandler);
   app.register(requestLogger);
   app.register(requestScopePlugin);
