@@ -6,5 +6,6 @@ declare module "fastify" {
     user?: UserPayload;
     scope: any;
     resolve: <T>(key: string) => T;
+    validatedFile?: MultipartFile;
   }
 }

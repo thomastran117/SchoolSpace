@@ -11,9 +11,11 @@ import { httpError } from "../utility/httpUtility";
 import { authRoutes } from "./authRoute";
 import { catalogueRoutes } from "./catalogueRoute";
 import { fileRoutes } from "./fileRoute";
+import { userRoutes } from "./userRoute";
 
 export async function registerRoutes(app: FastifyInstance) {
   app.register(authRoutes, { prefix: "/auth" });
+  app.register(userRoutes, { prefix: "/users" });
   app.register(fileRoutes, { prefix: "/files" });
   app.register(catalogueRoutes, { prefix: "/catalogues" });
 
