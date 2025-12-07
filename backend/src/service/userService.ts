@@ -1,3 +1,4 @@
+import type { MultipartFile } from "@fastify/multipart";
 import type { AuthResponse } from "../models/auth";
 import type { Role, SafeUser, User } from "../models/user";
 import type { UserRepository } from "../repository/userRepository";
@@ -43,8 +44,8 @@ class UserService extends BaseService {
 
   public async updateAvatar(
     userID: number,
-    image: Express.Multer.File,
-    oldRefreshToken: string,
+    image: MultipartFile,
+    oldRefreshToken?: string,
   ): Promise<AuthResponse> {
     try {
       if (!this.fileService || !this.tokenService)
@@ -55,9 +56,11 @@ class UserService extends BaseService {
 
       const oldAvatar = user.avatar;
 
+      const buffer = await image.toBuffer();
+
       const { publicUrl } = await this.fileService.uploadFile(
-        image.buffer,
-        image.originalname,
+        buffer,
+        image.filename,
         "profile",
       );
 
@@ -105,7 +108,7 @@ class UserService extends BaseService {
   public async updateRole(
     userID: number,
     role: Role,
-    oldRefreshToken: string,
+    oldRefreshToken?: string,
   ): Promise<AuthResponse> {
     try {
       if (!this.tokenService)
@@ -148,7 +151,6 @@ class UserService extends BaseService {
 
   public async updateUser(
     userID: number,
-    oldRefreshToken: string,
     data: {
       username?: string;
       name?: string;
@@ -157,6 +159,7 @@ class UserService extends BaseService {
       faculty?: string;
       school?: string;
     },
+    oldRefreshToken?: string,
   ): Promise<AuthResponse> {
     try {
       if (!this.tokenService)
@@ -210,7 +213,7 @@ class UserService extends BaseService {
     }
   }
 
-  public async deleteUser(id: number, oldRefreshToken: string) {
+  public async deleteUser(id: number, oldRefreshToken?: string) {
     try {
       if (!this.tokenService)
         httpError(503, "Service is not ready to serve this route");

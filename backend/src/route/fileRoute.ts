@@ -1,58 +1,25 @@
 /**
  * @file fileRoute.ts
  * @description
- * Express router for file handling (upload, retrieval, deletion).
+ * Router for file handling (upload, retrieval, deletion).
  *
  * @module route
  * @version 1.0.0
  * @auth Thomas
  */
 
-import type { NextFunction, Request, Response, Router } from "express";
-import express from "express";
-import multer from "multer";
-import container from "../container";
-import type { FileController } from "../controller/fileController";
-import { safeUploadAvatar } from "../middleware/uploadMiddleware";
-const router: Router = express.Router();
+import type { FastifyInstance } from "fastify";
+import { authDependency } from "../hooks/authHook";
+import { useController } from "../hooks/controllerHook";
 
-const useScopedController =
-  (
-    handler: (
-      controller: FileController,
-      req: Request,
-      res: Response,
-      next: NextFunction,
-    ) => Promise<any> | any,
-  ) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    const scope = container.createScope();
-    const controller = scope.resolve<FileController>("FileController");
+async function fileRoutes(app: FastifyInstance) {
+  app.get(
+    "/:type/:fileName",
+    {
+      preHandler: authDependency,
+    },
+    useController("FileController", (c) => c.handleFetch),
+  );
+}
 
-    try {
-      await handler(controller, req, res, next);
-    } catch (err) {
-      next(err);
-    } finally {
-      scope.dispose();
-    }
-  };
-
-const upload = multer({ storage: multer.memoryStorage() });
-
-router.post(
-  "/upload",
-  safeUploadAvatar(),
-  useScopedController((controller, req, res, next) =>
-    controller.handleUpload(req, res, next),
-  ),
-);
-
-router.get(
-  "/:type/:fileName",
-  useScopedController((controller, req, res, next) =>
-    controller.handleFetch(req, res, next),
-  ),
-);
-
-export default router;
+export { fileRoutes };

@@ -13,7 +13,7 @@
  * @auth Thomas
  */
 
-import type { Express } from "express";
+import type { MultipartFile } from "@fastify/multipart";
 import { fileTypeFromBuffer } from "file-type";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
@@ -27,28 +27,23 @@ export interface SanitizedImageResult {
   sanitizedBuffer: Buffer;
 }
 
-/**
- * Validates and sanitizes a user profile image.
- *
- * @param file - Uploaded file object from Multer (must contain `buffer`).
- * @returns {Promise<SanitizedImageResult>} Sanitized file metadata and buffer.
- * @throws {HttpError} If file is missing, invalid, or corrupted.
- */
 export async function sanitizeProfileImage(
-  file?: Express.Multer.File,
+  file?: MultipartFile,
 ): Promise<SanitizedImageResult> {
   if (!file) {
     httpError(400, "No file uploaded");
   }
 
-  const detected = await fileTypeFromBuffer(file!.buffer);
+  const buffer = await file.toBuffer();
+
+  const detected = await fileTypeFromBuffer(buffer);
   if (!detected || !["image/jpeg", "image/png"].includes(detected.mime)) {
     httpError(400, "Invalid or corrupted image file");
   }
 
-  const meta = await sharp(file!.buffer).metadata();
+  const meta = await sharp(buffer).metadata();
 
-  let imagePipeline = sharp(file!.buffer).withMetadata();
+  let imagePipeline = sharp(buffer).withMetadata();
 
   if ((meta.width ?? 0) > MAX_WIDTH || (meta.height ?? 0) > MAX_HEIGHT) {
     imagePipeline = imagePipeline.resize(MAX_WIDTH, MAX_HEIGHT, {
@@ -58,6 +53,7 @@ export async function sanitizeProfileImage(
   }
 
   const sanitizedBuffer = await imagePipeline.jpeg({ quality: 85 }).toBuffer();
+
   const fileName = `${uuidv4()}.jpg`;
 
   return { fileName, sanitizedBuffer };

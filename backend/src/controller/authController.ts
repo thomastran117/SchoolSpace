@@ -9,11 +9,10 @@
  */
 
 import env from "../config/envConfigs";
-import { httpError, HttpError, sendCookie } from "../utility/httpUtility";
+import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
-import type { NextFunction, Request, Response } from "express";
-import type { TypedRequest, TypedResponse } from "../types/express";
+import type { FastifyReply, FastifyRequest } from "fastify";
 
 import type {
   AppleDto,
@@ -25,6 +24,7 @@ import type {
   MicrosoftDto,
   SignupDto,
 } from "../dto/authSchema";
+import type { TokenQuery } from "../dto/query";
 import type { AuthService } from "../service/authService";
 
 class AuthController {
@@ -32,6 +32,7 @@ class AuthController {
 
   constructor(authService: AuthService) {
     this.authService = authService;
+
     this.localAuthenticate = this.localAuthenticate.bind(this);
     this.localSignup = this.localSignup.bind(this);
     this.localVerifyEmail = this.localVerifyEmail.bind(this);
@@ -45,9 +46,8 @@ class AuthController {
   }
 
   public async localAuthenticate(
-    req: TypedRequest<LoginDto>,
-    res: TypedResponse<AuthResponseDto>,
-    next: NextFunction,
+    req: FastifyRequest<{ Body: LoginDto }>,
+    reply: FastifyReply,
   ) {
     try {
       const { email, password, remember, captcha } = req.body;
@@ -62,56 +62,62 @@ class AuthController {
           captcha,
         );
 
-      sendCookie(res, refreshToken);
+      reply.setCookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: "/",
+      });
 
-      return res.status(200).json({
+      return reply.code(200).send({
         message: "Login successful",
         accessToken,
         role,
         avatar: avatar ?? undefined,
         username: username ?? undefined,
-      });
+      } satisfies AuthResponseDto);
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] localAuthenticate failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
   public async localSignup(
-    req: TypedRequest<SignupDto>,
-    res: Response,
-    next: NextFunction,
+    req: FastifyRequest<{ Body: SignupDto }>,
+    reply: FastifyReply,
   ) {
     try {
       const { email, password, role, captcha } = req.body;
 
       await this.authService.signupUser(email, password, role, captcha);
 
-      res.status(201).json({ message: "Email sent. Please verify." });
+      return reply.code(200).send({
+        message: "Email verification sent. Please verify.",
+      });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] localSignup failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
   public async localVerifyEmail(
-    req: Request<object, object, object>,
-    res: Response,
-    next: NextFunction,
+    req: FastifyRequest<{ Querystring: TokenQuery }>,
+    reply: FastifyReply,
   ) {
     try {
       if (!env.isEmailEnabled()) {
@@ -122,85 +128,81 @@ class AuthController {
         );
       }
 
-      const token = req.query.token as string | undefined;
+      const token = req.query.token;
       if (!token) httpError(400, "Missing token");
 
       await this.authService.verifyUser(token);
 
-      res.status(201).json({
-        message: "User verified - please log in.",
+      return reply.code(200).send({
+        message: "Email verification sent. Please verify.",
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
   public async localForgotPassword(
-    req: TypedRequest<ForgotPasswordDto>,
-    res: Response,
-    next: NextFunction,
+    req: FastifyRequest<{ Body: ForgotPasswordDto }>,
+    reply: FastifyReply,
   ) {
     try {
       const { email } = req.body;
       await this.authService.forgotPassword(email);
 
-      res.status(200).json({
-        message:
-          "If the account with email exists, we sent a link to the email",
+      return reply.code(200).send({
+        message: "If an account exist, an email has been sent",
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
   public async localChangePassword(
-    req: TypedRequest<ChangePasswordDto>,
-    res: Response,
-    next: NextFunction,
+    req: FastifyRequest<{ Body: ChangePasswordDto; Querystring: TokenQuery }>,
+    reply: FastifyReply,
   ) {
     try {
-      const token = req.query.token as string | undefined;
+      const token = req.query.token;
       if (!token) httpError(400, "Missing token");
 
       const { password } = req.body;
       await this.authService.changePassword(token, password);
 
-      res.status(200).json({
-        message: "Password changed successfully - please login now",
+      return reply.code(200).send({
+        message: "Password change sucessfully",
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
   public async microsoftAuthenticate(
-    req: TypedRequest<MicrosoftDto>,
-    res: TypedResponse<AuthResponseDto>,
-    next: NextFunction,
+    req: FastifyRequest<{ Body: MicrosoftDto }>,
+    reply: FastifyReply,
   ) {
     try {
       if (!env.isMicrosoftEnabled()) {
@@ -217,32 +219,37 @@ class AuthController {
       const { accessToken, refreshToken, role, username, avatar } =
         await this.authService.microsoftOAuth(idToken);
 
-      sendCookie(res, refreshToken);
+      reply.setCookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: "/",
+      });
 
-      return res.status(200).json({
+      return reply.code(200).send({
         message: "Login successful",
         accessToken,
         role,
         avatar: avatar ?? undefined,
         username: username ?? undefined,
-      });
+      } satisfies AuthResponseDto);
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] microsoftAuthenticate failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
   public async googleAuthenticate(
-    req: TypedRequest<GoogleDto>,
-    res: TypedResponse<AuthResponseDto>,
-    next: NextFunction,
+    req: FastifyRequest<{ Body: GoogleDto }>,
+    reply: FastifyReply,
   ) {
     try {
       const { id_token: googleToken } = req.body;
@@ -251,32 +258,36 @@ class AuthController {
       const { accessToken, refreshToken, role, username, avatar } =
         await this.authService.googleOAuth(googleToken);
 
-      sendCookie(res, refreshToken);
+      reply.setCookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+      });
 
-      return res.status(200).json({
+      return reply.code(200).send({
         message: "Login successful",
         accessToken,
         role,
         avatar: avatar ?? undefined,
         username: username ?? undefined,
-      });
+      } satisfies AuthResponseDto);
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] googleAuthenticate failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
   public async appleAuthenticate(
-    req: TypedRequest<AppleDto>,
-    res: TypedResponse<AuthResponseDto>,
-    next: NextFunction,
+    req: FastifyRequest<{ Body: AppleDto }>,
+    reply: FastifyReply,
   ) {
     try {
       const { id_token: appleToken } = req.body;
@@ -285,33 +296,35 @@ class AuthController {
       const { accessToken, refreshToken, role, username, avatar } =
         await this.authService.googleOAuth(appleToken); //change to appleOAuth later
 
-      sendCookie(res, refreshToken);
+      reply.setCookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: "/",
+      });
 
-      return res.status(200).json({
+      return reply.code(200).send({
         message: "Login successful",
         accessToken,
         role,
         avatar: avatar ?? undefined,
         username: username ?? undefined,
-      });
+      } satisfies AuthResponseDto);
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] appleAuthenticate failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
-  public async refreshAccessToken(
-    req: Request,
-    res: TypedResponse<AuthResponseDto>,
-    next: NextFunction,
-  ) {
+  public async refreshAccessToken(req: FastifyRequest, reply: FastifyReply) {
     try {
       const token = req.cookies.refreshToken;
       if (!token) httpError(401, "Missing refresh token");
@@ -319,59 +332,65 @@ class AuthController {
       const { accessToken, refreshToken, role, username, avatar } =
         await this.authService.generateNewTokens(token);
 
-      sendCookie(res, refreshToken);
+      reply.setCookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: "/",
+      });
 
-      return res.status(200).json({
-        message: "Granting new access token",
+      return reply.code(200).send({
+        message: "Login successful",
         accessToken,
         role,
         avatar: avatar ?? undefined,
         username: username ?? undefined,
-      });
+      } satisfies AuthResponseDto);
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] refreshAccessToken failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
-  public async logoutRefreshToken(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) {
+  public async logoutRefreshToken(req: FastifyRequest, reply: FastifyReply) {
     try {
       const token = req.cookies.refreshToken;
 
       if (!token) {
-        return res.status(200).json({ message: "Already logged out" });
+        return reply.code(200).send({
+          message: "Logged out already",
+        });
       }
 
       await this.authService.authLogout(token);
 
-      res.clearCookie("refreshToken", {
+      reply.clearCookie("refreshToken", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
       });
 
-      res.json({ message: "Logged out successfully" });
+      return reply.code(200).send({
+        message: "Logged out sucessfully",
+      });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] logoutRefreshToken failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 }

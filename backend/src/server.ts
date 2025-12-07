@@ -1,24 +1,17 @@
-/**
- * @file server.ts
- * @description Main entry point of the app
- *
- * @module app
- *
- * @author Thomas
- * @version 1.0.0
- *
- */
-import { initializeApp } from "./app";
+import { buildApp } from "./app";
 import logger from "./utility/logger";
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 8040;
 
-(async () => {
+async function start() {
   try {
-    const app = await initializeApp();
-    app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
+    const app = await buildApp();
+    await app.listen({ port: Number(PORT), host: "localhost" });
+    logger.info(`Server running on port ${PORT}`);
   } catch (err: any) {
     logger.error(`[Server] Failed to start: ${err.message}`);
     process.exit(1);
   }
-})();
+}
+
+start();

@@ -12,101 +12,108 @@
  */
 import type { NextFunction, Request, Response, Router } from "express";
 import express from "express";
+import type { FastifyInstance } from "fastify";
 import container from "../container";
 import type { UserController } from "../controller/userController";
 import { IdParamSchema } from "../dto/idSchema";
 import { RoleSchema, UserSchema } from "../dto/userSchema";
-import { safeUploadAvatar } from "../middleware/uploadMiddleware";
-import { validate } from "../middleware/validateMiddleware";
-const useScopedController =
-  (
-    handler: (
-      controller: UserController,
-      req: Request,
-      res: Response,
-      next: NextFunction,
-    ) => Promise<any> | any,
-  ) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    const scope = container.createScope();
-    const controller = scope.resolve<UserController>("UserController");
+import { authDependency } from "../hooks/authHook";
+import { useController } from "../hooks/controllerHook";
+import { safeUploadAvatar } from "../hooks/uploadHook";
+import { validate } from "../hooks/validateHook";
 
-    try {
-      await handler(controller, req, res, next);
-    } catch (err) {
-      next(err);
-    } finally {
-      scope.dispose();
-    }
-  };
+async function userRoutes(app: FastifyInstance) {
+  app.get(
+    "/:id",
+    {
+      preHandler: authDependency,
+      preValidation: validate(IdParamSchema, "params"),
+    },
+    useController("UserController", (c) => c.getUser),
+  );
 
-const router: Router = express.Router();
+  app.get(
+    "/",
+    {
+      preHandler: authDependency,
+    },
+    useController("UserController", (c) => c.getUser),
+  );
 
-router.post(
-  "/avatar",
-  safeUploadAvatar(),
-  useScopedController((controller, req, res, next) =>
-    controller.updateAvatar(req, res, next),
-  ),
-);
+  app.delete(
+    "/:id",
+    {
+      preHandler: authDependency,
+      preValidation: validate(IdParamSchema, "params"),
+    },
+    useController("UserController", (c) => c.deleteUser),
+  );
 
-router.put(
-  "/:id",
-  validate(IdParamSchema, "params"),
-  validate(UserSchema, "body"),
-  useScopedController((controller, req, res, next) =>
-    controller.updateUser(req, res, next),
-  ),
-);
-router.put(
-  "/",
-  useScopedController((controller, req, res, next) =>
-    controller.updateUser(req, res, next),
-  ),
-);
+  app.delete(
+    "/",
+    {
+      preHandler: authDependency,
+    },
+    useController("UserController", (c) => c.deleteUser),
+  );
 
-router.put(
-  "/",
-  validate(IdParamSchema, "params"),
-  validate(RoleSchema, "body"),
-  useScopedController((controller, req, res, next) =>
-    controller.updateRole(req, res, next),
-  ),
-);
-router.put(
-  "/",
-  validate(RoleSchema, "body"),
-  useScopedController((controller, req, res, next) =>
-    controller.updateRole(req, res, next),
-  ),
-);
+  app.put(
+    "/avatar/:id",
+    {
+      preHandler: [authDependency, safeUploadAvatar],
+      preValidation: validate(IdParamSchema, "params"),
+    },
+    useController("UserController", (c) => c.updateAvatar),
+  );
+  app.put(
+    "/avatar",
+    {
+      preHandler: [authDependency, safeUploadAvatar],
+    },
+    useController("UserController", (c) => c.updateAvatar),
+  );
 
-router.delete(
-  "/",
-  validate(IdParamSchema, "params"),
-  useScopedController((controller, req, res, next) =>
-    controller.deleteUser(req, res, next),
-  ),
-);
-router.delete(
-  "/",
-  useScopedController((controller, req, res, next) =>
-    controller.deleteUser(req, res, next),
-  ),
-);
+  app.put(
+    "/role/:id",
+    {
+      preHandler: authDependency,
+      preValidation: [
+        validate(IdParamSchema, "params"),
+        validate(RoleSchema, "body"),
+      ],
+    },
+    useController("UserController", (c) => c.updateRole),
+  );
 
-router.get(
-  "/:id",
-  validate(IdParamSchema, "params"),
-  useScopedController((controller, req, res, next) =>
-    controller.getUser(req, res, next),
-  ),
-);
-router.get(
-  "/",
-  useScopedController((controller, req, res, next) =>
-    controller.getUser(req, res, next),
-  ),
-);
+  app.put(
+    "/role",
+    {
+      preHandler: authDependency,
+      preValidation: validate(RoleSchema, "body"),
+    },
+    useController("UserController", (c) => c.updateRole),
+  );
 
-export default router;
+  app.put(
+    "/:id",
+    {
+      preHandler: authDependency,
+      preValidation: [
+        validate(IdParamSchema, "params"),
+        validate(UserSchema, "body"),
+      ],
+    },
+    useController("UserController", (c) => c.updateUser),
+  );
+
+  app.put(
+    "/",
+    {
+      preHandler: authDependency,
+      preValidation: validate(UserSchema, "body"),
+    },
+    useController("UserController", (c) => c.updateUser),
+  );
+}
+
+export { userRoutes };
