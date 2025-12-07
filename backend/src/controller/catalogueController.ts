@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from "express";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import type {
   CreateCatalogueDto,
   QueryCatalogueDto,
@@ -6,7 +6,6 @@ import type {
 } from "../dto/catalogueSchema";
 import type { UserPayload } from "../models/token";
 import type { CatalogueService } from "../service/catalogueService";
-import type { TypedRequest, TypedResponse } from "../types/express";
 import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
@@ -24,9 +23,8 @@ class CatalogueController {
   }
 
   public async createCourseTemplate(
-    req: TypedRequest<CreateCatalogueDto>,
-    res: TypedResponse<{ message: string; data: any }>,
-    next: NextFunction,
+    req: FastifyRequest<{ Body: CreateCatalogueDto }>,
+    reply: FastifyReply,
   ) {
     try {
       const { role: userRole } = req.user as UserPayload;
@@ -44,27 +42,26 @@ class CatalogueController {
         available,
       );
 
-      return res.status(201).json({
+      return reply.code(200).send({
         message: "Course template created successfully.",
         data: result,
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[CatalogueController] createCourseTemplate failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
   public async updateCourseTemplate(
-    req: TypedRequest<UpdateCatalogueDto>,
-    res: TypedResponse<{ message: string; data: any }>,
-    next: NextFunction,
+    req: FastifyRequest<{ Body: UpdateCatalogueDto }>,
+    reply: FastifyReply,
   ) {
     try {
       const { role: userRole } = req.user as UserPayload;
@@ -85,28 +82,24 @@ class CatalogueController {
         available,
       );
 
-      return res.status(200).json({
+      return reply.code(200).send({
         message: "Course template updated successfully.",
         data: result,
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[CatalogueController] updateCourseTemplate failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
-  public async deleteCourseTemplate(
-    req: Request,
-    res: TypedResponse<{ message: string }>,
-    next: NextFunction,
-  ) {
+  public async deleteCourseTemplate(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { role: userRole } = req.user as UserPayload;
       if (userRole !== "admin")
@@ -116,53 +109,48 @@ class CatalogueController {
 
       await this.catalogueService.deleteCourseTemplate(courseId);
 
-      return res.status(200).json({
+      return reply.code(200).send({
         message: "Course template deleted successfully.",
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[CatalogueController] deleteCourseTemplate failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
-  public async getCourseTemplate(
-    req: Request,
-    res: TypedResponse<{ message: string; data: any }>,
-    next: NextFunction,
-  ) {
+  public async getCourseTemplate(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { id: courseId } = req.params as unknown as { id: string };
       const course =
         await this.catalogueService.getCourseTemplateById(courseId);
 
-      return res.status(200).json({
+      return reply.code(200).send({
         message: "Course template fetched successfully.",
         data: course,
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[CatalogueController] getCourseTemplate failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
   public async getCourseTemplates(
-    req: TypedRequest<QueryCatalogueDto>,
-    res: Response,
-    next: NextFunction,
+    req: FastifyRequest<{ Querystring: QueryCatalogueDto }>,
+    reply: FastifyReply,
   ) {
     try {
       const { term, available, search, page, limit } = req.query;
@@ -178,7 +166,7 @@ class CatalogueController {
         limitNum,
       );
 
-      return res.status(200).json({
+      return reply.code(200).send({
         message: "Courses retrieved successfully.",
         total: result.total,
         totalPages: result.totalPages,
@@ -188,14 +176,14 @@ class CatalogueController {
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[CatalogueController] getCourseTemplates failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 }
