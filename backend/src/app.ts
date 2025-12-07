@@ -1,19 +1,28 @@
 import cookie from "@fastify/cookie";
+import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import Fastify from "fastify";
+
 import container from "./container";
 import errorHandler from "./plugin/errorPlugin";
 import requestLogger from "./plugin/loggerPlugin";
 import requestScopePlugin from "./plugin/scopePlugin";
+import { registerRoutes } from "./route/route";
 
 export async function buildApp() {
   const app = Fastify({});
   await container.initialize();
 
+  app.register(cors, {
+    origin: ["http://localhost:3040"],
+    credentials: true,
+  });
+
   app.register(errorHandler);
   app.register(requestLogger);
   app.register(requestScopePlugin);
   app.register(cookie);
+
   app.register(multipart, {
     limits: {
       fileSize: 5 * 1024 * 1024,
@@ -31,6 +40,8 @@ export async function buildApp() {
   app.get("/health", async (_, reply) =>
     reply.code(200).send({ message: "ok" }),
   );
+
+  app.register(registerRoutes, { prefix: "/api" });
 
   return app;
 }

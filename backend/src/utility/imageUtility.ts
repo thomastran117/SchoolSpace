@@ -13,29 +13,14 @@
  * @auth Thomas
  */
 
-const MAX_WIDTH = 2048;
-const MAX_HEIGHT = 2048;
-
-export interface SanitizedImageResult {
-  fileName: string;
-  sanitizedBuffer: Buffer;
-}
-
-/**
- * Validates and sanitizes a user profile image.
- *
- * @param file - Uploaded file object from Multer (must contain `buffer`).
- * @returns {Promise<SanitizedImageResult>} Sanitized file metadata and buffer.
- * @throws {HttpError} If file is missing, invalid, or corrupted.
- */
 import type { MultipartFile } from "@fastify/multipart";
 import { fileTypeFromBuffer } from "file-type";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import { httpError } from "../utility/httpUtility";
 
-const MAX_WIDTH = 1024;
-const MAX_HEIGHT = 1024;
+const MAX_WIDTH = 2048;
+const MAX_HEIGHT = 2048;
 
 export interface SanitizedImageResult {
   fileName: string;

@@ -1,34 +1,19 @@
 /**
- * @file route.ts
+ * @file index.ts
  * @description
  * Main route file to serve all API routes.
  *
- * @module route
  * @version 1.0.0
- * @auth Thomas
  */
 
-import type { NextFunction, Request, Response, Router } from "express";
-import express from "express";
-
-import { AuthGuard } from "../middleware/authMiddleware";
+import type { FastifyInstance } from "fastify";
 import { httpError } from "../utility/httpUtility";
-import authRoute from "./authRoute";
-import catalogueRoute from "./catalogueRoute";
-import fileRoute from "./fileRoute";
-import paymentRoute from "./paymentRoute";
-import userRoute from "./userRoute";
+import { authRoutes } from "./authRoute";
 
-const router: Router = express.Router();
+export async function registerRoutes(app: FastifyInstance) {
+  app.register(authRoutes, { prefix: "/auth" });
 
-router.use("/auth", authRoute);
-router.use("/payment", AuthGuard, paymentRoute);
-router.use("/files", AuthGuard, fileRoute);
-router.use("/users", AuthGuard, userRoute);
-router.use("/catalogues", catalogueRoute);
-
-router.use((req: Request, _res: Response, _next: NextFunction) => {
-  httpError(404, `Route '${req.originalUrl}' does not exist`);
-});
-
-export default router;
+  app.setNotFoundHandler((request) => {
+    throw httpError(404, `Route '${request.url}' does not exist`);
+  });
+}
