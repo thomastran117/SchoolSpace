@@ -10,11 +10,7 @@
 /**
  * Imports
  */
-import type { NextFunction, Request, Response, Router } from "express";
-import express from "express";
 import type { FastifyInstance } from "fastify";
-import container from "../container";
-import type { UserController } from "../controller/userController";
 import { IdParamSchema } from "../dto/idSchema";
 import { RoleSchema, UserSchema } from "../dto/userSchema";
 import { authDependency } from "../hooks/authHook";
