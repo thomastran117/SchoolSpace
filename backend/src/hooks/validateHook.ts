@@ -31,8 +31,8 @@ export function validate<T extends ZodSchema>(
       source === "body"
         ? req.body
         : source === "params"
-          ? req.params
-          : req.query;
+        ? req.params
+        : req.query;
 
     const isEmptyObject =
       data === undefined ||
@@ -47,13 +47,22 @@ export function validate<T extends ZodSchema>(
           ? Object.keys(effectiveSchema.shape)
           : [];
 
-      throw httpError(400, "Missing or empty input");
+      throw httpError(400, "Missing or empty input", {
+        source,
+        expectedFields,
+      });
     }
 
     const parseResult = effectiveSchema.safeParse(data);
 
     if (!parseResult.success) {
-      throw httpError(400, "Validation failed");
+      throw httpError(400, "Validation failed", {
+        source,
+        errors: parseResult.error.issues.map((issue) => ({
+          field: issue.path.join(".") || source,
+          message: issue.message,
+        })),
+      });
     }
 
     if (source === "body") req.body = parseResult.data as any;
