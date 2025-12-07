@@ -6,9 +6,7 @@ export default fp(async function errorHandler(app) {
   app.setErrorHandler((err: unknown, request, reply) => {
     if (err instanceof HttpError) {
       if (err.statusCode === 500) {
-        logger.error(
-          `[500] ${request.method} ${request.url} - ${err.message}`,
-        );
+        logger.error(`[500] ${request.method} ${request.url} - ${err.message}`);
       }
 
       return reply.code(err.statusCode).send({
@@ -22,7 +20,7 @@ export default fp(async function errorHandler(app) {
     logger.error(
       `${request.method} ${request.url} - ${
         unknownError?.message ?? unknownError
-      }`
+      }`,
     );
 
     return reply.code(500).send({

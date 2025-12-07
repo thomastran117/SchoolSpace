@@ -31,8 +31,8 @@ export function validate<T extends ZodSchema>(
       source === "body"
         ? req.body
         : source === "params"
-        ? req.params
-        : req.query;
+          ? req.params
+          : req.query;
 
     const isEmptyObject =
       data === undefined ||
