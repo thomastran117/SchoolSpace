@@ -1,7 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { MultipartFile } from "@fastify/multipart";
-import type { FileParams } from "../dto/params.js";
 import mime from "mime-types";
+import type { FileParams } from "../dto/params.js";
 import type { FileService } from "../service/fileService.js";
 import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
@@ -19,7 +18,7 @@ class FileController {
 
   public async handleUpload(
     req: FastifyRequest<{ Params: FileParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     try {
       const { type } = req.params;
@@ -32,7 +31,7 @@ class FileController {
       const result = await this.fileService.uploadFile(
         buffer,
         file.filename,
-        type
+        type,
       );
 
       return reply.code(201).send({
@@ -52,7 +51,7 @@ class FileController {
 
   public async handleFetch(
     req: FastifyRequest<{ Params: FileParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     try {
       const { type, fileName } = req.params;
@@ -60,12 +59,11 @@ class FileController {
 
       const { filePath } = await this.fileService.getFile(type, fileName);
 
-      const contentType =
-        mime.lookup(fileName) || "application/octet-stream";
+      const contentType = mime.lookup(fileName) || "application/octet-stream";
 
       return reply
         .type(contentType)
-        .send(await import("fs").then(fs => fs.createReadStream(filePath)));
+        .send(await import("fs").then((fs) => fs.createReadStream(filePath)));
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
@@ -79,7 +77,7 @@ class FileController {
 
   public async handleDelete(
     req: FastifyRequest<{ Params: FileParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ) {
     try {
       const { type, fileName } = req.params;
