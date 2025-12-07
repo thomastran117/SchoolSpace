@@ -1,3 +1,4 @@
+import type { MultipartFile } from "@fastify/multipart";
 import type { AuthResponse } from "../models/auth";
 import type { Role, SafeUser, User } from "../models/user";
 import type { UserRepository } from "../repository/userRepository";
@@ -7,7 +8,6 @@ import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
 import type { FileService } from "./fileService";
 import type { TokenService } from "./tokenService";
-import type { MultipartFile } from "@fastify/multipart";
 
 class UserService extends BaseService {
   private readonly userRepository: UserRepository;
@@ -63,7 +63,7 @@ class UserService extends BaseService {
         image.filename,
         "profile",
       );
-      
+
       const updated = await this.userRepository.update(userID, {
         avatar: publicUrl,
       });

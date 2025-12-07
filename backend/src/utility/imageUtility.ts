@@ -67,9 +67,7 @@ export async function sanitizeProfileImage(
     });
   }
 
-  const sanitizedBuffer = await imagePipeline
-    .jpeg({ quality: 85 })
-    .toBuffer();
+  const sanitizedBuffer = await imagePipeline.jpeg({ quality: 85 }).toBuffer();
 
   const fileName = `${uuidv4()}.jpg`;
 
