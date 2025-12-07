@@ -1,4 +1,5 @@
 import cookie from "@fastify/cookie";
+import multipart from "@fastify/multipart";
 import Fastify from "fastify";
 import container from "./container";
 import errorHandler from "./plugin/errorPlugin";
@@ -13,6 +14,11 @@ export async function buildApp() {
   app.register(requestLogger);
   app.register(requestScopePlugin);
   app.register(cookie);
+  app.register(multipart, {
+    limits: {
+      fileSize: 5 * 1024 * 1024,
+    },
+  });
 
   app.get("/", async (_, reply) => reply.code(200).send({ message: "ok" }));
 

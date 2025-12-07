@@ -13,12 +13,6 @@
  * @auth Thomas
  */
 
-import type { Express } from "express";
-import { fileTypeFromBuffer } from "file-type";
-import sharp from "sharp";
-import { v4 as uuidv4 } from "uuid";
-import { httpError } from "../utility/httpUtility";
-
 const MAX_WIDTH = 2048;
 const MAX_HEIGHT = 2048;
 
@@ -34,21 +28,37 @@ export interface SanitizedImageResult {
  * @returns {Promise<SanitizedImageResult>} Sanitized file metadata and buffer.
  * @throws {HttpError} If file is missing, invalid, or corrupted.
  */
+import type { MultipartFile } from "@fastify/multipart";
+import { fileTypeFromBuffer } from "file-type";
+import sharp from "sharp";
+import { v4 as uuidv4 } from "uuid";
+import { httpError } from "../utility/httpUtility";
+
+const MAX_WIDTH = 1024;
+const MAX_HEIGHT = 1024;
+
+export interface SanitizedImageResult {
+  fileName: string;
+  sanitizedBuffer: Buffer;
+}
+
 export async function sanitizeProfileImage(
-  file?: Express.Multer.File,
+  file?: MultipartFile,
 ): Promise<SanitizedImageResult> {
   if (!file) {
     httpError(400, "No file uploaded");
   }
 
-  const detected = await fileTypeFromBuffer(file!.buffer);
+  const buffer = await file.toBuffer();
+
+  const detected = await fileTypeFromBuffer(buffer);
   if (!detected || !["image/jpeg", "image/png"].includes(detected.mime)) {
     httpError(400, "Invalid or corrupted image file");
   }
 
-  const meta = await sharp(file!.buffer).metadata();
+  const meta = await sharp(buffer).metadata();
 
-  let imagePipeline = sharp(file!.buffer).withMetadata();
+  let imagePipeline = sharp(buffer).withMetadata();
 
   if ((meta.width ?? 0) > MAX_WIDTH || (meta.height ?? 0) > MAX_HEIGHT) {
     imagePipeline = imagePipeline.resize(MAX_WIDTH, MAX_HEIGHT, {
@@ -57,7 +67,10 @@ export async function sanitizeProfileImage(
     });
   }
 
-  const sanitizedBuffer = await imagePipeline.jpeg({ quality: 85 }).toBuffer();
+  const sanitizedBuffer = await imagePipeline
+    .jpeg({ quality: 85 })
+    .toBuffer();
+
   const fileName = `${uuidv4()}.jpg`;
 
   return { fileName, sanitizedBuffer };

@@ -1,4 +1,6 @@
-import type { NextFunction, Request, Response } from "express";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import type { MultipartFile } from "@fastify/multipart";
+import type { FileParams } from "../dto/params.js";
 import mime from "mime-types";
 import type { FileService } from "../service/fileService.js";
 import { httpError, HttpError } from "../utility/httpUtility";
@@ -9,71 +11,93 @@ class FileController {
 
   constructor(fileService: FileService) {
     this.fileService = fileService;
+
     this.handleUpload = this.handleUpload.bind(this);
     this.handleFetch = this.handleFetch.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
   }
 
-  public async handleUpload(req: Request, res: Response, next: NextFunction) {
+  public async handleUpload(
+    req: FastifyRequest<{ Params: FileParams }>,
+    reply: FastifyReply
+  ) {
     try {
       const { type } = req.params;
-      const file = req.file;
+
+      const file = await req.file();
       if (!file) httpError(400, "Missing file");
+
+      const buffer = await file.toBuffer();
+
       const result = await this.fileService.uploadFile(
-        file.buffer,
-        file.originalname,
-        type,
+        buffer,
+        file.filename,
+        type
       );
-      res
-        .status(201)
-        .json({ message: "File uploaded successfully", ...result });
+
+      return reply.code(201).send({
+        message: "File uploaded successfully",
+        ...result,
+      });
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        return next(err);
-      }
+      if (err instanceof HttpError) throw err;
 
       logger.error(
         `[FileController] handleUpload failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
-  public async handleFetch(req: Request, res: Response, next: NextFunction) {
+  public async handleFetch(
+    req: FastifyRequest<{ Params: FileParams }>,
+    reply: FastifyReply
+  ) {
     try {
       const { type, fileName } = req.params;
-      const { file, filePath } = await this.fileService.getFile(type, fileName);
-      const contentType = mime.lookup(fileName) || "application/octet-stream";
-      res.setHeader("Content-Type", contentType);
-      res.sendFile(filePath);
+      if (!fileName) httpError(400, "Missing file name");
+
+      const { filePath } = await this.fileService.getFile(type, fileName);
+
+      const contentType =
+        mime.lookup(fileName) || "application/octet-stream";
+
+      return reply
+        .type(contentType)
+        .send(await import("fs").then(fs => fs.createReadStream(filePath)));
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        return next(err);
-      }
+      if (err instanceof HttpError) throw err;
 
       logger.error(
         `[FileController] handleFetch failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
-  public async handleDelete(req: Request, res: Response, next: NextFunction) {
+
+  public async handleDelete(
+    req: FastifyRequest<{ Params: FileParams }>,
+    reply: FastifyReply
+  ) {
     try {
       const { type, fileName } = req.params;
+      if (!fileName) httpError(400, "Missing file name");
+
       await this.fileService.deleteFile(type, fileName);
-      res.status(200).json({ message: "File deleted successfully" });
+
+      return reply.code(200).send({
+        message: "File deleted successfully",
+      });
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        return next(err);
-      }
+      if (err instanceof HttpError) throw err;
 
       logger.error(
         `[FileController] handleDelete failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 }
