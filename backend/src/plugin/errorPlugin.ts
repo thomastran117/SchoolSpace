@@ -4,8 +4,7 @@ import logger from "../utility/logger";
 
 export default fp(async function errorHandler(app) {
   app.setErrorHandler((err: any, request, reply) => {
-    const status =
-      err instanceof HttpError ? err.statusCode : 500;
+    const status = err instanceof HttpError ? err.statusCode : 500;
 
     const message =
       err instanceof HttpError

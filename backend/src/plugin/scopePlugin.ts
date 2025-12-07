@@ -3,7 +3,6 @@ import container from "../container";
 import logger from "../utility/logger";
 
 export default fp(async function requestScopePlugin(app) {
-
   app.addHook("onRequest", async (request, reply) => {
     const scope = container.createScope();
     request.scope = scope;
@@ -17,5 +16,4 @@ export default fp(async function requestScopePlugin(app) {
       logger.error(`[Scope] Failed disposing: ${err}`);
     }
   });
-
 });
