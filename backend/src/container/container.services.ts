@@ -83,7 +83,11 @@ function registerServiceModules(): Map<string, Registration<any>> {
     });
 
     services.set("CatalogueService", {
-      factory: (scope) => new CatalogueService(scope.resolve("CacheService")),
+      factory: (scope) =>
+        new CatalogueService(
+          scope.resolve("CacheService"),
+          scope.resolve("CatalogueRepository"),
+        ),
       lifetime: "scoped",
     });
 

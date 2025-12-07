@@ -1,4 +1,10 @@
-class CourseRepository {
+import { BaseRepository } from "./baseRepository";
+
+class CourseRepository extends BaseRepository {
+  constructor() {
+    super({ maxRetries: 3, baseDelay: 150 });
+  }
+
   public async findById() {
     try {
       return;
