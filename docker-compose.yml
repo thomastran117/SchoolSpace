@@ -1,94 +1,85 @@
 version: "3.9"
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: schoolspace-mysql
-    environment:
-      MYSQL_DATABASE: appdb
-      MYSQL_USER: app
-      MYSQL_PASSWORD: app
-      MYSQL_ROOT_PASSWORD: root
-    command: ["--default-authentication-plugin=mysql_native_password"]
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "3307:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -proot --silent"]
-      interval: 5s
-      timeout: 3s
-      retries: 15
-
-  redis:
-    image: redis:7-alpine
-    container_name: schoolspace-redis
-    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
-    ports:
-      - "6380:6379"
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
-  mongodb:
-    image: mongo:7.0
-    container_name: schoolspace-mongodb
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_DATABASE: appdb
-    ports:
-      - "27018:27017"
-    volumes:
-      - mongo-data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      - "3090:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: schoolspace-backend
-    env_file:
-      - ./backend/.env
     environment:
-      DATABASE_URL: "mysql://app:app@mysql:3306/appdb"
-      REDIS_URL: "redis://redis:6379"
-      MONGO_URL: "mongodb://root:root@mongodb:27017/appdb?authSource=admin"
-      CORS_WHITELIST: "http://localhost:3040"
-      FRONTEND_CLIENT: "http://localhost:3040"
-      PORT: "8040"
+      - DB_CONNECTION_STRING=Server=mysql;Port=3306;Database=appdb;User=root;Password=root
+      - REDIS_CONNECTION=redis:6379
+      - MONGO_CONNECTION=mongodb://mongo:27017/eventxperience
+      - JWT_SECRET_KEY=amazing_secret_key_yup_yes_abcdef123
+      - JWT_SECRET_KEY_REFRESH=amazing_secret_key_yup_yes_abcdef123
+      - JWT_SECRET_KEY_VERIFY=amazing_secret_key_yup_yes_abcdef123
+    ports:
+      - "8090:8090"
     depends_on:
       mysql:
         condition: service_healthy
       redis:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
-    ports:
-      - "8040:8040"
+        condition: service_started
+      mongo:
+        condition: service_started
+    networks:
+      - app-network
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: "http://localhost:8040"
-    container_name: schoolspace-frontend
-    depends_on:
-      - backend
+  mysql:
+    image: mysql:8.4
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    volumes:
+      - mysql_data:/var/lib/mysql
     ports:
-      - "3040:80"
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:7
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
-  mysql-data:
-  redis-data:
-  mongo-data:
+  mysql_data:
+  redis_data:
+  mongo_data:
