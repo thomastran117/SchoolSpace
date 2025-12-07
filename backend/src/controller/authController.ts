@@ -73,14 +73,14 @@ class AuthController {
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] localAuthenticate failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
@@ -97,14 +97,14 @@ class AuthController {
       res.status(201).json({ message: "Email sent. Please verify." });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] localSignup failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
@@ -132,14 +132,14 @@ class AuthController {
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
@@ -158,14 +158,14 @@ class AuthController {
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
@@ -186,14 +186,14 @@ class AuthController {
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
         `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
       );
 
-      return next(new HttpError(500, "Internal server error"));
+      throw new HttpError(500, "Internal server error");
     }
   }
 
@@ -228,7 +228,7 @@ class AuthController {
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
@@ -262,7 +262,7 @@ class AuthController {
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
@@ -296,7 +296,7 @@ class AuthController {
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
@@ -330,7 +330,7 @@ class AuthController {
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(
@@ -364,7 +364,7 @@ class AuthController {
       res.json({ message: "Logged out successfully" });
     } catch (err: any) {
       if (err instanceof HttpError) {
-        return next(err);
+        throw err;
       }
 
       logger.error(

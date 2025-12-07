@@ -62,7 +62,7 @@ class OAuthService {
 
   private async retry<T>(
     fn: () => Promise<T>,
-    operationName: string
+    operationName: string,
   ): Promise<T> {
     let attempt = 0;
 
@@ -72,7 +72,7 @@ class OAuthService {
       } catch (err: any) {
         if (!this.isTransient(err) || attempt >= this.maxRetries) {
           logger.error(
-            `[OAuthService] Fatal error in ${operationName}: ${err?.message}`
+            `[OAuthService] Fatal error in ${operationName}: ${err?.message}`,
           );
           throw err;
         }
@@ -83,7 +83,7 @@ class OAuthService {
           `[OAuthService] Transient error in ${operationName}: ${err?.message}. ` +
             `Retrying in ${Math.round(delay)}ms (attempt ${
               attempt + 1
-            }/${this.maxRetries})`
+            }/${this.maxRetries})`,
         );
 
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -105,7 +105,7 @@ class OAuthService {
         cache: true,
         cacheMaxEntries: 10,
         cacheMaxAge: 10 * 60 * 1000,
-        timeout: 8000
+        timeout: 8000,
       });
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
@@ -117,7 +117,7 @@ class OAuthService {
 
   private async getSigningKey(
     client: JwksClient,
-    header: JwtHeader
+    header: JwtHeader,
   ): Promise<string> {
     return this.retry<string>(
       () =>
@@ -133,7 +133,7 @@ class OAuthService {
             resolve(pubKey);
           });
         }),
-      "getSigningKey"
+      "getSigningKey",
     );
   }
 
@@ -182,10 +182,11 @@ class OAuthService {
                 algorithms: ["RS256"],
                 issuer: iss,
                 audience: this.MS_CLIENT_ID!,
-                clockTolerance: 5
+                clockTolerance: 5,
               },
               (err, verified) => {
-                if (err) return reject(httpError(401, "Invalid Microsoft Token"));
+                if (err)
+                  return reject(httpError(401, "Invalid Microsoft Token"));
 
                 const payload = verified as JwtPayload;
                 if (!payload || (!payload.sub && !(payload as any).oid)) {
@@ -193,16 +194,16 @@ class OAuthService {
                 }
 
                 resolve(payload);
-              }
+              },
             );
           }),
-        "msTokenVerify"
+        "msTokenVerify",
       );
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[OAuthService] verifyMicrosoftToken failed: ${err?.message}`
+        `[OAuthService] verifyMicrosoftToken failed: ${err?.message}`,
       );
       httpError(500, "Internal server error");
     }
@@ -224,9 +225,9 @@ class OAuthService {
         () =>
           this.googleClient!.verifyIdToken({
             idToken: googleToken,
-            audience: this.GOOGLE_CLIENT_ID!
+            audience: this.GOOGLE_CLIENT_ID!,
           }),
-        "googleTokenVerify"
+        "googleTokenVerify",
       );
 
       const payload: TokenPayload | undefined = ticket.getPayload();
@@ -238,14 +239,12 @@ class OAuthService {
         email: payload.email,
         name: payload.name,
         picture: payload.picture,
-        sub: payload.sub
+        sub: payload.sub,
       };
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
-      logger.error(
-        `[OAuthService] verifyGoogleToken failed: ${err?.message}`
-      );
+      logger.error(`[OAuthService] verifyGoogleToken failed: ${err?.message}`);
       httpError(500, "Internal server error");
     }
   }

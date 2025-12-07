@@ -122,3 +122,12 @@ router.post(
 );
 
 export default router;
+
+/*
+app.get("/api/users", async (req, reply) => {
+  const userService = req.resolve("UserService");
+  const users = await userService.getAllUsers();
+  return reply.code(200).send(users);
+});
+
+*/
