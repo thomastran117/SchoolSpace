@@ -11,15 +11,18 @@
  * @version 3.0.0
  * @auth Thomas
  */
-import { default as IORedis, default as Redis } from "ioredis";
+import IORedis, { Redis } from "ioredis";
 import { URL } from "url";
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 
 const baseUrl = new URL(env.redis_url);
 const redisCacheUrl = baseUrl.toString();
+
 baseUrl.searchParams.set("db", "1");
 const redisBullUrl = baseUrl.toString();
+
+let redisHealthy = false;
 
 const redis = new Redis(redisCacheUrl, {
   lazyConnect: true,
@@ -30,15 +33,42 @@ const connectionWorker = new IORedis(redisBullUrl, {
   maxRetriesPerRequest: null,
 });
 
+redis.on("connect", () => {
+  redisHealthy = true;
+});
+
+redis.on("ready", () => {
+  redisHealthy = true;
+});
+
+redis.on("error", (err) => {
+  redisHealthy = false;
+  logger.error(`[Redis] error: ${err.message}`);
+});
+
+redis.on("close", () => {
+  redisHealthy = false;
+  logger.warn("[Redis] connection closed");
+});
+
 async function initRedis(): Promise<void> {
   try {
     await redis.connect();
     await redis.ping();
-    // logger.info("Redis is connected");
+    redisHealthy = true;
   } catch (err: any) {
-    logger.error(`Unable to connect to Redis: ${err.message}`);
-    process.exit(1);
+    redisHealthy = false;
+    logger.error(`[Redis] init failed: ${err.message}`);
   }
 }
 
-export { connectionWorker, initRedis, redis };
+function isRedisHealthy(): boolean {
+  return redisHealthy;
+}
+
+export {
+  redis,
+  connectionWorker,
+  initRedis,
+  isRedisHealthy,
+};
