@@ -66,9 +66,4 @@ function isRedisHealthy(): boolean {
   return redisHealthy;
 }
 
-export {
-  redis,
-  connectionWorker,
-  initRedis,
-  isRedisHealthy,
-};
+export { connectionWorker, initRedis, isRedisHealthy, redis };

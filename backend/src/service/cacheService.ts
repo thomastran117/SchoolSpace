@@ -1,5 +1,5 @@
-import { redis } from "../resource/redis";
 import inMemoryStore from "../resource/inmemoryStore";
+import { redis } from "../resource/redis";
 import logger from "../utility/logger";
 
 type RedisOperation<T> = () => Promise<T>;
@@ -19,8 +19,7 @@ class CacheService {
           throw err;
         }
 
-        const delay =
-          Math.pow(2, attempt) * this.baseDelayMs * Math.random();
+        const delay = Math.pow(2, attempt) * this.baseDelayMs * Math.random();
 
         logger.warn(
           `[CacheService] transient redis error: ${err?.message ?? err}. Retrying in ${Math.round(

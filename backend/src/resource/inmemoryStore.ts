@@ -5,10 +5,7 @@ type MemoryEntry = {
 
 class InMemoryStore {
   private store = new Map<string, MemoryEntry>();
-
-  // -------------------------
-  // Internal helpers
-  // -------------------------
+  
   private isExpired(entry?: MemoryEntry): boolean {
     return !!entry?.expiresAt && Date.now() > entry.expiresAt;
   }
@@ -20,10 +17,6 @@ class InMemoryStore {
     }
   }
 
-  // -------------------------
-  // Redis-like API
-  // -------------------------
-
   get(key: string): string | null {
     this.purgeIfExpired(key);
     return this.store.get(key)?.value ?? null;
@@ -32,9 +25,7 @@ class InMemoryStore {
   set(key: string, value: string, ttlSeconds?: number): "OK" {
     this.store.set(key, {
       value,
-      expiresAt: ttlSeconds
-        ? Date.now() + ttlSeconds * 1000
-        : undefined,
+      expiresAt: ttlSeconds ? Date.now() + ttlSeconds * 1000 : undefined,
     });
     return "OK";
   }
@@ -86,13 +77,9 @@ class InMemoryStore {
   }
 
   keys(pattern = "*"): string[] {
-    const regex = new RegExp(
-      "^" + pattern.replace(/\*/g, ".*") + "$",
-    );
+    const regex = new RegExp("^" + pattern.replace(/\*/g, ".*") + "$");
 
-    return Array.from(this.store.keys()).filter((key) =>
-      regex.test(key),
-    );
+    return Array.from(this.store.keys()).filter((key) => regex.test(key));
   }
 
   flushall(): "OK" {
@@ -104,11 +91,7 @@ class InMemoryStore {
     return this.store.size;
   }
 
-  setNX(
-    key: string,
-    value: string,
-    ttlSeconds?: number,
-  ): number {
+  setNX(key: string, value: string, ttlSeconds?: number): number {
     if (this.exists(key)) return 0;
 
     this.set(key, value, ttlSeconds);
