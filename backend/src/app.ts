@@ -5,6 +5,7 @@ import Fastify from "fastify";
 
 import container from "./container";
 import errorHandler from "./plugin/errorPlugin";
+import rateLimiter from "./plugin/limiterPlugin";
 import requestLogger from "./plugin/loggerPlugin";
 import requestScopePlugin from "./plugin/scopePlugin";
 import { registerRoutes } from "./route/route";
@@ -16,6 +17,48 @@ export async function buildApp() {
   app.register(cors, {
     origin: ["http://localhost:3040"],
     credentials: true,
+  });
+
+  app.register(rateLimiter, {
+    defaultPolicy: {
+      mode: "window",
+      windowMs: 60_000,
+      maxRequests: 120,
+    },
+
+    policyResolver: (req) => {
+      if (req.url.startsWith("/auth/login")) {
+        return {
+          mode: "bucket",
+          capacity: 5,
+          refillRate: 0.1,
+        };
+      }
+
+      if (req.url.startsWith("/auth/refresh")) {
+        return {
+          mode: "bucket",
+          capacity: 10,
+          refillRate: 0.5,
+        };
+      }
+
+      return {
+        mode: "window",
+        windowMs: 60_000,
+        maxRequests: 120,
+      };
+    },
+
+    keyGenerator: (req) => {
+      if (req.url.startsWith("/auth")) {
+        return `ip:${req.ip}`;
+      }
+
+      return `user:${req.user?.id ?? req.ip}`;
+    },
+
+    message: "Too many requests. Please try again later.",
   });
 
   app.register(errorHandler);
