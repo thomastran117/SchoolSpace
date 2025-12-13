@@ -4,7 +4,7 @@ import env from "../config/envConfigs";
 import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
-const { jwt_secret_access: JWT_SECRET_ACCESS } = env;
+const { jwtSecretAccess: JWT_SECRET_ACCESS } = env;
 
 class BasicTokenService {
   /**

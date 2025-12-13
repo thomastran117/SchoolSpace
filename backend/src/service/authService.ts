@@ -23,7 +23,7 @@ import type { OAuthService } from "./oauthService";
 import type { TokenService } from "./tokenService";
 import type { WebService } from "./webService";
 
-const { frontend_client: FRONTEND_CLIENT } = env;
+const { frontendClient: FRONTEND_CLIENT } = env;
 
 class AuthService {
   private readonly userRepository: UserRepository;

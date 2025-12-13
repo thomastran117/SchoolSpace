@@ -23,7 +23,7 @@ class EmailService {
   private readonly isEmailEnabled: boolean;
 
   constructor() {
-    const hasCredentials = !!(env.email_user && env.email_pass);
+    const hasCredentials = !!(env.emailUsername && env.emailPassword);
 
     if (!hasCredentials) {
       logger.warn("Email credentials not provided — EmailService is disabled");
@@ -33,8 +33,8 @@ class EmailService {
     this.transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: env.email_user,
-        pass: env.email_pass,
+        user: env.emailUsername,
+        pass: env.emailPassword,
       },
     });
 
@@ -47,7 +47,7 @@ class EmailService {
 
   public async sendEmail(payload: MailPayload): Promise<void> {
     const mailOptions: SendMailOptions = {
-      from: `"SchoolSpace" <${env.email_user}>`,
+      from: `"SchoolSpace" <${env.emailUsername}>`,
       to: payload.to,
       subject: payload.subject,
       html: payload.html,
@@ -124,7 +124,7 @@ class EmailService {
               We’re excited to have you join <strong>SchoolSpace</strong>! Explore your dashboard, connect with peers, and make the most of your learning experience.
             </p>
             <div style="text-align: center; margin: 32px 0;">
-              <a href="${env.frontend_client}" target="_blank"
+              <a href="${env.frontendClient}" target="_blank"
                 style="background-color: #4CAF50; color: #ffffff; text-decoration: none;
                        padding: 14px 28px; font-size: 16px; border-radius: 8px;
                        display: inline-block; font-weight: 600; letter-spacing: 0.3px;">

@@ -13,7 +13,7 @@ import env from "../config/envConfigs";
 import logger from "../utility/logger";
 import type { WebService } from "./webService";
 
-const { paypal_client_id, paypal_secret_key, paypal_api, paypal_currency } =
+const { paypalClient, paypalSecret, paypalApi, paypalCurrency } =
   env;
 
 class PaymentService {
@@ -25,17 +25,17 @@ class PaymentService {
 
   constructor(webService: WebService) {
     if (
-      !paypal_client_id ||
-      !paypal_secret_key ||
-      !paypal_api ||
-      !paypal_currency
+      !paypalClient ||
+      !paypalSecret ||
+      !paypalApi ||
+      !paypalCurrency
     ) {
       throw new Error("Missing PayPal environment variables");
     }
-    this.PAYPAL_CLIENT_ID = paypal_client_id;
-    this.PAYPAL_SECRET_KEY = paypal_secret_key;
-    this.PAYPAL_API = paypal_api;
-    this.PAYMENT_CURRENCY = paypal_currency;
+    this.PAYPAL_CLIENT_ID = paypalClient;
+    this.PAYPAL_SECRET_KEY = paypalSecret;
+    this.PAYPAL_API = paypalApi;
+    this.PAYMENT_CURRENCY = paypalCurrency;
     this.webService = webService;
   }
 

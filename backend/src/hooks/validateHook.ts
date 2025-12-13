@@ -3,7 +3,7 @@ import { ZodObject, ZodSchema } from "zod";
 import env from "../config/envConfigs";
 import { httpError } from "../utility/httpUtility";
 
-const VALIDATION_MODE = env.zod_configuration ?? "strict";
+const VALIDATION_MODE = env.zodConfiguration ?? "strict";
 type ValidationSource = "body" | "params" | "query";
 
 export function validate<T extends ZodSchema>(

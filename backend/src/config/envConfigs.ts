@@ -8,7 +8,7 @@
  * - Supports feature detection (Google OAuth, Microsoft OAuth, Email, Captcha).
  *
  * @module config
- * @version 2.0.0
+ * @version 3.0.0
  * @auth Thomas
  */
 
@@ -18,63 +18,110 @@ import logger from "../utility/logger";
 dotenv.config();
 
 function asInt(v: string | undefined | null, fallback: number): number {
-  return v == null ? fallback : parseInt(v, 10);
+  const n = v == null ? NaN : parseInt(v, 10);
+  return Number.isNaN(n) ? fallback : n;
 }
 
 function asBool(v: string | undefined | null, fallback: boolean): boolean {
   return v == null ? fallback : /^(1|true|yes|on)$/i.test(String(v));
 }
 
+type EnvMode = "development" | "test" | "production";
+
 class EnvConfig {
   private static _instance: EnvConfig;
 
-  public readonly cors_whitelist: string;
-  public readonly frontend_client: string;
-  public readonly zod_configuration?: string;
-  public readonly database_url: string;
-  public readonly redis_url: string;
-  public readonly mongo_url: string;
+  private readonly _nodeEnv: EnvMode;
+  private readonly _strictEnv: boolean;
 
-  public readonly jwt_secret_access: string;
+  private readonly _databaseUrl: string;
+  private readonly _redisUrl: string;
+  private readonly _mongoUrl: string;
 
-  public readonly google_client_id?: string;
-  public readonly google_captcha_secret?: string;
+  private readonly _corsWhitelist: string;
+  private readonly _frontendClient: string;
+  private readonly _zodConfiguration?: string;
 
-  public readonly ms_client_id?: string;
-  public readonly ms_tenant_id?: string;
+  private readonly _jwtSecretAccess: string;
 
-  public readonly email_user?: string;
-  public readonly email_pass?: string;
+  private readonly _googleClientId?: string;
+  private readonly _googleCaptchaSecret?: string;
 
-  public readonly paypal_client_id?: string;
-  public readonly paypal_secret_key?: string;
-  public readonly paypal_api?: string;
-  public readonly paypal_currency?: string;
+  private readonly _msClientId?: string;
+  private readonly _msTenantId?: string;
+
+  private readonly _emailUser?: string;
+  private readonly _emailPass?: string;
+
+  private readonly _paypalClientId?: string;
+  private readonly _paypalSecretKey?: string;
+  private readonly _paypalApi?: string;
+  private readonly _paypalCurrency?: string;
 
   private constructor() {
-    this.database_url = this.req("DATABASE_URL");
-    this.redis_url = this.req("REDIS_URL");
-    this.mongo_url = this.req("MONGO_URL");
-    this.jwt_secret_access = this.opt("JWT_SECRET_ACCESS", "dev-secret")!;
-    this.cors_whitelist = this.opt("CORS_WHITELIST", "http://localhost:3040")!;
-    this.frontend_client = this.opt(
+    this._nodeEnv = (process.env.NODE_ENV as EnvMode) ?? "development";
+    this._strictEnv = asBool(
+      process.env.STRICT_ENV,
+      this._nodeEnv === "production",
+    );
+
+    this._databaseUrl = this.reqWithDefault(
+      "DATABASE_URL",
+      "postgresql://postgres:postgres@localhost:5432/app",
+    );
+
+    this._redisUrl = this.reqWithDefault(
+      "REDIS_URL",
+      "redis://localhost:6379",
+    );
+
+    this._mongoUrl = this.reqWithDefault(
+      "MONGO_URL",
+      "mongodb://localhost:27017/app",
+    );
+
+    this._jwtSecretAccess = this.reqWithDefault(
+      "JWT_SECRET_ACCESS",
+      "dev-secret",
+    );
+
+    this._corsWhitelist = this.opt(
+      "CORS_WHITELIST",
+      "http://localhost:3040",
+    )!;
+
+    this._frontendClient = this.opt(
       "FRONTEND_CLIENT",
       "http://localhost:3040",
     )!;
-    this.zod_configuration = this.opt("ZOD_CONFIGURATION", "passthrough");
-    this.google_client_id = this.opt("GOOGLE_CLIENT_ID");
-    this.google_captcha_secret = this.opt("GOOGLE_CAPTCHA_SECRET");
-    this.ms_client_id = this.opt("MS_CLIENT_ID");
-    this.ms_tenant_id = this.opt("MS_TENANT_ID");
-    this.email_user = this.opt("EMAIL_USER");
-    this.email_pass = this.opt("EMAIL_PASS");
-    this.paypal_client_id = this.opt("PAYPAL_CLIENT_ID");
-    this.paypal_secret_key = this.opt("PAYPAL_SECRET_KEY");
-    this.paypal_api = this.opt(
+
+    this._zodConfiguration = this.opt(
+      "ZOD_CONFIGURATION",
+      "passthrough",
+    );
+
+    this._googleClientId = this.opt("GOOGLE_CLIENT_ID");
+    this._googleCaptchaSecret = this.opt("GOOGLE_CAPTCHA_SECRET");
+
+    this._msClientId = this.opt("MS_CLIENT_ID");
+    this._msTenantId = this.opt("MS_TENANT_ID");
+
+    this._emailUser = this.opt("EMAIL_USER");
+    this._emailPass = this.opt("EMAIL_PASS");
+
+    this._paypalClientId = this.opt("PAYPAL_CLIENT_ID");
+    this._paypalSecretKey = this.opt("PAYPAL_SECRET_KEY");
+
+    this._paypalApi = this.opt(
       "PAYPAL_API",
       "https://api-m.sandbox.paypal.com",
     );
-    this.paypal_currency = this.opt("PAYMENT_CURRENCY", "CAD");
+
+    this._paypalCurrency = this.opt(
+      "PAYMENT_CURRENCY",
+      "CAD",
+    );
+
     Object.freeze(this);
   }
 
@@ -85,34 +132,121 @@ class EnvConfig {
     return this._instance;
   }
 
-  private req(key: string): string {
+  private reqWithDefault(key: string, def: string): string {
     const v = process.env[key];
-    if (v == null || v === "") {
-      logger.error(`Missing required environment variable: ${key}`);
-      process.exit(1);
+
+    if (!v) {
+      if (this._strictEnv) {
+        logger.error(
+          `[EnvConfig] Missing required env var "${key}" (strict mode enabled)`,
+        );
+        process.exit(1);
+      }
+
+      logger.warn(
+        `[EnvConfig] "${key}" not set → using default: ${def}`,
+      );
+      return def;
     }
+
     return v;
   }
 
   private opt(key: string, def?: string): string | undefined {
     const v = process.env[key];
-    return v == null || v === "" ? def : v;
+    return !v ? def : v;
+  }
+
+  get nodeEnv(): EnvMode {
+    return this._nodeEnv;
+  }
+
+  get isProduction(): boolean {
+    return this._nodeEnv === "production";
+  }
+
+  get databaseUrl(): string {
+    return this._databaseUrl;
+  }
+
+  get redisUrl(): string {
+    return this._redisUrl;
+  }
+
+  get mongoUrl(): string {
+    return this._mongoUrl;
+  }
+
+  get jwtSecretAccess(): string {
+    return this._jwtSecretAccess;
+  }
+
+  get corsWhitelist(): string {
+    return this._corsWhitelist;
+  }
+
+  get frontendClient(): string {
+    return this._frontendClient;
+  }
+
+  get zodConfiguration(): string | undefined {
+    return this._zodConfiguration;
+  }
+
+  get paypalApi(): string | undefined {
+    return this._paypalApi;
+  }
+
+  get paypalSecret(): string | undefined {
+    return this._paypalSecretKey;
+  }
+
+  get paypalClient(): string | undefined {
+    return this._paypalClientId;
+  }
+
+  get paypalCurrency(): string | undefined {
+    return this._paypalCurrency;
+  }
+
+  get googleClient(): string | undefined {
+    return this._googleClientId;
+  }
+
+  get googleCaptcha(): string | undefined {
+    return this._googleCaptchaSecret;
+  }
+
+  get microsoftClient(): string | undefined {
+    return this._msClientId;
+  }
+
+  get microsoftTenant(): string | undefined {
+    return this._msTenantId;
+  }
+
+  get emailUsername(): string | undefined {
+    return this.emailUsername;
+  }
+
+  get emailPassword(): string | undefined {
+    return this.emailPassword;
   }
 
   public isGoogleEnabled(): boolean {
-    return !!this.google_client_id;
+    return !!this._googleClientId;
   }
 
   public isMicrosoftEnabled(): boolean {
-    return !!(this.ms_client_id && this.ms_tenant_id);
+    return !!(this._msClientId && this._msTenantId);
   }
 
   public isEmailEnabled(): boolean {
-    return !!(this.email_user && this.email_pass);
+    return !!(this._emailUser && this._emailPass);
   }
 
   public isCaptchaEnabled(): boolean {
-    return !!this.google_captcha_secret;
+    return !!this._googleCaptchaSecret;
   }
 
   public asInt(v: string | undefined | null, fallback: number): number {
@@ -124,5 +258,4 @@ class EnvConfig {
   }
 }
 
-const env = EnvConfig.instance;
-export default env;
+export default EnvConfig.instance;
