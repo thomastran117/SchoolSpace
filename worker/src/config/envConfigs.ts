@@ -1,17 +1,3 @@
-/**
- * @file envConfigs.ts
- * @description
- * Centralized configuration manager for environment variables.
- *
- * - Loads and validates environment variables using `dotenv`.
- * - Provides type-safe accessors for required and optional variables.
- * - Supports feature detection (Google OAuth, Microsoft OAuth, Email, Captcha).
- *
- * @module config
- * @version 3.0.0
- * @auth Thomas
- */
-
 import dotenv from "dotenv";
 import logger from "../utility/logger";
 
@@ -35,23 +21,8 @@ class EnvConfig {
   private readonly _strictEnv: boolean;
 
   private readonly _databaseUrl: string;
+  private readonly _rabbitMQUrl: string;
   private readonly _redisUrl: string;
-  private readonly _mongoUrl: string;
-
-  private readonly _corsWhitelist: string;
-  private readonly _frontendClient: string;
-  private readonly _zodConfiguration?: string;
-
-  private readonly _jwtSecretAccess: string;
-
-  private readonly _googleClientId?: string;
-  private readonly _googleCaptchaSecret?: string;
-
-  private readonly _msClientId?: string;
-  private readonly _msTenantId?: string;
-
-  private readonly _emailUser?: string;
-  private readonly _emailPass?: string;
 
   private readonly _paypalClientId?: string;
   private readonly _paypalSecretKey?: string;
@@ -72,33 +43,7 @@ class EnvConfig {
 
     this._redisUrl = this.reqWithDefault("REDIS_URL", "redis://localhost:6379");
 
-    this._mongoUrl = this.reqWithDefault(
-      "MONGO_URL",
-      "mongodb://localhost:27017/app",
-    );
-
-    this._jwtSecretAccess = this.reqWithDefault(
-      "JWT_SECRET_ACCESS",
-      "dev-secret",
-    );
-
-    this._corsWhitelist = this.opt("CORS_WHITELIST", "http://localhost:3040")!;
-
-    this._frontendClient = this.opt(
-      "FRONTEND_CLIENT",
-      "http://localhost:3040",
-    )!;
-
-    this._zodConfiguration = this.opt("ZOD_CONFIGURATION", "passthrough");
-
-    this._googleClientId = this.opt("GOOGLE_CLIENT_ID");
-    this._googleCaptchaSecret = this.opt("GOOGLE_CAPTCHA_SECRET");
-
-    this._msClientId = this.opt("MS_CLIENT_ID");
-    this._msTenantId = this.opt("MS_TENANT_ID");
-
-    this._emailUser = this.opt("EMAIL_USER");
-    this._emailPass = this.opt("EMAIL_PASS");
+    this._rabbitMQUrl = this.reqWithDefault("RABBITMQ_URL", "amqp://guest:guest@localhost:5672");
 
     this._paypalClientId = this.opt("PAYPAL_CLIENT_ID");
     this._paypalSecretKey = this.opt("PAYPAL_SECRET_KEY");
@@ -155,28 +100,12 @@ class EnvConfig {
     return this._databaseUrl;
   }
 
+  get rabbitMqUrl(): string {
+    return this._rabbitMQUrl;
+  }
+
   get redisUrl(): string {
     return this._redisUrl;
-  }
-
-  get mongoUrl(): string {
-    return this._mongoUrl;
-  }
-
-  get jwtSecretAccess(): string {
-    return this._jwtSecretAccess;
-  }
-
-  get corsWhitelist(): string {
-    return this._corsWhitelist;
-  }
-
-  get frontendClient(): string {
-    return this._frontendClient;
-  }
-
-  get zodConfiguration(): string | undefined {
-    return this._zodConfiguration;
   }
 
   get paypalApi(): string | undefined {
@@ -195,44 +124,12 @@ class EnvConfig {
     return this._paypalCurrency;
   }
 
-  get googleClient(): string | undefined {
-    return this._googleClientId;
-  }
-
-  get googleCaptcha(): string | undefined {
-    return this._googleCaptchaSecret;
-  }
-
-  get microsoftClient(): string | undefined {
-    return this._msClientId;
-  }
-
-  get microsoftTenant(): string | undefined {
-    return this._msTenantId;
-  }
-
   get emailUsername(): string | undefined {
     return this.emailUsername;
   }
 
   get emailPassword(): string | undefined {
     return this.emailPassword;
-  }
-
-  public isGoogleEnabled(): boolean {
-    return !!this._googleClientId;
-  }
-
-  public isMicrosoftEnabled(): boolean {
-    return !!(this._msClientId && this._msTenantId);
-  }
-
-  public isEmailEnabled(): boolean {
-    return !!(this._emailUser && this._emailPass);
-  }
-
-  public isCaptchaEnabled(): boolean {
-    return !!this._googleCaptchaSecret;
   }
 
   public asInt(v: string | undefined | null, fallback: number): number {
