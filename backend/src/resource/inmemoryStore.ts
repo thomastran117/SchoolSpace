@@ -5,7 +5,7 @@ type MemoryEntry = {
 
 class InMemoryStore {
   private store = new Map<string, MemoryEntry>();
-  
+
   private isExpired(entry?: MemoryEntry): boolean {
     return !!entry?.expiresAt && Date.now() > entry.expiresAt;
   }

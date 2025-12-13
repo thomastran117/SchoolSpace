@@ -70,10 +70,7 @@ class EnvConfig {
       "postgresql://postgres:postgres@localhost:5432/app",
     );
 
-    this._redisUrl = this.reqWithDefault(
-      "REDIS_URL",
-      "redis://localhost:6379",
-    );
+    this._redisUrl = this.reqWithDefault("REDIS_URL", "redis://localhost:6379");
 
     this._mongoUrl = this.reqWithDefault(
       "MONGO_URL",
@@ -85,20 +82,14 @@ class EnvConfig {
       "dev-secret",
     );
 
-    this._corsWhitelist = this.opt(
-      "CORS_WHITELIST",
-      "http://localhost:3040",
-    )!;
+    this._corsWhitelist = this.opt("CORS_WHITELIST", "http://localhost:3040")!;
 
     this._frontendClient = this.opt(
       "FRONTEND_CLIENT",
       "http://localhost:3040",
     )!;
 
-    this._zodConfiguration = this.opt(
-      "ZOD_CONFIGURATION",
-      "passthrough",
-    );
+    this._zodConfiguration = this.opt("ZOD_CONFIGURATION", "passthrough");
 
     this._googleClientId = this.opt("GOOGLE_CLIENT_ID");
     this._googleCaptchaSecret = this.opt("GOOGLE_CAPTCHA_SECRET");
@@ -117,10 +108,7 @@ class EnvConfig {
       "https://api-m.sandbox.paypal.com",
     );
 
-    this._paypalCurrency = this.opt(
-      "PAYMENT_CURRENCY",
-      "CAD",
-    );
+    this._paypalCurrency = this.opt("PAYMENT_CURRENCY", "CAD");
 
     Object.freeze(this);
   }
@@ -143,9 +131,7 @@ class EnvConfig {
         process.exit(1);
       }
 
-      logger.warn(
-        `[EnvConfig] "${key}" not set → using default: ${def}`,
-      );
+      logger.warn(`[EnvConfig] "${key}" not set → using default: ${def}`);
       return def;
     }
 
