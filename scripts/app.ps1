@@ -38,7 +38,7 @@ Write-Host ("Starting payment worker...") -ForegroundColor Cyan
 $workerCmd = "cd '$BackendPath'; npx ts-node ./src/workers/paymentWorker.ts"
 $wkProc = Start-Process -FilePath "powershell.exe" `
   -ArgumentList "-NoExit", "-Command", $workerCmd `
-  -PassThru
+  -PassThru 
 
 Write-Host "`nAll services running. Press Ctrl+C or close this window to stop everything..." -ForegroundColor Green
 try {

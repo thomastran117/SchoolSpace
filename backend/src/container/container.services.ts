@@ -162,9 +162,10 @@ function registerServiceModules(): Map<string, Registration<any>> {
     services.set("CourseService", {
       factory: (scope) =>
         new CourseService(
+          scope.resolve("CourseRepository"),
+          scope.resolve("CacheService"),
           scope.resolve("UserService"),
           scope.resolve("CatalogueService"),
-          scope.resolve("CacheService"),
           scope.resolve("FileService"),
         ),
       lifetime: "scoped",

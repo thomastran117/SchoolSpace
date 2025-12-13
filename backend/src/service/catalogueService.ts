@@ -5,14 +5,17 @@ import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
 
 class CatalogueService extends BaseService {
-  private readonly cache: CacheService;
-  private readonly repo: CatalogueRepository;
+  private readonly cacheService: CacheService;
+  private readonly catalogueRepository: CatalogueRepository;
   private readonly ttl = 300;
 
-  constructor(cacheService: CacheService, repo: CatalogueRepository) {
+  constructor(
+    cacheService: CacheService,
+    catalogueRepository: CatalogueRepository,
+  ) {
     super();
-    this.cache = cacheService;
-    this.repo = repo;
+    this.cacheService = cacheService;
+    this.catalogueRepository = catalogueRepository;
   }
 
   public async createCourseTemplate(
@@ -23,10 +26,11 @@ class CatalogueService extends BaseService {
     available: boolean = true,
   ): Promise<ICatalogue> {
     try {
-      const existing = await this.repo.findByCourseCode(course_code);
+      const existing =
+        await this.catalogueRepository.findByCourseCode(course_code);
       if (existing) httpError(409, "Course template already exists");
 
-      const course = await this.repo.create(
+      const course = await this.catalogueRepository.create(
         course_name,
         description,
         course_code,
@@ -34,8 +38,8 @@ class CatalogueService extends BaseService {
         available,
       );
 
-      await this.cache.delete("catalogue:all");
-      await this.cache.deletePattern("catalogue:filter:*");
+      await this.cacheService.delete("catalogue:all");
+      await this.cacheService.deletePattern("catalogue:filter:*");
 
       return this.toSafe(course);
     } catch (err) {
@@ -65,14 +69,11 @@ class CatalogueService extends BaseService {
         available ?? "any"
       }:${search ?? "none"}:${page}:${limit}`;
 
-      const cached = await this.cache.get(cacheKey);
+      const cached = await this.cacheService.get(cacheKey);
       if (cached) return cached;
 
-      const { results, total } = await this.repo.findAllWithFilters(
-        filter,
-        page,
-        limit,
-      );
+      const { results, total } =
+        await this.catalogueRepository.findAllWithFilters(filter, page, limit);
 
       const safeResults = this.toSafeArray(results);
       const totalPages = Math.ceil(total / limit);
@@ -84,7 +85,7 @@ class CatalogueService extends BaseService {
         currentPage: page,
       };
 
-      await this.cache.set(cacheKey, response, this.ttl);
+      await this.cacheService.set(cacheKey, response, this.ttl);
       return response;
     } catch (err) {
       throw httpError(500, `Failed to fetch course templates: ${String(err)}`);
@@ -94,14 +95,14 @@ class CatalogueService extends BaseService {
   public async getCourseTemplateById(id: string): Promise<ICatalogue> {
     const cacheKey = `catalogue:id:${id}`;
 
-    const cached = await this.cache.get<ICatalogue>(cacheKey);
+    const cached = await this.cacheService.get<ICatalogue>(cacheKey);
     if (cached) return cached;
 
-    const course = await this.repo.findById(id);
+    const course = await this.catalogueRepository.findById(id);
     if (!course) httpError(404, "Course not found");
 
     const safe = this.toSafe(course);
-    await this.cache.set(cacheKey, safe, this.ttl);
+    await this.cacheService.set(cacheKey, safe, this.ttl);
 
     return safe;
   }
@@ -111,14 +112,14 @@ class CatalogueService extends BaseService {
     updates: Partial<ICatalogue>,
   ): Promise<ICatalogue> {
     try {
-      const course = await this.repo.update(id, updates);
+      const course = await this.catalogueRepository.update(id, updates);
       if (!course) httpError(404, "Course template not found");
 
       const safe = this.toSafe(course);
 
-      await this.cache.delete(`catalogue:id:${id}`);
-      await this.cache.deletePattern("catalogue:filter:*");
-      await this.cache.delete("catalogue:all");
+      await this.cacheService.delete(`catalogue:id:${id}`);
+      await this.cacheService.deletePattern("catalogue:filter:*");
+      await this.cacheService.delete("catalogue:all");
 
       return safe;
     } catch (err) {
@@ -128,12 +129,12 @@ class CatalogueService extends BaseService {
 
   public async deleteCourseTemplate(id: string): Promise<boolean> {
     try {
-      const result = await this.repo.delete(id);
+      const result = await this.catalogueRepository.delete(id);
       if (!result) httpError(404, "Course template not found");
 
-      await this.cache.delete(`catalogue:id:${id}`);
-      await this.cache.deletePattern("catalogue:filter:*");
-      await this.cache.delete("catalogue:all");
+      await this.cacheService.delete(`catalogue:id:${id}`);
+      await this.cacheService.deletePattern("catalogue:filter:*");
+      await this.cacheService.delete("catalogue:all");
 
       return true;
     } catch (err) {
