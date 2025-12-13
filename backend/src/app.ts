@@ -5,10 +5,10 @@ import Fastify from "fastify";
 
 import container from "./container";
 import errorHandler from "./plugin/errorPlugin";
+import rateLimiter from "./plugin/limiterPlugin";
 import requestLogger from "./plugin/loggerPlugin";
 import requestScopePlugin from "./plugin/scopePlugin";
 import { registerRoutes } from "./route/route";
-import rateLimiter from "./plugin/limiterPlugin";
 
 export async function buildApp() {
   const app = Fastify({});
@@ -20,13 +20,47 @@ export async function buildApp() {
   });
 
   app.register(rateLimiter, {
-    mode: "bucket",
-    capacity: 100,
-    refillRate: 10,
-    keyGenerator: (req) => req.user?.id ?? req.ip,
-    message: "Too many requests",
+    defaultPolicy: {
+      mode: "window",
+      windowMs: 60_000,
+      maxRequests: 120,
+    },
+
+    policyResolver: (req) => {
+      if (req.url.startsWith("/auth/login")) {
+        return {
+          mode: "bucket",
+          capacity: 5,
+          refillRate: 0.1,
+        };
+      }
+
+      if (req.url.startsWith("/auth/refresh")) {
+        return {
+          mode: "bucket",
+          capacity: 10,
+          refillRate: 0.5,
+        };
+      }
+
+      return {
+        mode: "window",
+        windowMs: 60_000,
+        maxRequests: 120,
+      };
+    },
+
+    keyGenerator: (req) => {
+      if (req.url.startsWith("/auth")) {
+        return `ip:${req.ip}`;
+      }
+
+      return `user:${req.user?.id ?? req.ip}`;
+    },
+
+    message: "Too many requests. Please try again later.",
   });
-  
+
   app.register(errorHandler);
   app.register(requestLogger);
   app.register(requestScopePlugin);
