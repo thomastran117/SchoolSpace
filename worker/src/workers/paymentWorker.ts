@@ -1,8 +1,6 @@
 // npx tsx src/workers/paymentWorker.ts
-import type { Job, WorkerOptions } from "bullmq";
-import { Worker } from "bullmq";
+import amqp, { Channel, ConsumeMessage } from "amqplib";
 import container from "../container";
-import { connectionWorker } from "../resource/redis";
 import { markWorkerAlive, markWorkerDead } from "../resource/workerHealth";
 import type { PaymentService } from "../service/paymentService";
 import logger from "../utility/logger";
@@ -11,100 +9,125 @@ interface PaymentJobData {
   paypalOrderId: string;
 }
 
+const QUEUE = "payment.capture";
+const RETRY_QUEUE = "payment.capture.retry";
+const DLQ = "payment.capture.dlq";
+
+const MAX_RETRIES = 10;
+const PREFETCH = 3;
+
 (async () => {
   try {
     await container.initialize();
-    logger.info("[Worker] Container initialized successfully.");
+    logger.info("[Worker] Container initialized.");
 
-    const workerOptions: WorkerOptions = {
-      connection: connectionWorker,
-      concurrency: 3,
-      limiter: { max: 10, duration: 1000 },
-      settings: {
-        backoffStrategy: (attempts: number) => Math.pow(2, attempts) * 1000,
-      },
-    };
+    const conn = await amqp.connect(process.env.RABBITMQ_URL!);
+    const channel = await conn.createChannel();
 
-    const worker = new Worker<PaymentJobData>(
-      "payment",
-      async (job: Job<PaymentJobData>) => {
-        const { paypalOrderId } = job.data;
-        if (!paypalOrderId)
-          throw new Error("Missing paypalOrderId in job data");
-
-        const scope = container.createScope();
-        const paymentService = scope.resolve<PaymentService>("PaymentService");
-
-        logger.info(
-          `[Worker] Processing payment for order ${paypalOrderId}...`,
-        );
-
-        try {
-          const result = await paymentService.captureOrder(paypalOrderId);
-
-          if (result.status === "COMPLETED") {
-            logger.info(`[Worker] ✅ Payment captured for ${paypalOrderId}`);
-            return { status: "success", result };
-          }
-
-          throw new Error(`Unexpected PayPal order status: ${result.status}`);
-        } catch (err) {
-          const error = err instanceof Error ? err : new Error(String(err));
-          logger.error(
-            `[Worker] Capture failed for ${paypalOrderId}: ${error.message}`,
-          );
-          throw error;
-        } finally {
-          scope.dispose();
-        }
-      },
-      workerOptions,
-    );
-
-    worker.on("ready", () => {
-      markWorkerAlive();
-      logger.info("[Worker] Payment worker started");
-      setInterval(() => markWorkerAlive(), 15_000);
+    // Main queue
+    await channel.assertQueue(QUEUE, {
+      durable: true,
+      deadLetterExchange: "",
+      deadLetterRoutingKey: RETRY_QUEUE,
     });
 
-    worker.on("failed", async (job, err) => {
-      logger.error(
-        `[Worker] Job failed for ${job?.id}: ${err.message} (attempt ${job?.attemptsMade})`,
-      );
+    // Retry queue with TTL
+    await channel.assertQueue(RETRY_QUEUE, {
+      durable: true,
+      messageTtl: 5000, // base delay
+      deadLetterExchange: "",
+      deadLetterRoutingKey: QUEUE,
+    });
 
-      if (job && job.attemptsMade >= 10) {
-        logger.warn(
-          `[Worker] Job ${job.id} exceeded retry limit (10). Removing from queue.`,
-        );
-        try {
-          await job.remove();
-        } catch (e) {
-          const error = e instanceof Error ? e : new Error(String(e));
-          logger.error(
-            `[Worker] Failed to remove job ${job.id}: ${error.message}`,
-          );
-        }
+    // Dead-letter queue
+    await channel.assertQueue(DLQ, { durable: true });
+
+    channel.prefetch(PREFETCH);
+
+    markWorkerAlive();
+    setInterval(markWorkerAlive, 15_000);
+
+    logger.info("[Worker] Payment worker started (RabbitMQ)");
+
+    await channel.consume(QUEUE, async (msg: any) => {
+      if (!msg) return;
+
+      const retryCount =
+        msg.properties.headers?.["x-retry-count"] ?? 0;
+
+      let payload: PaymentJobData;
+
+      try {
+        payload = JSON.parse(msg.content.toString());
+      } catch {
+        logger.error("[Worker] Invalid message format");
+        channel.nack(msg, false, false);
+        return;
       }
-    });
 
-    worker.on("completed", (job, result) => {
-      logger.info(
-        `[Worker] Job completed for ${job.id} with result: ${JSON.stringify(result)}`,
-      );
-    });
+      const { paypalOrderId } = payload;
 
-    worker.on("error", (err) => {
-      logger.error(`[Worker] Global error: ${err.message}`);
-      markWorkerDead();
-    });
+      if (!paypalOrderId) {
+        logger.error("[Worker] Missing paypalOrderId");
+        channel.nack(msg, false, false);
+        return;
+      }
 
-    worker.on("closed", () => {
-      logger.warn("[Worker] Payment worker stopped");
-      markWorkerDead();
+      const scope = container.createScope();
+      const paymentService = scope.resolve<PaymentService>("PaymentService");
+
+      try {
+        logger.info(`[Worker] Capturing payment ${paypalOrderId}`);
+
+        const result = await paymentService.captureOrder(paypalOrderId);
+
+        if (result.status !== "COMPLETED") {
+          throw new Error(`Unexpected status: ${result.status}`);
+        }
+
+        logger.info(`[Worker] ✅ Payment captured ${paypalOrderId}`);
+        channel.ack(msg);
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error(String(err));
+
+        logger.error(
+          `[Worker] Capture failed ${paypalOrderId}: ${error.message}`,
+        );
+
+        if (retryCount >= MAX_RETRIES) {
+          logger.warn(
+            `[Worker] Max retries exceeded (${MAX_RETRIES}) for ${paypalOrderId}`,
+          );
+
+          channel.sendToQueue(
+            DLQ,
+            msg.content,
+            { persistent: true },
+          );
+
+          channel.ack(msg);
+        } else {
+          channel.sendToQueue(
+            RETRY_QUEUE,
+            msg.content,
+            {
+              persistent: true,
+              headers: {
+                "x-retry-count": retryCount + 1,
+              },
+            },
+          );
+
+          channel.ack(msg);
+        }
+      } finally {
+        scope.dispose();
+      }
     });
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
-    logger.error(`[Worker] Failed to initialize: ${error.message}`);
+    logger.error(`[Worker] Fatal error: ${error.message}`);
+    markWorkerDead();
     process.exit(1);
   }
 })();
