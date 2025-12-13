@@ -19,7 +19,7 @@ import env from "../config/envConfigs";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
-const { google_captcha_secret: GOOGLE_CAPTCHA_SECRET } = env;
+const { googleCaptcha: GOOGLE_CAPTCHA_SECRET } = env;
 
 interface GoogleCaptchaResponse {
   success: boolean;

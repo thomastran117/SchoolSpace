@@ -35,8 +35,8 @@ class OAuthService {
   private readonly baseDelay = 150;
 
   constructor() {
-    this.GOOGLE_CLIENT_ID = env.google_client_id || null;
-    this.MS_CLIENT_ID = env.ms_client_id || null;
+    this.GOOGLE_CLIENT_ID = env.googleClient || null;
+    this.MS_CLIENT_ID = env.microsoftClient || null;
 
     if (this.GOOGLE_CLIENT_ID) {
       this.googleClient = new OAuth2Client(this.GOOGLE_CLIENT_ID);

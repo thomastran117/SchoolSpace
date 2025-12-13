@@ -16,7 +16,7 @@ import { URL } from "url";
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 
-const baseUrl = new URL(env.redis_url);
+const baseUrl = new URL(env.redisUrl);
 const redisCacheUrl = baseUrl.toString();
 
 baseUrl.searchParams.set("db", "1");

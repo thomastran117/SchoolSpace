@@ -21,7 +21,7 @@ import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BasicTokenService } from "./basicTokenService";
 
-const { jwt_secret_access: JWT_SECRET_ACCESS } = env;
+const { jwtSecretAccess: JWT_SECRET_ACCESS } = env;
 
 const ACCESS_EXPIRY = "30m";
 const SHORT_REFRESH_TTL = 24 * 60 * 60; // 1 day
@@ -232,7 +232,7 @@ class TokenService extends BasicTokenService {
       );
 
       if (existingToken) {
-        await this.cacheService.expire(
+        await this.cacheService.set(
           `verify:${existingToken}`,
           VERIFY_TOKEN_TTL,
         );
