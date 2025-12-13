@@ -2,6 +2,7 @@
 import amqp, { Channel, ConsumeMessage } from "amqplib";
 import container from "../container";
 import { markWorkerAlive, markWorkerDead } from "../resource/workerHealth";
+import env from "../config/envConfigs";
 import type { PaymentService } from "../service/paymentService";
 import logger from "../utility/logger";
 
@@ -21,25 +22,22 @@ const PREFETCH = 3;
     await container.initialize();
     logger.info("[Worker] Container initialized.");
 
-    const conn = await amqp.connect(process.env.RABBITMQ_URL!);
+    const conn = await amqp.connect(env.rabbitMqUrl);
     const channel = await conn.createChannel();
 
-    // Main queue
     await channel.assertQueue(QUEUE, {
       durable: true,
       deadLetterExchange: "",
       deadLetterRoutingKey: RETRY_QUEUE,
     });
 
-    // Retry queue with TTL
     await channel.assertQueue(RETRY_QUEUE, {
       durable: true,
-      messageTtl: 5000, // base delay
+      messageTtl: 5000,
       deadLetterExchange: "",
       deadLetterRoutingKey: QUEUE,
     });
 
-    // Dead-letter queue
     await channel.assertQueue(DLQ, { durable: true });
 
     channel.prefetch(PREFETCH);
@@ -85,7 +83,7 @@ const PREFETCH = 3;
           throw new Error(`Unexpected status: ${result.status}`);
         }
 
-        logger.info(`[Worker] ✅ Payment captured ${paypalOrderId}`);
+        logger.info(`[Worker] Payment captured ${paypalOrderId}`);
         channel.ack(msg);
       } catch (err) {
         const error = err instanceof Error ? err : new Error(String(err));

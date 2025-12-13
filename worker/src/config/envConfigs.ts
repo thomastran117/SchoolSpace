@@ -21,6 +21,7 @@ class EnvConfig {
   private readonly _strictEnv: boolean;
 
   private readonly _databaseUrl: string;
+  private readonly _rabbitMQUrl: string;
   private readonly _redisUrl: string;
 
   private readonly _paypalClientId?: string;
@@ -41,6 +42,8 @@ class EnvConfig {
     );
 
     this._redisUrl = this.reqWithDefault("REDIS_URL", "redis://localhost:6379");
+
+    this._rabbitMQUrl = this.reqWithDefault("RABBITMQ_URL", "amqp://guest:guest@localhost:5672");
 
     this._paypalClientId = this.opt("PAYPAL_CLIENT_ID");
     this._paypalSecretKey = this.opt("PAYPAL_SECRET_KEY");
@@ -95,6 +98,10 @@ class EnvConfig {
 
   get databaseUrl(): string {
     return this._databaseUrl;
+  }
+
+  get rabbitMqUrl(): string {
+    return this._rabbitMQUrl;
   }
 
   get redisUrl(): string {
