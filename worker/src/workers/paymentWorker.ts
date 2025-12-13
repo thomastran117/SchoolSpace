@@ -1,3 +1,4 @@
+// npx tsx src/workers/paymentWorker.ts
 import type { Job, WorkerOptions } from "bullmq";
 import { Worker } from "bullmq";
 import container from "../container";
