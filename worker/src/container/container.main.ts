@@ -1,7 +1,6 @@
 import logger from "../utility/logger";
 import { registerControllerModules } from "./container.controllers";
 import { CoreInitializer } from "./container.core";
-import { bootstrapQueues, registerQueueModules } from "./container.queue";
 import { registerRepositoryModules } from "./container.repository";
 import { registerServiceModules } from "./container.services";
 import type { Registration } from "./container.types";
@@ -16,7 +15,6 @@ class Container {
     for (const [k, v] of registerRepositoryModules()) this.services.set(k, v);
     for (const [k, v] of registerServiceModules()) this.services.set(k, v);
     for (const [k, v] of registerControllerModules()) this.services.set(k, v);
-    for (const [k, v] of registerQueueModules()) this.services.set(k, v);
   }
 
   static get instance(): Container {
@@ -109,9 +107,6 @@ class Container {
         }
       }
     }
-    logger.info("[Container] Initializing queues");
-
-    await bootstrapQueues(Container.instance);
 
     logger.info("Container initialized successfully.");
   }
@@ -124,28 +119,6 @@ class Container {
         `[Container] Resolving CacheService failed: ${err?.message ?? err}`,
       );
       throw new Error(`Resolving CacheService failed`);
-    }
-  }
-
-  get fileService() {
-    try {
-      return this.resolve("FileService");
-    } catch (err: any) {
-      logger.error(
-        `[Container] Resolving FileService failed: ${err?.message ?? err}`,
-      );
-      throw new Error(`Resolving FileService failed`);
-    }
-  }
-
-  get basicTokenService() {
-    try {
-      return this.resolve("BasicTokenService");
-    } catch (err: any) {
-      logger.error(
-        `[Container] Resolving BasicTokenService failed: ${err?.message ?? err}`,
-      );
-      throw new Error(`Resolving BasicTokenService failed`);
     }
   }
 

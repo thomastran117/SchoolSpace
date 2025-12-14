@@ -11,7 +11,6 @@ import { FileController } from "../controller/fileController";
 import { GradeController } from "../controller/gradeController";
 import { LectureController } from "../controller/lectureController";
 import { OfficeController } from "../controller/officeController";
-import { PaymentController } from "../controller/paymentController";
 import { ReviewController } from "../controller/reviewController";
 import { SubmissionController } from "../controller/submissionController";
 import { TutorController } from "../controller/tutorController";
@@ -27,12 +26,6 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("AuthController", {
       factory: (scope) => new AuthController(scope.resolve("AuthService")),
-      lifetime: "scoped",
-    });
-
-    controllers.set("PaymentController", {
-      factory: (scope) =>
-        new PaymentController(scope.resolve("PaymentService")),
       lifetime: "scoped",
     });
 

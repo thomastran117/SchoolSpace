@@ -17,17 +17,17 @@ import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 import type { AuthResponse } from "../models/auth";
+import type { EmailQueue } from "../queue/emailQueue";
 import type { UserRepository } from "../repository/userRepository";
-import type { EmailService } from "./emailService";
 import type { OAuthService } from "./oauthService";
 import type { TokenService } from "./tokenService";
 import type { WebService } from "./webService";
 
-const { frontend_client: FRONTEND_CLIENT } = env;
+const { frontendClient: FRONTEND_CLIENT } = env;
 
 class AuthService {
   private readonly userRepository: UserRepository;
-  private readonly emailService: EmailService;
+  private readonly emailQueue: EmailQueue;
   private readonly tokenService: TokenService;
   private readonly oauthService: OAuthService;
   private readonly webService: WebService;
@@ -37,13 +37,13 @@ class AuthService {
 
   constructor(
     userRepository: UserRepository,
-    emailService: EmailService,
+    emailQueue: EmailQueue,
     tokenService: TokenService,
     oauthService: OAuthService,
     webService: WebService,
   ) {
     this.userRepository = userRepository;
-    this.emailService = emailService;
+    this.emailQueue = emailQueue;
     this.tokenService = tokenService;
     this.oauthService = oauthService;
     this.webService = webService;
@@ -160,7 +160,7 @@ class AuthService {
         const url = `${FRONTEND_CLIENT}/auth/verify?token=${encodeURIComponent(
           token,
         )}`;
-        await this.emailService.sendVerificationEmail(email, url);
+        await this.emailQueue.enqueueVerifyEmail(email, url);
       } else {
         logger.warn("[AuthService] Email verification is not available");
         await this.userRepository.create({
@@ -201,7 +201,7 @@ class AuthService {
       });
 
       if (env.isEmailEnabled()) {
-        await this.emailService.sendWelcomeEmail(email);
+        await this.emailQueue.enqueueWelcomeEmail(email);
       }
 
       return user;
@@ -241,7 +241,7 @@ class AuthService {
       const url = `${FRONTEND_CLIENT}/auth/forgot-password?token=${encodeURIComponent(
         token,
       )}`;
-      await this.emailService.sendVerificationEmail(email, url); //change to forgot password
+      await this.emailQueue.enqueueVerifyEmail(email, url); //change to forgot password
 
       return;
     } catch (err: any) {

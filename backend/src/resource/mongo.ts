@@ -13,7 +13,7 @@ import mongoose from "mongoose";
 import config from "../config/envConfigs";
 import logger from "../utility/logger";
 
-const MONGO_URL = config.mongo_url;
+const MONGO_URL = config.mongoUrl;
 
 export async function initMongo(): Promise<void> {
   try {

@@ -35,7 +35,7 @@ $beProc = Start-Process -FilePath "powershell.exe" `
   -PassThru
 
 Write-Host ("Starting payment worker...") -ForegroundColor Cyan
-$workerCmd = "cd '$BackendPath'; npx ts-node ./src/workers/paymentWorker.ts"
+$workerCmd = "cd '$BackendPath'; node --loader ts-node/esm ./src/workers/paymentWorker.ts"
 $wkProc = Start-Process -FilePath "powershell.exe" `
   -ArgumentList "-NoExit", "-Command", $workerCmd `
   -PassThru 

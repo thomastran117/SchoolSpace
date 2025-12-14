@@ -15,20 +15,7 @@
 
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
-import env from "../config/envConfigs";
-import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
-
-const { googleCaptcha: GOOGLE_CAPTCHA_SECRET } = env;
-
-interface GoogleCaptchaResponse {
-  success: boolean;
-  challenge_ts?: string;
-  hostname?: string;
-  score?: number;
-  action?: string;
-  "error-codes"?: string[];
-}
 
 export interface PayPalAuthResponse {
   access_token: string;
@@ -62,29 +49,6 @@ class WebService {
       return await axios.get<T>(url, config);
     } catch (err: any) {
       this.handleAxiosError("GET", url, err);
-    }
-  }
-
-  async verifyGoogleCaptcha(token: string): Promise<boolean> {
-    if (!GOOGLE_CAPTCHA_SECRET) {
-      throw new Error("Missing GOOGLE_CAPTCHA_SECRET in environment");
-    }
-
-    try {
-      const response = await axios.post<GoogleCaptchaResponse>(
-        "https://www.google.com/recaptcha/api/siteverify",
-        new URLSearchParams({
-          secret: GOOGLE_CAPTCHA_SECRET,
-          response: token,
-        }),
-      );
-
-      return response.data.success === true;
-    } catch (err: any) {
-      logger.error(
-        `[WebService] verifyGoogleCaptcha failed: ${err?.message ?? err}\n${err.stack || ""}`,
-      );
-      httpError(503, "Captcha verification unavailable");
     }
   }
 
@@ -194,8 +158,6 @@ class WebService {
   private handleAxiosError(method: string, url: string, err: any): never {
     const prefix = `[WebService] ${method} failed`;
 
-    if (err instanceof HttpError) throw err;
-
     const isAxios = !!err.isAxiosError;
     const message = err?.message ?? String(err);
     const stack = err.stack || "";
@@ -206,7 +168,7 @@ class WebService {
       err.code === "ETIMEDOUT"
     ) {
       logger.error(`${prefix}: ${message}\n${stack}`);
-      httpError(503, "External service unavailable");
+      throw new Error();
     }
 
     if (isAxios) {
@@ -214,17 +176,17 @@ class WebService {
 
       if (status && status >= 500) {
         logger.error(`${prefix}: ${message}\n${stack}`);
-        httpError(503, "External service unavailable");
+        throw new Error();
       }
 
       if (status && status >= 400 && status < 500) {
         logger.error(`${prefix}: ${message}\n${stack}`);
-        httpError(503, "External service unavailable");
+        throw new Error();
       }
     }
 
     logger.error(`${prefix}: ${message}\n${stack}`);
-    httpError(500, "Internal server error");
+    throw new Error();
   }
 }
 
