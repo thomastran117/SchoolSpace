@@ -34,18 +34,13 @@ $beProc = Start-Process -FilePath "powershell.exe" `
   -ArgumentList "-NoExit", "-Command", "cd '$BackendPath'; npm run dev" `
   -PassThru
 
-Write-Host ("Starting payment worker...") -ForegroundColor Cyan
-$workerCmd = "cd '$BackendPath'; node --loader ts-node/esm ./src/workers/paymentWorker.ts"
-$wkProc = Start-Process -FilePath "powershell.exe" `
-  -ArgumentList "-NoExit", "-Command", $workerCmd `
-  -PassThru 
 
 Write-Host "`nAll services running. Press Ctrl+C or close this window to stop everything..." -ForegroundColor Green
 try {
   while ($true) { Start-Sleep -Seconds 2 }
 } finally {
   Write-Host "`nStopping all services..." -ForegroundColor Yellow
-  foreach ($p in @($feProc, $beProc, $wkProc)) {
+  foreach ($p in @($feProc, $beProc)) {
     try {
       if ($p -and -not $p.HasExited) {
         & taskkill /T /PID $p.Id /F | Out-Null
