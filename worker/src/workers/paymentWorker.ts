@@ -1,8 +1,8 @@
 // npx tsx src/workers/paymentWorker.ts
-import amqp, { Channel, ConsumeMessage } from "amqplib";
+import amqp from "amqplib";
+import env from "../config/envConfigs";
 import container from "../container";
 import { markWorkerAlive, markWorkerDead } from "../resource/workerHealth";
-import env from "../config/envConfigs";
 import type { PaymentService } from "../service/paymentService";
 import logger from "../utility/logger";
 
@@ -50,8 +50,7 @@ const PREFETCH = 3;
     await channel.consume(QUEUE, async (msg: any) => {
       if (!msg) return;
 
-      const retryCount =
-        msg.properties.headers?.["x-retry-count"] ?? 0;
+      const retryCount = msg.properties.headers?.["x-retry-count"] ?? 0;
 
       let payload: PaymentJobData;
 
@@ -97,24 +96,16 @@ const PREFETCH = 3;
             `[Worker] Max retries exceeded (${MAX_RETRIES}) for ${paypalOrderId}`,
           );
 
-          channel.sendToQueue(
-            DLQ,
-            msg.content,
-            { persistent: true },
-          );
+          channel.sendToQueue(DLQ, msg.content, { persistent: true });
 
           channel.ack(msg);
         } else {
-          channel.sendToQueue(
-            RETRY_QUEUE,
-            msg.content,
-            {
-              persistent: true,
-              headers: {
-                "x-retry-count": retryCount + 1,
-              },
+          channel.sendToQueue(RETRY_QUEUE, msg.content, {
+            persistent: true,
+            headers: {
+              "x-retry-count": retryCount + 1,
             },
-          );
+          });
 
           channel.ack(msg);
         }

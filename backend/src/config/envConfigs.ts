@@ -37,6 +37,7 @@ class EnvConfig {
   private readonly _databaseUrl: string;
   private readonly _redisUrl: string;
   private readonly _mongoUrl: string;
+  private readonly _rabbitMQUrl: string;
 
   private readonly _corsWhitelist: string;
   private readonly _frontendClient: string;
@@ -75,6 +76,11 @@ class EnvConfig {
     this._mongoUrl = this.reqWithDefault(
       "MONGO_URL",
       "mongodb://localhost:27017/app",
+    );
+
+    this._rabbitMQUrl = this.reqWithDefault(
+      "RABBITMQ_URL",
+      "amqp://guest:guest@localhost:5672",
     );
 
     this._jwtSecretAccess = this.reqWithDefault(
@@ -161,6 +167,10 @@ class EnvConfig {
 
   get mongoUrl(): string {
     return this._mongoUrl;
+  }
+
+  get rabbitMqUrl(): string {
+    return this._rabbitMQUrl;
   }
 
   get jwtSecretAccess(): string {

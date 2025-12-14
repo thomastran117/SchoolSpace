@@ -19,10 +19,14 @@ class EnvConfig {
 
   private readonly _nodeEnv: EnvMode;
   private readonly _strictEnv: boolean;
+  private readonly _frontendClient: string;
 
   private readonly _databaseUrl: string;
   private readonly _rabbitMQUrl: string;
   private readonly _redisUrl: string;
+
+  private readonly _emailUser?: string;
+  private readonly _emailPass?: string;
 
   private readonly _paypalClientId?: string;
   private readonly _paypalSecretKey?: string;
@@ -36,6 +40,11 @@ class EnvConfig {
       this._nodeEnv === "production",
     );
 
+    this._frontendClient = this.opt(
+      "FRONTEND_CLIENT",
+      "http://localhost:3040",
+    )!;
+
     this._databaseUrl = this.reqWithDefault(
       "DATABASE_URL",
       "mysql://root:password123@localhost:3306/schoolapp",
@@ -43,7 +52,10 @@ class EnvConfig {
 
     this._redisUrl = this.reqWithDefault("REDIS_URL", "redis://localhost:6379");
 
-    this._rabbitMQUrl = this.reqWithDefault("RABBITMQ_URL", "amqp://guest:guest@localhost:5672");
+    this._rabbitMQUrl = this.reqWithDefault(
+      "RABBITMQ_URL",
+      "amqp://guest:guest@localhost:5672",
+    );
 
     this._paypalClientId = this.opt("PAYPAL_CLIENT_ID");
     this._paypalSecretKey = this.opt("PAYPAL_SECRET_KEY");
@@ -54,6 +66,9 @@ class EnvConfig {
     );
 
     this._paypalCurrency = this.opt("PAYMENT_CURRENCY", "CAD");
+
+    this._emailUser = this.opt("EMAIL_USER");
+    this._emailPass = this.opt("EMAIL_PASS");
 
     Object.freeze(this);
   }
@@ -108,6 +123,10 @@ class EnvConfig {
     return this._redisUrl;
   }
 
+  get frontendClient(): string {
+    return this._frontendClient;
+  }
+
   get paypalApi(): string | undefined {
     return this._paypalApi;
   }
@@ -125,11 +144,11 @@ class EnvConfig {
   }
 
   get emailUsername(): string | undefined {
-    return this.emailUsername;
+    return this._emailUser;
   }
 
   get emailPassword(): string | undefined {
-    return this.emailPassword;
+    return this._emailPass;
   }
 
   public asInt(v: string | undefined | null, fallback: number): number {

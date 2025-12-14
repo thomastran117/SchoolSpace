@@ -1,6 +1,7 @@
 import logger from "../utility/logger";
 import { registerControllerModules } from "./container.controllers";
 import { CoreInitializer } from "./container.core";
+import { bootstrapQueues, registerQueueModules } from "./container.queue";
 import { registerRepositoryModules } from "./container.repository";
 import { registerServiceModules } from "./container.services";
 import type { Registration } from "./container.types";
@@ -15,6 +16,7 @@ class Container {
     for (const [k, v] of registerRepositoryModules()) this.services.set(k, v);
     for (const [k, v] of registerServiceModules()) this.services.set(k, v);
     for (const [k, v] of registerControllerModules()) this.services.set(k, v);
+    for (const [k, v] of registerQueueModules()) this.services.set(k, v);
   }
 
   static get instance(): Container {
@@ -87,16 +89,6 @@ class Container {
     if (this.initialized) return;
     this.initialized = true;
 
-    try {
-      this.resolve("EnvironmentManager");
-      logger.info("Environment variables loaded");
-    } catch (err: any) {
-      logger.error(
-        `[Container] Failed to resolve EnvironmentManager: ${err?.message}`,
-      );
-      throw new Error("Failed to initialize EnvironmentManager");
-    }
-
     await this.coreInitializer.initialize();
 
     for (const [key, reg] of this.services) {
@@ -117,6 +109,9 @@ class Container {
         }
       }
     }
+    logger.info("[Container] Initializing queues");
+
+    await bootstrapQueues(Container.instance);
 
     logger.info("Container initialized successfully.");
   }
