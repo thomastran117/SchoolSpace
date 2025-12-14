@@ -179,7 +179,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
       factory: (scope) =>
         new AuthService(
           scope.resolve("UserRepository"),
-          scope.resolve("EmailService"),
+          scope.resolve("EmailQueue"),
           scope.resolve("TokenService"),
           scope.resolve("OAuthService"),
           scope.resolve("WebService"),

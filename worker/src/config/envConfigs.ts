@@ -25,6 +25,9 @@ class EnvConfig {
   private readonly _rabbitMQUrl: string;
   private readonly _redisUrl: string;
 
+  private readonly _emailUser?: string;
+  private readonly _emailPass?: string;
+
   private readonly _paypalClientId?: string;
   private readonly _paypalSecretKey?: string;
   private readonly _paypalApi?: string;
@@ -63,6 +66,9 @@ class EnvConfig {
     );
 
     this._paypalCurrency = this.opt("PAYMENT_CURRENCY", "CAD");
+
+    this._emailUser = this.opt("EMAIL_USER");
+    this._emailPass = this.opt("EMAIL_PASS");
 
     Object.freeze(this);
   }
@@ -138,11 +144,11 @@ class EnvConfig {
   }
 
   get emailUsername(): string | undefined {
-    return this.emailUsername;
+    return this._emailUser;
   }
 
   get emailPassword(): string | undefined {
-    return this.emailPassword;
+    return this._emailPass;
   }
 
   public asInt(v: string | undefined | null, fallback: number): number {

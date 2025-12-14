@@ -32,7 +32,6 @@ const PREFETCH = 5;
 (async () => {
   try {
     await container.initialize();
-    logger.info("[EmailWorker] Container initialized");
 
     const conn = await amqp.connect(process.env.RABBITMQ_URL!);
     const channel = await conn.createChannel();

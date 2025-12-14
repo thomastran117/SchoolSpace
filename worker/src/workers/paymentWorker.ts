@@ -1,8 +1,8 @@
 // npx tsx src/workers/paymentWorker.ts
-import amqp, { Channel, ConsumeMessage } from "amqplib";
+import amqp from "amqplib";
+import env from "../config/envConfigs";
 import container from "../container";
 import { markWorkerAlive, markWorkerDead } from "../resource/workerHealth";
-import env from "../config/envConfigs";
 import type { PaymentService } from "../service/paymentService";
 import logger from "../utility/logger";
 
