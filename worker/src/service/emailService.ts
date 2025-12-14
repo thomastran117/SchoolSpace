@@ -13,6 +13,12 @@ import nodemailer from "nodemailer";
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 
+interface MailPayload {
+  to: string;
+  subject: string;
+  html: string;
+}
+
 export type EmailJob =
   | {
       type: "VERIFY_EMAIL";
@@ -30,24 +36,10 @@ export type EmailJob =
       html: string;
     };
 
-interface MailPayload {
-  to: string;
-  subject: string;
-  html: string;
-}
-
 class EmailService {
   private readonly transporter: Transporter;
-  private readonly isEmailEnabled: boolean;
 
   constructor() {
-    const hasCredentials = !!(env.emailUsername && env.emailPassword);
-
-    if (!hasCredentials) {
-      logger.warn("Email credentials not provided — EmailService is disabled");
-      this.isEmailEnabled = false;
-    }
-
     this.transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -55,12 +47,6 @@ class EmailService {
         pass: env.emailPassword,
       },
     });
-
-    this.isEmailEnabled = true;
-  }
-
-  public emailEnabled(): boolean {
-    return this.isEmailEnabled;
   }
 
   public async sendEmail(payload: MailPayload): Promise<void> {
@@ -71,13 +57,17 @@ class EmailService {
       html: payload.html,
     };
 
-    try {
-      await this.transporter.sendMail(mailOptions);
-      logger.info(`Email sent to ${payload.to} (${payload.subject})`);
-    } catch (err: any) {
-      logger.error(`Failed to send email to ${payload.to}: ${err.message}`);
-      throw new Error("Failed to send email");
-    }
+    await this.retry(
+      async () => {
+        await this.transporter.sendMail(mailOptions);
+      },
+      {
+        maxRetries: 3,
+        baseDelayMs: 500,
+        maxDelayMs: 8000,
+        jitterFactor: 0.3,
+      },
+    );
   }
 
   public async sendVerificationEmail(
@@ -188,6 +178,54 @@ class EmailService {
     course: string,
   ): Promise<void> {
     logger.info(`sendAssignmentEmail() called for ${email} (${course})`);
+  }
+
+  private async retry<T>(
+    operation: () => Promise<T>,
+    options?: {
+      maxRetries?: number;
+      baseDelayMs?: number;
+      maxDelayMs?: number;
+      jitterFactor?: number;
+    },
+  ): Promise<T> {
+    const {
+      maxRetries = 3,
+      baseDelayMs = 500,
+      maxDelayMs = 10_000,
+      jitterFactor = 0.3,
+    } = options ?? {};
+
+    let attempt = 0;
+
+    while (true) {
+      try {
+        return await operation();
+      } catch (err) {
+        attempt++;
+
+        if (attempt > maxRetries) {
+          throw err;
+        }
+
+        const expDelay = Math.min(
+          baseDelayMs * Math.pow(2, attempt - 1),
+          maxDelayMs,
+        );
+
+        const jitter = expDelay * jitterFactor * (Math.random() * 2 - 1);
+
+        const delay = Math.max(0, expDelay + jitter);
+
+        logger.warn(
+          `[EmailService] Retry ${attempt}/${maxRetries} in ${Math.round(
+            delay,
+          )}ms`,
+        );
+
+        await new Promise((res) => setTimeout(res, delay));
+      }
+    }
   }
 }
 

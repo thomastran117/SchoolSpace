@@ -1,6 +1,7 @@
 import { PaymentService } from "../service/paymentService";
 import { CacheService } from "../service/cacheService";
 import { WebService } from "../service/webService";
+import { EmailService } from "../service/emailService";
 
 import type { Registration } from "./container.types";
 
@@ -13,6 +14,11 @@ function registerServiceModules(): Map<string, Registration<any>> {
     services.set("CacheService", {
       factory: () => new CacheService(),
       lifetime: "singleton",
+    });
+
+    services.set("EmailService", {
+      factory: () => new EmailService(),
+      lifetime: "transient",
     });
 
     services.set("WebService", {
