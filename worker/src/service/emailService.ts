@@ -77,41 +77,79 @@ class EmailService {
     verifyUrl: string,
   ): Promise<void> {
     const html = `
-      <div style="font-family: Arial, sans-serif; background-color: #f4f6f8; padding: 40px 0; margin:0;">
-        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); overflow: hidden;">
-          <div style="background: linear-gradient(90deg, #2563eb, #4CAF50); padding: 24px; text-align: center;">
-            <h1 style="margin: 0; font-size: 24px; color: #fff; font-weight: 600;">SchoolSpace</h1>
-          </div>
-          <div style="padding: 32px;">
-            <h2 style="font-size: 20px; color: #111; margin-top: 0;">Verify Your Email</h2>
-            <p style="font-size: 16px; color: #333; line-height: 1.6; margin: 16px 0;">Hi there,</p>
-            <p style="font-size: 16px; color: #333; line-height: 1.6; margin: 16px 0;">
-              Thanks for signing up! Please confirm your email address by clicking the button below:
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Arial, sans-serif;
+                  background-color: #0f1021; padding: 48px 0; margin:0;">
+        <div style="max-width: 640px; margin: 0 auto; background-color: #ffffff;
+                    border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+                    overflow: hidden;">
+
+          <!-- Header -->
+          <div style="background: linear-gradient(135deg, #6d28d9, #8b5cf6, #a78bfa);
+                      padding: 28px 32px; text-align: center;">
+            <h1 style="margin: 0; font-size: 26px; color: #ffffff; font-weight: 700;
+                      letter-spacing: 0.5px;">
+              SchoolSpace
+            </h1>
+            <p style="margin: 6px 0 0; font-size: 14px; color: #e9d5ff;">
+              Smart learning, beautifully organized
             </p>
-            <div style="text-align: center; margin: 32px 0;">
+          </div>
+
+          <!-- Body -->
+          <div style="padding: 40px 36px;">
+            <h2 style="font-size: 22px; color: #111827; margin-top: 0; font-weight: 700;">
+              Verify your email address
+            </h2>
+
+            <p style="font-size: 16px; color: #374151; line-height: 1.7; margin: 20px 0;">
+              Hi there,
+            </p>
+
+            <p style="font-size: 16px; color: #374151; line-height: 1.7; margin: 20px 0;">
+              Thanks for joining <strong>SchoolSpace</strong> 🎓  
+              Please confirm your email address to activate your account.
+            </p>
+
+            <!-- CTA -->
+            <div style="text-align: center; margin: 36px 0;">
               <a href="${verifyUrl}" target="_blank"
-                style="background-color: #2563eb; color: #ffffff; text-decoration: none;
-                       padding: 14px 28px; font-size: 16px; border-radius: 8px;
-                       display: inline-block; font-weight: 600; letter-spacing: 0.3px;">
+                style="background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+                        color: #ffffff; text-decoration: none;
+                        padding: 16px 34px; font-size: 16px;
+                        border-radius: 12px; display: inline-block;
+                        font-weight: 700; letter-spacing: 0.3px;
+                        box-shadow: 0 12px 24px rgba(124,58,237,0.35);">
                 Verify Email
               </a>
             </div>
-            <p style="font-size: 14px; color: #666; line-height: 1.6;">
+
+            <!-- Fallback -->
+            <p style="font-size: 14px; color: #6b7280; line-height: 1.6;">
               If the button doesn’t work, copy and paste this link into your browser:
             </p>
-            <p style="font-size: 14px; color: #2563eb; word-break: break-all;">
-              <a href="${verifyUrl}" target="_blank" style="color: #2563eb;">${verifyUrl}</a>
+
+            <p style="font-size: 14px; color: #7c3aed; word-break: break-all; margin-top: 8px;">
+              <a href="${verifyUrl}" target="_blank" style="color: #7c3aed;">
+                ${verifyUrl}
+              </a>
             </p>
-            <p style="font-size: 14px; color: #999; margin-top: 32px;">
-              If you did not create an account, ignore this email. The link will expire in <strong>24 hours</strong>.
-            </p>
+
+            <div style="margin-top: 36px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+              <p style="font-size: 13px; color: #9ca3af; line-height: 1.6;">
+                If you didn’t create a SchoolSpace account, you can safely ignore this email.
+                This verification link will expire in <strong>24 hours</strong>.
+              </p>
+            </div>
           </div>
-          <div style="background-color: #f9fafb; text-align: center; padding: 20px; font-size: 12px; color: #999;">
-            &copy; ${new Date().getFullYear()} SchoolSpace. All rights reserved.
+
+          <!-- Footer -->
+          <div style="background-color: #f9fafb; text-align: center;
+                      padding: 20px; font-size: 12px; color: #9ca3af;">
+            © ${new Date().getFullYear()} SchoolSpace. All rights reserved.
           </div>
         </div>
       </div>
-    `;
+      `;
 
     await this.sendEmail({
       to: email,
