@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repoRoot  = Join-Path $scriptDir ".."
+$repoRoot  = Join-Path $scriptDir "../.."
 Set-Location $repoRoot
 
 Write-Host "Building and starting containers (detached)..."
