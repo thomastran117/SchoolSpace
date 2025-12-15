@@ -7,9 +7,7 @@ This document will show you how to configure the application, including a full i
 If you haven't already, create a .env for each folder using the provided script:
 
 ```bash
-.\scripts\create-env.ps1 # Windows
-# OR
-./scripts/create-env.sh # Linux
+./app env
 ```
 
 This scripts creates a .env skeleton to be filled out for the frontend and backend.
@@ -65,3 +63,7 @@ Acquire Microsoft OAuth Permissions by registering the app at [Azure Entra ID](h
 
 To enable verification via email and verify tokens, ensure that Email .env variables are set.
 To enable OAuth for Google and Microsoft, ensure that Google and/or Microsoft variables are set.
+
+## Worker Environment Variables
+
+Continued...
