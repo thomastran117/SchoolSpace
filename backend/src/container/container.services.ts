@@ -1,4 +1,3 @@
-import { EnvironmentManager } from "../config/environmentManager";
 import { AnnoucementService } from "../service/annoucementService";
 import { AppointmentService } from "../service/appointmentService";
 import { AssignmentService } from "../service/assignmentService";
@@ -30,11 +29,6 @@ import logger from "../utility/logger";
 function registerServiceModules(): Map<string, Registration<any>> {
   try {
     const services = new Map<string, Registration<any>>();
-
-    services.set("EnvironmentManager", {
-      factory: () => new EnvironmentManager(),
-      lifetime: "singleton",
-    });
 
     services.set("CacheService", {
       factory: () => new CacheService(),

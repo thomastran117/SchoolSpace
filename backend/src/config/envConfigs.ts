@@ -130,13 +130,6 @@ class EnvConfig {
     const v = process.env[key];
 
     if (!v) {
-      if (this._strictEnv) {
-        logger.error(
-          `[EnvConfig] Missing required env var "${key}" (strict mode enabled)`,
-        );
-        process.exit(1);
-      }
-
       logger.warn(`[EnvConfig] "${key}" not set → using default: ${def}`);
       return def;
     }

@@ -4,7 +4,7 @@ import logger from "../utility/logger";
 
 const QUEUE = "email.send";
 
- type EmailJob =
+type EmailJob =
   | {
       type: "VERIFY_EMAIL";
       email: string;
@@ -63,11 +63,9 @@ class EmailQueue {
     }
 
     return this.retry(async () => {
-      this.channel!.sendToQueue(
-        QUEUE,
-        Buffer.from(JSON.stringify(job)),
-        { persistent: true },
-      );
+      this.channel!.sendToQueue(QUEUE, Buffer.from(JSON.stringify(job)), {
+        persistent: true,
+      });
     });
   }
 

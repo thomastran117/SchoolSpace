@@ -1,42 +1,62 @@
-version: "3.9"
-
 services:
   frontend:
+    container_name: school-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3090:80"
+      - "3040:80"
     depends_on:
       - backend
     networks:
-      - app-network
+      - school-network
 
   backend:
+    container_name: school-backend
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: school-backend
     environment:
-      - DB_CONNECTION_STRING=Server=mysql;Port=3306;Database=appdb;User=root;Password=root
-      - REDIS_CONNECTION=redis:6379
-      - MONGO_CONNECTION=mongodb://mongo:27017/eventxperience
-      - JWT_SECRET_KEY=amazing_secret_key_yup_yes_abcdef123
-      - JWT_SECRET_KEY_REFRESH=amazing_secret_key_yup_yes_abcdef123
-      - JWT_SECRET_KEY_VERIFY=amazing_secret_key_yup_yes_abcdef123
+      DATABASE_URL: mysql://root:root@mysql:3306/appdb
+      REDIS_URL: redis:6379
+      MONGO_URL: mongodb://mongo:27017/schoolapp
+      RABBITMQ_URL: amqp://appuser:apppass@rabbitmq:5672
+      JWT_SECRET_KEY: amazing_secret_key_yup_yes_abcdef123
+      JWT_SECRET_KEY_REFRESH: amazing_secret_key_yup_yes_abcdef123
+      JWT_SECRET_KEY_VERIFY: amazing_secret_key_yup_yes_abcdef123
     ports:
-      - "8090:8090"
+      - "8040:8040"
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_started
-      mongo:
-        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     networks:
-      - app-network
+      - school-network
+
+  worker:
+    image: school-backend
+    container_name: school-worker
+    command: node dist/workers/emailWorker.js
+    environment:
+      DATABASE_URL: mysql://root:root@mysql:3306/appdb
+      REDIS_URL: redis:6379
+      RABBITMQ_URL: amqp://appuser:apppass@rabbitmq:5672
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - school-network
 
   mysql:
     image: mysql:8.4
+    container_name: school-mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -53,30 +73,50 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - app-network
+      - school-network
 
   redis:
     image: redis:7-alpine
+    container_name: school-redis
     restart: always
     ports:
       - "6380:6379"
     volumes:
       - redis_data:/data
     networks:
-      - app-network
+      - school-network
 
   mongo:
     image: mongo:7
+    container_name: school-mongo
     restart: always
     ports:
       - "27018:27017"
     volumes:
       - mongo_data:/data/db
     networks:
-      - app-network
+      - school-network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: school-rabbit
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: appuser
+      RABBITMQ_DEFAULT_PASS: apppass
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - school-network
 
 networks:
-  app-network:
+  school-network:
     driver: bridge
 
 volumes:

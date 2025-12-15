@@ -33,7 +33,6 @@ class CatalogueService extends BaseService {
       });
 
       await this.cache.delete("catalogue:all");
-      await this.cache.deletePattern("catalogue:filter:*");
 
       return this.toSafe(course.toObject());
     } catch (err) {
@@ -147,7 +146,6 @@ class CatalogueService extends BaseService {
       const safe = this.toSafe(course);
 
       await this.cache.delete(`catalogue:id:${id}`);
-      await this.cache.deletePattern("catalogue:filter:*");
       await this.cache.delete("catalogue:all");
 
       return safe;
@@ -163,7 +161,6 @@ class CatalogueService extends BaseService {
       if (!result) httpError(404, "Course template not found");
 
       await this.cache.delete(`catalogue:id:${id}`);
-      await this.cache.deletePattern("catalogue:filter:*");
       await this.cache.delete("catalogue:all");
 
       return true;
