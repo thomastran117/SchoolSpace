@@ -8,4 +8,4 @@ Write-Host "Building and starting containers (detached)..."
 docker compose up -d --build
 
 Write-Host "Switching to attached mode..."
-docker compose up backend frontend redis  mysql
+docker compose up backend frontend redis mysql
