@@ -6,44 +6,121 @@ import logger from "../utility/logger";
 const QUEUE = "email.send";
 
 class EmailQueue {
-  private channel!: Channel;
+  private channel?: Channel;
+  private available = false;
+  private readonly maxRetries = 3;
+  private readonly baseDelayMs = 100;
+
+  public get isAvailable(): boolean {
+    return this.available;
+  }
 
   public async init(): Promise<void> {
-    const conn = await amqp.connect(env.rabbitMqUrl);
-    this.channel = await conn.createChannel();
-
-    await this.channel.assertQueue("email.send", {
-      durable: true,
-      deadLetterExchange: "",
-      deadLetterRoutingKey: "email.send.retry",
-    });
-  }
-
-  public async enqueue(job: EmailJob): Promise<void> {
-    if (!this.channel) {
-      throw new Error("EmailQueue not initialized");
+    if (!env.rabbitMqUrl) {
+      logger.warn("[EmailQueue] RabbitMQ not configured — queue disabled");
+      this.available = false;
+      return;
     }
 
-    this.channel.sendToQueue(QUEUE, Buffer.from(JSON.stringify(job)), {
-      persistent: true,
-    });
+    try {
+      const conn = await amqp.connect(env.rabbitMqUrl);
+      this.channel = await conn.createChannel();
 
-    logger.info(`[EmailQueue] Enqueued email job (${job.type})`);
+      await this.channel.assertQueue(QUEUE, {
+        durable: true,
+        deadLetterExchange: "",
+        deadLetterRoutingKey: "email.send.retry",
+      });
+
+      this.available = true;
+      logger.info("[EmailQueue] Connected and ready");
+    } catch (err) {
+      this.available = false;
+      logger.warn(
+        `[EmailQueue] Failed to connect — falling back to direct email: ${err}`,
+      );
+    }
   }
 
-  public async enqueueVerifyEmail(
+  public async enqueue(job: EmailJob): Promise<boolean> {
+    if (!this.available || !this.channel) {
+      return false;
+    }
+
+    return this.retry(async () => {
+      this.channel!.sendToQueue(
+        QUEUE,
+        Buffer.from(JSON.stringify(job)),
+        { persistent: true },
+      );
+    });
+  }
+
+  private async retry(operation: () => void): Promise<boolean> {
+    let attempt = 0;
+
+    while (attempt <= this.maxRetries) {
+      try {
+        operation();
+        return true;
+      } catch (err) {
+        attempt++;
+
+        if (attempt > this.maxRetries || !this.isTransientError(err)) {
+          logger.warn(
+            `[EmailQueue] Permanent failure after ${attempt} attempts: ${err}`,
+          );
+          this.available = false;
+          return false;
+        }
+
+        const delay = this.computeBackoff(attempt);
+
+        logger.warn(
+          `[EmailQueue] Transient failure, retrying in ${delay}ms (${attempt}/${this.maxRetries})`,
+        );
+
+        await this.sleep(delay);
+      }
+    }
+
+    return false;
+  }
+
+  private computeBackoff(attempt: number): number {
+    const maxDelay = this.baseDelayMs * Math.pow(2, attempt);
+    return Math.floor(Math.random() * maxDelay);
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private isTransientError(err: any): boolean {
+    const msg = err?.message?.toLowerCase() ?? "";
+
+    return (
+      msg.includes("connection") ||
+      msg.includes("timeout") ||
+      msg.includes("socket") ||
+      msg.includes("econnreset") ||
+      msg.includes("channel closed")
+    );
+  }
+
+  public enqueueVerifyEmail(
     email: string,
     verifyUrl: string,
-  ): Promise<void> {
-    await this.enqueue({
+  ): Promise<boolean> {
+    return this.enqueue({
       type: "VERIFY_EMAIL",
       email,
       verifyUrl,
     });
   }
 
-  public async enqueueWelcomeEmail(email: string): Promise<void> {
-    await this.enqueue({
+  public enqueueWelcomeEmail(email: string): Promise<boolean> {
+    return this.enqueue({
       type: "WELCOME_EMAIL",
       email,
     });
