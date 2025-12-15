@@ -14,7 +14,6 @@
  */
 
 import type { MultipartFile } from "@fastify/multipart";
-import { fileTypeFromBuffer } from "file-type";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import { httpError } from "../utility/httpUtility";
@@ -36,11 +35,6 @@ export async function sanitizeProfileImage(
 
   const buffer = await file.toBuffer();
 
-  const detected = await fileTypeFromBuffer(buffer);
-  if (!detected || !["image/jpeg", "image/png"].includes(detected.mime)) {
-    httpError(400, "Invalid or corrupted image file");
-  }
-
   const meta = await sharp(buffer).metadata();
 
   let imagePipeline = sharp(buffer).withMetadata();
@@ -58,14 +52,3 @@ export async function sanitizeProfileImage(
 
   return { fileName, sanitizedBuffer };
 }
-
-/*
-    if (meta.width > 2048 || meta.height > 2048) {
-      httpError(400, "Image dimensions too large (max 2048x2048)");
-    }
-
-    const sanitizedBuffer = await sharp(file.buffer)
-      .resize(512, 512, { fit: "cover" })
-      .jpeg({ quality: 85 })
-      .toBuffer();
-    */

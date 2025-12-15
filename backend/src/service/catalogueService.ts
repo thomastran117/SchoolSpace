@@ -38,8 +38,7 @@ class CatalogueService extends BaseService {
         available,
       );
 
-      await this.cacheService.delete("catalogue:all");
-      await this.cacheService.deletePattern("catalogue:filter:*");
+      await this.cache.delete("catalogue:all");
 
       return this.toSafe(course);
     } catch (err) {
@@ -117,9 +116,8 @@ class CatalogueService extends BaseService {
 
       const safe = this.toSafe(course);
 
-      await this.cacheService.delete(`catalogue:id:${id}`);
-      await this.cacheService.deletePattern("catalogue:filter:*");
-      await this.cacheService.delete("catalogue:all");
+      await this.cache.delete(`catalogue:id:${id}`);
+      await this.cache.delete("catalogue:all");
 
       return safe;
     } catch (err) {
@@ -132,9 +130,8 @@ class CatalogueService extends BaseService {
       const result = await this.catalogueRepository.delete(id);
       if (!result) httpError(404, "Course template not found");
 
-      await this.cacheService.delete(`catalogue:id:${id}`);
-      await this.cacheService.deletePattern("catalogue:filter:*");
-      await this.cacheService.delete("catalogue:all");
+      await this.cache.delete(`catalogue:id:${id}`);
+      await this.cache.delete("catalogue:all");
 
       return true;
     } catch (err) {

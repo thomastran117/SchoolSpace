@@ -16,8 +16,9 @@ function Invoke-Format {
     Pop-Location
 }
 
-Invoke-Format "..\backend"
-Invoke-Format "..\frontend"
+Invoke-Format "..\..\backend"
+Invoke-Format "..\..\frontend"
+Invoke-Format "..\..\worker"
 
 Write-Host ""
 Write-Host "All formatting complete." -ForegroundColor Cyan

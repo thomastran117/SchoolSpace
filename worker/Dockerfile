@@ -37,6 +37,4 @@ COPY prisma ./prisma
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
-EXPOSE 8040
-
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/server.js"]
+CMD ["node", "dist/workers/emailWorker.js"]

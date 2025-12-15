@@ -9,7 +9,7 @@ try {
   throw "Node.js (and npm) are not installed or not on PATH."
 }
 
-$RootDir      = Resolve-Path (Join-Path $PSScriptRoot "..")
+$RootDir      = Resolve-Path (Join-Path $PSScriptRoot "../..")
 $FrontendPath = Resolve-Path (Join-Path $RootDir "frontend")
 $BackendPath  = Resolve-Path (Join-Path $RootDir "backend")
 

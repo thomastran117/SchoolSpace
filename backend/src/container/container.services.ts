@@ -1,4 +1,3 @@
-import { EnvironmentManager } from "../config/environmentManager";
 import { AnnoucementService } from "../service/annoucementService";
 import { AppointmentService } from "../service/appointmentService";
 import { AssignmentService } from "../service/assignmentService";
@@ -9,7 +8,6 @@ import { CacheService } from "../service/cacheService";
 import { CatalogueService } from "../service/catalogueService";
 import { CourseService } from "../service/courseService";
 import { DiscussionService } from "../service/discussionService";
-import { EmailService } from "../service/emailService";
 import { EnrollmentService } from "../service/enrollmentService";
 import { FileService } from "../service/fileService";
 import { GradeService } from "../service/gradeService";
@@ -32,11 +30,6 @@ function registerServiceModules(): Map<string, Registration<any>> {
   try {
     const services = new Map<string, Registration<any>>();
 
-    services.set("EnvironmentManager", {
-      factory: () => new EnvironmentManager(),
-      lifetime: "singleton",
-    });
-
     services.set("CacheService", {
       factory: () => new CacheService(),
       lifetime: "singleton",
@@ -50,11 +43,6 @@ function registerServiceModules(): Map<string, Registration<any>> {
     services.set("BasicTokenService", {
       factory: () => new BasicTokenService(),
       lifetime: "singleton",
-    });
-
-    services.set("EmailService", {
-      factory: () => new EmailService(),
-      lifetime: "transient",
     });
 
     services.set("WebService", {

@@ -11,7 +11,6 @@ import { FileController } from "../controller/fileController";
 import { GradeController } from "../controller/gradeController";
 import { LectureController } from "../controller/lectureController";
 import { OfficeController } from "../controller/officeController";
-import { PaymentController } from "../controller/paymentController";
 import { ReviewController } from "../controller/reviewController";
 import { SubmissionController } from "../controller/submissionController";
 import { TutorController } from "../controller/tutorController";
@@ -24,7 +23,6 @@ export const ControllerTypes = {
   SubmissionController,
   ReviewController,
   OfficeController,
-  PaymentController,
   LectureController,
   GradeController,
   FileController,

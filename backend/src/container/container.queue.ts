@@ -3,7 +3,6 @@ import { EmailQueue } from "../queue/emailQueue";
 import type { Registration } from "./container.types";
 
 import logger from "../utility/logger";
-import { Container } from "./container.main";
 
 function registerQueueModules(): Map<string, Registration<any>> {
   try {
@@ -23,9 +22,4 @@ function registerQueueModules(): Map<string, Registration<any>> {
   }
 }
 
-async function bootstrapQueues(container: Container) {
-  const emailQueue = container.resolve<EmailQueue>("EmailQueue");
-  await emailQueue.init();
-}
-
-export { bootstrapQueues, registerQueueModules };
+export { registerQueueModules };

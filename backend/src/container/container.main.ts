@@ -1,7 +1,7 @@
 import logger from "../utility/logger";
 import { registerControllerModules } from "./container.controllers";
 import { CoreInitializer } from "./container.core";
-import { bootstrapQueues, registerQueueModules } from "./container.queue";
+import { registerQueueModules } from "./container.queue";
 import { registerRepositoryModules } from "./container.repository";
 import { registerServiceModules } from "./container.services";
 import type { Registration } from "./container.types";
@@ -109,10 +109,6 @@ class Container {
         }
       }
     }
-    logger.info("[Container] Initializing queues");
-
-    await bootstrapQueues(Container.instance);
-
     logger.info("Container initialized successfully.");
   }
 

@@ -1,37 +1,27 @@
 # SchoolSpace
 
-A mock version of BrightSpace. It supports students and teachers being able to enroll in classes, provide assignments and grades. It has a live dashboard to see real-time information.
+At its core, SchoolSpace is a mock version of BrightSpace. It supports students and teachers being able to enroll in classes, provide assignments and grades. Additionally, it supports the ability to provide lectures. It has a live dashboard to see real-time information concerning students, grades etc.
 
-For a full documentation, refers to the docs/ folder
+As for students, students have the ability to submit assignments, view their performance and track their progress with a dashboard, and a calender implementation.
+
+Future iterations will likely include an AI transcription for lectures and note summary for PDF versions.
+
+For a full documentation, refers to the `docs/` folder
 
 ## Authors
 
 - [@thomastran117](https://www.github.com/thomastran117)
 
 
-## SchoolSpace Features
-
-- Authenication and Authorization System
-- Email System
-
-
-
 ## Tech Stack
 
-**Client:** React, Redux, JavaScript, Bootstrap
+**Client:** React, Redux, TypeScript, Bootstrap
 
-**Server:** JavaScript, Node, Express, Prisma
+**Server:** TypeScript, Node, Fastify, Prisma
 
-**Database:** MySQL
+**Database:** MySQL, Redis
 
-### Frontend
--FRONTEND_CLIENT=          # Frontend client URL
-
-Note: it is required that a database and redis URL is provided. Furthermore, Microsoft OAuth, Google OAuth and email variables are not required, but you will be unable to use those functions (will return 503).
-
-The rest of the .env have defaults.
-
-More information about the .env variables in the frontend
+**Others:** RabbitMQ
 
 ## Demo
 
@@ -44,13 +34,3 @@ Deployed webite:
 
 ![App Screenshot](https://via.placeholder.com/468x300?text=App+Screenshot+Here)
 
-
-## Running Tests
-
-To run tests, run the following command
-
-```bash
-  .\scripts\run-test.ps1 # Windows
-  # OR
-  ./scripts/run-test.sh # Linux
-```

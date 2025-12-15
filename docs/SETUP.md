@@ -24,26 +24,21 @@ Verify Docker is working with:
 - [Node.js v22.16.0](https://nodejs.org/en/download)
 - [MySQL](https://www.mysql.com/downloads/)
 - [Redis](https://redis.io/downloads/)
+- [RabbitMQ](https://www.rabbitmq.com/tutorials)
 
-[Installing Redis on Windows](https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/install-redis-on-windows/)
+[Installing Redis on Windows](https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/install-redis-on-windows/)  
+[Installing RabbitMQ on Windows](https://www.rabbitmq.com/docs/download)
 
-Alternatively, you can use a cloud instance of MySQL and Redis - however it is a lot for this project
+Alternatively, you can use a cloud instance of MySQL, Redis, RabbitMQ and Mongo - however it is a lot for this project
 
 Verify your local environment is working with:
 
 ```bash
   node --version
-
-  # Should return the node version
-  v22.16.0
-
-  mysql -u root -p -e "SELECT VERSION();" # Should succeed, alternatively check if MySQL shell is avaliable
-
+  mysql -u root -p -e "SELECT VERSION();"
+  mongosh
   redis-cli ping
-  
-  # Should return pong
-  PONG
-
+  sudo rabbitmq-diagnostics ping
 ```
 
 Once verification of the tools are successful, then you are ready to install and run SchoolSpace
@@ -60,20 +55,15 @@ Clone SchoolSpace using Git.
 
 ### Setup .env
 
-Due to Prisma, a minimal .env is needed to complete setup as migrations can't be applied to MySQL without the database URL. Run the following command in the root directory (where scripts/ is located)
+Due to Prisma, a minimal .env is needed to complete setup as migrations can't be applied to MySQL without the database URL. Run the following command in the root directory
 
 Run 
 ```bash
-.\scripts\create-env.ps1 # Windows
-# OR
-./scripts/create-env.sh # Linux
+./app env
 ```
 
-These two scripts will scaffold the exact template needed for both frontend and backend, with defaults configured for local development.
+These two scripts will scaffold the exact template needed for both frontend, backend and workers, with defaults configured for local development.
 
-The two .env variables needed for the backend are the MySQL database and Redis.
-
-**NOTE** The app can't launch without the database urls set.
 
 ## Running with Docker (recommended)
 
@@ -82,20 +72,8 @@ Although Docker normally works using the standard docker-compose, unfortunately,
 Start Docker with the following command at the root directory:
 
 ```bash
-  .\scripts\run-docker.ps1 # Windows
-  # OR
-  ./scripts/run-docker.sh # Linux
+  ../app docker
 ```
-  
-Stop the Docker containers with Ctrl^C as you normally would with docker-compose
-
-Once you have applied the migrations, you may use docker-compose to start the application
-
-```bash
-  docker-compose up --build
-```
-
-**NOTE**: If you apply migrations, you must apply them to the container before it works. I recommend the shell script to do for you.
 
 ## Running locally
 
@@ -106,17 +84,10 @@ run-app will run both the frontend and backend in one terminal
 
 Paste the following scripts into the terminal:
 ```bash
-  # Installing the application
-  .\scripts\setup.ps1 # Windows
-  # OR
-  ./scripts/setup.sh # Linux
-
-  # Running the application
-  .\scripts\run-app.ps1 # Windows
-  # OR
-  ./scripts/run-app.sh # Linux
+  ./app setup
+  ./app local
 ```
-Stop the servers with Ctrl^X
+Stop the servers with Ctrl^C
 
 ## Accessing the application
 
@@ -126,4 +97,4 @@ I recommend accesing the server through the React frontend as it handles request
 
 Congrats! You now have installed SchoolSpace and should be able to use it.
 
-Refer to DEVELOPERS.md and CONFIGURATION.md for more information
+Refer to [DEVELOPERS.md](\DEVELOPERS.md)and [CONFIGURATION.md](\CONFIGURATION.md) for more information
