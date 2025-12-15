@@ -4,7 +4,7 @@ param(
 )
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$ScriptsDir = Join-Path $ScriptDir "scripts"
+$ScriptsDir = Join-Path $ScriptDir "scripts/powershell"
 
 function Write-Header {
     param([string]$Text)
@@ -58,8 +58,8 @@ function Show-Help {
 
 switch ($Command.ToLower()) {
     "docker" { Invoke-Script "docker.ps1" }
-    "local"  { Invoke-Script "app.ps1" }
-    "env"    { Invoke-Script "create-env.ps1" }
+    "local"  { Invoke-Script "local.ps1" }
+    "env"    { Invoke-Script "env.ps1" }
     "setup"  { Invoke-Script "setup.ps1" }
     "format" { Invoke-Script "format.ps1" }
     "--help" { Show-Help }

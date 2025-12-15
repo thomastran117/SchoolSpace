@@ -9,9 +9,10 @@ try {
 }
 
 
-$ROOT      = Resolve-Path (Join-Path $PSScriptRoot "..")
+$ROOT      = Resolve-Path (Join-Path $PSScriptRoot "../..")
 $FRONTEND  = Join-Path $ROOT "frontend"
 $BACKEND   = Join-Path $ROOT "backend"
+$WORKER   = Join-Path $ROOT "worker"
 
 if (Test-Path (Join-Path $FRONTEND "package.json")) {
     Write-Host "Installing frontend dependencies..." -ForegroundColor Cyan
@@ -23,6 +24,13 @@ if (Test-Path (Join-Path $FRONTEND "package.json")) {
 if (Test-Path (Join-Path $BACKEND "package.json")) {
     Write-Host "Installing backend dependencies..." -ForegroundColor Cyan
     Push-Location $BACKEND
+    npm install
+    Pop-Location
+}
+
+if (Test-Path (Join-Path $WORKER "package.json")) {
+    Write-Host "Installing backend dependencies..." -ForegroundColor Cyan
+    Push-Location $WORKER
     npm install
     Pop-Location
 }
@@ -40,5 +48,20 @@ if (Test-Path (Join-Path $BACKEND "prisma\schema.prisma")) {
     }
     Pop-Location
 }
+
+if (Test-Path (Join-Path $WORKER "prisma\schema.prisma")) {
+    Push-Location $WORKER
+    Write-Host "Running prisma generate..." -ForegroundColor Cyan
+    npx prisma generate
+
+    Write-Host "Applying prisma migrations..." -ForegroundColor Cyan
+    if (Test-Path (Join-Path $WORKER "prisma\migrations")) {
+        npx prisma migrate deploy
+    } else {
+        npx prisma migrate dev --name init
+    }
+    Pop-Location
+}
+
 
 Write-Host "=== Setup complete ===" -ForegroundColor Green
