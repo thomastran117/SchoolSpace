@@ -1,4 +1,4 @@
-import React, { useRef, forwardRef, useImperativeHandle } from "react";
+import { useRef, forwardRef, useImperativeHandle } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import environment from "../../configuration/Environment";
 
@@ -6,7 +6,7 @@ export interface CaptchaRef {
   execute: () => Promise<string | null>;
 }
 
-const GoogleRecaptcha = forwardRef<CaptchaRef>((props, ref) => {
+const GoogleRecaptcha = forwardRef<CaptchaRef>((_props, ref) => {
   const captchaRef = useRef<ReCAPTCHA | null>(null);
 
   useImperativeHandle(ref, () => ({

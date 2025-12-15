@@ -11,4 +11,5 @@ const ViewOrderSchema = z.object({
 type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
 type ViewOrderDto = z.infer<typeof ViewOrderSchema>;
 
-export { CreateOrderDto, CreateOrderSchema, ViewOrderDto, ViewOrderSchema };
+export { CreateOrderSchema, ViewOrderSchema };
+export type { CreateOrderDto, ViewOrderDto };
