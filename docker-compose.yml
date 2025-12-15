@@ -38,9 +38,11 @@ services:
       - school-network
 
   worker:
-    image: school-backend
+    image: school-worker
     container_name: school-worker
-    command: node dist/workers/emailWorker.js
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
     environment:
       DATABASE_URL: mysql://root:root@mysql:3306/appdb
       REDIS_URL: redis:6379
