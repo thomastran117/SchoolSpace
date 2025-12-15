@@ -65,7 +65,6 @@ class CourseService extends BaseService {
       );
 
       await this.cacheService.delete("course:all");
-      await this.cacheService.deletePattern("course:filter:*");
 
       return this.toSafe(course);
     } catch (err) {
@@ -193,7 +192,6 @@ class CourseService extends BaseService {
 
       await Promise.all([
         this.cacheService.delete(`course:id:${id}`),
-        this.cacheService.deletePattern("course:filter:*"),
         this.cacheService.delete("course:all"),
       ]);
 
@@ -212,7 +210,6 @@ class CourseService extends BaseService {
       if (!result) httpError(404, "Course not found");
 
       await this.cacheService.delete(`course:id:${id}`);
-      await this.cacheService.deletePattern("course:filter:*");
       await this.cacheService.delete("course:all");
 
       return true;
