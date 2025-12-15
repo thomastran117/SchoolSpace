@@ -23,9 +23,4 @@ function registerQueueModules(): Map<string, Registration<any>> {
   }
 }
 
-async function bootstrapQueues(container: Container) {
-  const emailQueue = container.resolve<EmailQueue>("EmailQueue");
-  await emailQueue.init();
-}
-
-export { bootstrapQueues, registerQueueModules };
+export { registerQueueModules };

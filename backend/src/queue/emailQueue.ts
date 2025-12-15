@@ -1,9 +1,25 @@
 import amqp, { Channel } from "amqplib";
 import env from "../config/envConfigs";
-import type { EmailJob } from "../service/emailService";
 import logger from "../utility/logger";
 
 const QUEUE = "email.send";
+
+ type EmailJob =
+  | {
+      type: "VERIFY_EMAIL";
+      email: string;
+      verifyUrl: string;
+    }
+  | {
+      type: "WELCOME_EMAIL";
+      email: string;
+    }
+  | {
+      type: "GENERIC";
+      to: string;
+      subject: string;
+      html: string;
+    };
 
 class EmailQueue {
   private channel?: Channel;
@@ -33,7 +49,6 @@ class EmailQueue {
       });
 
       this.available = true;
-      logger.info("[EmailQueue] Connected and ready");
     } catch (err) {
       this.available = false;
       logger.warn(
