@@ -20,8 +20,7 @@ spec:
     spec:
       containers:
         - name: mysql
-          image: mysql:8.0
-          command: ["mysqld", "--default-authentication-plugin=mysql_native_password"]
+          image: mysql:8.4
           ports:
             - containerPort: 3306
           env:
@@ -30,28 +29,9 @@ spec:
             - name: MYSQL_DATABASE
               value: appdb
             - name: MYSQL_USER
-              value: app
+              value: appuser
             - name: MYSQL_PASSWORD
-              value: app
-          volumeMounts:
-            - name: mysql-data
-              mountPath: /var/lib/mysql
-      volumes:
-        - name: mysql-data
-          persistentVolumeClaim:
-            claimName: mysql-pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pvc
-  namespace: schoolspace
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
+              value: apppass
 ---
 apiVersion: v1
 kind: Service
@@ -63,7 +43,6 @@ spec:
     app: mysql
   ports:
     - port: 3306
-      targetPort: 3306
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -83,28 +62,8 @@ spec:
       containers:
         - name: redis
           image: redis:7-alpine
-          command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
           ports:
             - containerPort: 6379
-          volumeMounts:
-            - name: redis-data
-              mountPath: /data
-      volumes:
-        - name: redis-data
-          persistentVolumeClaim:
-            claimName: redis-pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: redis-pvc
-  namespace: schoolspace
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
@@ -116,66 +75,79 @@ spec:
     app: redis
   ports:
     - port: 6379
-      targetPort: 6379
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongodb
+  name: mongo
   namespace: schoolspace
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mongodb
+      app: mongo
   template:
     metadata:
       labels:
-        app: mongodb
+        app: mongo
     spec:
       containers:
-        - name: mongodb
-          image: mongo:7.0
+        - name: mongo
+          image: mongo:7
           ports:
             - containerPort: 27017
-          env:
-            - name: MONGO_INITDB_ROOT_USERNAME
-              value: root
-            - name: MONGO_INITDB_ROOT_PASSWORD
-              value: root
-            - name: MONGO_INITDB_DATABASE
-              value: appdb
-          volumeMounts:
-            - name: mongo-data
-              mountPath: /data/db
-      volumes:
-        - name: mongo-data
-          persistentVolumeClaim:
-            claimName: mongo-pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongo-pvc
-  namespace: schoolspace
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongodb
+  name: mongo
   namespace: schoolspace
 spec:
   selector:
-    app: mongodb
+    app: mongo
   ports:
     - port: 27017
-      targetPort: 27017
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  namespace: schoolspace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3.13-management
+          ports:
+            - containerPort: 5672
+            - containerPort: 15672
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              value: appuser
+            - name: RABBITMQ_DEFAULT_PASS
+              value: apppass
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: schoolspace
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp
+      port: 5672
+    - name: management
+      port: 15672
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -194,36 +166,25 @@ spec:
     spec:
       containers:
         - name: backend
-          image: schoolspace-backend:latest
+          image: school-backend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8040
           env:
             - name: DATABASE_URL
-              value: "mysql://app:app@mysql:3306/appdb"
+              value: mysql://root:root@mysql:3306/appdb
             - name: REDIS_URL
-              value: "redis://redis:6379"
+              value: redis:6379
             - name: MONGO_URL
-              value: "mongodb://root:root@mongodb:27017/appdb?authSource=admin"
-            - name: CORS_WHITELIST
-              value: "http://localhost:3040"
-            - name: FRONTEND_CLIENT
-              value: "http://localhost:3040"
-            - name: PORT
-              value: "8040"
-          imagePullPolicy: IfNotPresent
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: 8040
-            initialDelaySeconds: 10
-            periodSeconds: 5
-
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8040
-            initialDelaySeconds: 20
-            periodSeconds: 10
+              value: mongodb://mongo:27017/schoolapp
+            - name: RABBITMQ_URL
+              value: amqp://appuser:apppass@rabbitmq:5672
+            - name: JWT_SECRET_KEY
+              value: amazing_secret_key_yup_yes_abcdef123
+            - name: JWT_SECRET_KEY_REFRESH
+              value: amazing_secret_key_yup_yes_abcdef123
+            - name: JWT_SECRET_KEY_VERIFY
+              value: amazing_secret_key_yup_yes_abcdef123
 ---
 apiVersion: v1
 kind: Service
@@ -235,8 +196,34 @@ spec:
     app: backend
   ports:
     - port: 8040
-      targetPort: 8040
   type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: schoolspace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+        - name: worker
+          image: school-worker:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DATABASE_URL
+              value: mysql://root:root@mysql:3306/appdb
+            - name: REDIS_URL
+              value: redis:6379
+            - name: RABBITMQ_URL
+              value: amqp://appuser:apppass@rabbitmq:5672
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -255,13 +242,10 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: schoolspace-frontend:latest
+          image: school-frontend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
-          env:
-            - name: VITE_API_BASE_URL
-              value: "http://backend.schoolspace.svc.cluster.local:8040"
-          imagePullPolicy: IfNotPresent
 ---
 apiVersion: v1
 kind: Service
@@ -272,7 +256,6 @@ spec:
   selector:
     app: frontend
   ports:
-    - port: 80
+    - port: 3040
       targetPort: 80
-      nodePort: 3040
-  type: NodePort
+  type: ClusterIP

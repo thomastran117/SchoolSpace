@@ -1,102 +1,75 @@
 [CmdletBinding()]
 param(
-  [string]$Namespace = "schoolspace",
-  [string]$FrontendPort = "3040",
-  [string]$ManifestFile = "schoolspace.yaml"
+  [string]$Namespace    = "schoolspace",
+  [int]   $FrontendPort = 3040,
+  [int]   $BackendPort  = 8040
 )
 
-function Write-Status([string]$msg, [string]$color = "Cyan") {
-  Write-Host ("[SETUP] $msg") -ForegroundColor $color
+$ErrorActionPreference = "Stop"
+
+function Info($msg)    { Write-Host "[K8S ] $msg" -ForegroundColor Cyan }
+function Success($msg) { Write-Host "[ OK ] $msg" -ForegroundColor Green }
+function Warn($msg)    { Write-Host "[WARN] $msg" -ForegroundColor Yellow }
+function Fail($msg)    { Write-Host "[ERR ] $msg" -ForegroundColor Red; exit 1 }
+
+Info "Checking dependencies..."
+
+foreach ($cmd in @("docker", "kubectl")) {
+  if (-not (Get-Command $cmd -ErrorAction SilentlyContinue)) {
+    Fail "$cmd not found on PATH"
+  }
 }
 
-Write-Status "Checking dependencies..."
+Success "All dependencies found"
 
-$dockerCmd = Get-Command docker -ErrorAction SilentlyContinue
-if (-not $dockerCmd) {
-  Write-Error "Docker not detected or not on PATH."
-  exit 1
-}
-$dockerVersion = (& docker version --format '{{.Server.Version}}' 2>$null)
-Write-Status "Docker: $dockerVersion"
+$root = Resolve-Path (Join-Path (Split-Path $MyInvocation.MyCommand.Path) "../..")
 
-$kubectlCmd = Get-Command kubectl -ErrorAction SilentlyContinue
-if (-not $kubectlCmd) {
-  Write-Error "kubectl not detected or not on PATH."
-  exit 1
-}
-$kubectlVersion = & kubectl version --client=true
-Write-Status "Kubectl: $kubectlVersion"
-
-Write-Status "Building ARM64 Docker images..."
-
-$root = Resolve-Path (Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Definition) "..")
 $frontendPath = Join-Path $root "frontend"
 $backendPath  = Join-Path $root "backend"
+$workerPath   = Join-Path $root "worker"
+$manifest     = Join-Path $root "schoolspace.yml"
 
-Push-Location $backendPath
+Info "Building Docker images..."
 
-Write-Status "Running Prisma generate (local check)..."
-npx prisma generate
+docker build -t school-frontend:latest $frontendPath | Out-Null
+docker build -t school-backend:latest  $backendPath  | Out-Null
+docker build -t school-worker:latest   $workerPath   | Out-Null
 
-Write-Status "Building backend image (includes prisma migrate deploy on startup)..."
-docker buildx build --platform linux/arm64 `
-  -t schoolspace-backend:latest `
-  --build-arg RUN_PRISMA_GENERATE=true `
-  .
+Success "Docker images built"
 
-if ($LASTEXITCODE -ne 0) {
-  Write-Error "Backend image build failed."
-  exit 1
-}
-Pop-Location
+Info "Applying Kubernetes manifests..."
+kubectl apply -f $manifest | Out-Null
+Success "Manifests applied"
 
-Push-Location $frontendPath
-docker buildx build --platform linux/arm64 -t schoolspace-frontend:latest .
-if ($LASTEXITCODE -ne 0) {
-  Write-Error "Frontend image build failed."
-  exit 1
-}
-Pop-Location
+Info "Waiting for deployments..."
+kubectl rollout status deployment/frontend -n $Namespace --timeout=120s | Out-Null
+kubectl rollout status deployment/backend  -n $Namespace --timeout=120s | Out-Null
+kubectl rollout status deployment/worker   -n $Namespace --timeout=120s | Out-Null
 
-Write-Status "Docker images built successfully."
+Success "All deployments ready"
 
-$manifest = Join-Path $root $ManifestFile
-if (-not (Test-Path $manifest)) {
-  Write-Error "schoolspace.yaml not found at $manifest"
-  exit 1
-}
-
-Write-Status "Applying Kubernetes manifests from $ManifestFile..."
-kubectl apply -f $manifest | Write-Host
-
-Write-Status "Waiting for pods in namespace '$Namespace' to become Ready..."
-
-$retries = 0
-do {
-  Start-Sleep -Seconds 5
-  $status = & kubectl get pods -n $Namespace --no-headers 2>$null
-
-  $ready = ($status -match "Running") -and ($status -notmatch "CrashLoopBackOff")
-  $retries++
-
-  if ($ready) { break }
-  if ($retries -ge 24) {
-    Write-Warning "Timeout waiting for pods to be Ready."
-    break
-  }
-} while (-not $ready)
-
-Write-Status "Current pod status:"
+Info "Current pod status:"
 kubectl get pods -n $Namespace
 
-Write-Status "Starting port-forward to http://localhost:$FrontendPort ..."
-Write-Host "Press Ctrl+C to stop the port-forward."
+Warn "Starting port-forwards (Ctrl+C to stop)"
 
-Start-Process -NoNewWindow powershell -ArgumentList @(
-  "-NoProfile", "-Command",
-  "kubectl port-forward -n $Namespace svc/frontend $FrontendPort`:80"
+Start-Process powershell -NoNewWindow -ArgumentList @(
+  "-NoProfile",
+  "-Command",
+  "kubectl port-forward -n $Namespace svc/frontend $FrontendPort`:3040 > `$null 2>&1"
+)
+
+Start-Process powershell -NoNewWindow -ArgumentList @(
+  "-NoProfile",
+  "-Command",
+  "kubectl port-forward -n $Namespace svc/backend $BackendPort`:8040 > `$null 2>&1"
 )
 
 Write-Host ""
-Write-Host "To clean up all resources later, run:" -ForegroundColor Yellow
+Success "Dev environment is ready"
+Write-Host "  Frontend: http://localhost:$FrontendPort" -ForegroundColor White
+Write-Host "  Backend : http://localhost:$BackendPort"  -ForegroundColor White
+
+Write-Host ""
+Write-Host "Cleanup later:" -ForegroundColor Yellow
 Write-Host "  kubectl delete namespace $Namespace" -ForegroundColor Yellow

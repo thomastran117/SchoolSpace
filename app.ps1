@@ -42,6 +42,7 @@ function Show-Help {
 
     Write-Header "Commands"
     Write-Command "docker"  "Start Docker Compose services"
+    Write-Command "k8"      "Start kubernetes services"
     Write-Command "local"   "Run the application locally"
     Write-Command "env"     "Generate a new .env file"
     Write-Command "setup"   "Install local dependencies"
@@ -58,6 +59,7 @@ function Show-Help {
 
 switch ($Command.ToLower()) {
     "docker" { Invoke-Script "docker.ps1" }
+    "k8" { Invoke-Script "k8.ps1" }
     "local"  { Invoke-Script "local.ps1" }
     "env"    { Invoke-Script "env.ps1" }
     "setup"  { Invoke-Script "setup.ps1" }
