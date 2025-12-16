@@ -5,47 +5,226 @@ import {
   UsersIcon,
 } from "@heroicons/react/24/outline";
 
+function MetricBar({ value }: { value: number }) {
+  return (
+    <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+      <span
+        className="block h-full rounded-full bg-gradient-to-r from-purple-400 to-fuchsia-400"
+        style={{ width: `${value}%` }}
+      />
+    </div>
+  );
+}
+
+function TestimonialCard({
+  quote,
+  author,
+  role,
+  organization,
+}: {
+  quote: string;
+  author: string;
+  role: string;
+  organization: string;
+}) {
+  return (
+    <div className="bg-gray-50 rounded-2xl p-8 shadow-sm hover:shadow-md transition text-gray-900">
+      <p className="text-gray-700 italic leading-relaxed">“{quote}”</p>
+
+      <div className="mt-6">
+        <p className="font-semibold text-gray-900">{author}</p>
+        <p className="text-sm text-gray-500">
+          {role} · {organization}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function FeatureCard({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+}) {
+  return (
+    <motion.div
+      whileHover={{ y: -6 }}
+      className="bg-white rounded-2xl shadow-xl p-8 text-center"
+    >
+      <div className="mx-auto w-14 h-14 flex items-center justify-center rounded-xl bg-purple-100 text-purple-700">
+        <Icon className="w-8 h-8" />
+      </div>
+      <h4 className="mt-6 text-xl font-semibold text-gray-900">{title}</h4>
+      <p className="mt-3 text-gray-600">{description}</p>
+    </motion.div>
+  );
+}
+
+function PricingCard({
+  title,
+  price,
+  description,
+  features,
+  highlighted = false,
+}: {
+  title: string;
+  price: string;
+  description: string;
+  features: string[];
+  highlighted?: boolean;
+}) {
+  return (
+    <div
+      className={`relative rounded-2xl p-8 bg-white shadow-xl border transition text-gray-900
+        ${highlighted ? "border-purple-600 scale-105" : "border-gray-200"}
+      `}
+    >
+      {highlighted && (
+        <span
+          className="absolute -top-3 left-1/2 -translate-x-1/2
+                         bg-purple-600 text-white text-xs font-semibold
+                         px-4 py-1 rounded-full shadow"
+        >
+          Most Popular
+        </span>
+      )}
+
+      <h3 className="text-xl font-semibold">{title}</h3>
+      <p className="mt-2 text-gray-600">{description}</p>
+
+      <div className="mt-6">
+        <span className="text-4xl font-bold text-purple-700">{price}</span>
+        {price !== "Custom" && <span className="text-gray-500"> / month</span>}
+      </div>
+
+      <ul className="mt-6 space-y-3 text-gray-700">
+        {features.map((feature) => (
+          <li key={feature} className="flex gap-2">
+            <span className="text-purple-600 font-bold">✓</span>
+            <span>{feature}</span>
+          </li>
+        ))}
+      </ul>
+
+      <button
+        className={`mt-8 w-full py-3 rounded-xl font-semibold transition
+          ${
+            highlighted
+              ? "bg-purple-600 text-white hover:bg-purple-700"
+              : "bg-purple-50 text-purple-700 hover:bg-purple-100"
+          }
+        `}
+      >
+        Choose Plan
+      </button>
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-700 via-violet-700 to-fuchsia-700 text-white">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-400/30 rounded-full blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-fuchsia-400/30 rounded-full blur-3xl" />
+      <section
+        className="
+          relative max-w-7xl mx-auto px-6 pt-28 pb-44
+          grid lg:grid-cols-2 gap-20 items-center
+        "
+      >
+        {/* Gradient blobs */}
+        <div className="absolute -top-40 -left-40 w-[520px] h-[520px] bg-purple-600/30 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-40 -right-40 w-[420px] h-[420px] bg-fuchsia-600/30 rounded-full blur-3xl animate-pulse" />
 
-        <div className="relative max-w-7xl mx-auto px-6 py-32 text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-5xl md:text-6xl font-extrabold tracking-tight"
+        {/* Left: Copy */}
+        <div className="relative z-10">
+          <span
+            className="
+              inline-flex items-center px-4 py-1.5 rounded-full
+              bg-white/10 text-sm mb-6 text-purple-100
+            "
           >
-            SchoolSpace
-          </motion.h1>
+            🎓 Built for modern academic platforms
+          </span>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-6 max-w-2xl mx-auto text-lg text-purple-100"
-          >
-            A modern platform for managing courses, students, and insights —
-            built for universities and schools that value clarity and scale.
-          </motion.p>
+          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight text-white">
+            Power smarter
+            <br />
+            <span className="text-purple-300">academic management</span>
+          </h1>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-10 flex justify-center gap-4"
-          >
-            <button className="px-8 py-3 rounded-xl bg-white text-purple-700 font-semibold shadow-lg hover:bg-purple-50 transition">
-              Get Started
+          <p className="mt-6 text-lg text-white/70 max-w-xl">
+            SchoolSpace is a premium SaaS platform for managing courses,
+            students, performance insights, and institutional analytics — all in
+            one place.
+          </p>
+
+          <div className="mt-10 flex flex-wrap gap-4">
+            <button
+              className="
+                px-8 py-4 rounded-xl font-semibold
+                bg-gradient-to-r from-purple-500 to-fuchsia-500
+                text-white shadow-lg shadow-purple-500/30
+                hover:scale-[1.03] transition
+              "
+            >
+              Start Free Trial
             </button>
-            <button className="px-8 py-3 rounded-xl border border-white/30 text-white hover:bg-white/10 transition">
-              View Demo
+
+            <button
+              className="
+                px-8 py-4 rounded-xl
+                bg-white/10 text-white
+                border border-white/20
+                hover:bg-white/20 transition
+              "
+            >
+              Watch Demo
             </button>
-          </motion.div>
+          </div>
+        </div>
+
+        {/* Right: Metric / Product Card */}
+        <div className="relative z-10">
+          <div
+            className="
+              rounded-3xl p-8
+              bg-white/10 backdrop-blur-xl
+              border border-white/20
+              shadow-[0_40px_120px_rgba(168,85,247,0.35)]
+            "
+          >
+            <div className="flex items-center justify-between mb-6">
+              <span
+                className="
+                  px-3 py-1 rounded-full text-xs font-semibold
+                  bg-purple-500/20 text-purple-200
+                "
+              >
+                Live Academic Metrics
+              </span>
+
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
+              </span>
+            </div>
+
+            <div className="space-y-2 mb-8">
+              <p className="text-4xl font-extrabold text-white">18,742</p>
+              <p className="text-sm text-white/60">
+                Active Students This Semester
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <MetricBar value={82} />
+              <MetricBar value={67} />
+              <MetricBar value={91} />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -190,144 +369,38 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-purple-700 to-fuchsia-700 py-24 text-center">
-        <div className="max-w-3xl mx-auto px-6">
-          <h3 className="text-3xl md:text-4xl font-bold">
-            Ready to transform your academic platform?
+      <section className="relative bg-gradient-to-r from-purple-700 to-fuchsia-700 py-28 text-center">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.15),transparent_60%)]" />
+
+        <div className="relative max-w-4xl mx-auto px-6 text-white">
+          <h3 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+            Ready to elevate your academic platform?
           </h3>
-          <p className="mt-4 text-purple-100">
-            Join institutions already using SchoolSpace to streamline their
-            operations.
+
+          <p className="mt-6 text-lg text-purple-100 max-w-2xl mx-auto">
+            Join forward-thinking institutions using SchoolSpace to streamline
+            operations, empower educators, and support student success.
           </p>
 
           <div className="mt-10">
-            <button className="px-10 py-4 rounded-xl bg-white text-purple-700 font-semibold shadow-xl hover:bg-purple-50 transition">
-              Start Free Trial
+            <button
+              className="
+        px-12 py-4 rounded-xl
+        bg-white text-purple-700 font-semibold
+        shadow-xl shadow-purple-900/30
+        hover:bg-purple-50 hover:scale-[1.03]
+        transition
+      "
+            >
+              Start Your Free Trial
             </button>
           </div>
+
+          <p className="mt-4 text-sm text-purple-200">
+            No credit card required
+          </p>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-purple-900 py-10 text-center text-purple-200">
-        <p>© {new Date().getFullYear()} SchoolSpace. All rights reserved.</p>
-      </footer>
-    </div>
-  );
-}
-
-function FeatureCard({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-}) {
-  return (
-    <motion.div
-      whileHover={{ y: -6 }}
-      className="bg-white rounded-2xl shadow-xl p-8 text-center"
-    >
-      <div className="mx-auto w-14 h-14 flex items-center justify-center rounded-xl bg-purple-100 text-purple-700">
-        <Icon className="w-8 h-8" />
-      </div>
-      <h4 className="mt-6 text-xl font-semibold text-gray-900">{title}</h4>
-      <p className="mt-3 text-gray-600">{description}</p>
-    </motion.div>
-  );
-}
-
-type TestimonialCardProps = {
-  quote: string;
-  author: string;
-  role: string;
-  organization: string;
-};
-
-export function TestimonialCard({
-  quote,
-  author,
-  role,
-  organization,
-}: {
-  quote: string;
-  author: string;
-  role: string;
-  organization: string;
-}) {
-  return (
-    <div className="bg-gray-50 rounded-2xl p-8 shadow-sm hover:shadow-md transition text-gray-900">
-      <p className="text-gray-700 italic leading-relaxed">“{quote}”</p>
-
-      <div className="mt-6">
-        <p className="font-semibold text-gray-900">{author}</p>
-        <p className="text-sm text-gray-500">
-          {role} · {organization}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-export function PricingCard({
-  title,
-  price,
-  description,
-  features,
-  highlighted = false,
-}: {
-  title: string;
-  price: string;
-  description: string;
-  features: string[];
-  highlighted?: boolean;
-}) {
-  return (
-    <div
-      className={`relative rounded-2xl p-8 bg-white shadow-xl border transition text-gray-900
-        ${highlighted ? "border-purple-600 scale-105" : "border-gray-200"}
-      `}
-    >
-      {highlighted && (
-        <span
-          className="absolute -top-3 left-1/2 -translate-x-1/2
-                         bg-purple-600 text-white text-xs font-semibold
-                         px-4 py-1 rounded-full shadow"
-        >
-          Most Popular
-        </span>
-      )}
-
-      <h3 className="text-xl font-semibold">{title}</h3>
-      <p className="mt-2 text-gray-600">{description}</p>
-
-      <div className="mt-6">
-        <span className="text-4xl font-bold text-purple-700">{price}</span>
-        {price !== "Custom" && <span className="text-gray-500"> / month</span>}
-      </div>
-
-      <ul className="mt-6 space-y-3 text-gray-700">
-        {features.map((feature) => (
-          <li key={feature} className="flex gap-2">
-            <span className="text-purple-600 font-bold">✓</span>
-            <span>{feature}</span>
-          </li>
-        ))}
-      </ul>
-
-      <button
-        className={`mt-8 w-full py-3 rounded-xl font-semibold transition
-          ${
-            highlighted
-              ? "bg-purple-600 text-white hover:bg-purple-700"
-              : "bg-purple-50 text-purple-700 hover:bg-purple-100"
-          }
-        `}
-      >
-        Choose Plan
-      </button>
     </div>
   );
 }
