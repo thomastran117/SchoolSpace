@@ -8,7 +8,7 @@ import { useProtectedAvatar } from "../../hooks/profile/ProfileAvatar";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const { accessToken, username, avatar } = useSelector(
     (state: RootState) => state.auth,
@@ -17,35 +17,48 @@ export default function Navbar() {
   const isAuthenticated = !!accessToken;
   const avatarSrc = useProtectedAvatar(avatar);
 
-  /* Scroll detection */
+  /* Smooth scroll interpolation */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => {
+      const y = window.scrollY;
+      const progress = Math.min(Math.max(y / 80, 0), 1);
+      setScrollProgress(progress);
+    };
+
     window.addEventListener("scroll", onScroll);
+    onScroll();
+
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const isLight = scrollProgress > 0.6;
+  const navVariant = isLight ? "light" : "dark";
+
   return (
     <header className="sticky top-0 z-50 w-full">
-      {/* Base background */}
+      {/* Gradient (top state) */}
       <div
-        className={`
-          absolute inset-0 transition-all duration-500
-          ${
-            scrolled
-              ? "bg-white/85 backdrop-blur-xl shadow-[0_1px_0_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.08)]"
-              : "bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600"
-          }
-        `}
-      />
+        className="absolute inset-0 transition-opacity duration-300"
+        style={{ opacity: 1 - scrollProgress }}
+      >
+        <div className="h-full w-full bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600" />
+      </div>
+
+      {/* Glass (scrolled state) */}
+      <div
+        className="absolute inset-0 backdrop-blur-xl transition-opacity duration-300"
+        style={{ opacity: scrollProgress }}
+      >
+        <div className="h-full w-full bg-white/85 shadow-[0_1px_0_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.08)]" />
+      </div>
 
       {/* Subtle brand tint */}
       <div
-        className={`
-          absolute inset-0 pointer-events-none transition-opacity duration-500
-          ${scrolled ? "opacity-100" : "opacity-0"}
-          bg-gradient-to-r from-indigo-500/4 via-purple-500/4 to-fuchsia-500/4
-        `}
-      />
+        className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+        style={{ opacity: scrollProgress * 0.6 }}
+      >
+        <div className="h-full w-full bg-gradient-to-r from-indigo-500/4 via-purple-500/4 to-fuchsia-500/4" />
+      </div>
 
       {/* Bottom divider */}
       <div className="absolute inset-x-0 bottom-0 h-px bg-slate-200/70" />
@@ -56,9 +69,10 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <div
               className={`
-                h-9 w-9 rounded-lg grid place-items-center font-bold text-white transition
+                h-9 w-9 rounded-lg grid place-items-center font-bold text-white
+                transition-all duration-300
                 ${
-                  scrolled
+                  isLight
                     ? "bg-gradient-to-br from-indigo-600 to-purple-600 shadow-sm"
                     : "bg-white/10 backdrop-blur"
                 }
@@ -67,42 +81,46 @@ export default function Navbar() {
               S
             </div>
             <span
-              className={`text-lg font-semibold transition-colors ${
-                scrolled ? "text-slate-900" : "text-white"
-              }`}
+              className={`
+                text-lg font-semibold transition-colors duration-300
+                ${isLight ? "text-slate-900" : "text-white"}
+              `}
             >
               SchoolSpace
             </span>
           </div>
 
           {/* Desktop Links */}
-          <div
-            className={`hidden md:flex items-center gap-8 transition-colors ${
-              scrolled ? "text-slate-700" : "text-white/90"
-            }`}
-          >
-            <NavLink href="/">Home</NavLink>
-            <NavLink href="/catalogue">Courses</NavLink>
-            <NavLink href="/schools">Schools</NavLink>
-            <NavLink href="/about">About</NavLink>
+          <div className="hidden md:flex items-center gap-8">
+            <NavLink href="/" variant={navVariant}>
+              Home
+            </NavLink>
+            <NavLink href="/catalogue" variant={navVariant}>
+              Courses
+            </NavLink>
+            <NavLink href="/schools" variant={navVariant}>
+              Schools
+            </NavLink>
+            <NavLink href="/about" variant={navVariant}>
+              About
+            </NavLink>
           </div>
 
           {/* Actions */}
           <div className="hidden md:flex items-center gap-4">
             {!isAuthenticated ? (
               <>
-                <NavLink href="/login" subtle>
+                <NavLink href="/login" subtle variant={navVariant}>
                   Login
                 </NavLink>
 
-                {/* CTA */}
                 <a
                   href="/register"
                   className={`
-                    rounded-lg px-4 py-2 text-sm font-medium transition-all
+                    rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300
                     ${
-                      scrolled
-                        ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-500"
+                      isLight
+                        ? "bg-indigo-600 text-white hover:bg-indigo-500"
                         : "bg-white/10 text-white backdrop-blur hover:bg-white/20"
                     }
                   `}
@@ -116,13 +134,13 @@ export default function Navbar() {
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="flex h-10 items-center gap-3"
                 >
-                  {/* Username (desktop only) */}
+                  {/* Username */}
                   <span
                     className={`
-        hidden sm:block max-w-[140px] truncate
-        text-sm font-medium leading-none transition-colors
-        ${scrolled ? "text-slate-700" : "text-white/90"}
-      `}
+                      hidden sm:block max-w-[140px] truncate text-sm font-medium
+                      transition-colors duration-300
+                      ${isLight ? "text-slate-700" : "text-white/90"}
+                    `}
                     title={username ?? undefined}
                   >
                     {username}
@@ -133,15 +151,15 @@ export default function Navbar() {
                     src={avatarSrc ?? "/avatar-placeholder.png"}
                     alt="avatar"
                     className={`
-        h-12 w-12 rounded-full object-cover
-        ring-2 ring-offset-1 transition
-        ${
-          scrolled
-            ? "ring-slate-300 ring-offset-white"
-            : "ring-white/30 ring-offset-transparent"
-        }
-        hover:ring-indigo-400/60
-      `}
+                      h-12 w-12 rounded-full object-cover
+                      ring-2 ring-offset-1 transition-all duration-300
+                      ${
+                        isLight
+                          ? "ring-slate-300 ring-offset-white"
+                          : "ring-white/30 ring-offset-transparent"
+                      }
+                      hover:ring-indigo-400/60
+                    `}
                   />
                 </button>
 
@@ -175,9 +193,7 @@ export default function Navbar() {
 
           {/* Mobile Toggle */}
           <button
-            className={`md:hidden ${
-              scrolled ? "text-slate-900" : "text-white"
-            }`}
+            className={`md:hidden transition-colors ${isLight ? "text-slate-900" : "text-white"}`}
             onClick={() => setOpen(!open)}
           >
             {open ? <X size={22} /> : <Menu size={22} />}
@@ -187,14 +203,22 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {open && (
           <div className="md:hidden mt-4 space-y-4 pb-6">
-            <NavLink href="/">Home</NavLink>
-            <NavLink href="/catalogue">Courses</NavLink>
-            <NavLink href="/schools">Schools</NavLink>
-            <NavLink href="/about">About</NavLink>
+            <NavLink href="/" variant={navVariant}>
+              Home
+            </NavLink>
+            <NavLink href="/catalogue" variant={navVariant}>
+              Courses
+            </NavLink>
+            <NavLink href="/schools" variant={navVariant}>
+              Schools
+            </NavLink>
+            <NavLink href="/about" variant={navVariant}>
+              About
+            </NavLink>
 
             {!isAuthenticated ? (
               <div className="pt-4 border-t flex gap-3">
-                <NavLink href="/login" subtle>
+                <NavLink href="/login" subtle variant={navVariant}>
                   Login
                 </NavLink>
                 <a
@@ -205,7 +229,9 @@ export default function Navbar() {
                 </a>
               </div>
             ) : (
-              <NavLink href="/dashboard">Dashboard</NavLink>
+              <NavLink href="/dashboard" variant={navVariant}>
+                Dashboard
+              </NavLink>
             )}
           </div>
         )}

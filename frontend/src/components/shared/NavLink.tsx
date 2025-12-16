@@ -5,9 +5,17 @@ interface Props {
   href: string;
   children: React.ReactNode;
   subtle?: boolean;
+  variant?: "dark" | "light";
 }
 
-export default function NavLink({ href, children, subtle }: Props) {
+export default function NavLink({
+  href,
+  children,
+  subtle,
+  variant = "light",
+}: Props) {
+  const isDark = variant === "dark";
+
   return (
     <RouterLink
       to={href}
@@ -15,9 +23,15 @@ export default function NavLink({ href, children, subtle }: Props) {
         clsx(
           "group relative text-sm font-medium transition-colors",
           subtle
-            ? "text-slate-500 hover:text-slate-800"
-            : "text-slate-700 hover:text-indigo-600",
-          isActive && "text-indigo-600",
+            ? isDark
+              ? "text-white/70 hover:text-white"
+              : "text-slate-500 hover:text-slate-800"
+            : isDark
+              ? "text-white/90 hover:text-white"
+              : "text-slate-700 hover:text-indigo-600",
+
+          // Active state
+          isActive && (isDark ? "text-white" : "text-indigo-600"),
         )
       }
     >
@@ -30,8 +44,12 @@ export default function NavLink({ href, children, subtle }: Props) {
             className={clsx(
               "pointer-events-none absolute -bottom-2 left-0 h-[2px] w-full rounded-full transition-all duration-300",
               isActive
-                ? "opacity-100 bg-indigo-600"
-                : "opacity-0 group-hover:opacity-100 bg-slate-300",
+                ? isDark
+                  ? "opacity-100 bg-white"
+                  : "opacity-100 bg-indigo-600"
+                : isDark
+                  ? "opacity-0 group-hover:opacity-100 bg-white/50"
+                  : "opacity-0 group-hover:opacity-100 bg-slate-300",
             )}
           />
         </>
