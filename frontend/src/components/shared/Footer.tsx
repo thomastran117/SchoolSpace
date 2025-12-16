@@ -117,10 +117,6 @@ export default function Footer() {
   );
 }
 
-/* ------------------------------------------------ */
-/* Helpers                                          */
-/* ------------------------------------------------ */
-
 function FooterColumn({
   title,
   children,
