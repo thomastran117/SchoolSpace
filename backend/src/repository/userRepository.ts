@@ -8,31 +8,31 @@ class UserRepository extends BaseRepository {
   }
 
   public async findById(id: number): Promise<User | null> {
-    return this.withRetry("UserRepository.findById", async () =>
+    return this.executeAsync(async () =>
       prisma.user.findUnique({ where: { id } }),
     );
   }
 
   public async findByEmail(email: string): Promise<User | null> {
-    return this.withRetry("UserRepository.findByEmail", async () =>
+    return this.executeAsync(async () =>
       prisma.user.findUnique({ where: { email } }),
     );
   }
 
   public async findByUsername(username: string): Promise<User | null> {
-    return this.withRetry("UserRepository.findByUsername", async () =>
+    return this.executeAsync(async () =>
       prisma.user.findUnique({ where: { username } }),
     );
   }
 
   public async findByGoogleId(googleId: string): Promise<User | null> {
-    return this.withRetry("UserRepository.findByGoogleId", async () =>
+    return this.executeAsync(async () =>
       prisma.user.findUnique({ where: { googleId } }),
     );
   }
 
   public async findByMicrosoftId(msId: string): Promise<User | null> {
-    return this.withRetry("UserRepository.findByMicrosoftId", async () =>
+    return this.executeAsync(async () =>
       prisma.user.findUnique({ where: { microsoftId: msId } }),
     );
   }
@@ -42,7 +42,7 @@ class UserRepository extends BaseRepository {
     msTenantId: string,
     microsoftId: string,
   ): Promise<User | null> {
-    return this.withRetry("UserRepository.findMicrosoftUser", async () =>
+    return this.executeAsync(async () =>
       prisma.user.findFirst({
         where: { microsoftId, msIssuer, msTenantId },
       }),
@@ -50,7 +50,7 @@ class UserRepository extends BaseRepository {
   }
 
   public async findAll(role?: Role): Promise<User[]> {
-    return this.withRetry("UserRepository.findAll", async () =>
+    return this.executeAsync(async () =>
       prisma.user.findMany({
         where: role ? { role } : {},
         orderBy: { id: "asc" },
@@ -59,7 +59,7 @@ class UserRepository extends BaseRepository {
   }
 
   public async countByAvatar(url: string): Promise<number> {
-    return this.withRetry("UserRepository.countByAvatar", async () =>
+    return this.executeAsync(async () =>
       prisma.user.count({ where: { avatar: url } }),
     );
   }
@@ -84,7 +84,7 @@ class UserRepository extends BaseRepository {
       ];
     }
 
-    return this.withRetry("UserRepository.filterUsers", async () =>
+    return this.executeAsync(async () =>
       prisma.user.findMany({
         where,
         orderBy: { id: "asc" },
@@ -105,9 +105,7 @@ class UserRepository extends BaseRepository {
     name?: string | null;
     avatar?: string | null;
   }): Promise<User> {
-    return this.withRetry("UserRepository.create", async () =>
-      prisma.user.create({ data }),
-    );
+    return this.executeAsync(async () => prisma.user.create({ data }));
   }
 
   public async update(
@@ -122,7 +120,7 @@ class UserRepository extends BaseRepository {
       throw new Error("[UserRepository.update] No fields provided for update");
     }
 
-    return this.withRetry("UserRepository.update", async () =>
+    return this.executeAsync(async () =>
       prisma.user.update({
         where: { id },
         data: cleanData,
@@ -131,9 +129,7 @@ class UserRepository extends BaseRepository {
   }
 
   public async delete(id: number): Promise<boolean> {
-    await this.withRetry("UserRepository.delete", async () =>
-      prisma.user.delete({ where: { id } }),
-    );
+    await this.executeAsync(async () => prisma.user.delete({ where: { id } }));
     return true;
   }
 }

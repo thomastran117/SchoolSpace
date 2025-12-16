@@ -19,10 +19,7 @@ export abstract class BaseRepository {
     return transientCodes.has(err.code);
   }
 
-  protected async withRetry<T>(
-    operationName: string,
-    fn: () => Promise<T>,
-  ): Promise<T> {
+  protected async executeAsync<T>(fn: () => Promise<T>): Promise<T> {
     let attempt = 0;
 
     while (true) {
@@ -33,7 +30,7 @@ export abstract class BaseRepository {
 
         if (attempt > this.maxRetries || !this.shouldRetry(err)) {
           throw new Error(
-            `[${operationName}] failed after ${attempt} attempts: ${err?.message ?? err}`,
+            `[Repository] failed after ${attempt} attempts: ${err?.message ?? err}`,
           );
         }
 
@@ -42,7 +39,7 @@ export abstract class BaseRepository {
         const wait = delay + jitter;
 
         console.warn(
-          `[${operationName}] attempt ${attempt} failed (${err.code}). Retrying in ${Math.round(wait)}ms...`,
+          `[Repository] attempt ${attempt} failed (${err.code}). Retrying in ${Math.round(wait)}ms...`,
         );
 
         await this.sleep(wait);

@@ -8,7 +8,7 @@ class CourseRepository extends BaseRepository {
   }
 
   public async findById(id: string): Promise<ICourse | null> {
-    return this.withRetry("CourseRepository.findById", async () => {
+    return this.executeAsync(async () => {
       return await CourseModel.findById(id).populate("catalogue").lean();
     });
   }
@@ -17,7 +17,7 @@ class CourseRepository extends BaseRepository {
     teacherId: number,
     year?: number,
   ): Promise<ICourse[]> {
-    return this.withRetry("CourseRepository.findByTeacher", async () => {
+    return this.executeAsync(async () => {
       const filter: any = { teacher_id: teacherId };
       if (year) filter.year = year;
 
@@ -33,7 +33,7 @@ class CourseRepository extends BaseRepository {
     page: number,
     limit: number,
   ): Promise<{ results: ICourse[]; total: number }> {
-    return this.withRetry("CourseRepository.findAllWithFilters", async () => {
+    return this.executeAsync(async () => {
       const skip = (page - 1) * limit;
 
       const [results, total] = await Promise.all([
@@ -56,7 +56,7 @@ class CourseRepository extends BaseRepository {
     year: number,
     image_url?: string,
   ): Promise<ICourse> {
-    return this.withRetry("CourseRepository.create", async () => {
+    return this.executeAsync(async () => {
       const course = await CourseModel.create({
         catalogue: catalogueId,
         teacher_id,
@@ -72,7 +72,7 @@ class CourseRepository extends BaseRepository {
     id: string,
     updates: Partial<ICourse>,
   ): Promise<ICourse | null> {
-    return this.withRetry("CourseRepository.update", async () => {
+    return this.executeAsync(async () => {
       return await CourseModel.findByIdAndUpdate(id, updates, {
         new: true,
         runValidators: true,
@@ -82,13 +82,13 @@ class CourseRepository extends BaseRepository {
   }
 
   public async delete(id: string): Promise<ICourse | null> {
-    return this.withRetry("CourseRepository.delete", async () => {
+    return this.executeAsync(async () => {
       return await CourseModel.findByIdAndDelete(id).lean();
     });
   }
 
   public async countImages(imageUrl: string): Promise<number> {
-    return this.withRetry("CourseRepository.countImages", async () => {
+    return this.executeAsync(async () => {
       return await CourseModel.countDocuments({ image_url: imageUrl });
     });
   }
