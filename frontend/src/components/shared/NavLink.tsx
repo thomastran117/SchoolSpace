@@ -17,7 +17,7 @@ export default function NavLink({ href, children, subtle }: Props) {
           subtle
             ? "text-slate-600 hover:text-slate-900"
             : "text-slate-800 hover:text-purple-600",
-          isActive && "text-purple-600"
+          isActive && "text-purple-600",
         )
       }
     >
@@ -29,7 +29,7 @@ export default function NavLink({ href, children, subtle }: Props) {
               "absolute -bottom-2 left-0 h-[2px] w-full rounded-full transition-all",
               isActive
                 ? "opacity-100 bg-gradient-to-r from-purple-500 via-indigo-500 to-fuchsia-500"
-                : "opacity-0 group-hover:opacity-100 bg-slate-300"
+                : "opacity-0 group-hover:opacity-100 bg-slate-300",
             )}
           />
         </>

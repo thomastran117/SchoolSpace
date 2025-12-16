@@ -1,9 +1,4 @@
-import {
-  Github,
-  Linkedin,
-  Twitter,
-  Mail,
-} from "lucide-react";
+import { Github, Linkedin, Twitter, Mail } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -28,8 +23,8 @@ export default function Footer() {
             </div>
 
             <p className="text-sm text-slate-600 max-w-sm">
-              SchoolSpace helps students explore courses, compare schools,
-              and make informed academic decisions — all in one modern platform.
+              SchoolSpace helps students explore courses, compare schools, and
+              make informed academic decisions — all in one modern platform.
             </p>
 
             {/* Socials */}
@@ -92,22 +87,13 @@ export default function Footer() {
           </span>
 
           <div className="flex gap-6">
-            <a
-              href="/privacy"
-              className="hover:text-purple-600 transition"
-            >
+            <a href="/privacy" className="hover:text-purple-600 transition">
               Privacy Policy
             </a>
-            <a
-              href="/terms"
-              className="hover:text-purple-600 transition"
-            >
+            <a href="/terms" className="hover:text-purple-600 transition">
               Terms of Service
             </a>
-            <a
-              href="/cookies"
-              className="hover:text-purple-600 transition"
-            >
+            <a href="/cookies" className="hover:text-purple-600 transition">
               Cookies
             </a>
           </div>
@@ -126,9 +112,7 @@ function FooterColumn({
 }) {
   return (
     <div className="space-y-4">
-      <h4 className="text-sm font-semibold text-slate-900">
-        {title}
-      </h4>
+      <h4 className="text-sm font-semibold text-slate-900">{title}</h4>
       <ul className="space-y-3">{children}</ul>
     </div>
   );
