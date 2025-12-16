@@ -4,6 +4,8 @@ import { login } from "../../services/AuthService";
 import GoogleRecaptcha, {
   type CaptchaRef,
 } from "../../components/auth/GoogleRecaptcha";
+import MicrosoftButton from "../../components/auth/MicrosoftButton";
+import GoogleButton from "../../components/auth/GoogleButton";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -78,14 +80,10 @@ export default function Login() {
               </div>
 
               {/* OAuth */}
-              <div className="space-y-3">
-                <button className="w-full cursor-pointer rounded-lg border border-slate-300 bg-white/70 py-2.5 text-sm font-medium hover:bg-white transition">
-                  Continue with Google
-                </button>
-                <button className="w-full cursor-pointer rounded-lg border border-slate-300 bg-white/70 py-2.5 text-sm font-medium hover:bg-white transition">
-                  Continue with Microsoft
-                </button>
-              </div>
+<div className="grid grid-cols-2 gap-3">
+  <GoogleButton />
+  <MicrosoftButton />
+</div>
 
               {/* Divider */}
               <div className="my-8 flex items-center gap-4">

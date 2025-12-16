@@ -5,6 +5,8 @@ import Footer from "./components/shared/Footer";
 import HomePage from "./pages/main/HomePage";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
+import MicrosoftCallbackPage from "./pages/auth/MicrosoftCallbackPage";
+import GoogleCallbackPage from "./pages/auth/GoogleCallbackPage";
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/auth/login" element={<LoginPage />} />
           <Route path="/auth/signup" element={<SignupPage />} />
+          <Route path="/auth/google" element={<GoogleCallbackPage />} />
+          <Route path="/auth/microsoft" element={<MicrosoftCallbackPage />} />
         </Routes>
       </div>
       <Footer />
