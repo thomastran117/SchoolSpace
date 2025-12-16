@@ -8,7 +8,7 @@ class CatalogueRepository extends BaseRepository {
   }
 
   public async findById(id: string): Promise<ICatalogue | null> {
-    return this.withRetry("CatalogueRepository.findById", async () => {
+    return this.executeAsync(async () => {
       return await CatalogueModel.findById(id).lean();
     });
   }
@@ -16,7 +16,7 @@ class CatalogueRepository extends BaseRepository {
   public async findByCourseCode(
     course_code: string,
   ): Promise<ICatalogue | null> {
-    return this.withRetry("CatalogueRepository.findByCourseCode", async () => {
+    return this.executeAsync(async () => {
       return await CatalogueModel.findOne({ course_code }).lean();
     });
   }
@@ -26,23 +26,20 @@ class CatalogueRepository extends BaseRepository {
     page: number,
     limit: number,
   ): Promise<{ results: ICatalogue[]; total: number }> {
-    return this.withRetry(
-      "CatalogueRepository.findAllWithFilters",
-      async () => {
-        const skip = (page - 1) * limit;
+    return this.executeAsync(async () => {
+      const skip = (page - 1) * limit;
 
-        const [results, total] = await Promise.all([
-          CatalogueModel.find(filter)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .lean(),
-          CatalogueModel.countDocuments(filter),
-        ]);
+      const [results, total] = await Promise.all([
+        CatalogueModel.find(filter)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+        CatalogueModel.countDocuments(filter),
+      ]);
 
-        return { results, total };
-      },
-    );
+      return { results, total };
+    });
   }
 
   public async create(
@@ -52,7 +49,7 @@ class CatalogueRepository extends BaseRepository {
     term: Term,
     available: boolean = true,
   ): Promise<ICatalogue> {
-    return this.withRetry("CatalogueRepository.create", async () => {
+    return this.executeAsync(async () => {
       const course = await CatalogueModel.create({
         course_name,
         description,
@@ -69,7 +66,7 @@ class CatalogueRepository extends BaseRepository {
     id: string,
     updates: Partial<ICatalogue>,
   ): Promise<ICatalogue | null> {
-    return this.withRetry("CatalogueRepository.update", async () => {
+    return this.executeAsync(async () => {
       return await CatalogueModel.findByIdAndUpdate(id, updates, {
         new: true,
         runValidators: true,
@@ -79,7 +76,7 @@ class CatalogueRepository extends BaseRepository {
   }
 
   public async delete(id: string): Promise<ICatalogue | null> {
-    return this.withRetry("CatalogueRepository.delete", async () => {
+    return this.executeAsync(async () => {
       return await CatalogueModel.findByIdAndDelete(id).lean();
     });
   }
