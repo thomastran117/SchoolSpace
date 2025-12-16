@@ -47,7 +47,7 @@ try {
   while ($true) { Start-Sleep -Seconds 2 }
 } finally {
   Write-Host "`nStopping all services..." -ForegroundColor Yellow
-  foreach ($p in @($feProc, $beProc)) {
+  foreach ($p in @($feProc, $beProc, $wkProc)) {
     try {
       if ($p -and -not $p.HasExited) {
         & taskkill /T /PID $p.Id /F | Out-Null
