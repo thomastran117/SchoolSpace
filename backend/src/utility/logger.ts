@@ -15,8 +15,12 @@ function getTimestamp() {
 }
 
 function logToFile(level: LogLevel, message: string) {
-  const entry = `[${getTimestamp()}] [${level.toUpperCase()}] ${message}\n`;
-  fs.appendFileSync(logFile, entry, "utf8");
+  try {
+    const entry = `[${getTimestamp()}] [${level.toUpperCase()}] ${message}\n`;
+    fs.appendFileSync(logFile, entry, "utf8");
+  } catch (_err) {
+    // intentionally ignored
+  }
 }
 
 function log(level: LogLevel, message: string) {
