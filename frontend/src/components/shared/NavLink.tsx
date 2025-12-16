@@ -13,22 +13,24 @@ export default function NavLink({ href, children, subtle }: Props) {
       to={href}
       className={({ isActive }) =>
         clsx(
-          "relative text-sm font-medium transition-colors",
+          "group relative text-sm font-medium transition-colors",
           subtle
-            ? "text-slate-600 hover:text-slate-900"
-            : "text-slate-800 hover:text-purple-600",
-          isActive && "text-purple-600",
+            ? "text-slate-500 hover:text-slate-800"
+            : "text-slate-700 hover:text-indigo-600",
+          isActive && "text-indigo-600",
         )
       }
     >
       {({ isActive }) => (
         <>
           {children}
+
+          {/* Underline */}
           <span
             className={clsx(
-              "absolute -bottom-2 left-0 h-[2px] w-full rounded-full transition-all",
+              "pointer-events-none absolute -bottom-2 left-0 h-[2px] w-full rounded-full transition-all duration-300",
               isActive
-                ? "opacity-100 bg-gradient-to-r from-purple-500 via-indigo-500 to-fuchsia-500"
+                ? "opacity-100 bg-indigo-600"
                 : "opacity-0 group-hover:opacity-100 bg-slate-300",
             )}
           />

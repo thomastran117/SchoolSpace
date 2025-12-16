@@ -85,11 +85,10 @@ export default function Signup() {
               </div>
 
               {/* OAuth */}
-<div className="grid grid-cols-2 gap-3">
-  <GoogleButton />
-  <MicrosoftButton />
-</div>
-
+              <div className="grid grid-cols-2 gap-3">
+                <GoogleButton />
+                <MicrosoftButton />
+              </div>
 
               {/* Divider */}
               <div className="my-8 flex items-center gap-4">
@@ -142,7 +141,10 @@ export default function Signup() {
                     Email
                   </label>
                   <div className="relative mt-1">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <Mail
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      size={18}
+                    />
                     <input
                       type="email"
                       value={email}
@@ -160,7 +162,10 @@ export default function Signup() {
                     Password
                   </label>
                   <div className="relative mt-1">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <Lock
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      size={18}
+                    />
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
@@ -194,7 +199,10 @@ export default function Signup() {
 
               <p className="mt-7 text-sm text-slate-700">
                 Already have an account?{" "}
-                <a href="/login" className="text-purple-700 font-medium hover:underline">
+                <a
+                  href="/login"
+                  className="text-purple-700 font-medium hover:underline"
+                >
                   Sign in
                 </a>
               </p>
@@ -219,7 +227,10 @@ export default function Signup() {
                   "Teachers manage and showcase courses",
                   "One shared academic platform",
                 ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-white/90">
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 text-white/90"
+                  >
                     <CheckCircle2 size={18} />
                     <span>{item}</span>
                   </li>

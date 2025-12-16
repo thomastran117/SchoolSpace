@@ -132,10 +132,7 @@ function BottomLink({
   children: React.ReactNode;
 }) {
   return (
-    <a
-      href={href}
-      className="hover:text-purple-600 transition-colors"
-    >
+    <a href={href} className="hover:text-purple-600 transition-colors">
       {children}
     </a>
   );

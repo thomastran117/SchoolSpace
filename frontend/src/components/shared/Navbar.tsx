@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../stores";
 import { Menu, X, LogOut } from "lucide-react";
 import NavLink from "./NavLink";
-import ProtectedApi from "../../api/ProtectedApi";
+import { useProtectedAvatar } from "../../hooks/profile/ProfileAvatar";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -15,11 +15,7 @@ export default function Navbar() {
   );
 
   const isAuthenticated = !!accessToken;
-
-  /* Restore session */
-  useEffect(() => {
-    ProtectedApi.get("/auth/refresh").catch(() => {});
-  }, []);
+  const avatarSrc = useProtectedAvatar(avatar);
 
   /* Scroll detection */
   useEffect(() => {
@@ -36,18 +32,18 @@ export default function Navbar() {
           absolute inset-0 transition-all duration-500
           ${
             scrolled
-              ? "bg-white/80 backdrop-blur-xl shadow-[0_1px_0_rgba(15,23,42,0.06),0_6px_24px_rgba(15,23,42,0.12)]"
-              : "bg-gradient-to-r from-purple-600 via-indigo-600 to-fuchsia-600"
+              ? "bg-white/85 backdrop-blur-xl shadow-[0_1px_0_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.08)]"
+              : "bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600"
           }
         `}
       />
 
-      {/* Brand tint (only when scrolled) */}
+      {/* Subtle brand tint */}
       <div
         className={`
           absolute inset-0 pointer-events-none transition-opacity duration-500
           ${scrolled ? "opacity-100" : "opacity-0"}
-          bg-gradient-to-r from-purple-500/5 via-indigo-500/5 to-fuchsia-500/5
+          bg-gradient-to-r from-indigo-500/4 via-purple-500/4 to-fuchsia-500/4
         `}
       />
 
@@ -63,8 +59,8 @@ export default function Navbar() {
                 h-9 w-9 rounded-lg grid place-items-center font-bold text-white transition
                 ${
                   scrolled
-                    ? "bg-gradient-to-br from-purple-600 via-indigo-600 to-fuchsia-600 shadow"
-                    : "bg-white/15 backdrop-blur"
+                    ? "bg-gradient-to-br from-indigo-600 to-purple-600 shadow-sm"
+                    : "bg-white/10 backdrop-blur"
                 }
               `}
             >
@@ -99,15 +95,15 @@ export default function Navbar() {
                   Login
                 </NavLink>
 
-                {/* CTA – adaptive */}
+                {/* CTA */}
                 <a
                   href="/register"
                   className={`
                     rounded-lg px-4 py-2 text-sm font-medium transition-all
                     ${
                       scrolled
-                        ? "bg-gradient-to-r from-purple-600 via-indigo-600 to-fuchsia-600 text-white shadow hover:brightness-110"
-                        : "bg-white/15 text-white backdrop-blur hover:bg-white/25"
+                        ? "bg-indigo-600 text-white shadow-sm hover:bg-indigo-500"
+                        : "bg-white/10 text-white backdrop-blur hover:bg-white/20"
                     }
                   `}
                 >
@@ -116,19 +112,36 @@ export default function Navbar() {
               </>
             ) : (
               <div className="relative">
-                {/* Avatar */}
-                <button onClick={() => setMenuOpen(!menuOpen)}>
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="flex h-10 items-center gap-3"
+                >
+                  {/* Username (desktop only) */}
+                  <span
+                    className={`
+        hidden sm:block max-w-[140px] truncate
+        text-sm font-medium leading-none transition-colors
+        ${scrolled ? "text-slate-700" : "text-white/90"}
+      `}
+                    title={username ?? undefined}
+                  >
+                    {username}
+                  </span>
+
+                  {/* Avatar */}
                   <img
-                    src={avatar ?? "/avatar-placeholder.png"}
+                    src={avatarSrc ?? "/avatar-placeholder.png"}
                     alt="avatar"
                     className={`
-                      h-9 w-9 rounded-full object-cover transition
-                      ${
-                        scrolled
-                          ? "border border-slate-300"
-                          : "border border-white/30"
-                      }
-                    `}
+        h-12 w-12 rounded-full object-cover
+        ring-2 ring-offset-1 transition
+        ${
+          scrolled
+            ? "ring-slate-300 ring-offset-white"
+            : "ring-white/30 ring-offset-transparent"
+        }
+        hover:ring-indigo-400/60
+      `}
                   />
                 </button>
 
@@ -186,7 +199,7 @@ export default function Navbar() {
                 </NavLink>
                 <a
                   href="/register"
-                  className="flex-1 text-center rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-fuchsia-600 px-4 py-2 text-sm text-white"
+                  className="flex-1 text-center rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-500 transition"
                 >
                   Get Started
                 </a>
