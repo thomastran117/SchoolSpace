@@ -103,9 +103,7 @@ export default function GoogleCallbackPage() {
             <h3 className="text-lg font-semibold text-slate-900">
               Google Sign-In Failed
             </h3>
-            <p className="mt-2 text-sm text-slate-700">
-              {error}
-            </p>
+            <p className="mt-2 text-sm text-slate-700">{error}</p>
 
             <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
               <button

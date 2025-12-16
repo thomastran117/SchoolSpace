@@ -5,31 +5,51 @@ interface Props {
   href: string;
   children: React.ReactNode;
   subtle?: boolean;
+  variant?: "dark" | "light";
 }
 
-export default function NavLink({ href, children, subtle }: Props) {
+export default function NavLink({
+  href,
+  children,
+  subtle,
+  variant = "light",
+}: Props) {
+  const isDark = variant === "dark";
+
   return (
     <RouterLink
       to={href}
       className={({ isActive }) =>
         clsx(
-          "relative text-sm font-medium transition-colors",
+          "group relative text-sm font-medium transition-colors",
           subtle
-            ? "text-slate-600 hover:text-slate-900"
-            : "text-slate-800 hover:text-purple-600",
-          isActive && "text-purple-600",
+            ? isDark
+              ? "text-white/70 hover:text-white"
+              : "text-slate-500 hover:text-slate-800"
+            : isDark
+              ? "text-white/90 hover:text-white"
+              : "text-slate-700 hover:text-indigo-600",
+
+          // Active state
+          isActive && (isDark ? "text-white" : "text-indigo-600"),
         )
       }
     >
       {({ isActive }) => (
         <>
           {children}
+
+          {/* Underline */}
           <span
             className={clsx(
-              "absolute -bottom-2 left-0 h-[2px] w-full rounded-full transition-all",
+              "pointer-events-none absolute -bottom-2 left-0 h-[2px] w-full rounded-full transition-all duration-300",
               isActive
-                ? "opacity-100 bg-gradient-to-r from-purple-500 via-indigo-500 to-fuchsia-500"
-                : "opacity-0 group-hover:opacity-100 bg-slate-300",
+                ? isDark
+                  ? "opacity-100 bg-white"
+                  : "opacity-100 bg-indigo-600"
+                : isDark
+                  ? "opacity-0 group-hover:opacity-100 bg-white/50"
+                  : "opacity-0 group-hover:opacity-100 bg-slate-300",
             )}
           />
         </>

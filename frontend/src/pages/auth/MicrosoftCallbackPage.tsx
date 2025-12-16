@@ -33,8 +33,7 @@ export default function MicrosoftCallbackPage() {
           throw new Error("No login result found. Please try again.");
 
         const idToken = result.idToken;
-        if (!idToken)
-          throw new Error("Missing id_token from Microsoft login.");
+        if (!idToken) throw new Error("Missing id_token from Microsoft login.");
 
         if (active) setStatus("Verifying your Microsoft account…");
 
@@ -102,9 +101,7 @@ export default function MicrosoftCallbackPage() {
             <h3 className="text-lg font-semibold text-slate-900">
               Microsoft Sign-In Failed
             </h3>
-            <p className="mt-2 text-sm text-slate-700">
-              {error}
-            </p>
+            <p className="mt-2 text-sm text-slate-700">{error}</p>
 
             <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
               <button

@@ -80,10 +80,10 @@ export default function Login() {
               </div>
 
               {/* OAuth */}
-<div className="grid grid-cols-2 gap-3">
-  <GoogleButton />
-  <MicrosoftButton />
-</div>
+              <div className="grid grid-cols-2 gap-3">
+                <GoogleButton />
+                <MicrosoftButton />
+              </div>
 
               {/* Divider */}
               <div className="my-8 flex items-center gap-4">
