@@ -1,34 +1,43 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ProtectedApi from "../../api/ProtectedApi";
 
 export function useProtectedAvatar(avatarPath?: string | null) {
   const [src, setSrc] = useState<string | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!avatarPath) {
-      setSrc(null);
-      return;
-    }
+    if (!avatarPath) return;
 
-    let revoked = false;
-    let objectUrl: string | null = null;
+    const controller = new AbortController();
 
-    ProtectedApi.get(avatarPath, { responseType: "blob" })
+    ProtectedApi.get(avatarPath, {
+      responseType: "blob",
+      signal: controller.signal,
+    })
       .then((res) => {
-        if (revoked) return;
+        const url = URL.createObjectURL(res.data);
 
-        objectUrl = URL.createObjectURL(res.data);
-        setSrc(objectUrl);
+        if (objectUrlRef.current) {
+          URL.revokeObjectURL(objectUrlRef.current);
+        }
+
+        objectUrlRef.current = url;
+        setSrc(url);
       })
-      .catch(() => {
-        setSrc(null);
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        console.error("Failed to load avatar", err);
       });
 
     return () => {
-      revoked = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      controller.abort();
+
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
     };
   }, [avatarPath]);
 
-  return src;
+  return avatarPath ? src : null;
 }
