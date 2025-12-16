@@ -1,11 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
+import Navbar from "./components/shared/Navbar";
 import HomePage from "./pages/main/HomePage";
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen overflow-y-auto overflow-x-hidden">
+      <Navbar />
+        <div className="min-h-screen overflow-y-auto overflow-x-hidden">
         <Routes>
           <Route path="/" element={<HomePage />} />
         </Routes>
