@@ -4,7 +4,6 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "../../stores/authSlice";
 import PublicApi from "../../api/PublicApi";
 import environment from "../../configuration/Environment";
-import "../../styles/auth/Callback.css";
 
 export default function GoogleCallbackPage() {
   const navigate = useNavigate();
@@ -74,43 +73,69 @@ export default function GoogleCallbackPage() {
   }, [navigate, dispatch]);
 
   return (
-    <div className="callback-page">
-      <div className="callback-gradient gradient-1" />
-      <div className="callback-gradient gradient-2" />
+    <div className="relative min-h-screen overflow-hidden flex items-center justify-center px-6">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-indigo-500 to-fuchsia-500" />
+      <div className="absolute inset-0 bg-white/20" />
 
-      <div className="callback-card fade-in">
+      {/* Decorative blobs */}
+      <div className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-purple-400/35 rounded-full blur-3xl" />
+      <div className="absolute bottom-[-40%] left-1/2 w-[720px] h-[720px] bg-indigo-400/30 rounded-full blur-3xl" />
+
+      {/* Card */}
+      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white/70 backdrop-blur-xl border border-white/40 p-10 text-center shadow-xl">
         {!error ? (
-          <div className="loader-wrapper">
-            <div className="loader-circle" />
+          <>
+            {/* Loader */}
+            <div className="mx-auto h-12 w-12 rounded-full border-4 border-purple-200 border-t-purple-600 animate-spin" />
 
-            <h3 className="callback-status mt-4">{status}</h3>
-            <p className="callback-subtext">
+            <h3 className="mt-6 text-lg font-semibold text-slate-900">
+              {status}
+            </h3>
+            <p className="mt-2 text-sm text-slate-700">
               Please wait while we complete your secure sign-in.
             </p>
-          </div>
+          </>
         ) : (
-          <div className="callback-error-wrapper">
-            <div className="error-icon mb-3">⚠️</div>
+          <>
+            <div className="text-3xl mb-4">⚠️</div>
 
-            <h3 className="callback-error-title">Google Sign-In Failed</h3>
-            <p className="callback-error-text">{error}</p>
+            <h3 className="text-lg font-semibold text-slate-900">
+              Google Sign-In Failed
+            </h3>
+            <p className="mt-2 text-sm text-slate-700">{error}</p>
 
-            <div className="callback-btn-row mt-4">
+            <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
               <button
-                className="btn btn-primary pill-btn px-4"
                 onClick={retryGoogleOAuth}
+                className="
+                  rounded-lg
+                  bg-gradient-to-r from-purple-600 via-indigo-600 to-fuchsia-600
+                  px-4 py-2.5
+                  text-white text-sm font-medium
+                  hover:brightness-110 transition
+                  cursor-pointer
+                "
               >
                 Retry Google Sign-In
               </button>
 
               <button
-                className="btn btn-outline-primary pill-btn px-4"
                 onClick={() => navigate("/auth")}
+                className="
+                  rounded-lg
+                  border border-purple-300/60
+                  bg-white/70
+                  px-4 py-2.5
+                  text-sm font-medium text-slate-800
+                  hover:bg-purple-50 transition
+                  cursor-pointer
+                "
               >
                 Back to Sign In
               </button>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

@@ -1,39 +1,34 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  CheckCircle2,
+  GraduationCap,
+  BookOpen,
+} from "lucide-react";
+import { signup } from "../../services/AuthService";
 import GoogleRecaptcha, {
   type CaptchaRef,
 } from "../../components/auth/GoogleRecaptcha";
-import { useNavigate } from "react-router-dom";
-
-import GoogleButton from "../../components/auth/GoogleButton";
 import MicrosoftButton from "../../components/auth/MicrosoftButton";
-import PublicApi from "../../api/PublicApi";
+import GoogleButton from "../../components/auth/GoogleButton";
 
-import "../../styles/auth/Auth.css";
+type Role = "student" | "teacher";
 
-const SignupPage: React.FC = () => {
-  const navigate = useNavigate();
-
+export default function Signup() {
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"student" | "teacher" | null>(null);
-
+  const [role, setRole] = useState<Role>("student");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-
+  const [error, setError] = useState<string | null>(null);
   const captchaRef = useRef<CaptchaRef>(null);
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccessMessage("");
-
-    if (!role) {
-      setError("Please select a role (Student or Teacher).");
-      return;
-    }
-
+    setError(null);
     setLoading(true);
 
     try {
@@ -44,206 +39,209 @@ const SignupPage: React.FC = () => {
         return;
       }
 
-      await PublicApi.post("/auth/signup", {
+      const data = await signup({
         email,
         password,
         role,
         captcha: token,
       });
 
-      setSuccessMessage(
-        `A verification link has been sent to ${email}. Please check your inbox to activate your account.`,
-      );
-
-      setTimeout(() => {
-        navigate("/auth/login");
-      }, 5000);
+      console.log(data);
+      window.location.href = "/dashboard";
     } catch (err: any) {
-      const msg =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Signup failed. Please try again.";
-      setError(msg);
+      setError(err?.response?.data?.message ?? "Signup failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-page position-relative">
-      <div className="login-bg-gradient-1" />
-      <div className="login-bg-gradient-2" />
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-indigo-500 to-fuchsia-500" />
+      <div className="absolute inset-0 bg-white/20" />
 
-      <div className="container py-5">
-        <div className="login-card mx-auto d-flex flex-wrap">
-          <div className="col-lg-6 login-left text-white d-flex flex-column justify-content-center p-5">
-            <h1 className="fw-bold display-5">Create Your Account</h1>
-            <p className="subtitle mt-3">
-              Join SchoolSpace and access your academic tools, resources, and
-              schedules—all in one place.
-            </p>
+      {/* Decorative blobs */}
+      <div className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-purple-400/35 rounded-full blur-3xl" />
+      <div className="absolute top-1/3 -right-24 w-[420px] h-[420px] bg-fuchsia-400/30 rounded-full blur-3xl" />
+      <div className="absolute bottom-[-40%] left-1/2 w-[720px] h-[720px] bg-indigo-400/30 rounded-full blur-3xl" />
 
-            <div className="wave-right-1"></div>
-            <div className="wave-right-2"></div>
-            <div className="circle-outline circle-o-1"></div>
-            <div className="circle-outline circle-o-2"></div>
-            <div className="circle-outline circle-o-3"></div>
-            <div className="circle-outline circle-o-4"></div>
-            <div className="circle-outline circle-o-5"></div>
-          </div>
-
-          <div className="col-lg-6 bg-white p-5 login-right position-relative">
-            <h2 className="fw-bold mb-2">Sign Up</h2>
-            <p className="text-muted mb-4">
-              Start your journey with SchoolSpace.
-            </p>
-
-            <form onSubmit={handleSignup} className="w-100">
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Email</label>
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <i className="bi bi-envelope"></i>
-                  </span>
-                  <input
-                    type="email"
-                    className="form-control"
-                    placeholder="you@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
+      <div className="relative z-10 min-h-screen flex items-center py-16 lg:py-24">
+        <div className="w-full max-w-7xl px-6 lg:pl-20">
+          <div className="grid grid-cols-1 lg:grid-cols-[480px_1fr] gap-16 items-center">
+            {/* -------- Left: Signup Form -------- */}
+            <section className="bg-white/65 backdrop-blur-xl border border-white/40 rounded-2xl px-10 py-14">
+              {/* Header */}
+              <div className="mb-8">
+                <span className="inline-block mb-3 text-sm font-medium text-purple-700">
+                  Get started
+                </span>
+                <h2 className="text-3xl font-extrabold text-slate-900">
+                  Create your account
+                </h2>
+                <p className="mt-2 text-slate-700">
+                  Join SchoolSpace in under a minute.
+                </p>
               </div>
 
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Password</label>
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <i className="bi bi-lock"></i>
-                  </span>
+              {/* OAuth */}
+              <div className="grid grid-cols-2 gap-3">
+                <GoogleButton />
+                <MicrosoftButton />
+              </div>
 
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    className="form-control"
-                    placeholder="••••••••"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+              {/* Divider */}
+              <div className="my-8 flex items-center gap-4">
+                <div className="h-[2px] flex-1 rounded-full bg-slate-400/70" />
+                <span className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                  OR
+                </span>
+                <div className="h-[2px] flex-1 rounded-full bg-slate-400/70" />
+              </div>
 
-                  <button
-                    type="button"
-                    className="input-group-text toggle-view"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    <i
-                      className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}
+              {/* Form */}
+              <form className="space-y-5" onSubmit={handleSubmit}>
+                {/* Role */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    I am a
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setRole("student")}
+                      className={`flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
+                        role === "student"
+                          ? "border-purple-500 bg-purple-50 text-purple-700"
+                          : "border-slate-300 bg-white/70 hover:bg-white"
+                      }`}
+                    >
+                      <GraduationCap size={16} />
+                      Student
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setRole("teacher")}
+                      className={`flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition cursor-pointer ${
+                        role === "teacher"
+                          ? "border-purple-500 bg-purple-50 text-purple-700"
+                          : "border-slate-300 bg-white/70 hover:bg-white"
+                      }`}
+                    >
+                      <BookOpen size={16} />
+                      Teacher
+                    </button>
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Email
+                  </label>
+                  <div className="relative mt-1">
+                    <Mail
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      size={18}
                     />
-                  </button>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      placeholder="you@school.edu"
+                      className="w-full rounded-lg border border-slate-300 bg-white/70 py-2.5 pl-10 pr-4 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Select Role</label>
-
-                <div className="d-flex gap-3">
-                  <button
-                    type="button"
-                    className={`role-btn ${role === "student" ? "active-role" : ""}`}
-                    onClick={() => setRole("student")}
-                  >
-                    <i className="bi bi-book"></i> Student
-                  </button>
-
-                  <button
-                    type="button"
-                    className={`role-btn ${role === "teacher" ? "active-role" : ""}`}
-                    onClick={() => setRole("teacher")}
-                  >
-                    <i className="bi bi-mortarboard"></i> Teacher
-                  </button>
+                {/* Password */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Password
+                  </label>
+                  <div className="relative mt-1">
+                    <Lock
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      size={18}
+                    />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      placeholder="••••••••"
+                      className="w-full rounded-lg border border-slate-300 bg-white/70 py-2.5 pl-10 pr-12 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="form-check mb-3 d-flex align-items-center">
-                <input
-                  type="checkbox"
-                  className="form-check-input mt-0"
-                  id="agreeTerms"
-                  required
-                />
-
-                <label
-                  htmlFor="agreeTerms"
-                  className="form-check-label ms-2 d-flex align-items-center flex-wrap"
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-lg bg-gradient-to-r from-purple-600 via-indigo-600 to-fuchsia-600 py-2.5 text-white font-medium hover:brightness-110 transition disabled:opacity-60 cursor-pointer"
                 >
-                  I agree to the{" "}
-                  <button
-                    type="button"
-                    className="btn btn-link p-0 text-primary ms-1"
-                    onClick={() => navigate("/legal/terms")}
+                  {loading ? "Creating account..." : "Create account"}
+                </button>
+              </form>
+
+              <p className="mt-7 text-sm text-slate-700">
+                Already have an account?{" "}
+                <a
+                  href="/login"
+                  className="text-purple-700 font-medium hover:underline"
+                >
+                  Sign in
+                </a>
+              </p>
+            </section>
+
+            {/* -------- Right: Context -------- */}
+            <aside className="hidden lg:block">
+              <h1 className="text-4xl font-extrabold text-white leading-tight max-w-xl">
+                Built for students
+                <br />
+                <span className="text-white/90">and educators alike</span>
+              </h1>
+
+              <p className="mt-6 text-white/90 max-w-lg">
+                Whether you're learning or teaching, SchoolSpace gives you the
+                tools to organize, compare, and succeed.
+              </p>
+
+              <ul className="mt-8 space-y-4">
+                {[
+                  "Students explore and track programs",
+                  "Teachers manage and showcase courses",
+                  "One shared academic platform",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 text-white/90"
                   >
-                    Terms & Conditions
-                  </button>
-                </label>
-              </div>
-
-              {successMessage && (
-                <div className="auth-success-box mb-2">
-                  <i className="bi bi-check-circle-fill me-2"></i>
-                  {successMessage}
-                </div>
-              )}
-
-              {error && (
-                <div className="auth-error-box mb-2">
-                  <i className="bi bi-exclamation-circle me-2"></i>
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="btn btn-login-purple w-100 py-3 mb-2 d-flex justify-content-center align-items-center"
-                disabled={loading}
-              >
-                {loading && (
-                  <div
-                    className="spinner-border spinner-border-sm me-2"
-                    role="status"
-                  ></div>
-                )}
-                {loading ? "Creating account…" : "Sign Up"}
-              </button>
-
-              <GoogleRecaptcha ref={captchaRef} />
-            </form>
-
-            <div className="login-divider text-center my-4">
-              <span className="divider-text">or</span>
-            </div>
-
-            <div className="d-flex justify-content-center gap-3 flex-wrap">
-              <GoogleButton disabled={loading} />
-              <MicrosoftButton disabled={loading} />
-            </div>
-
-            <div className="login-signup-row mt-4">
-              <span>Already have an account?</span>
-              <button
-                type="button"
-                className="btn btn-link p-0 text-primary ms-1"
-                onClick={() => navigate("/auth/login")}
-              >
-                Login
-              </button>
-            </div>
+                    <CheckCircle2 size={18} />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </aside>
           </div>
         </div>
       </div>
+
+      <GoogleRecaptcha ref={captchaRef} />
     </div>
   );
-};
-
-export default SignupPage;
+}

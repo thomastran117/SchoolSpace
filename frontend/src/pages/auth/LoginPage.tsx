@@ -1,34 +1,24 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { Eye, EyeOff, Mail, Lock, CheckCircle2 } from "lucide-react";
+import { login } from "../../services/AuthService";
 import GoogleRecaptcha, {
   type CaptchaRef,
 } from "../../components/auth/GoogleRecaptcha";
-import { useDispatch } from "react-redux";
-import { setCredentials } from "../../stores/authSlice";
-import type { AppDispatch } from "../../stores";
-import { useNavigate } from "react-router-dom";
-
-import GoogleButton from "../../components/auth/GoogleButton";
 import MicrosoftButton from "../../components/auth/MicrosoftButton";
-import PublicApi from "../../api/PublicApi";
+import GoogleButton from "../../components/auth/GoogleButton";
 
-import "../../styles/auth/Auth.css";
-
-const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
-
+export default function Login() {
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-
+  const [error, setError] = useState<string | null>(null);
   const captchaRef = useRef<CaptchaRef>(null);
+  const [rememberMe, setRememberMe] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError(null);
     setLoading(true);
 
     try {
@@ -39,178 +29,233 @@ const LoginPage: React.FC = () => {
         return;
       }
 
-      const res = await PublicApi.post("/auth/login", {
+      const data = await login({
         email,
         password,
-        remember,
+        remember: rememberMe,
         captcha: token,
       });
 
-      const { accessToken, username, role, avatar } = res.data;
-      dispatch(setCredentials({ accessToken, username, role, avatar }));
-      navigate("/dashboard");
+      console.log(data);
+
+      window.location.href = "/dashboard";
     } catch (err: any) {
-      const msg =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Login failed. Please try again.";
-      setError(msg);
+      setError(err?.response?.data?.message ?? "Invalid email or password");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-page position-relative">
-      <div className="login-bg-gradient-1" />
-      <div className="login-bg-gradient-2" />
+    <div className="relative min-h-screen overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-indigo-500 to-fuchsia-500" />
+      <div className="absolute inset-0 bg-white/20" />
 
-      <div className="container py-5">
-        <div className="login-card mx-auto d-flex flex-wrap">
-          <div className="col-lg-6 login-left text-white d-flex flex-column justify-content-center p-5">
-            <h1 className="fw-bold display-5">Welcome Back</h1>
-            <p className="subtitle mt-3">
-              Your academic hub for schedules, resources, announcements, and
-              more.
-            </p>
+      {/* Decorative blobs */}
+      <div className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-purple-400/35 rounded-full blur-3xl" />
+      <div className="absolute top-1/3 -right-24 w-[420px] h-[420px] bg-fuchsia-400/30 rounded-full blur-3xl" />
+      <div className="absolute bottom-[-40%] left-1/2 w-[720px] h-[720px] bg-indigo-400/30 rounded-full blur-3xl" />
 
-            <div className="wave-right-1"></div>
-            <div className="wave-right-2"></div>
-
-            <div className="circle-outline circle-o-1"></div>
-            <div className="circle-outline circle-o-2"></div>
-            <div className="circle-outline circle-o-3"></div>
-            <div className="circle-outline circle-o-4"></div>
-            <div className="circle-outline circle-o-5"></div>
-          </div>
-
-          <div className="col-lg-6 bg-white p-5 login-right position-relative">
-            <div className="ribbon-bg-1"></div>
-            <div className="ribbon-bg-2"></div>
-
-            <h2 className="fw-bold mb-2">Sign in to SchoolSpace</h2>
-            <p className="text-muted mb-4">
-              Log in with your registered email.
-            </p>
-
-            <form onSubmit={handleLogin} className="w-100">
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Email</label>
-                <div className="input-group">
-                  <span className="input-group-text bg-white border-end-0">
-                    <i className="bi bi-envelope"></i>
-                  </span>
-                  <input
-                    type="email"
-                    className="form-control border-start-0"
-                    placeholder="you@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
+      <div className="relative z-10 min-h-screen flex items-center py-16 lg:py-24">
+        <div className="w-full max-w-7xl px-6 lg:pl-20">
+          <div className="grid grid-cols-1 lg:grid-cols-[480px_1fr] gap-16 items-center">
+            {/* -------- Left: Auth Form -------- */}
+            <section
+              className="
+                bg-white/65 backdrop-blur-xl
+                border border-white/40
+                rounded-2xl
+                px-10 py-14
+              "
+            >
+              {/* Brand */}
+              <div className="mb-8">
+                <span className="inline-block mb-3 text-sm font-medium text-purple-700">
+                  Welcome back
+                </span>
+                <h2 className="text-3xl font-extrabold text-slate-900">
+                  Sign in to your account
+                </h2>
+                <p className="mt-2 text-slate-700">Continue to SchoolSpace.</p>
               </div>
 
-              <div className="mb-3">
-                <label className="form-label fw-semibold">Password</label>
-                <div className="input-group">
-                  <span className="input-group-text bg-white border-end-0">
-                    <i className="bi bi-lock"></i>
-                  </span>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    className="form-control border-start-0"
-                    placeholder="••••••••"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="input-group-text bg-white border-start-0 toggle-view"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    <i
-                      className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}
-                    ></i>
-                  </button>
-                </div>
+              {/* OAuth */}
+              <div className="grid grid-cols-2 gap-3">
+                <GoogleButton />
+                <MicrosoftButton />
               </div>
 
-              <div className="login-remember-row mb-3">
-                <div className="form-check">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id="rememberMe"
-                    checked={remember}
-                    onChange={(e) => setRemember(e.target.checked)}
-                  />
-                  <label htmlFor="rememberMe" className="form-check-label">
+              {/* Divider */}
+              <div className="my-8 flex items-center gap-4">
+                <div className="h-[2px] flex-1 rounded-full bg-slate-400/70" />
+                <span className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                  OR
+                </span>
+                <div className="h-[2px] flex-1 rounded-full bg-slate-400/70" />
+              </div>
+
+              {/* Form */}
+              <form className="space-y-5" onSubmit={handleSubmit}>
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Email
+                  </label>
+                  <div className="relative mt-1">
+                    <Mail
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+                    <input
+                      type="email"
+                      value={email}
+                      placeholder="you@school.edu"
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="
+                        w-full rounded-lg
+                        border border-slate-300
+                        bg-white/70
+                        py-2.5 pl-10 pr-4 text-sm
+                        focus:border-purple-500
+                        focus:ring-2 focus:ring-purple-500/20
+                        outline-none
+                      "
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">
+                    Password
+                  </label>
+
+                  <div className="relative mt-1">
+                    {/* Left icon */}
+                    <Lock
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    />
+
+                    {/* Input */}
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      placeholder="••••••••"
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="
+        w-full rounded-lg
+        border border-slate-300
+        bg-white/70
+        py-2.5 pl-10 pr-12 text-sm
+        focus:border-purple-500
+        focus:ring-2 focus:ring-purple-500/20
+        outline-none
+      "
+                    />
+
+                    {/* Toggle visibility */}
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="
+        absolute right-3 top-1/2 -translate-y-1/2
+        text-slate-400 hover:text-slate-600
+        cursor-pointer
+        focus:outline-none
+      "
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Remember / Forgot */}
+                <div className="flex items-center justify-between text-sm">
+                  <label className="flex items-center gap-2 text-slate-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="rounded border-slate-300 cursor-pointer"
+                    />
                     Remember me
                   </label>
+                  <a
+                    href="/forgot-password"
+                    className="text-purple-700 hover:underline"
+                  >
+                    Forgot password?
+                  </a>
                 </div>
 
+                {/* Submit */}
                 <button
-                  type="button"
-                  className="btn btn-link p-0 text-primary"
-                  onClick={() => navigate("/forgot-password")}
+                  type="submit"
+                  disabled={loading}
+                  className="
+                        w-full rounded-lg
+                        bg-gradient-to-r from-purple-600 via-indigo-600 to-fuchsia-600
+                        py-2.5 text-white font-medium
+                        hover:brightness-110
+                        transition
+                        disabled:opacity-60
+                        cursor-pointer
+                    "
                 >
-                  Forgot password?
+                  {loading ? "Signing in..." : "Sign in"}
                 </button>
-              </div>
+              </form>
 
-              <div className="error-placeholder mb-2">
-                {error && (
-                  <div className="auth-error-box">
-                    <i className="bi bi-exclamation-circle me-2"></i>
-                    {error}
-                  </div>
-                )}
-              </div>
+              <p className="mt-7 text-sm text-slate-700">
+                Don’t have an account?{" "}
+                <a
+                  href="/register"
+                  className="text-purple-700 font-medium hover:underline"
+                >
+                  Sign up
+                </a>
+              </p>
+            </section>
 
-              <button
-                type="submit"
-                className="btn btn-login-purple w-100 py-3 mb-2 d-flex justify-content-center align-items-center"
-                disabled={loading}
-              >
-                {loading && (
-                  <div
-                    className="spinner-border spinner-border-sm me-2"
-                    role="status"
-                    style={{ color: "white" }}
-                  ></div>
-                )}
-                {loading ? "Signing in…" : "Login"}
-              </button>
+            {/* -------- Right: Context / Value -------- */}
+            <aside className="hidden lg:block">
+              <h1 className="text-4xl font-extrabold text-white leading-tight max-w-xl">
+                Your academic journey,
+                <br />
+                <span className="text-white/90">organized in one place</span>
+              </h1>
 
-              <GoogleRecaptcha ref={captchaRef} />
-            </form>
+              <p className="mt-6 text-white/90 max-w-lg">
+                SchoolSpace helps students explore programs, compare schools,
+                and make confident academic decisions with clarity.
+              </p>
 
-            <div className="login-divider text-center my-4">
-              <span className="divider-text">or</span>
-            </div>
-
-            <div className="d-flex justify-content-center gap-3 flex-wrap">
-              <GoogleButton disabled={loading} />
-              <MicrosoftButton disabled={loading} />
-            </div>
-
-            <div className="login-signup-row mt-4">
-              <span>New here?</span>
-              <button
-                type="button"
-                className="btn btn-link p-0 text-primary ms-1"
-                onClick={() => navigate("/auth/signup")}
-              >
-                Create an account
-              </button>
-            </div>
+              <ul className="mt-8 space-y-4">
+                {[
+                  "Browse and compare courses across institutions",
+                  "Track programs, deadlines, and shortlists",
+                  "Built for students, advisors, and administrators",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 text-white/90"
+                  >
+                    <CheckCircle2 className="mt-0.5 text-white" size={18} />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </aside>
           </div>
         </div>
       </div>
+      <GoogleRecaptcha ref={captchaRef} />
     </div>
   );
-};
-
-export default LoginPage;
+}

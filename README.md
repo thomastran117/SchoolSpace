@@ -11,7 +11,7 @@ For a full documentation, refers to the `docs/` folder
 ## Authors
 
 - [@thomastran117](https://www.github.com/thomastran117)
-
+- [@sanjeeveasparan](https://www.github.com/sanjeeveasparan)
 
 ## Tech Stack
 

@@ -12,7 +12,7 @@ interface MicrosoftButtonProps {
 const MicrosoftButton: React.FC<MicrosoftButtonProps> = ({
   disabled = false,
 }) => {
-  const [msalReady, setMsalReady] = useState<boolean>(false);
+  const [msalReady, setMsalReady] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -31,10 +31,10 @@ const MicrosoftButton: React.FC<MicrosoftButtonProps> = ({
     };
   }, []);
 
-  const handleMicrosoftOAuth = async () => {
-    if (!msalReady || disabled) return;
+  const isDisabled = disabled || !msalReady;
 
-    await waitForMsal();
+  const handleMicrosoftOAuth = async () => {
+    if (isDisabled) return;
 
     await msalInstance.loginRedirect({
       scopes: microsoftScopes,
@@ -46,38 +46,25 @@ const MicrosoftButton: React.FC<MicrosoftButtonProps> = ({
     <button
       type="button"
       onClick={handleMicrosoftOAuth}
-      disabled={!msalReady || disabled}
-      className="d-flex align-items-center justify-content-center gap-2 border"
-      style={{
-        backgroundColor: "#fff",
-        borderColor: "#dadce0",
-        borderRadius: "6px",
-        padding: "8px 16px",
-        minWidth: "150px",
-        fontWeight: 500,
-        fontSize: "15px",
-        color: "#3c4043",
-        transition: "all 0.2s ease",
-        boxShadow:
-          !msalReady || disabled ? "none" : "0 1px 3px rgba(60, 64, 67, 0.3)",
-        cursor: !msalReady || disabled ? "not-allowed" : "pointer",
-        opacity: !msalReady || disabled ? 0.6 : 1,
-      }}
-      onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
-        if (msalReady && !disabled)
-          e.currentTarget.style.boxShadow = "0 2px 6px rgba(60, 64, 67, 0.3)";
-      }}
-      onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
-        if (msalReady && !disabled)
-          e.currentTarget.style.boxShadow = "0 1px 3px rgba(60, 64, 67, 0.3)";
-      }}
+      disabled={isDisabled}
+      className={`
+        flex items-center justify-center gap-2
+        h-11 w-full
+        rounded-lg
+        border border-purple-300/60
+        bg-white/70
+        text-sm font-medium text-slate-800
+        backdrop-blur-sm
+        transition
+        ${
+          isDisabled
+            ? "cursor-not-allowed opacity-60"
+            : "cursor-pointer hover:bg-purple-50 hover:border-purple-400 hover:shadow-md"
+        }
+      `}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 23 23"
-      >
+      {/* Microsoft icon */}
+      <svg width="18" height="18" viewBox="0 0 23 23">
         <rect width="10" height="10" x="0" y="0" fill="#F35325" />
         <rect width="10" height="10" x="13" y="0" fill="#81BC06" />
         <rect width="10" height="10" x="0" y="13" fill="#05A6F0" />

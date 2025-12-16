@@ -12,6 +12,7 @@ try {
 $RootDir      = Resolve-Path (Join-Path $PSScriptRoot "../..")
 $FrontendPath = Resolve-Path (Join-Path $RootDir "frontend")
 $BackendPath  = Resolve-Path (Join-Path $RootDir "backend")
+$WorkerPath  = Resolve-Path (Join-Path $RootDir "worker")
 
 function Assert-Package([string]$Path) {
   if (-not (Test-Path (Join-Path $Path "package.json"))) {
@@ -20,6 +21,7 @@ function Assert-Package([string]$Path) {
 }
 Assert-Package $FrontendPath
 Assert-Package $BackendPath
+Assert-Package $WorkerPath
 
 Write-Host ("Starting frontend in {0}" -f $FrontendPath) -ForegroundColor Cyan
 $frontendCmd = 'npm run dev'
@@ -29,11 +31,16 @@ $feProc = Start-Process -FilePath $env:ComSpec `
   -WindowStyle Hidden `
   -PassThru
 
-Write-Host ("Starting backend in new window...") -ForegroundColor Cyan
+Write-Host ("Starting backend...") -ForegroundColor Cyan
 $beProc = Start-Process -FilePath "powershell.exe" `
   -ArgumentList "-NoExit", "-Command", "cd '$BackendPath'; npm run dev" `
   -PassThru
 
+Write-Host ("Starting workers...") -ForegroundColor Cyan
+$workerCmd = "cd '$WorkerPath'; npx tsx src/workers/emailWorker.ts"
+$wkProc = Start-Process -FilePath "powershell.exe" `
+  -ArgumentList "-NoExit", "-Command", $workerCmd `
+  -PassThru
 
 Write-Host "`nAll services running. Press Ctrl+C or close this window to stop everything..." -ForegroundColor Green
 try {

@@ -29,38 +29,24 @@ const GoogleButton: React.FC<GoogleButtonProps> = ({ disabled = false }) => {
       type="button"
       onClick={handleGoogleOAuth}
       disabled={disabled}
-      className="d-flex align-items-center justify-content-center gap-2 border"
-      style={{
-        backgroundColor: "#fff",
-        borderColor: "#dadce0",
-        borderRadius: "6px",
-        padding: "8px 16px",
-        minWidth: "150px",
-        fontWeight: 500,
-        fontSize: "15px",
-        color: "#3c4043",
-        transition: "all 0.2s ease",
-        boxShadow: disabled ? "none" : "0 1px 3px rgba(60, 64, 67, 0.3)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.6 : 1,
-      }}
-      onMouseEnter={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.boxShadow = "0 2px 6px rgba(60, 64, 67, 0.3)";
+      className={`
+        flex items-center justify-center gap-2
+        h-11 w-full
+        rounded-lg
+        border border-purple-300/60
+        bg-white/70
+        text-sm font-medium text-slate-800
+        backdrop-blur-sm
+        transition
+        ${
+          disabled
+            ? "cursor-not-allowed opacity-60"
+            : "cursor-pointer hover:bg-purple-50 hover:border-purple-400 hover:shadow-md"
         }
-      }}
-      onMouseLeave={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.boxShadow = "0 1px 3px rgba(60, 64, 67, 0.3)";
-        }
-      }}
+      `}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 48 48"
-      >
+      {/* Google icon */}
+      <svg width="18" height="18" viewBox="0 0 48 48">
         <path
           fill="#EA4335"
           d="M24 9.5c3.94 0 7.06 1.64 9.18 3.01l6.85-6.85C36.41 2.69 30.67 0 24 0 14.64 0 6.54 5.39 2.44 13.22l7.98 6.2C12.14 13.14 17.58 9.5 24 9.5z"
