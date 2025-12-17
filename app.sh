@@ -3,7 +3,7 @@
 COMMAND="${1:---help}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPTS_DIR="$SCRIPT_DIR/scripts/bash"
+SCRIPTS_DIR="$SCRIPT_DIR/scripts/shell"
 
 write_header() {
   echo ""
