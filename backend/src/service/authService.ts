@@ -156,20 +156,11 @@ class AuthService {
         role,
       );
 
-      if (env.isEmailEnabled()) {
-        const url = `${FRONTEND_CLIENT}/auth/verify?token=${encodeURIComponent(
-          token,
-        )}`;
-        await this.emailQueue.enqueueVerifyEmail(email, url);
-      } else {
-        logger.warn("[AuthService] Email verification is not available");
-        await this.userRepository.create({
-          email,
-          role: role as any,
-          provider: "local",
-          password: hashedPassword,
-        });
-      }
+      const url = `${FRONTEND_CLIENT}/auth/verify?token=${encodeURIComponent(
+        token,
+      )}`;
+      await this.emailQueue.enqueueVerifyEmail(email, url);
+
     } catch (err: any) {
       if (err instanceof HttpError) {
         throw err;
@@ -200,9 +191,7 @@ class AuthService {
         password,
       });
 
-      if (env.isEmailEnabled()) {
-        await this.emailQueue.enqueueWelcomeEmail(email);
-      }
+      await this.emailQueue.enqueueWelcomeEmail(email);
 
       return user;
     } catch (err: any) {
