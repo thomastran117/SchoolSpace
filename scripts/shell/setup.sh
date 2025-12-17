@@ -1,46 +1,66 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -euo pipefail
+set -e
 
-echo "=== Setup starting ==="
+CYAN="\033[36m"
+GREEN="\033[32m"
+RESET="\033[0m"
 
-if ! command -v node >/dev/null 2>&1; then
-  echo "Error: Node.js is not installed or not in PATH." >&2
+echo -e "${CYAN}=== Setup starting ===${RESET}"
+
+if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+  echo "Node.js (and npm) are not installed or not on PATH." >&2
   exit 1
 fi
 
-if ! command -v npm >/dev/null 2>&1; then
-  echo "Error: npm is not installed or not in PATH." >&2
-  exit 1
-fi
+NODE_VERSION="$(node -v)"
+NPM_VERSION="$(npm -v)"
 
-echo "Node: $(node -v)  npm: $(npm -v)"
+echo -e "${GREEN}Node: $NODE_VERSION  npm: $NPM_VERSION${RESET}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-FRONTEND="${ROOT}/frontend"
-BACKEND="${ROOT}/backend"
+ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-if [ -f "${FRONTEND}/package.json" ]; then
-  echo "Installing frontend dependencies..."
-  (cd "${FRONTEND}" && npm install)
-fi
+FRONTEND="$ROOT/frontend"
+BACKEND="$ROOT/backend"
 
-if [ -f "${BACKEND}/package.json" ]; then
-  echo "Installing backend dependencies..."
-  (cd "${BACKEND}" && npm install)
-fi
+install_deps() {
+  local name="$1"
+  local path="$2"
 
-if [ -f "${BACKEND}/prisma/schema.prisma" ]; then
-  echo "Running prisma generate..."
-  (cd "${BACKEND}" && npx prisma generate)
-
-  echo "Applying prisma migrations..."
-  if [ -d "${BACKEND}/prisma/migrations" ] && [ "$(ls -A "${BACKEND}/prisma/migrations")" ]; then
-    (cd "${BACKEND}" && npx prisma migrate deploy)
-  else
-    (cd "${BACKEND}" && npx prisma migrate dev --name init)
+  if [[ -f "$path/package.json" ]]; then
+    echo -e "${CYAN}Installing $name dependencies...${RESET}"
+    pushd "$path" > /dev/null
+    npm install
+    popd > /dev/null
   fi
-fi
+}
 
-echo "=== Setup complete ==="
+install_deps "frontend" "$FRONTEND"
+install_deps "backend"  "$BACKEND"
+install_deps "worker"   "$WORKER"
+
+run_prisma() {
+  local path="$1"
+
+  if [[ -f "$path/prisma/schema.prisma" ]]; then
+    pushd "$path" > /dev/null
+
+    echo -e "${CYAN}Running prisma generate...${RESET}"
+    npx prisma generate
+
+    echo -e "${CYAN}Applying prisma migrations...${RESET}"
+    if [[ -d "$path/prisma/migrations" ]]; then
+      npx prisma migrate deploy
+    else
+      npx prisma migrate dev --name init
+    fi
+
+    popd > /dev/null
+  fi
+}
+
+run_prisma "$BACKEND"
+run_prisma "$WORKER"
+
+echo -e "${GREEN}=== Setup complete ===${RESET}"

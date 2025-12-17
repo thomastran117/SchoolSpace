@@ -1,28 +1,34 @@
 #!/usr/bin/env bash
-set -e 
 
-ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+set -e
 
-echo -e "\033[0;36mRunning format script for backend and frontend...\033[0m"
+ROOT_DIR="$(pwd)"
 
-run_format() {
-  local dir="$1"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+CYAN="\033[36m"
+YELLOW="\033[33m"
+RESET="\033[0m"
+
+echo -e "${CYAN}Running format script...${RESET}"
+
+invoke_format() {
+  local path="$1"
+
   echo ""
-  echo -e "\033[1;33mFormatting in: $dir\033[0m"
+  echo -e "${YELLOW}Formatting in: $path${RESET}"
 
-  pushd "$dir" > /dev/null
-  if npm run format; then
-    echo -e "\033[0;32m✔ Formatting completed in $dir\033[0m"
-  else
-    echo -e "\033[0;31m✖ Failed to format in $dir\033[0m"
-  fi
+  pushd "$path" > /dev/null
+  npm run format
   popd > /dev/null
 }
 
-run_format "$ROOT_DIR/backend"
-run_format "$ROOT_DIR/frontend"
+invoke_format "../../backend"
+invoke_format "../../frontend"
+invoke_format "../../worker"
 
 echo ""
-echo -e "\033[0;36mAll formatting complete.\033[0m"
+echo -e "${CYAN}All formatting complete.${RESET}"
 
 cd "$ROOT_DIR"

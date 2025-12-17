@@ -1,57 +1,84 @@
 #!/usr/bin/env bash
 
+COMMAND="${1:---help}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR="$SCRIPT_DIR/scripts/bash"
+
+write_header() {
+  echo ""
+  echo -e "\033[36m$1\033[0m"
+}
+
+write_command() {
+  local name="$1"
+  local desc="$2"
+  printf "%-12s %s\n" "$name" "$desc"
+}
+
+invoke_script() {
+  local script_name="$1"
+  local path="$SCRIPTS_DIR/$script_name"
+
+  if [[ ! -f "$path" ]]; then
+    echo -e "\n\033[31mScript not found: $script_name\033[0m\n"
+    exit 1
+  fi
+
+  bash "$path"
+}
 
 show_help() {
-  echo ""
-  echo -e "\033[36mUsage:\033[0m"
-  echo -e "  ./app.sh <command> [options]\n"
-  
-  echo -e "\033[36mDescription:\033[0m"
+  write_header "Usage"
+  echo -e "  ./app.sh <command>"
+
+  write_header "Description"
   echo "  Main entry point for managing and running project tasks."
-  echo ""
-  
-  echo -e "\033[36mCommands:\033[0m"
-  printf "  %-10s %s\n" "docker" "Run docker.sh   → Starts Docker Compose services"
-  printf "  %-10s %s\n" "app"    "Run app.sh      → Launches the app locally"
-  printf "  %-10s %s\n" "env"    "Run create-env.sh   → Generates a new .env file"
-  printf "  %-10s %s\n" "setup"  "Run setup.sh        → Installs local dependencies"
-  printf "  %-10s %s\n" "format"  "Run format.sh        → Formats repo"
-  printf "  %-10s %s\n" "--help" "Show this help message"
-  echo ""
-  
-  echo -e "\033[36mExamples:\033[0m"
+
+  write_header "Commands"
+  write_command "docker"  "Start Docker Compose services"
+  write_command "k8"      "Start Kubernetes services"
+  write_command "local"   "Run the application locally"
+  write_command "env"     "Generate a new .env file"
+  write_command "setup"   "Install local dependencies"
+  write_command "format"  "Run code formatting scripts"
+  write_command "--help"  "Show this help message"
+
+  write_header "Examples"
   echo -e "  ./app.sh docker"
-  echo -e "  ./app.sh app"
+  echo -e "  ./app.sh local"
   echo -e "  ./app.sh env"
   echo -e "  ./app.sh setup"
   echo ""
 }
 
-COMMAND="$1"
-shift || true
-
-case "$COMMAND" in
+# ---------------------------------------------
+# Command Router
+# ---------------------------------------------
+case "${COMMAND,,}" in
   docker)
-    bash "$SCRIPT_DIR/scripts/docker.sh" "$@"
+    invoke_script "docker.sh"
     ;;
-  app)
-    bash "$SCRIPT_DIR/scripts/app.sh" "$@"
+  k8)
+    invoke_script "k8.sh"
+    ;;
+  local)
+    invoke_script "local.sh"
     ;;
   env)
-    bash "$SCRIPT_DIR/scripts/create-env.sh" "$@"
-    ;;
-  fprmat)
-    bash "$SCRIPT_DIR/scripts/format.sh" "$@"
+    invoke_script "env.sh"
     ;;
   setup)
-    bash "$SCRIPT_DIR/scripts/setup.sh" "$@"
+    invoke_script "setup.sh"
     ;;
-  --help|"")
+  format)
+    invoke_script "format.sh"
+    ;;
+  --help)
     show_help
     ;;
   *)
-    echo -e "\n\033[31mUnknown or missing command: $COMMAND\033[0m\n"
+    echo -e "\n\033[31mUnknown command: $COMMAND\033[0m\n"
     show_help
     exit 1
     ;;

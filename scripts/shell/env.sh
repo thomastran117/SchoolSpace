@@ -1,27 +1,33 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -euo pipefail
-
-FORCE=false
-if [[ "${1:-}" == "--force" ]]; then
-  FORCE=true
-fi
+set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKEND_PATH="$SCRIPT_DIR/../backend"
-ENV_FILE_BACK="$BACKEND_PATH/.env"
 
-FRONTEND_PATH="$SCRIPT_DIR/../frontend"
-ENV_FILE_FRONT="$FRONTEND_PATH/.env"
+BACKEND_PATH="$(cd "$SCRIPT_DIR/../../backend" && pwd 2>/dev/null || true)"
+WORKER_PATH="$BACKEND_PATH"
+FRONTEND_PATH="$(cd "$SCRIPT_DIR/../../frontend" && pwd 2>/dev/null || true)"
 
-ENV_CONTENT_FRONT=$(cat <<'EOF'
-##############################################
-# Configuration
-##############################################
+ENV_BACKEND="$BACKEND_PATH/.env"
+ENV_FRONTEND="$FRONTEND_PATH/.env"
+ENV_WORKER="$WORKER_PATH/.env"
 
-ENVIRONMENT="development"
-ZOD_CONFIGURATION="strip"
+if [[ ! -d "$BACKEND_PATH" ]]; then
+  echo "Backend folder not found at $BACKEND_PATH" >&2
+  exit 1
+fi
 
+if [[ ! -d "$FRONTEND_PATH" ]]; then
+  echo "Frontend folder not found at $FRONTEND_PATH" >&2
+  exit 1
+fi
+
+if [[ ! -d "$WORKER_PATH" ]]; then
+  echo "Worker folder not found at $WORKER_PATH" >&2
+  exit 1
+fi
+
+cat > "$ENV_FRONTEND" <<'EOF'
 ##############################################
 # Server
 ##############################################
@@ -41,14 +47,17 @@ VITE_GOOGLE_CLIENT_ID="google_client"
 # Recaptcha
 ##############################################
 VITE_GOOGLE_RECAPTCHA="captcha"
-'@
+EOF
 
-$envContent_backend = @'
+echo ".env file has been created at $ENV_FRONTEND"
+
+cat > "$ENV_BACKEND" <<'EOF'
 ##############################################
 # Configuration
 ##############################################
 
 ENVIRONMENT="development"
+ZOD_CONFIGURATION="strip"
 
 ##############################################
 # Server
@@ -64,6 +73,7 @@ PORT=8040
 DATABASE_URL="mysql://root:password123@localhost:3306/database"
 REDIS_URL="redis://127.0.0.1:6379"
 MONGO_URL="mongodb://localhost:27017/app"
+RABBITMQ_URL="amqp://guest:guest@localhost:5672"
 
 ##############################################
 # Security
@@ -71,7 +81,6 @@ MONGO_URL="mongodb://localhost:27017/app"
 
 JWT_SECRET_ACCESS="access-jwt-token"
 GOOGLE_CAPTCHA_SECRET="google-captcha"
-
 
 ##############################################
 # CORS Configuration
@@ -101,22 +110,46 @@ PAYPAL_CLIENT_ID="paypal-clientid"
 PAYPAL_SECRET_KEY="secret-key"
 PAYPAL_API="https://api-m.sandbox.paypal.com"
 PAYMENT_CURRENCY="CAD"
-
 EOF
-)
 
-if [[ ! -d "$BACKEND_PATH" ]]; then
-  echo "❌ Backend folder not found at $BACKEND_PATH" >&2
-  exit 1
-fi
+echo ".env file has been created at $ENV_BACKEND"
 
-if [[ ! -d "$FRONTEND_PATH" ]]; then
-  echo "❌ Frontend folder not found at $FRONTEND_PATH" >&2
-  exit 1
-fi
+cat > "$ENV_WORKER" <<'EOF'
+##############################################
+# Configuration
+##############################################
 
-echo "$ENV_CONTENT_BACK" > "$ENV_FILE_BACK"
-echo "✅ .env file has been created at $ENV_FILE_BACK"
+ENVIRONMENT="development"
 
-echo "$ENV_CONTENT_FRONT" > "$ENV_FILE_FRONT"
-echo "✅ .env file has been created at $ENV_FILE_FRONT"
+##############################################
+# Server
+##############################################
+
+FRONTEND_CLIENT="http://localhost:3040"
+
+##############################################
+# Databases
+##############################################
+
+DATABASE_URL="mysql://root:password123@localhost:3306/database"
+REDIS_URL="redis://127.0.0.1:6379"
+MONGO_URL="mongodb://localhost:27017/app"
+RABBITMQ_URL="amqp://guest:guest@localhost:5672"
+
+##############################################
+# Email (SMTP credentials)
+##############################################
+
+EMAIL_USER=""
+EMAIL_PASS=""
+
+##############################################
+# Paypal
+##############################################
+PAYPAL_CLIENT_ID="paypal-clientid"
+PAYPAL_SECRET_KEY="secret-key"
+PAYPAL_API="https://api-m.sandbox.paypal.com"
+PAYMENT_CURRENCY="CAD"
+EOF
+
+echo ".env file has been created at $ENV_WORKER"
