@@ -1,7 +1,7 @@
 import {
   LoginSchema,
-  SignupSchema,
   MicrosoftSchema,
+  SignupSchema,
 } from "../../dto/authSchema";
 
 import { validate } from "../../hooks/validateHook";

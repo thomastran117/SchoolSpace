@@ -1,5 +1,4 @@
 import { AuthController } from "../../controller/authController";
-import { HttpError } from "../../utility/httpUtility";
 
 describe("AuthController", () => {
   let controller: AuthController;
