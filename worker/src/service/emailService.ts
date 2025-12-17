@@ -228,7 +228,7 @@ class EmailService {
     email: string,
     resetUrl: string,
   ): Promise<void> {
-      const html = `
+    const html = `
       <!DOCTYPE html>
       <html>
       <head>
