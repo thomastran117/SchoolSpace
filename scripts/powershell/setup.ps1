@@ -29,7 +29,7 @@ if (Test-Path (Join-Path $BACKEND "package.json")) {
 }
 
 if (Test-Path (Join-Path $WORKER "package.json")) {
-    Write-Host "Installing backend dependencies..." -ForegroundColor Cyan
+    Write-Host "Installing worker dependencies..." -ForegroundColor Cyan
     Push-Location $WORKER
     npm install
     Pop-Location

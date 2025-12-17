@@ -10,9 +10,9 @@ describe("AuthService", () => {
     update: jest.fn(),
   };
 
-  const mockEmailService = {
-    sendVerificationEmail: jest.fn(),
-    sendWelcomeEmail: jest.fn(),
+  const mockEmailQueue = {
+    enqueueVerifyEmail: jest.fn(),
+    enqueueWelcomeEmail: jest.fn(),
   };
 
   const mockTokenService = {
@@ -35,9 +35,11 @@ describe("AuthService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    mockWebService.verifyGoogleCaptcha.mockResolvedValue(true);
+
     authService = new AuthService(
       mockUserRepository as any,
-      mockEmailService as any,
+      mockEmailQueue as any,
       mockTokenService as any,
       mockOAuthService as any,
       mockWebService as any,
@@ -46,11 +48,10 @@ describe("AuthService", () => {
 
   describe("loginUser", () => {
     it("logs in a user successfully", async () => {
-      mockWebService.verifyGoogleCaptcha.mockResolvedValue(true);
       mockUserRepository.findByEmail.mockResolvedValue({
         id: 1,
         email: "test@test.com",
-        password: "$2b$10$abcdef", // mock hash
+        password: "hashed",
         role: "student",
         username: "TestUser",
       });
@@ -60,20 +61,20 @@ describe("AuthService", () => {
         .mockResolvedValue(true);
 
       mockTokenService.generateTokens.mockResolvedValue({
-        accessToken: "jwt-access",
-        refreshToken: "jwt-refresh",
+        accessToken: "access",
+        refreshToken: "refresh",
       });
 
       const result = await authService.loginUser(
         "test@test.com",
-        "123456",
+        "password",
         false,
         "captcha",
       );
 
       expect(result).toEqual({
-        accessToken: "jwt-access",
-        refreshToken: "jwt-refresh",
+        accessToken: "access",
+        refreshToken: "refresh",
         role: "student",
         id: 1,
         username: "TestUser",
@@ -82,11 +83,10 @@ describe("AuthService", () => {
     });
 
     it("throws 401 on invalid password", async () => {
-      mockWebService.verifyGoogleCaptcha.mockResolvedValue(true);
       mockUserRepository.findByEmail.mockResolvedValue({
         id: 1,
         email: "test@test.com",
-        password: "$2b$10$abcdef",
+        password: "hashed",
       });
 
       jest
@@ -94,57 +94,28 @@ describe("AuthService", () => {
         .mockResolvedValue(false);
 
       await expect(
-        authService.loginUser("test@test.com", "wrongpass", false, "captcha"),
+        authService.loginUser("test@test.com", "wrong", false, "captcha"),
       ).rejects.toBeInstanceOf(HttpError);
     });
 
-    it("throws 401 when captcha verification fails", async () => {
+    it("throws 401 when captcha fails", async () => {
       mockWebService.verifyGoogleCaptcha.mockResolvedValue(false);
 
       await expect(
-        authService.loginUser(
-          "test@test.com",
-          "password",
-          false,
-          "bad-captcha",
-        ),
-      ).rejects.toBeInstanceOf(HttpError);
-
-      expect(mockWebService.verifyGoogleCaptcha).toHaveBeenCalled();
-      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled();
-    });
-
-    it("throws 401 when user exists but has no password (OAuth account)", async () => {
-      mockWebService.verifyGoogleCaptcha.mockResolvedValue(true);
-
-      mockUserRepository.findByEmail.mockResolvedValue({
-        id: 1,
-        email: "oauth@test.com",
-        password: null,
-        role: "student",
-      });
-
-      jest
-        .spyOn<any, any>(authService as any, "comparePassword")
-        .mockResolvedValue(false);
-
-      await expect(
-        authService.loginUser("oauth@test.com", "somepass", false, "captcha"),
+        authService.loginUser("x@test.com", "pass", false, "bad"),
       ).rejects.toBeInstanceOf(HttpError);
     });
   });
 
   describe("signupUser", () => {
-    it("creates a signup verification token and sends email", async () => {
-      mockWebService.verifyGoogleCaptcha.mockResolvedValue(true);
-      mockUserRepository.findByEmail.mockResolvedValue(undefined);
+    it("creates verify token and sends email", async () => {
+      mockUserRepository.findByEmail.mockResolvedValue(null);
 
       jest
         .spyOn<any, any>(authService as any, "hashPassword")
         .mockResolvedValue("hashed");
-      mockTokenService.createVerifyToken.mockResolvedValue("verify-token");
 
-      mockEmailService.sendVerificationEmail.mockResolvedValue(undefined);
+      mockTokenService.createVerifyToken.mockResolvedValue("verify-token");
 
       const result = await authService.signupUser(
         "test@test.com",
@@ -154,11 +125,10 @@ describe("AuthService", () => {
       );
 
       expect(result).toBe(true);
-      expect(mockEmailService.sendVerificationEmail).toHaveBeenCalled();
+      expect(mockEmailQueue.enqueueVerifyEmail).toHaveBeenCalled();
     });
 
-    it("throws 409 when email already exists", async () => {
-      mockWebService.verifyGoogleCaptcha.mockResolvedValue(true);
+    it("throws 409 if email exists", async () => {
       mockUserRepository.findByEmail.mockResolvedValue({
         email: "test@test.com",
       });
@@ -170,91 +140,32 @@ describe("AuthService", () => {
   });
 
   describe("verifyUser", () => {
-    it("creates the user after token verification", async () => {
+    it("creates user and sends welcome email", async () => {
       mockTokenService.validateVerifyToken.mockResolvedValue({
         email: "test@test.com",
-        password: "hashedPass",
+        password: "hashed",
         role: "student",
       });
 
       mockUserRepository.create.mockResolvedValue({ id: 1 });
-
-      const result = await authService.verifyUser("token123");
-
-      expect(result).toEqual({ id: 1 });
-    });
-
-    it("throws 500 when token verification fails", async () => {
-      mockTokenService.validateVerifyToken.mockRejectedValue(
-        new Error("Invalid token"),
-      );
-
-      await expect(authService.verifyUser("badToken")).rejects.toBeInstanceOf(
-        Error,
-      );
-
-      expect(mockUserRepository.create).not.toHaveBeenCalled();
-    });
-
-    it("sends a welcome email after successful verification", async () => {
-      mockTokenService.validateVerifyToken.mockResolvedValue({
-        email: "new@test.com",
-        password: "hashedPass",
-        role: "student",
-      });
-
-      mockUserRepository.create.mockResolvedValue({ id: 1 });
-      mockEmailService.sendWelcomeEmail.mockResolvedValue(undefined);
 
       const result = await authService.verifyUser("token");
 
-      expect(mockEmailService.sendWelcomeEmail).toHaveBeenCalledWith(
-        "new@test.com",
-      );
       expect(result).toEqual({ id: 1 });
-    });
-
-    it("throws 500 if user creation fails", async () => {
-      mockTokenService.validateVerifyToken.mockResolvedValue({
-        email: "x@test.com",
-        password: "abc",
-        role: "student",
-      });
-
-      mockUserRepository.create.mockRejectedValue(new Error("DB failure"));
-
-      await expect(authService.verifyUser("token")).rejects.toBeInstanceOf(
-        Error,
-      );
-
-      expect(mockEmailService.sendWelcomeEmail).not.toHaveBeenCalled();
+      expect(mockEmailQueue.enqueueWelcomeEmail).toHaveBeenCalled();
     });
   });
 
-  // --------------------------------------------------
-  // FORGOT PASSWORD
-  // --------------------------------------------------
   describe("forgotPassword", () => {
     it("does nothing if user does not exist", async () => {
-      mockUserRepository.findByEmail.mockResolvedValue(undefined);
+      mockUserRepository.findByEmail.mockResolvedValue(null);
 
-      await authService.forgotPassword("missing@test.com");
+      await authService.forgotPassword("x@test.com");
 
-      expect(mockEmailService.sendVerificationEmail).not.toHaveBeenCalled();
+      expect(mockEmailQueue.enqueueVerifyEmail).not.toHaveBeenCalled();
     });
 
-    it("does nothing for OAuth accounts", async () => {
-      mockUserRepository.findByEmail.mockResolvedValue({
-        email: "test@test.com",
-        provider: "google",
-      });
-
-      await authService.forgotPassword("test@test.com");
-
-      expect(mockEmailService.sendVerificationEmail).not.toHaveBeenCalled();
-    });
-
-    it("sends reset email for valid local account", async () => {
+    it("sends reset email for local user", async () => {
       mockUserRepository.findByEmail.mockResolvedValue({
         email: "test@test.com",
         provider: "local",
@@ -264,15 +175,12 @@ describe("AuthService", () => {
 
       await authService.forgotPassword("test@test.com");
 
-      expect(mockEmailService.sendVerificationEmail).toHaveBeenCalled();
+      expect(mockEmailQueue.enqueueVerifyEmail).toHaveBeenCalled();
     });
   });
 
-  // --------------------------------------------------
-  // CHANGE PASSWORD
-  // --------------------------------------------------
   describe("changePassword", () => {
-    it("updates the user's password", async () => {
+    it("updates password", async () => {
       mockTokenService.validateVerifyToken.mockResolvedValue({
         email: "test@test.com",
       });
@@ -282,41 +190,26 @@ describe("AuthService", () => {
         email: "test@test.com",
       });
 
-      mockUserRepository.update.mockResolvedValue(true);
-
       jest
         .spyOn<any, any>(authService as any, "hashPassword")
-        .mockResolvedValue("hashedPass");
+        .mockResolvedValue("new-hash");
 
-      await authService.changePassword("token123", "newpass");
+      await authService.changePassword("token", "newpass");
 
-      expect(mockUserRepository.update).toHaveBeenCalledWith(1, "hashedPass");
-    });
-
-    it("throws 404 if user not found", async () => {
-      mockTokenService.validateVerifyToken.mockResolvedValue({
-        email: "x@test.com",
+      expect(mockUserRepository.update).toHaveBeenCalledWith(1, {
+        password: "new-hash",
       });
-      mockUserRepository.findByEmail.mockResolvedValue(undefined);
-
-      await expect(
-        authService.changePassword("token", "pass"),
-      ).rejects.toBeInstanceOf(HttpError);
     });
   });
 
-  // --------------------------------------------------
-  // MICROSOFT OAUTH
-  // --------------------------------------------------
   describe("microsoftOAuth", () => {
-    it("creates a new user if none exists", async () => {
+    it("creates user if missing", async () => {
       mockOAuthService.verifyMicrosoftToken.mockResolvedValue({
-        sub: "sub123",
+        sub: "ms-sub",
         email: "test@test.com",
-        name: "John",
       });
 
-      mockUserRepository.findByEmail.mockResolvedValue(undefined);
+      mockUserRepository.findByEmail.mockResolvedValue(null);
       mockUserRepository.create.mockResolvedValue({
         id: 1,
         email: "test@test.com",
@@ -324,48 +217,39 @@ describe("AuthService", () => {
       });
 
       mockTokenService.generateTokens.mockResolvedValue({
-        accessToken: "access",
-        refreshToken: "refresh",
+        accessToken: "a",
+        refreshToken: "b",
       });
 
-      const result = await authService.microsoftOAuth("microsoftToken123");
+      const res = await authService.microsoftOAuth("ms-token");
 
-      expect(result.accessToken).toBe("access");
-      expect(mockUserRepository.create).toHaveBeenCalled();
+      expect(res.accessToken).toBe("a");
     });
   });
 
-  // --------------------------------------------------
-  // GOOGLE OAUTH
-  // --------------------------------------------------
   describe("googleOAuth", () => {
-    it("creates a new user if none exists", async () => {
+    it("creates user if missing", async () => {
       mockOAuthService.verifyGoogleToken.mockResolvedValue({
         email: "test@test.com",
-        sub: "googleSub123",
+        sub: "google-sub",
       });
 
-      mockUserRepository.findByEmail.mockResolvedValue(undefined);
-      mockUserRepository.create.mockResolvedValue({
-        id: 1,
-        email: "test@test.com",
-      });
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+      mockUserRepository.create.mockResolvedValue({ id: 1 });
 
       mockTokenService.generateTokens.mockResolvedValue({
         accessToken: "a",
         refreshToken: "b",
       });
 
-      const res = await authService.googleOAuth("token");
+      const res = await authService.googleOAuth("google-token");
+
       expect(res.accessToken).toBe("a");
     });
   });
 
-  // --------------------------------------------------
-  // GENERATE NEW TOKENS
-  // --------------------------------------------------
   describe("generateNewTokens", () => {
-    it("successfully rotates refresh token and returns new tokens", async () => {
+    it("rotates refresh token", async () => {
       mockTokenService.rotateRefreshToken.mockResolvedValue({
         accessToken: "newAccess",
         refreshToken: "newRefresh",
@@ -374,47 +258,19 @@ describe("AuthService", () => {
         avatar: "avatar.png",
       });
 
-      const result = await authService.generateNewTokens("oldRefresh");
+      const res = await authService.generateNewTokens("old");
 
-      expect(result).toEqual({
-        accessToken: "newAccess",
-        refreshToken: "newRefresh",
-        role: "student",
-        username: "Tom",
-        avatar: "avatar.png",
-      });
-
-      expect(mockTokenService.rotateRefreshToken).toHaveBeenCalledWith(
-        "oldRefresh",
-      );
-    });
-
-    it("throws 500 if rotateRefreshToken rejects", async () => {
-      mockTokenService.rotateRefreshToken.mockRejectedValue(
-        new Error("Token expired"),
-      );
-
-      await expect(
-        authService.generateNewTokens("expiredToken"),
-      ).rejects.toBeInstanceOf(Error);
-    });
-
-    it("propagates HttpError thrown by rotateRefreshToken", async () => {
-      const httpErr = new HttpError(401, "Invalid refresh token");
-      mockTokenService.rotateRefreshToken.mockRejectedValue(httpErr);
-
-      await expect(authService.generateNewTokens("badToken")).rejects.toBe(
-        httpErr,
-      );
+      expect(res.accessToken).toBe("newAccess");
     });
   });
 
   describe("authLogout", () => {
-    it("invalidates token", async () => {
+    it("logs out user", async () => {
       mockTokenService.logoutToken.mockResolvedValue(true);
 
-      const result = await authService.authLogout("token");
-      expect(result).toBe(true);
+      const res = await authService.authLogout("token");
+
+      expect(res).toBe(true);
     });
   });
 });

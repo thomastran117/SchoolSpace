@@ -1,7 +1,7 @@
 $root = Get-Location
 Set-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Definition)
 
-Write-Host "Running format script for backend and frontend..." -ForegroundColor Cyan
+Write-Host "Running format script..." -ForegroundColor Cyan
 
 function Invoke-Format {
     param (

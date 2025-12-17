@@ -7,6 +7,45 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  prettier:
+    name: Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Check backend formating
+        working-directory: backend
+        run: npm run format:check
+
+      - name: Install worker dependencies
+        working-directory: worker
+        run: npm ci
+
+      - name: Check worker formatting
+        working-directory: worker
+        run: npm run format:check
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Check frontend formatting
+        working-directory: frontend
+        run: npm run format:check
+
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -27,7 +66,7 @@ jobs:
           chmod +x ./app.sh
           chmod -R +x ./scripts
 
-      - name: ⚙️ Generate environment file
+      - name: Generate environment file
         run: ./app.sh env
 
       - name: Install dependencies
@@ -61,7 +100,7 @@ jobs:
         run: ./app.sh env
 
       - name: Build and start containers
-        run: ./app.sh docker ci
+        run: ./app.sh docker
 
       - name: Wait for backend & verify health
         run: |
