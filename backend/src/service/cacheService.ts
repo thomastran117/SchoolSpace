@@ -1,194 +1,222 @@
-import inMemoryStore from "../resource/inmemoryStore";
-import { redis } from "../resource/redis";
+import { isRedisHealthy, redis } from "../resource/redis";
 import logger from "../utility/logger";
 
-type RedisOperation<T> = () => Promise<T>;
+class CacheCircuitBreaker {
+  private failures = 0;
+  private openUntil = 0;
+
+  private readonly FAILURE_THRESHOLD = 3;
+  private readonly OPEN_DURATION_MS = 10_000;
+
+  isOpen(): boolean {
+    return Date.now() < this.openUntil;
+  }
+
+  recordSuccess(): void {
+    this.failures = 0;
+  }
+
+  recordFailure(): void {
+    this.failures++;
+
+    if (this.failures >= this.FAILURE_THRESHOLD) {
+      this.openUntil = Date.now() + this.OPEN_DURATION_MS;
+      this.failures = 0;
+
+      logger.warn(
+        `[CacheService] Redis circuit opened for ${this.OPEN_DURATION_MS}ms`,
+      );
+    }
+  }
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("cache timeout")), timeoutMs),
+    ),
+  ]);
+}
 
 class CacheService {
-  private readonly maxRetries = 3;
-  private readonly baseDelayMs = 100;
+  private readonly CACHE_TIMEOUT_MS = 40;
+  private readonly circuit = new CacheCircuitBreaker();
 
-  private async _retry<T>(operation: RedisOperation<T>): Promise<T> {
-    let attempt = 0;
-
-    while (true) {
-      try {
-        return await operation();
-      } catch (err: any) {
-        if (!this.isTransientError(err) || attempt >= this.maxRetries) {
-          throw err;
-        }
-
-        const delay = Math.pow(2, attempt) * this.baseDelayMs * Math.random();
-
-        logger.warn(
-          `[CacheService] transient redis error: ${err?.message ?? err}. Retrying in ${Math.round(
-            delay,
-          )}ms (attempt ${attempt + 1}/${this.maxRetries})`,
-        );
-
-        await new Promise((r) => setTimeout(r, delay));
-        attempt++;
-      }
-    }
-  }
-
-  private isTransientError(err: any): boolean {
-    if (!err) return false;
-
-    const msg = err?.message?.toLowerCase() ?? "";
-
-    return (
-      msg.includes("connection") ||
-      msg.includes("timeout") ||
-      msg.includes("network") ||
-      msg.includes("econnreset") ||
-      msg.includes("failed to connect") ||
-      msg.includes("socket")
-    );
-  }
-
-  private async withFallback<T>(
-    redisOp: () => Promise<T>,
-    memoryOp: () => T,
-  ): Promise<T | null> {
-    try {
-      return await this._retry(redisOp);
-    } catch (err: any) {
-      logger.warn(
-        `[CacheService] Redis unavailable, using in-memory fallback: ${err?.message ?? err}`,
-      );
-      return memoryOp();
-    }
-  }
-
-  async set<T>(
-    key: string,
-    value: T,
-    ttlSeconds?: number,
-  ): Promise<boolean | null> {
-    const serialized = JSON.stringify(value);
-
-    return this.withFallback(
-      async () => {
-        ttlSeconds
-          ? await redis.set(key, serialized, "EX", ttlSeconds)
-          : await redis.set(key, serialized);
-        return true;
-      },
-      () => {
-        inMemoryStore.set(key, serialized, ttlSeconds);
-        return true;
-      },
-    );
+  private canUseRedis(): boolean {
+    return isRedisHealthy() && !this.circuit.isOpen();
   }
 
   async get<T>(key: string): Promise<T | null> {
-    return this.withFallback(
-      async () => {
-        const raw = await redis.get(key);
-        return raw ? (JSON.parse(raw) as T) : null;
-      },
-      () => {
-        const raw = inMemoryStore.get(key);
-        return raw ? (JSON.parse(raw) as T) : null;
-      },
-    );
+    if (!this.canUseRedis()) return null;
+
+    try {
+      const raw = await withTimeout(redis.get(key), this.CACHE_TIMEOUT_MS);
+
+      if (raw) {
+        this.circuit.recordSuccess();
+        return JSON.parse(raw) as T;
+      }
+
+      return null;
+    } catch (err: any) {
+      this.circuit.recordFailure();
+      logger.warn(
+        `[CacheService] Redis GET skipped (${key}): ${err?.message ?? err}`,
+      );
+      return null;
+    }
   }
 
-  async delete(key: string): Promise<boolean | null> {
-    return this.withFallback(
-      async () => {
-        await redis.del(key);
-        return true;
-      },
-      () => {
-        inMemoryStore.del(key);
-        return true;
-      },
-    );
+  async set<T>(key: string, value: T, ttlSeconds?: number): Promise<void> {
+    if (!this.canUseRedis()) return;
+
+    const serialized = JSON.stringify(value);
+
+    Promise.resolve()
+      .then(() =>
+        ttlSeconds !== undefined
+          ? redis.set(key, serialized, "EX", ttlSeconds)
+          : redis.set(key, serialized),
+      )
+      .then(() => this.circuit.recordSuccess())
+      .catch((err) => {
+        this.circuit.recordFailure();
+        logger.warn(
+          `[CacheService] Redis SET failed (${key}): ${err?.message ?? err}`,
+        );
+      });
   }
 
-  async exists(key: string): Promise<boolean | null> {
-    return this.withFallback(
-      async () => (await redis.exists(key)) === 1,
-      () => inMemoryStore.exists(key) === 1,
-    );
+  async delete(key: string): Promise<void> {
+    if (!this.canUseRedis()) return;
+
+    redis.del(key).catch((err) => {
+      this.circuit.recordFailure();
+      logger.warn(
+        `[CacheService] Redis DEL failed (${key}): ${err?.message ?? err}`,
+      );
+    });
   }
 
-  async increment(
-    key: string,
-    amount = 1,
-    ttlSeconds?: number,
-  ): Promise<number | null> {
-    return this.withFallback(
-      async () => {
-        const count = await redis.incrby(key, amount);
-        if (ttlSeconds && count === amount) {
+  async exists(key: string): Promise<boolean> {
+    if (!this.canUseRedis()) return false;
+
+    try {
+      const result = await withTimeout(
+        redis.exists(key),
+        this.CACHE_TIMEOUT_MS,
+      );
+      this.circuit.recordSuccess();
+      return result === 1;
+    } catch {
+      this.circuit.recordFailure();
+      return false;
+    }
+  }
+
+  async increment(key: string, amount = 1, ttlSeconds?: number): Promise<void> {
+    if (!this.canUseRedis()) return;
+
+    redis
+      .incrby(key, amount)
+      .then(async (count) => {
+        if (ttlSeconds !== undefined && count === amount) {
           await redis.expire(key, ttlSeconds);
         }
-        return count;
-      },
-      () => {
-        const count = inMemoryStore.incrby(key, amount);
-        if (ttlSeconds && count === amount) {
-          inMemoryStore.expire(key, ttlSeconds);
-        }
-        return count;
-      },
-    );
+        this.circuit.recordSuccess();
+      })
+      .catch((err) => {
+        this.circuit.recordFailure();
+        logger.warn(
+          `[CacheService] Redis INCR failed (${key}): ${err?.message ?? err}`,
+        );
+      });
   }
 
-  async decrement(key: string, amount = 1): Promise<number | null> {
-    return this.withFallback(
-      async () => redis.decrby(key, amount),
-      () => inMemoryStore.decrby(key, amount),
-    );
+  async decrement(key: string, amount = 1): Promise<void> {
+    if (!this.canUseRedis()) return;
+
+    redis.decrby(key, amount).catch((err) => {
+      this.circuit.recordFailure();
+      logger.warn(
+        `[CacheService] Redis DECR failed (${key}): ${err?.message ?? err}`,
+      );
+    });
   }
 
+  // ----------------------------------------
+  // SET IF NOT EXISTS
+  // ----------------------------------------
   async setIfNotExists<T>(
     key: string,
     value: T,
     ttlSeconds?: number,
-  ): Promise<boolean | null> {
+  ): Promise<boolean> {
+    if (!this.canUseRedis()) return false;
+
     const serialized = JSON.stringify(value);
 
-    return this.withFallback(
-      async () => {
-        const result = ttlSeconds
-          ? await redis.set(key, serialized, "EX", ttlSeconds, "NX")
-          : await redis.set(key, serialized, "NX");
-        return result === "OK";
-      },
-      () => inMemoryStore.setNX(key, serialized, ttlSeconds) === 1,
-    );
+    try {
+      const result = await (redis.set as any)(
+        key,
+        serialized,
+        "NX",
+        ...(ttlSeconds !== undefined ? ["EX", ttlSeconds] : []),
+      );
+      if (result === "OK") {
+        this.circuit.recordSuccess();
+        return true;
+      }
+
+      return false;
+    } catch (err: any) {
+      this.circuit.recordFailure();
+      logger.warn(
+        `[CacheService] Redis SETNX failed (${key}): ${err?.message ?? err}`,
+      );
+      return false;
+    }
   }
 
+  // ----------------------------------------
+  // TTL
+  // ----------------------------------------
   async ttl(key: string): Promise<number | null> {
-    return this.withFallback(
-      async () => redis.ttl(key),
-      () => inMemoryStore.ttl(key),
-    );
+    if (!this.canUseRedis()) return null;
+
+    try {
+      const ttl = await withTimeout(redis.ttl(key), this.CACHE_TIMEOUT_MS);
+      this.circuit.recordSuccess();
+      return ttl;
+    } catch {
+      this.circuit.recordFailure();
+      return null;
+    }
   }
 
-  async clearAll(): Promise<boolean | null> {
-    return this.withFallback(
-      async () => {
-        await redis.flushall();
-        return true;
-      },
-      () => {
-        inMemoryStore.flushall();
-        return true;
-      },
-    );
+  async clearAll(): Promise<void> {
+    if (!this.canUseRedis()) return;
+
+    redis.flushall().catch((err) => {
+      this.circuit.recordFailure();
+      logger.warn(
+        `[CacheService] Redis FLUSHALL failed: ${err?.message ?? err}`,
+      );
+    });
   }
 
   async size(): Promise<number | null> {
-    return this.withFallback(
-      async () => redis.dbsize(),
-      () => inMemoryStore.dbsize(),
-    );
+    if (!this.canUseRedis()) return null;
+
+    try {
+      const size = await withTimeout(redis.dbsize(), this.CACHE_TIMEOUT_MS);
+      this.circuit.recordSuccess();
+      return size;
+    } catch {
+      this.circuit.recordFailure();
+      return null;
+    }
   }
 }
 
