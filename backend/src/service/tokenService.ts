@@ -37,29 +37,16 @@ class TokenService extends BasicTokenService {
     this.cacheService = cacheService;
   }
 
-  // ------------------------------------------------------
-  // ACCESS TOKEN
-  // ------------------------------------------------------
   private createAccessToken(
     id: number,
     username: string,
     role: string,
     avatar?: string,
   ): string {
-    try {
-      const payload = { userId: id, username, role, avatar };
-      return jwt.sign(payload, JWT_SECRET_ACCESS, { expiresIn: ACCESS_EXPIRY });
-    } catch (err: any) {
-      logger.error(
-        `[TokenService] createAccessToken failed: ${err?.message ?? err}`,
-      );
-      httpError(500, "Internal server error");
-    }
+    const payload = { userId: id, username, role, avatar };
+    return jwt.sign(payload, JWT_SECRET_ACCESS, { expiresIn: ACCESS_EXPIRY });
   }
 
-  // ------------------------------------------------------
-  // REFRESH TOKEN
-  // ------------------------------------------------------
   private async saveRefreshToken(
     token: string,
     payload: {
@@ -70,25 +57,16 @@ class TokenService extends BasicTokenService {
       remember?: boolean;
     },
     ttlSeconds: number,
-  ) {
+  ): Promise<void> {
     try {
-      const res = await this.cacheService.set(
-        `refresh:${token}`,
-        JSON.stringify(payload),
-        ttlSeconds,
-      );
-      if (!res) httpError(503, "Service is not avaliable yet");
+      await this.cacheService.set(`refresh:${token}`, payload, ttlSeconds);
     } catch (err: any) {
-      logger.error(
-        `[TokenService] saveRefreshToken failed: ${err?.message ?? err}`,
+      logger.warn(
+        `[TokenService] saveRefreshToken failed (non-fatal): ${err?.message ?? err}`,
       );
-      httpError(500, "Internal server error");
     }
   }
 
-  /**
-   * Creates access + refresh tokens.
-   */
   public async generateTokens(
     id: number,
     username: string,
@@ -119,25 +97,28 @@ class TokenService extends BasicTokenService {
     }
   }
 
-  /**
-   * Validates a refresh token against Redis.
-   */
   public async validateRefreshToken(token: string) {
     try {
-      const data = await this.cacheService.get<string>(`refresh:${token}`);
+      const data = await this.cacheService.get<{
+        id: number;
+        username: string;
+        role: string;
+        avatar?: string;
+        remember?: boolean;
+      }>(`refresh:${token}`);
 
       if (!data) {
         httpError(401, "Refresh token revoked or expired");
       }
 
-      return JSON.parse(data!);
+      return data;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
       logger.error(
         `[TokenService] validateRefreshToken failed: ${err?.message ?? err}`,
       );
-      httpError(500, "Internal server error");
+      httpError(401, "Refresh token revoked or expired");
     }
   }
 
@@ -149,27 +130,15 @@ class TokenService extends BasicTokenService {
       if (err instanceof HttpError && err.statusCode === 401) {
         return false;
       }
-
-      if (err instanceof HttpError) {
-        throw err;
-      }
-
-      logger.error(
-        `[TokenService] isRefreshTokenValid failed: ${err?.message ?? err}`,
-      );
-      httpError(500, "Internal server error");
+      throw err;
     }
   }
 
-  /**
-   * Invalidates old refresh token and issues a new one.
-   */
   public async rotateRefreshToken(oldToken: string) {
     try {
       const payload = await this.validateRefreshToken(oldToken);
 
-      const res = await this.cacheService.delete(`refresh:${oldToken}`);
-      if (!res) httpError(503, "Service is not avaliable yet");
+      await this.cacheService.delete(`refresh:${oldToken}`);
 
       const accessToken = this.createAccessToken(
         payload.id,
@@ -201,26 +170,15 @@ class TokenService extends BasicTokenService {
     }
   }
 
-  /**
-   * Logs out user by deleting refresh token from Redis.
-   */
   public async logoutToken(token: string): Promise<boolean> {
     try {
-      const res = await this.cacheService.delete(`refresh:${token}`);
-      if (!res) httpError(503, "Service is not avaliable yet");
-
+      await this.cacheService.delete(`refresh:${token}`);
       return true;
-    } catch (err: any) {
-      if (err instanceof HttpError) throw err;
-
-      logger.error(`[TokenService] logoutToken failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+    } catch {
+      return true;
     }
   }
 
-  // ------------------------------------------------------
-  // VERIFY TOKEN
-  // ------------------------------------------------------
   public async createVerifyToken(
     email: string,
     passwordHash: string,
@@ -232,8 +190,10 @@ class TokenService extends BasicTokenService {
       );
 
       if (existingToken) {
+        // Extend existing token TTL
         await this.cacheService.set(
           `verify:${existingToken}`,
+          { email, passwordHash, role },
           VERIFY_TOKEN_TTL,
         );
 
@@ -241,21 +201,15 @@ class TokenService extends BasicTokenService {
       }
 
       const token = uuidv4();
-      const payload = JSON.stringify({ email, passwordHash, role });
+      const payload = { email, passwordHash, role };
 
-      const res = await this.cacheService.set(
-        `verify:${token}`,
-        payload,
-        VERIFY_TOKEN_TTL,
-      );
-      if (!res) httpError(503, "Service is not avaliable yet");
+      await this.cacheService.set(`verify:${token}`, payload, VERIFY_TOKEN_TTL);
 
-      const res1 = await this.cacheService.set(
+      await this.cacheService.set(
         `verify:email:${email}`,
         token,
         VERIFY_TOKEN_TTL,
       );
-      if (!res1) httpError(503, "Service is not avaliable yet");
 
       return token;
     } catch (err: any) {
@@ -268,29 +222,27 @@ class TokenService extends BasicTokenService {
     }
   }
 
-  /**
-   * Validates email verification or password-reset token.
-   */
   public async validateVerifyToken(token: string) {
     try {
-      const data = await this.cacheService.get<string>(`verify:${token}`);
+      const data = await this.cacheService.get<{
+        email: string;
+        passwordHash: string;
+        role: string;
+      }>(`verify:${token}`);
 
       if (!data) {
-        throw httpError(400, "Token missing, expired or already used");
+        httpError(400, "Token missing, expired or already used");
       }
 
-      const parsed = JSON.parse(data);
-      const email = parsed.email;
-
       await this.cacheService.delete(`verify:${token}`);
-      await this.cacheService.delete(`verify:email:${email}`);
+      await this.cacheService.delete(`verify:email:${data.email}`);
 
       await this.cacheService.set(`used:${token}`, "1", USED_VERIFY_TTL);
 
       return {
-        email: parsed.email,
-        password: parsed.passwordHash,
-        role: parsed.role,
+        email: data.email,
+        password: data.passwordHash,
+        role: data.role,
       };
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
