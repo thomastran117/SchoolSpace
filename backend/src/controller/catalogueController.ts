@@ -75,11 +75,7 @@ class CatalogueController {
 
       const result = await this.catalogueService.updateCourseTemplate(
         courseId,
-        course_name,
-        description,
-        course_code,
-        term,
-        available,
+        {},
       );
 
       return reply.code(200).send({
@@ -168,11 +164,6 @@ class CatalogueController {
 
       return reply.code(200).send({
         message: "Courses retrieved successfully.",
-        total: result.total,
-        totalPages: result.totalPages,
-        currentPage: result.currentPage,
-        count: result.data.length,
-        data: result.data as any,
       });
     } catch (err: any) {
       if (err instanceof HttpError) {
