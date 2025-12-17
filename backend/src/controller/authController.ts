@@ -8,7 +8,6 @@
  * @auth Thomas
  */
 
-import env from "../config/envConfigs";
 import { httpError, HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
@@ -120,14 +119,6 @@ class AuthController {
     reply: FastifyReply,
   ) {
     try {
-      if (!env.isEmailEnabled()) {
-        logger.warn("Email verification is not available");
-        httpError(
-          503,
-          "Email verification is not available. You don't need to access this route at this time.",
-        );
-      }
-
       const token = req.query.token;
       if (!token) httpError(400, "Missing token");
 
@@ -205,14 +196,6 @@ class AuthController {
     reply: FastifyReply,
   ) {
     try {
-      if (!env.isMicrosoftEnabled()) {
-        logger.warn("Microsoft OAuth is not available");
-        httpError(
-          503,
-          "Microsoft OAuth is not available. Please use another login method.",
-        );
-      }
-
       const { id_token: idToken } = req.body ?? {};
       if (!idToken) httpError(400, "Missing id_token");
 
