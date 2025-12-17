@@ -179,9 +179,6 @@ class CacheService {
     }
   }
 
-  // ----------------------------------------
-  // TTL
-  // ----------------------------------------
   async ttl(key: string): Promise<number | null> {
     if (!this.canUseRedis()) return null;
 
