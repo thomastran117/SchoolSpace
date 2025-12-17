@@ -160,7 +160,6 @@ class AuthService {
         token,
       )}`;
       await this.emailQueue.enqueueVerifyEmail(email, url);
-
     } catch (err: any) {
       if (err instanceof HttpError) {
         throw err;
