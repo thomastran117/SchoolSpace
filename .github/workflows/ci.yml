@@ -40,7 +40,7 @@ jobs:
 
       - name: Check formatting
         working-directory: ${{ matrix.app }}
-        run: npm format:check
+        run: npm run format:check
 
   test:
     name: Unit Tests
@@ -69,7 +69,7 @@ jobs:
         working-directory: backend
         env:
           NODE_ENV: test
-        run: npm test
+        run: npm run test
 
   integration:
     name: Integration Tests (Docker)
