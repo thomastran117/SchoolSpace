@@ -22,24 +22,34 @@ class CatalogueController {
     this.getCourseTemplates = this.getCourseTemplates.bind(this);
   }
 
+  private parsePositiveInt(
+    value: string | undefined,
+    defaultValue: number,
+  ): number {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : defaultValue;
+  }
+
+  private ensureAdmin(req: FastifyRequest) {
+    const { role } = req.user as UserPayload;
+    if (role !== "admin") {
+      httpError(403, "You lack permissions to perform this action.");
+    }
+  }
+
   public async createCourseTemplate(
     req: FastifyRequest<{ Body: CreateCatalogueDto }>,
     reply: FastifyReply,
   ) {
     try {
-      const { role: userRole } = req.user as UserPayload;
-      if (userRole !== "admin")
-        httpError(403, "You lack permissions to perform this action.");
-
-      const { course_name, description, course_code, term, available } =
-        req.body;
+      this.ensureAdmin(req);
 
       const result = await this.catalogueService.createCourseTemplate(
-        course_name,
-        description,
-        course_code,
-        term,
-        available,
+        req.body.course_name,
+        req.body.description,
+        req.body.course_code,
+        req.body.term,
+        req.body.available,
       );
 
       return reply.code(200).send({
@@ -47,35 +57,32 @@ class CatalogueController {
         data: result,
       });
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
 
       logger.error(
         `[CatalogueController] createCourseTemplate failed: ${err?.message ?? err}`,
       );
-
       throw new HttpError(500, "Internal server error");
     }
   }
 
   public async updateCourseTemplate(
-    req: FastifyRequest<{ Body: UpdateCatalogueDto }>,
+    req: FastifyRequest<{ Body: UpdateCatalogueDto; Params: { id: string } }>,
     reply: FastifyReply,
   ) {
     try {
-      const { role: userRole } = req.user as UserPayload;
-      if (userRole !== "admin")
-        httpError(403, "You lack permissions to perform this action.");
+      this.ensureAdmin(req);
 
-      const { id: courseId } = req.params as unknown as { id: string };
-
-      const { course_name, description, course_code, term, available } =
-        req.body;
+      const updates: Partial<UpdateCatalogueDto> = {};
+      for (const [key, value] of Object.entries(req.body)) {
+        if (value !== undefined) {
+          (updates as any)[key] = value;
+        }
+      }
 
       const result = await this.catalogueService.updateCourseTemplate(
-        courseId,
-        {},
+        req.params.id,
+        updates,
       );
 
       return reply.code(200).send({
@@ -83,63 +90,56 @@ class CatalogueController {
         data: result,
       });
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
 
       logger.error(
         `[CatalogueController] updateCourseTemplate failed: ${err?.message ?? err}`,
       );
-
       throw new HttpError(500, "Internal server error");
     }
   }
 
-  public async deleteCourseTemplate(req: FastifyRequest, reply: FastifyReply) {
+  public async deleteCourseTemplate(
+    req: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply,
+  ) {
     try {
-      const { role: userRole } = req.user as UserPayload;
-      if (userRole !== "admin")
-        httpError(403, "You lack permissions to perform this action.");
+      this.ensureAdmin(req);
 
-      const { id: courseId } = req.params as unknown as { id: string };
-
-      await this.catalogueService.deleteCourseTemplate(courseId);
+      await this.catalogueService.deleteCourseTemplate(req.params.id);
 
       return reply.code(200).send({
         message: "Course template deleted successfully.",
       });
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
 
       logger.error(
         `[CatalogueController] deleteCourseTemplate failed: ${err?.message ?? err}`,
       );
-
       throw new HttpError(500, "Internal server error");
     }
   }
 
-  public async getCourseTemplate(req: FastifyRequest, reply: FastifyReply) {
+  public async getCourseTemplate(
+    req: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply,
+  ) {
     try {
-      const { id: courseId } = req.params as unknown as { id: string };
-      const course =
-        await this.catalogueService.getCourseTemplateById(courseId);
+      const course = await this.catalogueService.getCourseTemplateById(
+        req.params.id,
+      );
 
       return reply.code(200).send({
         message: "Course template fetched successfully.",
         data: course,
       });
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
 
       logger.error(
         `[CatalogueController] getCourseTemplate failed: ${err?.message ?? err}`,
       );
-
       throw new HttpError(500, "Internal server error");
     }
   }
@@ -149,31 +149,27 @@ class CatalogueController {
     reply: FastifyReply,
   ) {
     try {
-      const { term, available, search, page, limit } = req.query;
-
-      const pageNum = page ? Number(page) : 1;
-      const limitNum = limit ? Number(limit) : 15;
+      const page = this.parsePositiveInt(req.query.page, 1);
+      const limit = this.parsePositiveInt(req.query.limit, 15);
 
       const result = await this.catalogueService.getCourseTemplates(
-        term as any,
-        available as any,
-        search as any,
-        pageNum,
-        limitNum,
+        req.query.term,
+        req.query.available,
+        req.query.search,
+        page,
+        limit,
       );
 
       return reply.code(200).send({
         message: "Courses retrieved successfully.",
+        ...result,
       });
     } catch (err: any) {
-      if (err instanceof HttpError) {
-        throw err;
-      }
+      if (err instanceof HttpError) throw err;
 
       logger.error(
         `[CatalogueController] getCourseTemplates failed: ${err?.message ?? err}`,
       );
-
       throw new HttpError(500, "Internal server error");
     }
   }

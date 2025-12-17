@@ -115,23 +115,46 @@ class CacheService {
     }
   }
 
-  async increment(key: string, amount = 1, ttlSeconds?: number): Promise<void> {
-    if (!this.canUseRedis()) return;
+  async getOrSet<T>(
+    key: string,
+    ttl: number,
+    resolver: () => Promise<T>,
+  ): Promise<T> {
+    const cached = await this.get<T>(key);
+    if (cached !== null && cached !== undefined) return cached;
 
-    redis
-      .incrby(key, amount)
-      .then(async (count) => {
-        if (ttlSeconds !== undefined && count === amount) {
-          await redis.expire(key, ttlSeconds);
-        }
-        this.circuit.recordSuccess();
-      })
-      .catch((err) => {
-        this.circuit.recordFailure();
-        logger.warn(
-          `[CacheService] Redis INCR failed (${key}): ${err?.message ?? err}`,
-        );
-      });
+    const value = await resolver();
+    await this.set(key, value, ttl);
+    return value;
+  }
+
+  async increment(
+    key: string,
+    amount = 1,
+    ttlSeconds?: number,
+  ): Promise<number> {
+    if (!this.canUseRedis()) {
+      // Fallback: behave as if counter exists and increments
+      return amount;
+    }
+
+    try {
+      const count = await redis.incrby(key, amount);
+
+      if (ttlSeconds !== undefined && count === amount) {
+        await redis.expire(key, ttlSeconds);
+      }
+
+      this.circuit.recordSuccess();
+      return count;
+    } catch (err: any) {
+      this.circuit.recordFailure();
+      logger.warn(
+        `[CacheService] Redis INCR failed (${key}): ${err?.message ?? err}`,
+      );
+
+      return amount;
+    }
   }
 
   async decrement(key: string, amount = 1): Promise<void> {
