@@ -4,10 +4,17 @@ import { httpError } from "../utility/httpUtility";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
 
+const NOT_FOUND = "__NOT_FOUND__";
+
 class CatalogueService extends BaseService {
   private readonly cacheService: CacheService;
   private readonly catalogueRepository: CatalogueRepository;
-  private readonly ttl = 300;
+
+  private readonly LIST_TTL = 300;
+  private readonly SEARCH_TTL = 120;
+  private readonly DETAIL_TTL = 600;
+
+  private catalogueVersion?: number;
 
   constructor(
     cacheService: CacheService,
@@ -16,6 +23,22 @@ class CatalogueService extends BaseService {
     super();
     this.cacheService = cacheService;
     this.catalogueRepository = catalogueRepository;
+  }
+
+  private async getCatalogueVersion(): Promise<number> {
+    if (this.catalogueVersion === undefined) {
+      this.catalogueVersion =
+        (await this.cacheService.get<number>("catalogue:version")) ?? 1;
+    }
+    return this.catalogueVersion;
+  }
+
+  private async bumpCatalogueVersion(): Promise<void> {
+    await this.cacheService.increment("catalogue:version");
+  }
+
+  private key(...parts: (string | number | boolean)[]): string {
+    return ["catalogue", ...parts].join(":");
   }
 
   public async createCourseTemplate(
@@ -38,8 +61,7 @@ class CatalogueService extends BaseService {
         available,
       );
 
-      await this.cacheService.delete("catalogue:all");
-
+      await this.bumpCatalogueVersion();
       return this.toSafe(course);
     } catch (err) {
       throw httpError(500, `Failed to create course template: ${String(err)}`);
@@ -64,9 +86,18 @@ class CatalogueService extends BaseService {
         ];
       }
 
-      const cacheKey = `catalogue:filter:${term ?? "all"}:${
-        available ?? "any"
-      }:${search ?? "none"}:${page}:${limit}`;
+      const version = await this.getCatalogueVersion();
+
+      const cacheKey = this.key(
+        "v",
+        version,
+        "filter",
+        term ?? "all",
+        available ?? "any",
+        search ?? "none",
+        page,
+        limit,
+      );
 
       const cached = await this.cacheService.get(cacheKey);
       if (cached) return cached;
@@ -74,17 +105,16 @@ class CatalogueService extends BaseService {
       const { results, total } =
         await this.catalogueRepository.findAllWithFilters(filter, page, limit);
 
-      const safeResults = this.toSafeArray(results);
-      const totalPages = Math.ceil(total / limit);
-
       const response = {
-        data: safeResults,
+        data: this.toSafeArray(results),
         total,
-        totalPages,
+        totalPages: Math.ceil(total / limit),
         currentPage: page,
       };
 
-      await this.cacheService.set(cacheKey, response, this.ttl);
+      const ttl = search ? this.SEARCH_TTL : this.LIST_TTL;
+      await this.cacheService.set(cacheKey, response, ttl);
+
       return response;
     } catch (err) {
       throw httpError(500, `Failed to fetch course templates: ${String(err)}`);
@@ -92,16 +122,23 @@ class CatalogueService extends BaseService {
   }
 
   public async getCourseTemplateById(id: string): Promise<ICatalogue> {
-    const cacheKey = `catalogue:id:${id}`;
+    const cacheKey = this.key("id", id);
 
-    const cached = await this.cacheService.get<ICatalogue>(cacheKey);
+    const cached = await this.cacheService.get<ICatalogue | typeof NOT_FOUND>(
+      cacheKey,
+    );
+
+    if (cached === NOT_FOUND) httpError(404, "Course not found");
     if (cached) return cached;
 
     const course = await this.catalogueRepository.findById(id);
-    if (!course) httpError(404, "Course not found");
+    if (!course) {
+      await this.cacheService.set(cacheKey, NOT_FOUND, 60);
+      httpError(404, "Course not found");
+    }
 
     const safe = this.toSafe(course);
-    await this.cacheService.set(cacheKey, safe, this.ttl);
+    await this.cacheService.set(cacheKey, safe, this.DETAIL_TTL);
 
     return safe;
   }
@@ -114,12 +151,10 @@ class CatalogueService extends BaseService {
       const course = await this.catalogueRepository.update(id, updates);
       if (!course) httpError(404, "Course template not found");
 
-      const safe = this.toSafe(course);
+      await this.cacheService.delete(this.key("id", id));
+      await this.bumpCatalogueVersion();
 
-      await this.cacheService.delete(`catalogue:id:${id}`);
-      await this.cacheService.delete("catalogue:all");
-
-      return safe;
+      return this.toSafe(course);
     } catch (err) {
       throw httpError(500, `Failed to update course template: ${String(err)}`);
     }
@@ -130,8 +165,8 @@ class CatalogueService extends BaseService {
       const result = await this.catalogueRepository.delete(id);
       if (!result) httpError(404, "Course template not found");
 
-      await this.cacheService.delete(`catalogue:id:${id}`);
-      await this.cacheService.delete("catalogue:all");
+      await this.cacheService.delete(this.key("id", id));
+      await this.bumpCatalogueVersion();
 
       return true;
     } catch (err) {
