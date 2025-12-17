@@ -195,7 +195,7 @@ class AuthService {
         await this.tokenService.validateVerifyToken(token);
       const user = await this.userRepository.create({
         email,
-        role,
+        role: role as any,
         provider: "local",
         password,
       });
