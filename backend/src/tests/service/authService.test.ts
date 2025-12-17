@@ -11,8 +11,8 @@ describe("AuthService", () => {
   };
 
   const mockEmailQueue = {
-    enqueueVerifyEmail: jest.fn(),
-    enqueueWelcomeEmail: jest.fn(),
+    enqueueVerifyEmail: jest.fn().mockResolvedValue(undefined),
+    enqueueWelcomeEmail: jest.fn().mockResolvedValue(undefined),
   };
 
   const mockTokenService = {
