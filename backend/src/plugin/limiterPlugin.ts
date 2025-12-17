@@ -61,7 +61,7 @@ export default fp<RateLimiterOptions>(
 
         const count = await cacheService.increment(key, 1, ttlSeconds);
 
-        if (!count) return;
+        if (count == null) return;
 
         if (count > maxRequests) {
           throw httpError(429, message);
