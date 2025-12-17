@@ -36,7 +36,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ matrix.app }}
-        run: npm install
+        run: npm ci
 
       - name: Check formatting
         working-directory: ${{ matrix.app }}
@@ -63,7 +63,7 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: npm install
+        run: npm ci
 
       - name: Run unit tests
         working-directory: backend
