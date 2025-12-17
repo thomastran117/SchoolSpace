@@ -2,63 +2,58 @@ name: SchoolSpace Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
+env:
+  NODE_VERSION: 20
+
+# -----------------------------------------
+# FORMAT CHECK (Parallel, Fast)
+# -----------------------------------------
 jobs:
-  prettier:
-    name: Format Check
+  format:
+    name: Format Check (${{ matrix.app }})
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: true
+      matrix:
+        app: [backend, frontend, worker]
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+            worker/package-lock.json
 
-      - name: Install backend dependencies
-        working-directory: backend
-        run: npm ci
+      - name: Install dependencies
+        working-directory: ${{ matrix.app }}
+        run: npm install
 
-      - name: Check backend formating
-        working-directory: backend
-        run: npm run format:check
-
-      - name: Install worker dependencies
-        working-directory: worker
-        run: npm ci
-
-      - name: Check worker formatting
-        working-directory: worker
-        run: npm run format:check
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci
-
-      - name: Check frontend formatting
-        working-directory: frontend
-        run: npm run format:check
+      - name: Check formatting
+        working-directory: ${{ matrix.app }}
+        run: npm format:check
 
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    needs: format
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
           cache-dependency-path: backend/package-lock.json
 
       - name: Make scripts executable
@@ -66,59 +61,57 @@ jobs:
           chmod +x ./app.sh
           chmod -R +x ./scripts
 
-      - name: Generate environment file
-        run: ./app.sh env
-
-      - name: Install dependencies
+      - name: Install backend dependencies
         working-directory: backend
-        run: npm ci
+        run: npm install
 
-      - name: Backend unit tests
+      - name: Run unit tests
         working-directory: backend
         env:
           NODE_ENV: test
         run: npm test
 
   integration:
-    name: Build & Integration Test
+    name: Integration Tests (Docker)
     runs-on: ubuntu-latest
-    needs: [test]
+    needs: test
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Make scripts executable
         run: |
           chmod +x ./app.sh
           chmod -R +x ./scripts
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v3
 
       - name: Generate environment file
         run: ./app.sh env
 
-      - name: Build and start containers
+      - name: Build & start containers
         run: ./app.sh docker
 
-      - name: Wait for backend & verify health
+      - name: Wait for backend health
         run: |
-          echo "Waiting for backend health endpoint..."
-          for i in {1..10}; do
-            if curl -s -f http://localhost:8040/health > /dev/null 2>&1 || \
-               curl -s -f http://localhost:8040/ping > /dev/null 2>&1 || \
-               curl -s -f http://localhost:8040/api > /dev/null 2>&1; then
-              echo "Backend is responding!"
-              exit 0
-            fi
-            echo "Backend not ready yet... retrying ($i/10)"
+          echo "Waiting for backend health..."
+          timeout=60
+          elapsed=0
+
+          until curl -sf http://localhost:8040/health; do
             sleep 5
+            elapsed=$((elapsed + 5))
+            if [ "$elapsed" -ge "$timeout" ]; then
+              echo "Backend failed health check"
+              docker compose ps
+              docker compose logs
+              exit 1
+            fi
+            echo "Still waiting... (${elapsed}s)"
           done
-          echo "Backend did not respond!"
-          docker compose logs backend
-          exit 1
+
+          echo "Backend is healthy"
 
       - name: Stop containers
         if: always()
-        run: docker compose down
+        run: docker compose down -v
