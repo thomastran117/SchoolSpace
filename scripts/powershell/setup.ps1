@@ -35,33 +35,4 @@ if (Test-Path (Join-Path $WORKER "package.json")) {
     Pop-Location
 }
 
-if (Test-Path (Join-Path $BACKEND "prisma\schema.prisma")) {
-    Push-Location $BACKEND
-    Write-Host "Running prisma generate..." -ForegroundColor Cyan
-    npx prisma generate
-
-    Write-Host "Applying prisma migrations..." -ForegroundColor Cyan
-    if (Test-Path (Join-Path $BACKEND "prisma\migrations")) {
-        npx prisma migrate deploy
-    } else {
-        npx prisma migrate dev --name init
-    }
-    Pop-Location
-}
-
-if (Test-Path (Join-Path $WORKER "prisma\schema.prisma")) {
-    Push-Location $WORKER
-    Write-Host "Running prisma generate..." -ForegroundColor Cyan
-    npx prisma generate
-
-    Write-Host "Applying prisma migrations..." -ForegroundColor Cyan
-    if (Test-Path (Join-Path $WORKER "prisma\migrations")) {
-        npx prisma migrate deploy
-    } else {
-        npx prisma migrate dev --name init
-    }
-    Pop-Location
-}
-
-
 Write-Host "=== Setup complete ===" -ForegroundColor Green
