@@ -24,8 +24,15 @@ class UserRepository extends BaseRepository {
     return this.executeAsync(async () => UserModel.findById(objectId).exec());
   }
 
-  public async findByEmail(email: string): Promise<IUser | null> {
-    return this.executeAsync(async () => UserModel.findOne({ email }).exec());
+  public async findByEmail(
+    email: string,
+    opts?: { includePassword?: boolean },
+  ): Promise<IUser | null> {
+    return this.executeAsync(async () =>
+      UserModel.findOne({ email })
+        .select(opts?.includePassword ? "+password" : "")
+        .exec(),
+    );
   }
 
   public async findByUsername(username: string): Promise<IUser | null> {
@@ -132,6 +139,10 @@ class UserRepository extends BaseRepository {
     const objectId = this.toObjectId(id);
     if (!objectId) {
       throw new Error("[UserRepository.update] Invalid user id");
+    }
+        
+    if ("version" in data) {
+      throw new Error("Version cannot be updated directly");
     }
 
     const cleanData = Object.fromEntries(

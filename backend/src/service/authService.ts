@@ -80,7 +80,9 @@ class AuthService {
         logger.warn("[AuthService] Google Captcha is not available");
       }
 
-      const user = await this.userRepository.findByEmail(email);
+      const user = await this.userRepository.findByEmail(email, {
+        includePassword: true,
+      });
       const hashToCheck = user?.password ?? this.DUMMY_HASH;
 
       const passwordMatches = await this.comparePassword(password, hashToCheck);
