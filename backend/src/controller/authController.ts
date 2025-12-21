@@ -22,6 +22,7 @@ import type {
   LoginDto,
   MicrosoftDto,
   SignupDto,
+  VerifyDto,
 } from "../dto/authSchema";
 import type { TokenQuery } from "../dto/query";
 import type { AuthService } from "../service/authService";
@@ -115,17 +116,16 @@ class AuthController {
   }
 
   public async localVerifyEmail(
-    req: FastifyRequest<{ Querystring: TokenQuery }>,
+    req: FastifyRequest<{ Body: VerifyDto }>,
     reply: FastifyReply,
   ) {
     try {
-      const token = req.query.token;
-      if (!token) httpError(400, "Missing token");
+      const { email, code, captcha } = req.body;
 
-      await this.authService.verifyUser(token);
+      await this.authService.verifyUser(email, code, captcha);
 
       return reply.code(200).send({
-        message: "Email verification sent. Please verify.",
+        message: "Please login now.",
       });
     } catch (err: any) {
       if (err instanceof HttpError) {

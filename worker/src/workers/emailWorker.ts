@@ -8,7 +8,7 @@ type EmailJob =
   | {
       type: "VERIFY_EMAIL";
       email: string;
-      verifyUrl: string;
+      code: string;
     }
   | {
       type: "WELCOME_EMAIL";
@@ -79,7 +79,7 @@ const PREFETCH = 5;
       try {
         switch (job.type) {
           case "VERIFY_EMAIL":
-            await emailService.sendVerificationEmail(job.email, job.verifyUrl);
+            await emailService.sendVerificationCodeEmail(job.email, job.code);
             break;
 
           case "WELCOME_EMAIL":

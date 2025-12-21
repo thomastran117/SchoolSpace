@@ -14,6 +14,12 @@ const SignupSchema = AuthSchema.extend({
   role: z.enum(["student", "teacher"]),
 });
 
+const VerifySchema = z.object({
+  email: z.string().email().max(100),
+  code: z.string().min(6).max(6),
+  captcha: z.string(),
+});
+
 const ChangePasswordSchema = z.object({
   password: z.string().min(6).max(128),
 });
@@ -31,6 +37,7 @@ const AppleSchema = MicrosoftSchema;
 
 type LoginDto = z.infer<typeof LoginSchema>;
 type SignupDto = z.infer<typeof SignupSchema>;
+type VerifyDto = z.infer<typeof VerifySchema>;
 type ForgotPasswordDto = z.infer<typeof ForgotPasswordSchema>;
 type ChangePasswordDto = z.infer<typeof ChangePasswordSchema>;
 type MicrosoftDto = z.infer<typeof MicrosoftSchema>;
@@ -53,6 +60,7 @@ export {
   LoginSchema,
   MicrosoftSchema,
   SignupSchema,
+  VerifySchema,
 };
 export type {
   AppleDto,
@@ -63,4 +71,5 @@ export type {
   LoginDto,
   MicrosoftDto,
   SignupDto,
+  VerifyDto,
 };

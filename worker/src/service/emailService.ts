@@ -76,9 +76,9 @@ class EmailService {
     );
   }
 
-  public async sendVerificationEmail(
+  public async sendVerificationCodeEmail(
     email: string,
-    verifyUrl: string,
+    code: string,
   ): Promise<void> {
     const html = `
     <!DOCTYPE html>
@@ -86,14 +86,8 @@ class EmailService {
     <head>
       <meta charset="UTF-8" />
       <style>
-        .cta-button:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 16px 32px rgba(124,58,237,0.45) !important;
-        }
-
-        .secondary-link:hover {
-          background-color: #ede9fe !important;
-          color: #5b21b6 !important;
+        .code-box {
+          letter-spacing: 12px;
         }
       </style>
     </head>
@@ -120,86 +114,42 @@ class EmailService {
           </div>
 
           <!-- Body -->
-          <div style="padding:44px 40px;">
+          <div style="padding:44px 40px; text-align:center;">
 
             <h2 style="font-size:24px; font-weight:800; color:#111827; margin-top:0;">
-              Welcome to SchoolSpace 🎉
+              Verify your email ✨
             </h2>
 
             <p style="font-size:16px; color:#374151; line-height:1.8; margin:22px 0;">
-              We’re excited to have you on board.
+              Use the verification code below to complete your signup.
             </p>
 
-            <p style="font-size:16px; color:#374151; line-height:1.8; margin:22px 0;">
-              SchoolSpace helps you stay organized, focused, and in control of your academic journey —
-              all in one beautifully designed platform.
-            </p>
-
-            <p style="font-size:16px; color:#374151; line-height:1.8; margin:22px 0;">
-              To get started, please verify your email address below.
-            </p>
-
-            <!-- Primary CTA -->
-            <div style="text-align:center; margin:44px 0 28px;">
-              <a href="${verifyUrl}" target="_blank"
-                class="cta-button"
-                style="
-                  display:inline-block;
-                  padding:18px 38px;
-                  font-size:16px;
-                  font-weight:800;
-                  color:#ffffff;
-                  text-decoration:none;
-                  border-radius:999px;
-                  background:linear-gradient(135deg,#7c3aed,#8b5cf6,#a78bfa);
-                  box-shadow:0 14px 28px rgba(124,58,237,0.35);
-                  transition:all 0.25s ease;
-                ">
-                Verify My Email
-              </a>
+            <!-- OTP Code -->
+            <div
+              class="code-box"
+              style="
+                margin:36px auto;
+                padding:22px 0;
+                font-size:32px;
+                font-weight:900;
+                color:#4c1d95;
+                background:#f5f3ff;
+                border-radius:14px;
+                text-align:center;
+                width:100%;
+                max-width:360px;
+              "
+            >
+              ${code}
             </div>
 
-            <!-- Secondary Links -->
-            <div style="text-align:center; margin-bottom:40px;">
-              <a href="${env.frontendClient}/about" target="_blank"
-                class="secondary-link"
-                style="
-                  display:inline-block;
-                  margin:6px;
-                  padding:10px 18px;
-                  font-size:13px;
-                  font-weight:600;
-                  color:#6d28d9;
-                  text-decoration:none;
-                  border-radius:999px;
-                  background:#f5f3ff;
-                  transition:all 0.2s ease;
-                ">
-                About SchoolSpace
-              </a>
-
-              <a href="${env.frontendClient}/privacy" target="_blank"
-                class="secondary-link"
-                style="
-                  display:inline-block;
-                  margin:6px;
-                  padding:10px 18px;
-                  font-size:13px;
-                  font-weight:600;
-                  color:#6d28d9;
-                  text-decoration:none;
-                  border-radius:999px;
-                  background:#f5f3ff;
-                  transition:all 0.2s ease;
-                ">
-                Privacy Policy
-              </a>
-            </div>
+            <p style="font-size:14px; color:#6b7280; margin-top:20px;">
+              This code expires in <strong>15 minutes</strong>.
+            </p>
 
             <div style="margin-top:36px; padding-top:28px; border-top:1px solid #e5e7eb;">
               <p style="font-size:13px; color:#9ca3af; line-height:1.7;">
                 If you didn’t create a SchoolSpace account, you can safely ignore this email.
-                This verification link will expire in <strong>24 hours</strong>.
               </p>
             </div>
 
@@ -219,7 +169,7 @@ class EmailService {
 
     await this.sendEmail({
       to: email,
-      subject: "Verify Your Email Address",
+      subject: "Your SchoolSpace verification code",
       html,
     });
   }

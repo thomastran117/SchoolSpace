@@ -152,16 +152,13 @@ class AuthService {
       if (existingUser) httpError(409, "Email already in use");
 
       const hashedPassword = await this.hashPassword(password);
-      const token = await this.tokenService.createVerifyToken(
+      const { code } = await this.tokenService.createEmailCode(
         email,
         hashedPassword,
         role,
       );
 
-      const url = `${FRONTEND_CLIENT}/auth/verify?token=${encodeURIComponent(
-        token,
-      )}`;
-      await this.emailQueue.enqueueVerifyEmail(email, url);
+      await this.emailQueue.enqueueVerifyEmail(email, code);
     } catch (err: any) {
       if (err instanceof HttpError) {
         throw err;
@@ -181,10 +178,20 @@ class AuthService {
    *
    * @throws {Error} If the verification fails
    */
-  public async verifyUser(token: string) {
+  public async verifyUser(email: string, token: string, captcha: string) {
     try {
-      const { email, password, role } =
-        await this.tokenService.validateVerifyToken(token);
+      if (env.isCaptchaEnabled()) {
+        const result = await this.webService.verifyGoogleCaptcha(captcha);
+        if (!result) httpError(401, "Invalid captcha");
+      } else {
+        logger.warn("[AuthService] Google Captcha is not available");
+      }
+
+      const { password, role } = await this.tokenService.verifyEmailCode(
+        email,
+        token,
+      );
+
       const user = await this.userRepository.create({
         email,
         role: role as any,
@@ -223,15 +230,12 @@ class AuthService {
       if (user.provider == "google" || user.provider == "microsoft") {
         return;
       }
-      const token = await this.tokenService.createVerifyToken(
+      const { code } = await this.tokenService.createEmailCode(
         email,
         "empty",
         "empty",
       );
-      const url = `${FRONTEND_CLIENT}/auth/forgot-password?token=${encodeURIComponent(
-        token,
-      )}`;
-      await this.emailQueue.enqueueVerifyEmail(email, url); //change to forgot password
+      await this.emailQueue.enqueueVerifyEmail(email, code); //change to forgot password
 
       return;
     } catch (err: any) {
@@ -256,7 +260,10 @@ class AuthService {
    */
   public async changePassword(token: string, password: string) {
     try {
-      const { email } = await this.tokenService.validateVerifyToken(token);
+      const { email } = await this.tokenService.verifyEmailCode(
+        "something",
+        token,
+      );
       const hashedPassword = await this.hashPassword(password);
       const user = await this.userRepository.findByEmail(email);
       if (!user) {

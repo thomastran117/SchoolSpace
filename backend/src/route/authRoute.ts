@@ -12,6 +12,7 @@ import {
   LoginSchema,
   MicrosoftSchema,
   SignupSchema,
+  VerifySchema,
 } from "../dto/authSchema";
 
 import { useController } from "../hooks/controllerHook";
@@ -41,6 +42,7 @@ async function authRoutes(app: FastifyInstance) {
    */
   app.get(
     "/verify",
+    { preValidation: validate(VerifySchema, "body") },
     useController("AuthController", (c) => c.localVerifyEmail),
   );
 
