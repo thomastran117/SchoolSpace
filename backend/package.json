@@ -11,15 +11,12 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint ./src --ext .ts",
-    "lint:fix": "eslint ./src --ext .ts --fix",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "lint:fix": "eslint ./src --ext .ts --fix"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.1.0",
     "@fastify/multipart": "^9.3.0",
-    "@prisma/client": "^6.9.0",
     "amqplib": "^0.10.9",
     "axios": "^1.12.2",
     "bcrypt": "^6.0.0",

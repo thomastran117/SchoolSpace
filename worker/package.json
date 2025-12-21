@@ -11,12 +11,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint ./src --ext .ts",
-    "lint:fix": "eslint ./src --ext .ts --fix",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "lint:fix": "eslint ./src --ext .ts --fix"
   },
   "dependencies": {
-    "@prisma/client": "^6.9.0",
     "amqplib": "^0.10.9",
     "axios": "^1.12.2",
     "chalk": "^4.1.2",

@@ -55,19 +55,10 @@ Clone SchoolSpace using Git.
 
 ### Setup .env
 
-Due to Prisma, a minimal .env is needed to complete setup as migrations can't be applied to MySQL without the database URL. Run the following command in the root directory
-
-Run 
-```bash
-./app env
-```
-
 These two scripts will scaffold the exact template needed for both frontend, backend and workers, with defaults configured for local development.
 
 
 ## Running with Docker (recommended)
-
-Although Docker normally works using the standard docker-compose, unfortunately, a new setup must apply the Prisma migrations before the app can run. A shell script is provided that starts the docker container, applies the migration and continues to run it to further smooth development and setup.
 
 Start Docker with the following command at the root directory:
 
@@ -79,7 +70,7 @@ Start Docker with the following command at the root directory:
 
 To run the app locally, we will need to install dependencies and then apply migrations before the app can boot up succesfully. Two shell scripts are provided to automate this.
 
-setup script will install all dependencies and apply the Prisma migration to MySQL
+setup script will install all dependencies
 run-app will run both the frontend and backend in one terminal
 
 Paste the following scripts into the terminal:
