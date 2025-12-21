@@ -29,10 +29,6 @@ const redis = new Redis(redisCacheUrl, {
   maxRetriesPerRequest: 2,
 });
 
-const connectionWorker = new IORedis(redisBullUrl, {
-  maxRetriesPerRequest: null,
-});
-
 redis.on("connect", () => {
   redisHealthy = true;
 });
@@ -66,4 +62,4 @@ function isRedisHealthy(): boolean {
   return redisHealthy;
 }
 
-export { connectionWorker, initRedis, isRedisHealthy, redis };
+export { initRedis, isRedisHealthy, redis };
