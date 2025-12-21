@@ -50,8 +50,6 @@ backend/build/
 backend/.env.local
 backend/.env.*.local
 backend/generated/
-backend/prisma/generated/
-backend/node_modules/.prisma/
 
 # --- Docker ---
 *.tar

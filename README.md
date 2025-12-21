@@ -17,9 +17,9 @@ For a full documentation, refers to the `docs/` folder
 
 **Client:** React, Redux, TypeScript, Bootstrap
 
-**Server:** TypeScript, Node, Fastify, Prisma
+**Server:** TypeScript, Node, Fastify
 
-**Database:** MySQL, Redis
+**Database:** MongoDB, Redis
 
 **Others:** RabbitMQ
 

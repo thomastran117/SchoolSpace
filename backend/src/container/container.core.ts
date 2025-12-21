@@ -1,6 +1,6 @@
 import { initMongo } from "../resource/mongo";
-import { initPrisma } from "../resource/prisma";
 import { initRedis } from "../resource/redis";
+import { UserModel } from "../templates/mongoTemplate";
 import logger from "../utility/logger";
 
 class CoreInitializer {
@@ -13,9 +13,9 @@ class CoreInitializer {
     logger.info("Initializing connections");
 
     try {
-      await initPrisma();
       await initRedis();
       await initMongo();
+      await UserModel.syncIndexes();
       logger.info("Core connections successful");
     } catch (err: any) {
       logger.error(`[Container] Connections failed: ${err?.message ?? err}`);

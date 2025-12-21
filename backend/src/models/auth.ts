@@ -2,7 +2,7 @@ interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   role: string;
-  id: number;
+  id: string;
   username?: string | null;
   avatar?: string | null;
 }

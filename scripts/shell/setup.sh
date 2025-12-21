@@ -40,27 +40,4 @@ install_deps "frontend" "$FRONTEND"
 install_deps "backend"  "$BACKEND"
 install_deps "worker"   "$WORKER"
 
-run_prisma() {
-  local path="$1"
-
-  if [[ -f "$path/prisma/schema.prisma" ]]; then
-    pushd "$path" > /dev/null
-
-    echo -e "${CYAN}Running prisma generate...${RESET}"
-    npx prisma generate
-
-    echo -e "${CYAN}Applying prisma migrations...${RESET}"
-    if [[ -d "$path/prisma/migrations" ]]; then
-      npx prisma migrate deploy
-    else
-      npx prisma migrate dev --name init
-    fi
-
-    popd > /dev/null
-  fi
-}
-
-run_prisma "$BACKEND"
-run_prisma "$WORKER"
-
 echo -e "${GREEN}=== Setup complete ===${RESET}"

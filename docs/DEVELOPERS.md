@@ -74,8 +74,6 @@ The backend is designed to be stateless, it should know very little about the cl
 
 - plugin/ : plugin folder contains anything that may need to be processed or ran before reaching the controller. This includes authentication, rate limiting and logging for example.
 
-- prisma/ : Contains the migrations for the database as well as the schema that defines the models.
-
 - resources/ : Contains clients for interacting with MySQL, Mongo and Redis
 
 - routes/ : Contains routes for the various models in the backend, mounted in route.js
@@ -89,20 +87,3 @@ The backend is designed to be stateless, it should know very little about the cl
 - app.ts : Mounts the middleware and routes
 
 - server.ts : Mounts app.ts with a port
-
-## Prisma
-
-This section will show how you how to interact and use Prisma. Prisma for the most part, follows a JavaScript-like syntax. After writing or adjusting the models, you will need to make a migration. You can do so as follows:
-
-Start a new migration and save it to dev:
-```bash
-npx prisma migrate dev --name name
-```
-Change name to a relevant model change
-
-To push to productuon later, deploy the migration
-```bash
-npx prisma migrate deploy
-```
-
-More information about prisma can be found here [Prisma](https://www.prisma.io/docs/orm)

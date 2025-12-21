@@ -1,6 +1,6 @@
 import type { MultipartFile } from "@fastify/multipart";
 import type { AuthResponse } from "../models/auth";
-import type { Role, SafeUser, User } from "../models/user";
+import type { Role, SafeUser } from "../models/user";
 import type { UserRepository } from "../repository/userRepository";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
@@ -29,33 +29,37 @@ class UserService extends BaseService {
     this.fileService = fileService;
   }
 
-  private async invalidateUserCache(userID: number): Promise<void> {
-    const key = `user:id:${userID}`;
-    await this.cacheService.delete(key);
+  // -------------------------
+  // Cache helpers (ID is string now)
+  // -------------------------
+  private userCacheKey(userID: string) {
+    return `user:id:${userID}`;
+  }
+
+  private async invalidateUserCache(userID: string): Promise<void> {
+    await this.cacheService.delete(this.userCacheKey(userID));
   }
 
   private async writeUserCache(
-    userID: number,
+    userID: string,
     safeUser: SafeUser,
   ): Promise<void> {
-    const key = `user:id:${userID}`;
-    await this.cacheService.set(key, safeUser, this.ttl);
+    await this.cacheService.set(this.userCacheKey(userID), safeUser, this.ttl);
   }
 
   public async updateAvatar(
-    userID: number,
+    userID: string,
     image: MultipartFile,
     oldRefreshToken?: string,
   ): Promise<AuthResponse> {
     try {
       if (!this.fileService || !this.tokenService)
-        httpError(503, "Service is not ready to serve this route");
+        httpError(503, "Service is not ready");
 
       const user = await this.userRepository.findById(userID);
-      if (!user) httpError(404, `User with ID ${userID} is not found`);
+      if (!user) httpError(404, "User not found");
 
       const oldAvatar = user.avatar;
-
       const buffer = await image.toBuffer();
 
       const { publicUrl } = await this.fileService.uploadFile(
@@ -64,9 +68,11 @@ class UserService extends BaseService {
         "profile",
       );
 
-      const updated = await this.userRepository.update(userID, {
-        avatar: publicUrl,
-      });
+      const updated = await this.userRepository.update(
+        userID,
+        { avatar: publicUrl },
+        user.version,
+      );
 
       if (
         oldAvatar &&
@@ -99,25 +105,27 @@ class UserService extends BaseService {
       };
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(`[UserService] updateAvatar failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
   }
 
   public async updateRole(
-    userID: number,
+    userID: string,
     role: Role,
     oldRefreshToken?: string,
   ): Promise<AuthResponse> {
     try {
-      if (!this.tokenService)
-        httpError(503, "Service is not ready to serve this route");
+      if (!this.tokenService) httpError(503, "Service is not ready");
 
       const user = await this.userRepository.findById(userID);
-      if (!user) httpError(404, `User with ID ${userID} is not found`);
+      if (!user) httpError(404, "User not found");
 
-      const updated = await this.userRepository.update(userID, { role });
+      const updated = await this.userRepository.update(
+        userID,
+        { role: role as any },
+        user.version,
+      );
 
       const { accessToken, refreshToken } =
         await this.tokenService.generateTokens(
@@ -143,14 +151,13 @@ class UserService extends BaseService {
       };
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(`[UserService] updateRole failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
   }
 
   public async updateUser(
-    userID: number,
+    userID: string,
     data: {
       username?: string;
       name?: string;
@@ -162,26 +169,25 @@ class UserService extends BaseService {
     oldRefreshToken?: string,
   ): Promise<AuthResponse> {
     try {
-      if (!this.tokenService)
-        httpError(503, "Service is not ready to serve this route");
+      if (!this.tokenService) httpError(503, "Service is not ready");
 
       if (data.username) {
-        const existingUser = await this.userRepository.findByUsername(
+        const existing = await this.userRepository.findByUsername(
           data.username,
         );
-        if (existingUser && existingUser.id !== userID) {
-          throw httpError(
-            409,
-            `A user with the username "${data.username}" already exists.`,
-          );
+        if (existing && existing.id !== userID) {
+          httpError(409, "Username already taken");
         }
       }
 
-      const cleanData = Object.fromEntries(
-        Object.entries(data).filter(([_, v]) => v !== undefined),
-      );
+      const user = await this.userRepository.findById(userID);
+      if (!user) httpError(404, "User not found");
 
-      const updated = await this.userRepository.update(userID, cleanData);
+      const updated = await this.userRepository.update(
+        userID,
+        data,
+        user.version,
+      );
 
       const { accessToken, refreshToken } =
         await this.tokenService.generateTokens(
@@ -207,52 +213,51 @@ class UserService extends BaseService {
       };
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(`[UserService] updateUser failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
   }
 
-  public async deleteUser(id: number, oldRefreshToken?: string) {
+  // -------------------------
+  // Delete user
+  // -------------------------
+  public async deleteUser(id: string, oldRefreshToken?: string) {
     try {
-      if (!this.tokenService)
-        httpError(503, "Service is not ready to serve this route");
+      if (!this.tokenService) httpError(503, "Service is not ready");
 
       const user = await this.userRepository.findById(id);
-      if (!user) httpError(404, `User with the ID ${id} is not found`);
+      if (!user) httpError(404, "User not found");
 
       await this.userRepository.delete(id);
       if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
 
       await this.invalidateUserCache(id);
-
-      return;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(`[UserService] deleteUser failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
   }
 
-  public async getUser(id: number): Promise<SafeUser> {
+  // -------------------------
+  // Reads
+  // -------------------------
+  public async getUser(id: string): Promise<SafeUser> {
     try {
-      const cacheKey = `user:id:${id}`;
-
-      const cached = await this.cacheService.get<SafeUser>(cacheKey);
+      const cached = await this.cacheService.get<SafeUser>(
+        this.userCacheKey(id),
+      );
       if (cached) return cached;
 
       const user = await this.userRepository.findById(id);
-      if (!user) httpError(404, `User with the ID ${id} is not found`);
+      if (!user) httpError(404, "User not found");
 
       const safe = this.toSafeUser(user);
-
-      await this.cacheService.set(cacheKey, safe, this.ttl);
+      await this.writeUserCache(id, safe);
 
       return safe;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(`[UserService] getUser failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
@@ -260,33 +265,28 @@ class UserService extends BaseService {
 
   public async getUsers(role?: Role): Promise<SafeUser[]> {
     try {
-      const users = await this.userRepository.findAll(role);
-      return this.toSafeUsers(users);
+      const users = await this.userRepository.findAll(role as any);
+      return users.map((u) => this.toSafeUser(u));
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(`[UserService] getUsers failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
   }
 
-  private toSafeUser(user: User): SafeUser {
+  private toSafeUser(user: any): SafeUser {
     const {
       password,
-      phone,
-      address,
       googleId,
       microsoftId,
       msIssuer,
       msTenantId,
       provider,
+      version,
       ...safe
     } = user;
-    return safe;
-  }
 
-  private toSafeUsers(users: User[]): SafeUser[] {
-    return users.map((u) => this.toSafeUser(u));
+    return safe;
   }
 }
 

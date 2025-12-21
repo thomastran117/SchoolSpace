@@ -11,7 +11,7 @@
  * Imports
  */
 import type { FastifyInstance } from "fastify";
-import { IdParamSchema } from "../dto/idSchema";
+import { MongoIdParamSchema } from "../dto/idSchema";
 import { RoleSchema, UserSchema } from "../dto/userSchema";
 import { authDependency } from "../hooks/authHook";
 import { useController } from "../hooks/controllerHook";
@@ -23,7 +23,7 @@ async function userRoutes(app: FastifyInstance) {
     "/:id",
     {
       preHandler: authDependency,
-      preValidation: validate(IdParamSchema, "params"),
+      preValidation: validate(MongoIdParamSchema, "params"),
     },
     useController("UserController", (c) => c.getUser),
   );
@@ -40,7 +40,7 @@ async function userRoutes(app: FastifyInstance) {
     "/:id",
     {
       preHandler: authDependency,
-      preValidation: validate(IdParamSchema, "params"),
+      preValidation: validate(MongoIdParamSchema, "params"),
     },
     useController("UserController", (c) => c.deleteUser),
   );
@@ -57,7 +57,7 @@ async function userRoutes(app: FastifyInstance) {
     "/avatar/:id",
     {
       preHandler: [authDependency, safeUploadAvatar],
-      preValidation: validate(IdParamSchema, "params"),
+      preValidation: validate(MongoIdParamSchema, "params"),
     },
     useController("UserController", (c) => c.updateAvatar),
   );
@@ -74,7 +74,7 @@ async function userRoutes(app: FastifyInstance) {
     {
       preHandler: authDependency,
       preValidation: [
-        validate(IdParamSchema, "params"),
+        validate(MongoIdParamSchema, "params"),
         validate(RoleSchema, "body"),
       ],
     },
@@ -95,7 +95,7 @@ async function userRoutes(app: FastifyInstance) {
     {
       preHandler: authDependency,
       preValidation: [
-        validate(IdParamSchema, "params"),
+        validate(MongoIdParamSchema, "params"),
         validate(UserSchema, "body"),
       ],
     },

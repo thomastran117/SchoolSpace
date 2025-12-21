@@ -1,11 +1,11 @@
 interface UserPayload {
-  id: number;
+  id: string;
   email: string;
   role: string;
 }
 
 interface TokenPayloadBase {
-  userId: number;
+  userId: string;
   username: string;
   role: string;
   avatar?: string;
