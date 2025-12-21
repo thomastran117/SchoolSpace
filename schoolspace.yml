@@ -6,47 +6,6 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql
-  namespace: schoolspace
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: mysql
-  template:
-    metadata:
-      labels:
-        app: mysql
-    spec:
-      containers:
-        - name: mysql
-          image: mysql:8.4
-          ports:
-            - containerPort: 3306
-          env:
-            - name: MYSQL_ROOT_PASSWORD
-              value: root
-            - name: MYSQL_DATABASE
-              value: appdb
-            - name: MYSQL_USER
-              value: appuser
-            - name: MYSQL_PASSWORD
-              value: apppass
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: mysql
-  namespace: schoolspace
-spec:
-  selector:
-    app: mysql
-  ports:
-    - port: 3306
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: redis
   namespace: schoolspace
 spec:
@@ -171,8 +130,6 @@ spec:
           ports:
             - containerPort: 8040
           env:
-            - name: DATABASE_URL
-              value: mysql://root:root@mysql:3306/appdb
             - name: REDIS_URL
               value: redis:6379
             - name: MONGO_URL
@@ -218,8 +175,6 @@ spec:
           image: school-worker:latest
           imagePullPolicy: IfNotPresent
           env:
-            - name: DATABASE_URL
-              value: mysql://root:root@mysql:3306/appdb
             - name: REDIS_URL
               value: redis:6379
             - name: RABBITMQ_URL

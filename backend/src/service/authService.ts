@@ -81,8 +81,8 @@ class AuthService {
       }
 
       const user = await this.userRepository.findByEmail(email);
-
       const hashToCheck = user?.password ?? this.DUMMY_HASH;
+
       const passwordMatches = await this.comparePassword(password, hashToCheck);
       if (!user || !passwordMatches || !user.password) {
         httpError(401, "Invalid credentials");
@@ -186,7 +186,7 @@ class AuthService {
       const user = await this.userRepository.create({
         email,
         role: role as any,
-        provider: "local",
+        provider: "local" as any,
         password,
       });
 
@@ -260,7 +260,11 @@ class AuthService {
       if (!user) {
         httpError(404, "User not found");
       }
-      await this.userRepository.update(user.id, { password: hashedPassword });
+      await this.userRepository.update(
+        user.id,
+        { password: hashedPassword },
+        user.version,
+      );
       return;
     } catch (err: any) {
       if (err instanceof HttpError) {
@@ -298,8 +302,8 @@ class AuthService {
       if (!user) {
         user = await this.userRepository.create({
           email,
-          role: "notdefined",
-          provider: "microsoft",
+          role: "notdefined" as any,
+          provider: "microsoft" as any,
           microsoftId: microsoftSub,
         });
       }
@@ -349,8 +353,8 @@ class AuthService {
       if (!user) {
         user = await this.userRepository.create({
           email: googleUser.email!,
-          role: "notdefined",
-          provider: "google",
+          role: "notdefined" as any,
+          provider: "google" as any,
           googleId: googleUser.sub,
         });
       }

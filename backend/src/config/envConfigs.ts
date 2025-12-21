@@ -34,7 +34,6 @@ class EnvConfig {
   private readonly _nodeEnv: EnvMode;
   private readonly _strictEnv: boolean;
 
-  private readonly _databaseUrl: string;
   private readonly _redisUrl: string;
   private readonly _mongoUrl: string;
   private readonly _rabbitMQUrl: string;
@@ -64,11 +63,6 @@ class EnvConfig {
     this._strictEnv = asBool(
       process.env.STRICT_ENV,
       this._nodeEnv === "production",
-    );
-
-    this._databaseUrl = this.reqWithDefault(
-      "DATABASE_URL",
-      "mysql://root:password123@localhost:3306/schoolapp",
     );
 
     this._redisUrl = this.reqWithDefault("REDIS_URL", "redis://localhost:6379");
@@ -148,10 +142,6 @@ class EnvConfig {
 
   get isProduction(): boolean {
     return this._nodeEnv === "production";
-  }
-
-  get databaseUrl(): string {
-    return this._databaseUrl;
   }
 
   get redisUrl(): string {

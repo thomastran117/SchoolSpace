@@ -1,4 +1,3 @@
-import { initPrisma } from "../resource/prisma";
 import { initRedis } from "../resource/redis";
 import logger from "../utility/logger";
 
@@ -12,7 +11,6 @@ class CoreInitializer {
     logger.info("Initializing connections");
 
     try {
-      await initPrisma();
       await initRedis();
       logger.info("Core connections successful");
     } catch (err: any) {

@@ -1,5 +1,4 @@
 import { initMongo } from "../resource/mongo";
-import { initPrisma } from "../resource/prisma";
 import { initRedis } from "../resource/redis";
 import logger from "../utility/logger";
 
@@ -13,7 +12,6 @@ class CoreInitializer {
     logger.info("Initializing connections");
 
     try {
-      await initPrisma();
       await initRedis();
       await initMongo();
       logger.info("Core connections successful");

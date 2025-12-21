@@ -38,7 +38,7 @@ class TokenService extends BasicTokenService {
   }
 
   private createAccessToken(
-    id: number,
+    id: string,
     username: string,
     role: string,
     avatar?: string,
@@ -50,7 +50,7 @@ class TokenService extends BasicTokenService {
   private async saveRefreshToken(
     token: string,
     payload: {
-      id: number;
+      id: string;
       username: string;
       role: string;
       avatar?: string;
@@ -68,7 +68,7 @@ class TokenService extends BasicTokenService {
   }
 
   public async generateTokens(
-    id: number,
+    id: string,
     username: string,
     role: string,
     avatar?: string,
@@ -100,7 +100,7 @@ class TokenService extends BasicTokenService {
   public async validateRefreshToken(token: string) {
     try {
       const data = await this.cacheService.get<{
-        id: number;
+        id: string;
         username: string;
         role: string;
         avatar?: string;

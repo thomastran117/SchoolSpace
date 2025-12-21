@@ -21,7 +21,6 @@ class EnvConfig {
   private readonly _strictEnv: boolean;
   private readonly _frontendClient: string;
 
-  private readonly _databaseUrl: string;
   private readonly _rabbitMQUrl: string;
   private readonly _redisUrl: string;
 
@@ -44,11 +43,6 @@ class EnvConfig {
       "FRONTEND_CLIENT",
       "http://localhost:3040",
     )!;
-
-    this._databaseUrl = this.reqWithDefault(
-      "DATABASE_URL",
-      "mysql://root:password123@localhost:3306/schoolapp",
-    );
 
     this._redisUrl = this.reqWithDefault("REDIS_URL", "redis://localhost:6379");
 
@@ -102,10 +96,6 @@ class EnvConfig {
 
   get isProduction(): boolean {
     return this._nodeEnv === "production";
-  }
-
-  get databaseUrl(): string {
-    return this._databaseUrl;
   }
 
   get rabbitMqUrl(): string {
