@@ -2,7 +2,7 @@
 import amqp from "amqplib";
 import env from "../config/envConfigs";
 import container from "../container";
-import { markWorkerAlive, markWorkerDead } from "../resource/workerHealth";
+// import { markWorkerAlive, markWorkerDead } from "../resource/workerHealth";
 import type { PaymentService } from "../service/paymentService";
 import logger from "../utility/logger";
 
@@ -42,8 +42,8 @@ const PREFETCH = 3;
 
     channel.prefetch(PREFETCH);
 
-    markWorkerAlive();
-    setInterval(markWorkerAlive, 15_000);
+    // markWorkerAlive();
+    // setInterval(markWorkerAlive, 15_000);
 
     logger.info("[Worker] Payment worker started (RabbitMQ)");
 
@@ -116,7 +116,7 @@ const PREFETCH = 3;
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
     logger.error(`[Worker] Fatal error: ${error.message}`);
-    markWorkerDead();
+    // markWorkerDead();
     process.exit(1);
   }
 })();

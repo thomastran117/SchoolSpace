@@ -1,7 +1,6 @@
 // npx tsx src/workers/emailWorker.ts
 import amqp from "amqplib";
 import container from "../container";
-import { markWorkerAlive, markWorkerDead } from "../resource/workerHealth";
 import { EmailService } from "../service/emailService";
 import logger from "../utility/logger";
 
@@ -53,8 +52,8 @@ const PREFETCH = 5;
 
     channel.prefetch(PREFETCH);
 
-    markWorkerAlive();
-    setInterval(markWorkerAlive, 15_000);
+    // markWorkerAlive();
+    // setInterval(markWorkerAlive, 15_000);
 
     logger.info("[EmailWorker] Email worker started");
 
@@ -116,7 +115,7 @@ const PREFETCH = 5;
     });
   } catch (err) {
     logger.error(`[EmailWorker] Fatal error: ${String(err)}`);
-    markWorkerDead();
+    // markWorkerDead();
     process.exit(1);
   }
 })();

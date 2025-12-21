@@ -8,13 +8,21 @@ import { CatalogueService } from "./catalogueService";
 import type { FileService } from "./fileService";
 import { UserService } from "./userService";
 
+const NOT_FOUND = "__NOT_FOUND__";
+
 class CourseService extends BaseService {
   private readonly cacheService: CacheService;
+  private readonly courseRepository: CourseRepository;
   private readonly catalogueService?: CatalogueService;
   private readonly fileService?: FileService;
   private readonly userService?: UserService;
-  private readonly courseRepository: CourseRepository;
-  private readonly ttl = 300;
+
+  private readonly LIST_TTL = 300;
+  private readonly TEACHER_TTL = 300;
+  private readonly DETAIL_TTL = 600;
+  private readonly NEGATIVE_TTL = 60;
+
+  private courseVersion?: number;
 
   constructor(
     courseRepository: CourseRepository,
@@ -25,10 +33,30 @@ class CourseService extends BaseService {
   ) {
     super();
     this.cacheService = cacheService;
-    this.fileService = fileService;
-    this.catalogueService = catalogueService;
     this.courseRepository = courseRepository;
+    this.catalogueService = catalogueService;
+    this.fileService = fileService;
     this.userService = userService;
+  }
+
+  private key(...parts: (string | number | boolean)[]): string {
+    return ["course", ...parts].join(":");
+  }
+
+  private async getVersion(): Promise<number> {
+    if (this.courseVersion === undefined) {
+      this.courseVersion =
+        (await this.cacheService.get<number>("course:version")) ?? 1;
+    }
+    return this.courseVersion;
+  }
+
+  private async bumpVersion(): Promise<void> {
+    await this.cacheService.increment("course:version");
+  }
+
+  private async markHot(id: string): Promise<void> {
+    await this.cacheService.increment(`course:hot:${id}`, 1, 60);
   }
 
   public async createCourse(
@@ -39,18 +67,12 @@ class CourseService extends BaseService {
   ): Promise<ICourse> {
     try {
       if (!this.fileService || !this.userService || !this.catalogueService)
-        httpError(503, "Service is not ready to serve this route");
+        httpError(503, "Service not ready");
 
-      const user = await this.userService.getUser(teacherId);
-      if (!user) httpError(400, `User with the ID ${teacherId} does not exist`);
-
-      const catalogue =
-        await this.catalogueService.getCourseTemplateById(catalogueId);
-      if (!catalogue)
-        httpError(400, `Catalogue with the ID ${catalogueId} does not exist`);
+      await this.userService.getUser(teacherId);
+      await this.catalogueService.getCourseTemplateById(catalogueId);
 
       const buffer = await image.toBuffer();
-
       const { publicUrl } = await this.fileService.uploadFile(
         buffer,
         image.filename,
@@ -64,8 +86,7 @@ class CourseService extends BaseService {
         publicUrl,
       );
 
-      await this.cacheService.delete("course:all");
-
+      await this.bumpVersion();
       return this.toSafe(course);
     } catch (err) {
       throw httpError(500, `Failed to create course: ${String(err)}`);
@@ -83,9 +104,17 @@ class CourseService extends BaseService {
       if (teacherId !== undefined) filter.teacher_id = teacherId;
       if (year !== undefined) filter.year = year;
 
-      const cacheKey = `course:filter:${teacherId ?? "any"}:${
-        year ?? "any"
-      }:${page}:${limit}`;
+      const version = await this.getVersion();
+
+      const cacheKey = this.key(
+        "v",
+        version,
+        "filter",
+        teacherId ?? "any",
+        year ?? "any",
+        page,
+        limit,
+      );
 
       const cached = await this.cacheService.get(cacheKey);
       if (cached) return cached;
@@ -96,17 +125,14 @@ class CourseService extends BaseService {
         limit,
       );
 
-      const safeResults = this.toSafeArray(results);
-      const totalPages = Math.ceil(total / limit);
-
       const response = {
-        data: safeResults,
+        data: this.toSafeArray(results),
         total,
-        totalPages,
+        totalPages: Math.ceil(total / limit),
         currentPage: page,
       };
 
-      await this.cacheService.set(cacheKey, response, this.ttl);
+      await this.cacheService.set(cacheKey, response, this.LIST_TTL);
       return response;
     } catch (err) {
       throw httpError(500, `Failed to fetch courses: ${String(err)}`);
@@ -114,16 +140,27 @@ class CourseService extends BaseService {
   }
 
   public async getCourseById(id: string): Promise<ICourse> {
-    const cacheKey = `course:id:${id}`;
+    const cacheKey = this.key("id", id);
 
-    const cached = await this.cacheService.get<ICourse>(cacheKey);
-    if (cached) return cached;
+    const cached = await this.cacheService.get<ICourse | typeof NOT_FOUND>(
+      cacheKey,
+    );
+
+    if (cached === NOT_FOUND) httpError(404, "Course not found");
+    if (cached) {
+      await this.markHot(id);
+      return cached;
+    }
 
     const course = await this.courseRepository.findById(id);
-    if (!course) httpError(404, "Course not found");
+    if (!course) {
+      await this.cacheService.set(cacheKey, NOT_FOUND, this.NEGATIVE_TTL);
+      httpError(404, "Course not found");
+    }
 
     const safe = this.toSafe(course);
-    await this.cacheService.set(cacheKey, safe, this.ttl);
+    await this.cacheService.set(cacheKey, safe, this.DETAIL_TTL);
+    await this.markHot(id);
 
     return safe;
   }
@@ -132,21 +169,27 @@ class CourseService extends BaseService {
     teacherId: number,
     year?: number,
   ): Promise<ICourse[]> {
-    if (!this.userService)
-      httpError(503, "Service is not ready to serve this route");
+    if (!this.userService) httpError(503, "Service not ready");
 
-    const cacheKey = `course:teacher:${teacherId}:${year ?? "any"}`;
+    const version = await this.getVersion();
+
+    const cacheKey = this.key(
+      "v",
+      version,
+      "teacher",
+      teacherId,
+      year ?? "any",
+    );
 
     const cached = await this.cacheService.get<ICourse[]>(cacheKey);
     if (cached) return cached;
 
-    const user = await this.userService.getUser(teacherId);
-    if (!user) httpError(400, `User with the ID ${teacherId} does not exist`);
+    await this.userService.getUser(teacherId);
 
     const courses = await this.courseRepository.findByTeacher(teacherId, year);
-    const safe = this.toSafeArray(courses);
 
-    await this.cacheService.set(cacheKey, safe, this.ttl);
+    const safe = this.toSafeArray(courses);
+    await this.cacheService.set(cacheKey, safe, this.TEACHER_TTL);
     return safe;
   }
 
@@ -156,46 +199,28 @@ class CourseService extends BaseService {
     image?: MultipartFile,
   ): Promise<ICourse> {
     try {
-      if (!this.fileService)
-        httpError(503, "Service is not ready to serve this route");
+      if (!this.fileService) httpError(503, "Service not ready");
 
       const existing = await this.courseRepository.findById(id);
       if (!existing) httpError(404, "Course not found");
 
-      const oldImage = existing.image_url;
-
       if (image) {
         const buffer = await image.toBuffer();
-
         const { publicUrl } = await this.fileService.uploadFile(
           buffer,
           image.filename,
           "course",
         );
-
         updates.image_url = publicUrl;
       }
 
       const updated = await this.courseRepository.update(id, updates);
       if (!updated) httpError(404, "Course not found after update");
 
-      if (
-        oldImage &&
-        updates.image_url &&
-        updates.image_url !== oldImage &&
-        (await this.courseRepository.countImages(oldImage)) <= 1
-      ) {
-        await this.fileService.deleteFile("course", oldImage);
-      }
+      await this.bumpVersion();
+      await this.cacheService.delete(this.key("id", id));
 
-      const safe = this.toSafe(updated);
-
-      await Promise.all([
-        this.cacheService.delete(`course:id:${id}`),
-        this.cacheService.delete("course:all"),
-      ]);
-
-      return safe;
+      return this.toSafe(updated);
     } catch (err) {
       throw httpError(500, `Failed to update course: ${String(err)}`);
     }
@@ -203,14 +228,13 @@ class CourseService extends BaseService {
 
   public async deleteCourse(id: string): Promise<boolean> {
     try {
-      if (!this.fileService)
-        httpError(503, "Service is not ready to serve this route");
+      if (!this.fileService) httpError(503, "Service not ready");
 
       const result = await this.courseRepository.delete(id);
       if (!result) httpError(404, "Course not found");
 
-      await this.cacheService.delete(`course:id:${id}`);
-      await this.cacheService.delete("course:all");
+      await this.bumpVersion();
+      await this.cacheService.delete(this.key("id", id));
 
       return true;
     } catch (err) {
