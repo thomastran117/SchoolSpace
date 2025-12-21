@@ -40,7 +40,7 @@ async function authRoutes(app: FastifyInstance) {
   /**
    * @route GET /auth/verify
    */
-  app.get(
+  app.post(
     "/verify",
     { preValidation: validate(VerifySchema, "body") },
     useController("AuthController", (c) => c.localVerifyEmail),
