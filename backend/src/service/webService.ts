@@ -67,7 +67,8 @@ class WebService {
 
   async verifyGoogleCaptcha(token: string): Promise<boolean> {
     if (!GOOGLE_CAPTCHA_SECRET) {
-      throw new Error("Missing GOOGLE_CAPTCHA_SECRET in environment");
+      logger.warn("[WebService] Google Captcha is not available");
+      return true;
     }
 
     try {

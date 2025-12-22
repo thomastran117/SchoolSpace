@@ -8,7 +8,7 @@ import {
   GraduationCap,
   BookOpen,
 } from "lucide-react";
-import { signup } from "../../services/AuthService";
+import { signup, verify } from "../../services/AuthService";
 import GoogleRecaptcha, {
   type CaptchaRef,
 } from "../../components/auth/GoogleRecaptcha";
@@ -70,14 +70,10 @@ export default function Signup() {
         return;
       }
 
-      await fetch("http://localhost:8040/api/auth/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          code: verificationCode,
-          captcha: token,
-        }),
+      const data = await verify({
+        email,
+        code: verificationCode,
+        captcha: token,
       });
 
     } catch (err: any) {

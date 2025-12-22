@@ -32,6 +32,14 @@ const USED_VERIFY_TTL = 24 * 60 * 60; // 24 hours
 const VERIFY_TTL = 15 * 60; // 15 minutes
 const MAX_ATTEMPTS = 5;
 
+type EmailVerificationCache = {
+  codeHash: string;
+  passwordHash: string;
+  role: string;
+  attempts: number;
+  createdAt: number;
+};
+
 class TokenService extends BasicTokenService {
   private readonly cacheService: CacheService;
 
@@ -186,26 +194,34 @@ class TokenService extends BasicTokenService {
     email: string,
     passwordHash: string,
     role: string,
-  ): Promise<{ code: string }> {
+  ): Promise<{ code?: string; alreadySent: boolean }> {
     try {
+      const key = `verify:email:${email}`;
+      const existing = await this.cacheService.get<EmailVerificationCache>(key);
+
+      if (existing) {
+        return { alreadySent: true };
+      }
+
       const code = this.generateOtp();
       const codeHash = await bcrypt.hash(code, 10);
 
       await this.cacheService.set(
-        `verify:email:${email}`,
+        key,
         {
           codeHash,
           passwordHash,
           role,
           attempts: 0,
+          createdAt: Date.now(),
         },
         VERIFY_TTL,
       );
 
-      return { code };
+      return { code, alreadySent: false };
     } catch (err: any) {
       logger.error(
-        `[TokenService] createEmailVerification failed: ${err?.message ?? err}`,
+        `[TokenService] createEmailCode failed: ${err?.message ?? err}`,
       );
       httpError(500, "Internal server error");
     }
@@ -215,13 +231,7 @@ class TokenService extends BasicTokenService {
     try {
       const key = `verify:email:${email}`;
 
-      const data = await this.cacheService.get<{
-        codeHash: string;
-        passwordHash: string;
-        role: string;
-        attempts: number;
-      }>(key);
-
+      const data = await this.cacheService.get<EmailVerificationCache>(key);
       if (!data) {
         httpError(400, "Verification code expired or invalid");
       }
@@ -237,8 +247,9 @@ class TokenService extends BasicTokenService {
         await this.cacheService.set(
           key,
           { ...data, attempts: data.attempts + 1 },
-          VERIFY_TTL,
+          undefined,
         );
+
         httpError(400, "Invalid verification code");
       }
 

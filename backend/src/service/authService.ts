@@ -73,12 +73,8 @@ class AuthService {
     captcha: string,
   ): Promise<AuthResponse> {
     try {
-      if (env.isCaptchaEnabled()) {
-        const result = await this.webService.verifyGoogleCaptcha(captcha);
-        if (!result) httpError(401, "Invalid captcha");
-      } else {
-        logger.warn("[AuthService] Google Captcha is not available");
-      }
+      const result = await this.webService.verifyGoogleCaptcha(captcha);
+      if (!result) httpError(401, "Invalid captcha");
 
       const user = await this.userRepository.findByEmail(email, {
         includePassword: true,
@@ -141,12 +137,8 @@ class AuthService {
     captcha: string,
   ): Promise<boolean> {
     try {
-      if (env.isCaptchaEnabled()) {
-        const result = await this.webService.verifyGoogleCaptcha(captcha);
-        if (!result) httpError(401, "Invalid captcha");
-      } else {
-        logger.warn("[AuthService] Google Captcha is not available");
-      }
+      const result = await this.webService.verifyGoogleCaptcha(captcha);
+      if (!result) httpError(401, "Invalid captcha");
 
       const existingUser = await this.userRepository.findByEmail(email);
       if (existingUser) httpError(409, "Email already in use");
@@ -158,7 +150,11 @@ class AuthService {
         role,
       );
 
+      if (!code) return true;
+
       await this.emailQueue.enqueueVerifyEmail(email, code);
+
+      return true;
     } catch (err: any) {
       if (err instanceof HttpError) {
         throw err;
@@ -166,8 +162,6 @@ class AuthService {
       logger.error(`[AuthService] signupUser failed: ${err?.message ?? err}`);
       httpError(500, "Internal server error");
     }
-
-    return true;
   }
 
   /**
@@ -180,13 +174,9 @@ class AuthService {
    */
   public async verifyUser(email: string, token: string, captcha: string) {
     try {
-      if (env.isCaptchaEnabled()) {
-        const result = await this.webService.verifyGoogleCaptcha(captcha);
-        if (!result) httpError(401, "Invalid captcha");
-      } else {
-        logger.warn("[AuthService] Google Captcha is not available");
-      }
-
+      const result = await this.webService.verifyGoogleCaptcha(captcha);
+      if (!result) httpError(401, "Invalid captcha");
+      
       const { password, role } = await this.tokenService.verifyEmailCode(
         email,
         token,
@@ -235,6 +225,8 @@ class AuthService {
         "empty",
         "empty",
       );
+      
+      if (!code) return;
       await this.emailQueue.enqueueVerifyEmail(email, code); //change to forgot password
 
       return;
