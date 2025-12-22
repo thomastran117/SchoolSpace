@@ -1,6 +1,6 @@
 import type { MultipartFile } from "@fastify/multipart";
 import type { CourseRepository } from "../repository/courseRepository";
-import type { ICourse } from "../templates/mongoTemplate";
+import type { ICourse } from "../templates/courseTemplate";
 import { httpError } from "../utility/httpUtility";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";

@@ -1,7 +1,7 @@
+import { AssignmentRepository } from "../repository/assignmentRepository";
 import { CatalogueRepository } from "../repository/catalogueRepository";
 import { CourseRepository } from "../repository/courseRepository";
 import { UserRepository } from "../repository/userRepository";
-import { AssignmentRepository } from "../repository/assignmentRepository";
 import type { Registration } from "./container.types";
 
 import logger from "../utility/logger";

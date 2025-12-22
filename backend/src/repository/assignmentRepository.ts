@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
+import {
+  AssignmentModel,
+  type IAssignment,
+} from "../templates/assignmentTemplate";
 import { BaseRepository } from "./baseRepository";
-import { AssignmentModel, type IAssignment } from "../templates/assignmentTemplate";
 
 interface AssignmentFilters {
   courseId?: string;
@@ -18,10 +21,7 @@ class AssignmentRepository extends BaseRepository {
 
   public async findById(id: string): Promise<IAssignment | null> {
     return this.executeAsync(
-      (signal) =>
-        AssignmentModel.findById(id)
-          .setOptions({ signal })
-          .exec(),
+      (signal) => AssignmentModel.findById(id).setOptions({ signal }).exec(),
       { deadlineMs: 800 },
     );
   }
@@ -85,9 +85,7 @@ class AssignmentRepository extends BaseRepository {
     );
   }
 
-  public async findAllWithFilters(
-    filters: AssignmentFilters,
-  ): Promise<{
+  public async findAllWithFilters(filters: AssignmentFilters): Promise<{
     data: IAssignment[];
     total: number;
     page: number;

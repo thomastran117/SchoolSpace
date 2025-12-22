@@ -1,5 +1,5 @@
-import type { ICourse } from "../templates/mongoTemplate";
-import { CourseModel } from "../templates/mongoTemplate";
+import type { ICourse } from "../templates/courseTemplate";
+import { CourseModel } from "../templates/courseTemplate";
 import { BaseRepository } from "./baseRepository";
 
 class CourseRepository extends BaseRepository {

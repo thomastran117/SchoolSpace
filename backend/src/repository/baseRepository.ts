@@ -37,10 +37,7 @@ abstract class BaseRepository {
         );
       }
 
-      if (
-        options?.deadlineMs &&
-        Date.now() - start > options.deadlineMs
-      ) {
+      if (options?.deadlineMs && Date.now() - start > options.deadlineMs) {
         throw new RepositoryError(
           `[Repository${context ? `:${context}` : ""}] deadline exceeded`,
           null,
@@ -50,9 +47,7 @@ abstract class BaseRepository {
       const controller = new AbortController();
 
       if (options?.signal) {
-        options.signal.addEventListener("abort", () =>
-          controller.abort(),
-        );
+        options.signal.addEventListener("abort", () => controller.abort());
       }
 
       let timeout: NodeJS.Timeout | undefined;
@@ -141,16 +136,7 @@ abstract class BaseRepository {
       }
     }
 
-    const retryableCodes = new Set([
-      6,
-      7,
-      89,
-      91,
-      11600,
-      11602,
-      10107,
-      13435,
-    ]);
+    const retryableCodes = new Set([6, 7, 89, 91, 11600, 11602, 10107, 13435]);
 
     return typeof err?.code === "number" && retryableCodes.has(err.code);
   }

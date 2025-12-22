@@ -1,11 +1,5 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
 
-enum Term {
-  SUMMER = "SUMMER",
-  WINTER = "WINTER",
-  FALL = "FALL",
-}
-
 enum Provider {
   LOCAL = "local",
   GOOGLE = "google",
@@ -42,35 +36,6 @@ interface IUser extends Document {
 
   version: number;
 
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface ICatalogue extends Document {
-  course_name: string;
-  description: string;
-  available: boolean;
-  course_code: string;
-  term: Term;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface ICourse extends Document {
-  catalogue_id: ICatalogue["_id"];
-  teacher_id: IUser["id"];
-  image_url?: string;
-  year: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-interface IAssignment extends Document {
-  course_id: ICourse["_id"];
-  name: string;
-  description: string;
-  file_url?: string;
-  dueDate?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -183,80 +148,6 @@ const UserSchema = new Schema<IUser>(
   { timestamps: true },
 );
 
-const CatalogueSchema = new Schema<ICatalogue>(
-  {
-    course_name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    description: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    available: {
-      type: Boolean,
-      default: true,
-    },
-
-    course_code: {
-      type: String,
-      required: true,
-      uppercase: true,
-      trim: true,
-      unique: true,
-    },
-
-    term: {
-      type: String,
-      enum: Object.values(Term),
-      required: true,
-    },
-  },
-  { timestamps: true },
-);
-
-const CourseSchema = new Schema<ICourse>(
-  {
-    catalogue_id: {
-      type: Schema.Types.ObjectId,
-      ref: "Catalogue",
-      required: true,
-    },
-
-    teacher_id: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    image_url: {
-      type: String,
-      default: null,
-      trim: true,
-    },
-
-    year: {
-      type: Number,
-      default: () => new Date().getFullYear(),
-      required: true,
-    },
-  },
-  { timestamps: true },
-);
-
-CatalogueSchema.set("toJSON", {
-  virtuals: true,
-  versionKey: false,
-  transform: (_, ret) => {
-    ret.id = ret._id;
-    delete ret._id;
-  },
-});
-
 UserSchema.set("toJSON", {
   virtuals: true,
   versionKey: false,
@@ -279,24 +170,8 @@ UserSchema.index(
   },
 );
 
-const CourseModel: Model<ICourse> =
-  mongoose.models.Course || mongoose.model<ICourse>("Course", CourseSchema);
-
-const CatalogueModel: Model<ICatalogue> =
-  mongoose.models.Catalogue ||
-  mongoose.model<ICatalogue>("Catalogue", CatalogueSchema);
-
 const UserModel: Model<IUser> =
   mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 
-CourseSchema.set("toJSON", {
-  virtuals: true,
-  versionKey: false,
-  transform: (_, ret) => {
-    ret.id = ret._id;
-    delete ret._id;
-  },
-});
-
-export { CatalogueModel, CourseModel, Provider, Role, Term, UserModel };
-export type { ICatalogue, ICourse, IUser };
+export { Provider, Role, UserModel };
+export type { IUser };

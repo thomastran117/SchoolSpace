@@ -1,6 +1,6 @@
 import { initMongo } from "../resource/mongo";
 import { initRedis } from "../resource/redis";
-import { UserModel } from "../templates/mongoTemplate";
+import { UserModel } from "../templates/userTemplate";
 import logger from "../utility/logger";
 
 class CoreInitializer {
