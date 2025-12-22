@@ -20,11 +20,11 @@ abstract class BaseRepository {
 
   protected async executeAsync<T>(
     fn: (signal?: AbortSignal) => Promise<T>,
-    context?: string,
     options?: {
       signal?: AbortSignal;
       deadlineMs?: number;
     },
+    context?: string,
   ): Promise<T> {
     let attempt = 0;
     const start = Date.now();
@@ -125,8 +125,8 @@ abstract class BaseRepository {
           await session.endSession();
         }
       },
-      context,
       options,
+      context,
     );
   }
 
