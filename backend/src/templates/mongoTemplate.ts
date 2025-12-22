@@ -57,10 +57,20 @@ interface ICatalogue extends Document {
 }
 
 interface ICourse extends Document {
-  catalogue: ICatalogue["_id"];
-  teacher_id: number;
+  catalogue_id: ICatalogue["_id"];
+  teacher_id: IUser["id"];
   image_url?: string;
   year: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface IAssignment extends Document {
+  course_id: ICourse["_id"];
+  name: string;
+  description: string;
+  file_url?: string;
+  dueDate?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -211,16 +221,16 @@ const CatalogueSchema = new Schema<ICatalogue>(
 
 const CourseSchema = new Schema<ICourse>(
   {
-    catalogue: {
+    catalogue_id: {
       type: Schema.Types.ObjectId,
       ref: "Catalogue",
       required: true,
     },
 
     teacher_id: {
-      type: Number,
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
-      index: true,
     },
 
     image_url: {
