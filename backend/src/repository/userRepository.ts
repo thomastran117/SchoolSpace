@@ -140,7 +140,7 @@ class UserRepository extends BaseRepository {
     if (!objectId) {
       throw new Error("[UserRepository.update] Invalid user id");
     }
-        
+
     if ("version" in data) {
       throw new Error("Version cannot be updated directly");
     }

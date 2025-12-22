@@ -11,6 +11,7 @@
  * @auth Thomas
  */
 
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
@@ -28,6 +29,16 @@ const SHORT_REFRESH_TTL = 24 * 60 * 60; // 1 day
 const LONG_REFRESH_TTL = 7 * 24 * 60 * 60; // 7 days
 const VERIFY_TOKEN_TTL = 15 * 60; // 15 minutes
 const USED_VERIFY_TTL = 24 * 60 * 60; // 24 hours
+const VERIFY_TTL = 15 * 60; // 15 minutes
+const MAX_ATTEMPTS = 5;
+
+type EmailVerificationCache = {
+  codeHash: string;
+  passwordHash: string;
+  role: string;
+  attempts: number;
+  createdAt: number;
+};
 
 class TokenService extends BasicTokenService {
   private readonly cacheService: CacheService;
@@ -179,68 +190,73 @@ class TokenService extends BasicTokenService {
     }
   }
 
-  public async createVerifyToken(
+  public async createEmailCode(
     email: string,
     passwordHash: string,
     role: string,
-  ): Promise<string> {
+  ): Promise<{ code?: string; alreadySent: boolean }> {
     try {
-      const existingToken = await this.cacheService.get<string>(
-        `verify:email:${email}`,
-      );
+      const key = `verify:email:${email}`;
+      const existing = await this.cacheService.get<EmailVerificationCache>(key);
 
-      if (existingToken) {
-        // Extend existing token TTL
-        await this.cacheService.set(
-          `verify:${existingToken}`,
-          { email, passwordHash, role },
-          VERIFY_TOKEN_TTL,
-        );
-
-        return existingToken;
+      if (existing) {
+        return { alreadySent: true };
       }
 
-      const token = uuidv4();
-      const payload = { email, passwordHash, role };
-
-      await this.cacheService.set(`verify:${token}`, payload, VERIFY_TOKEN_TTL);
+      const code = this.generateOtp();
+      const codeHash = await bcrypt.hash(code, 10);
 
       await this.cacheService.set(
-        `verify:email:${email}`,
-        token,
-        VERIFY_TOKEN_TTL,
+        key,
+        {
+          codeHash,
+          passwordHash,
+          role,
+          attempts: 0,
+          createdAt: Date.now(),
+        },
+        VERIFY_TTL,
       );
 
-      return token;
+      return { code, alreadySent: false };
     } catch (err: any) {
-      if (err instanceof HttpError) throw err;
-
       logger.error(
-        `[TokenService] createVerifyToken failed: ${err?.message ?? err}`,
+        `[TokenService] createEmailCode failed: ${err?.message ?? err}`,
       );
       httpError(500, "Internal server error");
     }
   }
 
-  public async validateVerifyToken(token: string) {
+  public async verifyEmailCode(email: string, code: string) {
     try {
-      const data = await this.cacheService.get<{
-        email: string;
-        passwordHash: string;
-        role: string;
-      }>(`verify:${token}`);
+      const key = `verify:email:${email}`;
 
+      const data = await this.cacheService.get<EmailVerificationCache>(key);
       if (!data) {
-        httpError(400, "Token missing, expired or already used");
+        httpError(400, "Verification code expired or invalid");
       }
 
-      await this.cacheService.delete(`verify:${token}`);
-      await this.cacheService.delete(`verify:email:${data.email}`);
+      if (data.attempts >= MAX_ATTEMPTS) {
+        await this.cacheService.delete(key);
+        httpError(429, "Too many verification attempts");
+      }
 
-      await this.cacheService.set(`used:${token}`, "1", USED_VERIFY_TTL);
+      const isValid = await bcrypt.compare(code, data.codeHash);
+
+      if (!isValid) {
+        await this.cacheService.set(
+          key,
+          { ...data, attempts: data.attempts + 1 },
+          undefined,
+        );
+
+        httpError(400, "Invalid verification code");
+      }
+
+      await this.cacheService.delete(key);
 
       return {
-        email: data.email,
+        email,
         password: data.passwordHash,
         role: data.role,
       };
@@ -248,10 +264,14 @@ class TokenService extends BasicTokenService {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[TokenService] validateVerifyToken failed: ${err?.message ?? err}`,
+        `[TokenService] verifyEmailCode failed: ${err?.message ?? err}`,
       );
       httpError(500, "Internal server error");
     }
+  }
+
+  private generateOtp(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 }
 

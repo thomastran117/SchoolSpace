@@ -8,7 +8,7 @@ type EmailJob =
   | {
       type: "VERIFY_EMAIL";
       email: string;
-      verifyUrl: string;
+      code: string;
     }
   | {
       type: "WELCOME_EMAIL";
@@ -121,14 +121,11 @@ class EmailQueue {
     );
   }
 
-  public enqueueVerifyEmail(
-    email: string,
-    verifyUrl: string,
-  ): Promise<boolean> {
+  public enqueueVerifyEmail(email: string, code: string): Promise<boolean> {
     return this.enqueue({
       type: "VERIFY_EMAIL",
       email,
-      verifyUrl,
+      code,
     });
   }
 

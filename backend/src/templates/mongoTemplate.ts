@@ -259,7 +259,14 @@ UserSchema.set("toJSON", {
 
 UserSchema.index(
   { microsoftId: 1, msIssuer: 1, msTenantId: 1 },
-  { unique: true, sparse: true },
+  {
+    unique: true,
+    partialFilterExpression: {
+      microsoftId: { $exists: true },
+      msIssuer: { $exists: true },
+      msTenantId: { $exists: true },
+    },
+  },
 );
 
 const CourseModel: Model<ICourse> =

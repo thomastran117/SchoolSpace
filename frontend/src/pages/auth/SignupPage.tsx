@@ -8,7 +8,7 @@ import {
   GraduationCap,
   BookOpen,
 } from "lucide-react";
-import { signup } from "../../services/AuthService";
+import { signup, verify } from "../../services/AuthService";
 import GoogleRecaptcha, {
   type CaptchaRef,
 } from "../../components/auth/GoogleRecaptcha";
@@ -24,6 +24,11 @@ export default function Signup() {
   const [role, setRole] = useState<Role>("student");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+
   const captchaRef = useRef<CaptchaRef>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,12 +51,34 @@ export default function Signup() {
         captcha: token,
       });
 
-      console.log(data);
-      window.location.href = "/dashboard";
+      setShowVerifyModal(true);
     } catch (err: any) {
       setError(err?.response?.data?.message ?? "Signup failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    setVerifyError(null);
+    setVerifyLoading(true);
+
+    try {
+      const token = await captchaRef.current?.execute();
+      if (!token) {
+        setVerifyError("Captcha validation failed.");
+        return;
+      }
+
+      const data = await verify({
+        email,
+        code: verificationCode,
+        captcha: token,
+      });
+    } catch (err: any) {
+      setVerifyError(err?.response?.data?.message ?? "Invalid code");
+    } finally {
+      setVerifyLoading(false);
     }
   };
 
@@ -242,6 +269,60 @@ export default function Signup() {
       </div>
 
       <GoogleRecaptcha ref={captchaRef} />
+
+      {showVerifyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl">
+            <h3 className="text-2xl font-extrabold text-slate-900">
+              Verify your email
+            </h3>
+
+            <p className="mt-2 text-sm text-slate-600">
+              Enter the 6-digit code sent to{" "}
+              <span className="font-medium">{email}</span>
+            </p>
+
+            {/* Code Input */}
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={verificationCode}
+              onChange={(e) =>
+                setVerificationCode(e.target.value.replace(/\D/g, ""))
+              }
+              className="mt-6 w-full rounded-xl border border-slate-300 px-4 py-3
+                        text-center text-2xl tracking-[0.6em] font-bold
+                        focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30
+                        outline-none"
+              placeholder="••••••"
+            />
+
+            {verifyError && (
+              <p className="mt-3 text-sm text-red-600">{verifyError}</p>
+            )}
+
+            <button
+              onClick={handleVerifyCode}
+              disabled={verifyLoading || verificationCode.length !== 6}
+              className="mt-6 w-full rounded-lg bg-gradient-to-r
+                        from-purple-600 via-indigo-600 to-fuchsia-600
+                        py-2.5 text-white font-medium
+                        hover:brightness-110 transition
+                        disabled:opacity-50"
+            >
+              {verifyLoading ? "Verifying..." : "Verify & Continue"}
+            </button>
+
+            <button
+              onClick={() => setShowVerifyModal(false)}
+              className="mt-4 w-full text-sm text-slate-500 hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
