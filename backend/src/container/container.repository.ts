@@ -1,6 +1,7 @@
 import { AssignmentRepository } from "../repository/assignmentRepository";
 import { CatalogueRepository } from "../repository/catalogueRepository";
 import { CourseRepository } from "../repository/courseRepository";
+import { EnrollmentRepository } from "../repository/enrollmentRepository";
 import { UserRepository } from "../repository/userRepository";
 import type { Registration } from "./container.types";
 
@@ -14,6 +15,7 @@ function registerRepositoryModules(): Map<string, Registration<any>> {
       factory: () => new UserRepository(),
       lifetime: "singleton",
     });
+
     repositories.set("CourseRepository", {
       factory: () => new CourseRepository(),
       lifetime: "singleton",
@@ -21,6 +23,11 @@ function registerRepositoryModules(): Map<string, Registration<any>> {
 
     repositories.set("CatalogueRepository", {
       factory: () => new CatalogueRepository(),
+      lifetime: "singleton",
+    });
+
+    repositories.set("EnrollmentRepository", {
+      factory: () => new EnrollmentRepository(),
       lifetime: "singleton",
     });
 
