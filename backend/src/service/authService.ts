@@ -176,7 +176,7 @@ class AuthService {
     try {
       const result = await this.webService.verifyGoogleCaptcha(captcha);
       if (!result) httpError(401, "Invalid captcha");
-      
+
       const { password, role } = await this.tokenService.verifyEmailCode(
         email,
         token,
@@ -225,7 +225,7 @@ class AuthService {
         "empty",
         "empty",
       );
-      
+
       if (!code) return;
       await this.emailQueue.enqueueVerifyEmail(email, code); //change to forgot password
 

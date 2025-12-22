@@ -51,7 +51,7 @@ export default function Signup() {
         captcha: token,
       });
 
-    setShowVerifyModal(true);
+      setShowVerifyModal(true);
     } catch (err: any) {
       setError(err?.response?.data?.message ?? "Signup failed");
     } finally {
@@ -75,7 +75,6 @@ export default function Signup() {
         code: verificationCode,
         captcha: token,
       });
-
     } catch (err: any) {
       setVerifyError(err?.response?.data?.message ?? "Invalid code");
     } finally {
