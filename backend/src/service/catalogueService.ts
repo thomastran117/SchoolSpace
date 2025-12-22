@@ -1,5 +1,5 @@
 import { CatalogueRepository } from "../repository/catalogueRepository";
-import type { ICatalogue, Term } from "../templates/mongoTemplate";
+import type { ICatalogue, Term } from "../templates/catalogueTemplate";
 import { httpError } from "../utility/httpUtility";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";

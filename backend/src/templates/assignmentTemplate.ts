@@ -1,5 +1,5 @@
 import mongoose, { Schema, type Document, type Model } from "mongoose";
-import { ICourse } from "./mongoTemplate";
+import { ICourse } from "./courseTemplate";
 
 interface IAssignment extends Document {
   course_id: ICourse["_id"];
@@ -43,18 +43,17 @@ const AssignmentSchema = new Schema<IAssignment>(
     },
 
     dueDate: {
-    type: Date,
-    validate: {
+      type: Date,
+      validate: {
         validator: (v: Date) => !v || v > new Date(),
         message: "Due date must be in the future",
-    },
+      },
     },
 
     deletedAt: {
-    type: Date,
-    default: null,
+      type: Date,
+      default: null,
     },
-
   },
   {
     timestamps: true,

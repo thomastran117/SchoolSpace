@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Term } from "../templates/mongoTemplate";
+import { Term } from "../templates/catalogueTemplate";
 
 const CreateCatalogueSchema = z.object({
   course_name: z.string().min(3).max(100),

@@ -4,7 +4,7 @@ import {
   type IUser,
   type Provider,
   type Role,
-} from "../templates/mongoTemplate";
+} from "../templates/userTemplate";
 import { BaseRepository } from "./baseRepository";
 
 class UserRepository extends BaseRepository {
