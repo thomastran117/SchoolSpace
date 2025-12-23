@@ -15,7 +15,7 @@ For a full documentation, refers to the `docs/` folder
 
 ## Tech Stack
 
-**Client:** React, Redux, TypeScript, Bootstrap
+**Client:** React, Redux, TypeScript, TailwindCSS
 
 **Server:** TypeScript, Node, Fastify
 

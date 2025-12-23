@@ -1,10 +1,10 @@
 # Setup
 
-This setup document will show how to get SchoolSpace running on your local machine for further development or local dmemos. This documentation will show the minimal setup needed to run the project with or without Docker.
+This setup document will show how to get SchoolSpace running on your local machine for further development or local demos. This documentation will show the minimal setup needed to run the project with or without Docker.
 
 ## Requirements
 
-There are two ways to run the project currently. The recommended approach is Docker as its minimal, works regardless of what environment (OS, Node version etc) that you may have, and more importantly, creates a MySQL and Redis container without local installation. You may use your own local Node, MySQL and Redis if you wish, but setup of MySQL and Redis is tedious if you do not have already installed.
+There are two ways to run the project currently. The recommended approach is Docker as its minimal, works regardless of what environment (OS, Node version etc) that you may have, and more importantly, creates a RabbitMQ and Redis container without local installation. You may use your own local Node, RabbitMQ and Redis if you wish, but setup of RabbitMQ and Redis is tedious if you do not have already installed.
 
 ### Docker (recommended)
 
@@ -22,20 +22,18 @@ Verify Docker is working with:
 ### Locally (not recommended)
 
 - [Node.js v22.16.0](https://nodejs.org/en/download)
-- [MySQL](https://www.mysql.com/downloads/)
 - [Redis](https://redis.io/downloads/)
 - [RabbitMQ](https://www.rabbitmq.com/tutorials)
 
 [Installing Redis on Windows](https://redis.io/docs/latest/operate/oss_and_stack/install/archive/install-redis/install-redis-on-windows/)  
 [Installing RabbitMQ on Windows](https://www.rabbitmq.com/docs/download)
 
-Alternatively, you can use a cloud instance of MySQL, Redis, RabbitMQ and Mongo - however it is a lot for this project
+Alternatively, you can use a cloud instance of Redis, RabbitMQ and Mongo - however it is a lot for this project
 
 Verify your local environment is working with:
 
 ```bash
   node --version
-  mysql -u root -p -e "SELECT VERSION();"
   mongosh
   redis-cli ping
   sudo rabbitmq-diagnostics ping
