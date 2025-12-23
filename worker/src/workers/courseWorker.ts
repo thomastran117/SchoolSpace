@@ -1,29 +1,25 @@
-// npx tsx src/workers/emailWorker.ts
 import amqp from "amqplib";
 import container from "../container";
-import { EmailService } from "../service/emailService";
 import logger from "../utility/logger";
 
-type EmailJob =
+type CourseWarmJob =
   | {
-      type: "VERIFY_EMAIL";
-      email: string;
-      code: string;
+      type: "COURSE_DETAIL";
+      courseId: string;
     }
   | {
-      type: "WELCOME_EMAIL";
-      email: string;
-    }
-  | {
-      type: "GENERIC";
-      to: string;
-      subject: string;
-      html: string;
+      type: "COURSE_LIST";
+      params: {
+        teacherId?: string;
+        year?: number;
+        page: number;
+        limit: number;
+      };
     };
 
-const QUEUE = "email.send";
-const RETRY_QUEUE = "email.send.retry";
-const DLQ = "email.send.dlq";
+const QUEUE = "course.warm";
+const RETRY_QUEUE = "course.warm.retry";
+const DLQ = "course.warm.dlq";
 
 const MAX_RETRIES = 5;
 const PREFETCH = 5;
@@ -52,49 +48,50 @@ const PREFETCH = 5;
 
     channel.prefetch(PREFETCH);
 
-    logger.info("[EmailWorker] Email worker started");
+    logger.info("[CourseWorker] Course worker started");
 
     await channel.consume(QUEUE, async (msg) => {
       if (!msg) return;
 
       const retryCount = msg.properties.headers?.["x-retry-count"] ?? 0;
 
-      let job: EmailJob;
+      let job: CourseWarmJob;
 
       try {
         job = JSON.parse(msg.content.toString());
       } catch {
-        logger.error("[EmailWorker] Invalid message payload");
+        logger.error("[CourseWorker] Invalid message payload");
         channel.sendToQueue(DLQ, msg.content, { persistent: true });
         channel.ack(msg);
         return;
       }
 
       const scope = container.createScope();
-      const emailService = scope.resolve<EmailService>("EmailService");
 
       try {
         switch (job.type) {
-          case "VERIFY_EMAIL":
-            await emailService.sendVerificationCodeEmail(job.email, job.code);
+          case "COURSE_DETAIL":
+            logger.info(
+              `[CourseWorker] Warm course detail requested`
+            
+            );
             break;
 
-          case "WELCOME_EMAIL":
-            await emailService.sendWelcomeEmail(job.email);
-            break;
-
-          case "GENERIC":
-            await emailService.sendEmail(job);
+          case "COURSE_LIST":
+            logger.info(
+              `[CourseWorker] Warm course list requested`
+            );
             break;
 
           default:
-            throw new Error("Unknown email job type");
+            throw new Error("Unknown course warm job type");
         }
 
-        logger.info(`[EmailWorker] Email sent (${job.type})`);
         channel.ack(msg);
       } catch (err) {
-        logger.error(`[EmailWorker] Send failed: ${String(err)}`);
+        logger.error(
+          `[CourseWorker] Job failed: ${String(err)}`,
+        );
 
         if (retryCount >= MAX_RETRIES) {
           channel.sendToQueue(DLQ, msg.content, { persistent: true });
@@ -111,7 +108,7 @@ const PREFETCH = 5;
       }
     });
   } catch (err) {
-    logger.error(`[EmailWorker] Fatal error: ${String(err)}`);
+    logger.error(`[CourseWorker] Fatal error: ${String(err)}`);
     process.exit(1);
   }
 })();
