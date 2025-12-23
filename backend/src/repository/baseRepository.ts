@@ -2,10 +2,33 @@ import mongoose, { ClientSession } from "mongoose";
 import { RepositoryError } from "../error/repositoryError";
 import { CircuitBreaker } from "../utility/circuitBreaker";
 
+/**
+ * BaseRepository
+ *
+ * Shared base class for all data-access repositories.
+ *
+ * Provides:
+ *  - Automatic retries with exponential backoff + jitter
+ *  - Deadline enforcement (timeouts across retries)
+ *  - AbortSignal propagation
+ *  - Circuit breaker protection
+ *  - MongoDB transaction helpers
+ *
+ * This class is intentionally opinionated to enforce
+ * resilience and consistency at the repository layer.
+ */
 abstract class BaseRepository {
+
+  /** Maximum retry attempts before failing */
   private readonly maxRetries: number;
+
+  /** Base delay (ms) for exponential backoff */
   private readonly baseDelay: number;
+
+  /** Upper bound for retry delay (ms) */
   private readonly maxDelay: number;
+
+  /** Circuit breaker guarding repository execution */
   private readonly breaker = new CircuitBreaker();
 
   constructor(options?: {
@@ -18,6 +41,22 @@ abstract class BaseRepository {
     this.maxDelay = options?.maxDelay ?? 5_000;
   }
 
+  /**
+   * executeAsync
+   *
+   * Core execution wrapper used by all repository methods.
+   *
+   * Responsibilities:
+   *  - Enforces retry logic for transient MongoDB failures
+   *  - Applies exponential backoff with jitter
+   *  - Propagates AbortSignal cancellation
+   *  - Enforces overall execution deadlines
+   *  - Integrates with the circuit breaker
+   *
+   * @param fn       The async repository operation
+   * @param options  Abort and deadline configuration
+   * @param context  Optional context string for logging/errors
+   */
   protected async executeAsync<T>(
     fn: (signal?: AbortSignal) => Promise<T>,
     options?: {
@@ -30,6 +69,9 @@ abstract class BaseRepository {
     const start = Date.now();
 
     while (true) {
+      /**
+       * Prevent execution when circuit breaker is OPEN
+       */
       if (!this.breaker.canExecute()) {
         throw new RepositoryError(
           `[Repository${context ? `:${context}` : ""}] circuit breaker OPEN`,
@@ -37,6 +79,9 @@ abstract class BaseRepository {
         );
       }
 
+      /**
+       * Enforce global deadline across retries
+       */
       if (options?.deadlineMs && Date.now() - start > options.deadlineMs) {
         throw new RepositoryError(
           `[Repository${context ? `:${context}` : ""}] deadline exceeded`,
@@ -44,8 +89,18 @@ abstract class BaseRepository {
         );
       }
 
+      /**
+       * Each attempt gets its own AbortController so:
+       *  - external cancellation propagates
+       *  - deadline-based cancellation is enforced
+       */
       const controller = new AbortController();
 
+
+      /**
+       * If a deadline is specified, schedule an abort
+       * when remaining time is exhausted
+       */
       if (options?.signal) {
         options.signal.addEventListener("abort", () => controller.abort());
       }
@@ -59,6 +114,9 @@ abstract class BaseRepository {
       }
 
       try {
+        /**
+         * Execute the repository operation
+         */
         const result = await fn(controller.signal);
 
         this.breaker.onSuccess();
@@ -67,6 +125,12 @@ abstract class BaseRepository {
         attempt++;
         this.breaker.onFailure();
 
+        /**
+         * Stop retrying when:
+         *  - max retries exceeded
+         *  - error is not retryable
+         *  - operation was aborted
+         */
         if (
           attempt > this.maxRetries ||
           !this.shouldRetry(err) ||
@@ -78,6 +142,9 @@ abstract class BaseRepository {
           );
         }
 
+        /**
+         * Exponential backoff with jitter to avoid retry storms
+         */
         const delay = Math.min(
           this.baseDelay * 2 ** (attempt - 1),
           this.maxDelay,
@@ -100,6 +167,20 @@ abstract class BaseRepository {
     }
   }
 
+  /**
+   * executeTransaction
+   *
+   * Helper for executing MongoDB transactions safely.
+   *
+   * Guarantees:
+   *  - Session lifecycle management
+   *  - Automatic retry behavior via executeAsync
+   *  - Proper cleanup even on failure
+   *
+   * @param fn       Transactional operation
+   * @param context  Optional logging context
+   * @param options  Deadline configuration
+   */
   protected async executeTransaction<T>(
     fn: (session: ClientSession, signal?: AbortSignal) => Promise<T>,
     context?: string,
@@ -125,6 +206,19 @@ abstract class BaseRepository {
     );
   }
 
+  /**
+   * shouldRetry
+   *
+   * Determines whether an error is safe to retry.
+   *
+   * Retries are allowed only for:
+   *  - MongoDB transient transaction errors
+   *  - Retryable write errors
+   *  - Known network / replica set failures
+   *
+   * Non-transient logical or validation errors
+   * must fail fast and never retry.
+   */
   protected shouldRetry(err: any): boolean {
     if (typeof err?.hasErrorLabel === "function") {
       if (
