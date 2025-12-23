@@ -7,8 +7,14 @@ import type { CacheService } from "./cacheService";
 import { CatalogueService } from "./catalogueService";
 import type { FileService } from "./fileService";
 import { UserService } from "./userService";
+import logger from "../utility/logger";
+import crypto from "crypto";
 
 const NOT_FOUND = "__NOT_FOUND__";
+
+const COURSE_HOT_THRESHOLD = 20;
+const LIST_HOT_THRESHOLD = 15;
+const HOT_WINDOW_SEC = 60;
 
 class CourseService extends BaseService {
   private readonly cacheService: CacheService;
@@ -18,9 +24,11 @@ class CourseService extends BaseService {
   private readonly userService?: UserService;
 
   private readonly LIST_TTL = 300;
-  private readonly TEACHER_TTL = 300;
   private readonly DETAIL_TTL = 600;
   private readonly NEGATIVE_TTL = 60;
+
+  private readonly HOT_DETAIL_TTL = 1800;
+  private readonly HOT_LIST_TTL = 120;
 
   private courseVersion?: number;
 
@@ -43,6 +51,10 @@ class CourseService extends BaseService {
     return ["course", ...parts].join(":");
   }
 
+  private hashKey(key: string): string {
+    return crypto.createHash("sha1").update(key).digest("hex");
+  }
+
   private async getVersion(): Promise<number> {
     if (this.courseVersion === undefined) {
       this.courseVersion =
@@ -52,78 +64,89 @@ class CourseService extends BaseService {
   }
 
   private async bumpVersion(): Promise<void> {
-    await this.cacheService.increment("course:version");
+    const next = await this.cacheService.increment("course:version");
+    this.courseVersion = next;
   }
 
-  private async markHot(id: string): Promise<void> {
-    await this.cacheService.increment(`course:hot:${id}`, 1, 60);
-  }
+  private async trackHotCourse(id: string): Promise<boolean> {
+    const key = `course:hot:${id}`;
+    const count = await this.cacheService.increment(
+      key,
+      1,
+      HOT_WINDOW_SEC,
+    );
 
-  public async createCourse(
-    catalogueId: string,
-    teacherId: number,
-    year: number,
-    image: MultipartFile,
-  ): Promise<ICourse> {
-    try {
-      if (!this.fileService || !this.userService || !this.catalogueService)
-        httpError(503, "Service not ready");
-
-      await this.userService.getUser(teacherId);
-      await this.catalogueService.getCourseTemplateById(catalogueId);
-
-      const buffer = await image.toBuffer();
-      const { publicUrl } = await this.fileService.uploadFile(
-        buffer,
-        image.filename,
-        "course",
-      );
-
-      const course = await this.courseRepository.create(
-        catalogueId,
-        teacherId,
-        year,
-        publicUrl,
-      );
-
-      await this.bumpVersion();
-      return this.toSafe(course);
-    } catch (err) {
-      throw httpError(500, `Failed to create course: ${String(err)}`);
+    if (count === COURSE_HOT_THRESHOLD) {
+      logger.info(`[CourseService] Course ${id} became HOT`);
+      return true;
     }
+
+    return count > COURSE_HOT_THRESHOLD;
+  }
+
+  private async trackHotList(cacheKey: string): Promise<boolean> {
+    const key = `course:list:hot:${this.hashKey(cacheKey)}`;
+    const count = await this.cacheService.increment(
+      key,
+      1,
+      HOT_WINDOW_SEC,
+    );
+
+    if (count === LIST_HOT_THRESHOLD) {
+      logger.info(`[CourseService] Course list page became HOT ${cacheKey}`);
+      return true;
+    }
+
+    return count > LIST_HOT_THRESHOLD;
+  }
+
+  private async acquireSoftLock(key: string): Promise<boolean> {
+    return this.cacheService.setIfNotExists(`${key}:lock`, true, 5);
+  }
+
+  private async releaseSoftLock(key: string): Promise<void> {
+    await this.cacheService.delete(`${key}:lock`);
   }
 
   public async getCourses(
-    teacherId?: number,
+    teacherId?: string,
     year?: number,
     page = 1,
     limit = 15,
   ) {
+    const filter: Record<string, unknown> = {};
+    if (teacherId) filter.teacher_id = teacherId;
+    if (year !== undefined) filter.year = year;
+
+    const version = await this.getVersion();
+
+    const cacheKey = this.key(
+      "v",
+      version,
+      "list",
+      teacherId ?? "any",
+      year ?? "any",
+      page,
+      limit,
+    );
+
+    const cached = await this.cacheService.get(cacheKey);
+    if (cached) return cached;
+
+    const hasLock = await this.acquireSoftLock(cacheKey);
+    if (!hasLock) {
+      await new Promise((r) => setTimeout(r, 50));
+      const retry = await this.cacheService.get(cacheKey);
+      if (retry) return retry;
+    }
+
     try {
-      const filter: Record<string, unknown> = {};
-      if (teacherId !== undefined) filter.teacher_id = teacherId;
-      if (year !== undefined) filter.year = year;
-
-      const version = await this.getVersion();
-
-      const cacheKey = this.key(
-        "v",
-        version,
-        "filter",
-        teacherId ?? "any",
-        year ?? "any",
-        page,
-        limit,
-      );
-
-      const cached = await this.cacheService.get(cacheKey);
-      if (cached) return cached;
-
-      const { results, total } = await this.courseRepository.findAllWithFilters(
-        filter,
-        page,
-        limit,
-      );
+      const { results, total } =
+        await this.courseRepository.findAllWithFilters(
+          filter,
+          page,
+          limit,
+        );
 
       const response = {
         data: this.toSafeArray(results),
@@ -132,10 +155,18 @@ class CourseService extends BaseService {
         currentPage: page,
       };
 
-      await this.cacheService.set(cacheKey, response, this.LIST_TTL);
+      const isHot = await this.trackHotList(cacheKey);
+
+      await this.cacheService.set(
+        cacheKey,
+        response,
+        isHot ? this.HOT_LIST_TTL : this.LIST_TTL,
+      );
+
       return response;
     } catch (err) {
-      throw httpError(500, `Failed to fetch courses: ${String(err)}`);
+      await this.releaseSoftLock(cacheKey);
+      throw err;
     }
   }
 
@@ -146,51 +177,77 @@ class CourseService extends BaseService {
       cacheKey,
     );
 
-    if (cached === NOT_FOUND) httpError(404, "Course not found");
-    if (cached) {
-      await this.markHot(id);
-      return cached;
-    }
-
-    const course = await this.courseRepository.findById(id);
-    if (!course) {
-      await this.cacheService.set(cacheKey, NOT_FOUND, this.NEGATIVE_TTL);
+    if (cached === NOT_FOUND) {
       httpError(404, "Course not found");
     }
 
-    const safe = this.toSafe(course);
-    await this.cacheService.set(cacheKey, safe, this.DETAIL_TTL);
-    await this.markHot(id);
+    if (cached) {
+      await this.trackHotCourse(id);
+      return cached;
+    }
 
-    return safe;
+    const hasLock = await this.acquireSoftLock(cacheKey);
+    if (!hasLock) {
+      await new Promise((r) => setTimeout(r, 50));
+      const retry = await this.cacheService.get<ICourse>(cacheKey);
+      if (retry) return retry;
+    }
+
+    try {
+      const course = await this.courseRepository.findById(id);
+      if (!course) {
+        await this.cacheService.set(
+          cacheKey,
+          NOT_FOUND,
+          this.NEGATIVE_TTL,
+        );
+        httpError(404, "Course not found");
+      }
+
+      const safe = this.toSafe(course);
+      const isHot = await this.trackHotCourse(id);
+
+      await this.cacheService.set(
+        cacheKey,
+        safe,
+        isHot ? this.HOT_DETAIL_TTL : this.DETAIL_TTL,
+      );
+
+      return safe;
+    } catch (err) {
+      await this.releaseSoftLock(cacheKey);
+      throw err;
+    }
   }
 
-  public async getCoursesByTeacher(
-    teacherId: number,
-    year?: number,
-  ): Promise<ICourse[]> {
-    if (!this.userService) httpError(503, "Service not ready");
-
-    const version = await this.getVersion();
-
-    const cacheKey = this.key(
-      "v",
-      version,
-      "teacher",
-      teacherId,
-      year ?? "any",
-    );
-
-    const cached = await this.cacheService.get<ICourse[]>(cacheKey);
-    if (cached) return cached;
+  public async createCourse(
+    catalogueId: string,
+    teacherId: string,
+    year: number,
+    image: MultipartFile,
+  ): Promise<ICourse> {
+    if (!this.fileService || !this.userService || !this.catalogueService)
+      httpError(503, "Service not ready");
 
     await this.userService.getUser(teacherId);
+    await this.catalogueService.getCourseTemplateById(catalogueId);
 
-    const courses = await this.courseRepository.findByTeacher(teacherId, year);
+    const buffer = await image.toBuffer();
+    const { publicUrl } = await this.fileService.uploadFile(
+      buffer,
+      image.filename,
+      "course",
+    );
 
-    const safe = this.toSafeArray(courses);
-    await this.cacheService.set(cacheKey, safe, this.TEACHER_TTL);
-    return safe;
+    const course = await this.courseRepository.create(
+      catalogueId,
+      teacherId,
+      year,
+      publicUrl,
+    );
+
+    await this.bumpVersion();
+    return this.toSafe(course);
   }
 
   public async updateCourse(
@@ -198,48 +255,38 @@ class CourseService extends BaseService {
     updates: Partial<ICourse>,
     image?: MultipartFile,
   ): Promise<ICourse> {
-    try {
-      if (!this.fileService) httpError(503, "Service not ready");
+    if (!this.fileService) httpError(503, "Service not ready");
 
-      const existing = await this.courseRepository.findById(id);
-      if (!existing) httpError(404, "Course not found");
+    const existing = await this.courseRepository.findById(id);
+    if (!existing) httpError(404, "Course not found");
 
-      if (image) {
-        const buffer = await image.toBuffer();
-        const { publicUrl } = await this.fileService.uploadFile(
-          buffer,
-          image.filename,
-          "course",
-        );
-        updates.image_url = publicUrl;
-      }
-
-      const updated = await this.courseRepository.update(id, updates);
-      if (!updated) httpError(404, "Course not found after update");
-
-      await this.bumpVersion();
-      await this.cacheService.delete(this.key("id", id));
-
-      return this.toSafe(updated);
-    } catch (err) {
-      throw httpError(500, `Failed to update course: ${String(err)}`);
+    if (image) {
+      const buffer = await image.toBuffer();
+      const { publicUrl } = await this.fileService.uploadFile(
+        buffer,
+        image.filename,
+        "course",
+      );
+      updates.image_url = publicUrl;
     }
+
+    const updated = await this.courseRepository.update(id, updates);
+    if (!updated) httpError(404, "Course not found after update");
+
+    await this.bumpVersion();
+    await this.cacheService.delete(this.key("id", id));
+
+    return this.toSafe(updated);
   }
 
   public async deleteCourse(id: string): Promise<boolean> {
-    try {
-      if (!this.fileService) httpError(503, "Service not ready");
+    const result = await this.courseRepository.delete(id);
+    if (!result) httpError(404, "Course not found");
 
-      const result = await this.courseRepository.delete(id);
-      if (!result) httpError(404, "Course not found");
+    await this.bumpVersion();
+    await this.cacheService.delete(this.key("id", id));
 
-      await this.bumpVersion();
-      await this.cacheService.delete(this.key("id", id));
-
-      return true;
-    } catch (err) {
-      throw httpError(500, `Failed to delete course: ${String(err)}`);
-    }
+    return true;
   }
 }
 

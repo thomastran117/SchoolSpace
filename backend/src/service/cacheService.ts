@@ -134,7 +134,6 @@ class CacheService {
     ttlSeconds?: number,
   ): Promise<number> {
     if (!this.canUseRedis()) {
-      // Fallback: behave as if counter exists and increments
       return amount;
     }
 
@@ -168,9 +167,6 @@ class CacheService {
     });
   }
 
-  // ----------------------------------------
-  // SET IF NOT EXISTS
-  // ----------------------------------------
   async setIfNotExists<T>(
     key: string,
     value: T,
