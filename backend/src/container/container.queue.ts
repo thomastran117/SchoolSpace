@@ -1,4 +1,5 @@
 import { EmailQueue } from "../queue/emailQueue";
+import { CourseQueue } from "../queue/courseQueue";
 
 import type { Registration } from "./container.types";
 
@@ -10,6 +11,11 @@ function registerQueueModules(): Map<string, Registration<any>> {
 
     queues.set("EmailQueue", {
       factory: () => new EmailQueue(),
+      lifetime: "singleton",
+    });
+
+    queues.set("CourseQueue", {
+      factory: () => new CourseQueue(),
       lifetime: "singleton",
     });
 
