@@ -14,7 +14,6 @@ import {
   SignupSchema,
   VerifySchema,
 } from "../dto/authSchema";
-
 import { useController } from "../hooks/controllerHook";
 import { validate } from "../hooks/validateHook";
 

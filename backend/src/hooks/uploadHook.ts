@@ -5,42 +5,66 @@ import sanitize from "sanitize-filename";
 import { httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
-const allowedMimeTypes = ["image/jpeg", "image/png"];
-const allowedExtensions = [".jpg", ".jpeg", ".png"];
-const maxSize = 2 * 1024 * 1024;
+type ImageUploadOptions = {
+  maxSize?: number;
+  allowedMimeTypes?: string[];
+  allowedExtensions?: string[];
+  fieldName?: string;
+};
 
-export async function safeUploadAvatar(
-  req: FastifyRequest,
-  reply: FastifyReply,
-) {
-  const file: MultipartFile | undefined = await req.file();
+const DEFAULTS: Required<ImageUploadOptions> = {
+  maxSize: 5 * 1024 * 1024, // 5MB default
+  allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
+  allowedExtensions: [".jpg", ".jpeg", ".png", ".webp"],
+  fieldName: "file",
+};
 
-  if (!file) {
-    throw httpError(400, "Missing file. Expected field name 'avatar'");
-  }
+export function safeUploadImage(options?: ImageUploadOptions) {
+  const config = { ...DEFAULTS, ...options };
 
-  if (file.file.bytesRead > maxSize) {
-    throw httpError(400, "File too large. Max file size is 2MB.");
-  }
+  return async function (req: FastifyRequest, reply: FastifyReply) {
+    const file: MultipartFile | undefined = await req.file();
 
-  const ext = path.extname(file.filename).toLowerCase();
-  const mime = file.mimetype;
+    if (!file) {
+      throw httpError(
+        400,
+        `Missing file. Expected field name '${config.fieldName}'`,
+      );
+    }
 
-  const validMime = allowedMimeTypes.includes(mime);
-  const validExt = allowedExtensions.includes(ext);
+    if (file.file.bytesRead > config.maxSize) {
+      throw httpError(
+        400,
+        `File too large. Max file size is ${Math.floor(config.maxSize / 1024 / 1024)}MB.`,
+      );
+    }
 
-  if (!validMime || !validExt) {
-    logger.warn(
-      `Rejected file: mimetype=${mime}, ext=${ext}, name=${file.filename}`,
-    );
+    const ext = path.extname(file.filename).toLowerCase();
+    const mime = file.mimetype;
 
-    throw httpError(
-      400,
-      "Only JPG and PNG files with correct extensions are allowed",
-    );
-  }
+    const validMime = config.allowedMimeTypes.includes(mime);
+    const validExt = config.allowedExtensions.includes(ext);
 
-  file.filename = sanitize(file.filename);
+    if (!validMime || !validExt) {
+      logger.warn(
+        `Rejected image upload: mimetype=${mime}, ext=${ext}, name=${file.filename}`,
+      );
 
-  (req as any).validatedFile = file;
+      throw httpError(
+        400,
+        `Invalid image format. Allowed: ${config.allowedExtensions.join(", ")}`,
+      );
+    }
+
+    file.filename = sanitize(file.filename);
+
+    (req as any).validatedFile = file;
+  };
 }
+
+export const safeUploadAvatar = safeUploadImage({
+  maxSize: 2 * 1024 * 1024,
+  allowedMimeTypes: ["image/jpeg", "image/png"],
+  allowedExtensions: [".jpg", ".jpeg", ".png"],
+  fieldName: "avatar",
+});

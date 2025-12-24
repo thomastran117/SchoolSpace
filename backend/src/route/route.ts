@@ -12,13 +12,14 @@ import { authRoutes } from "./authRoute";
 import { catalogueRoutes } from "./catalogueRoute";
 import { fileRoutes } from "./fileRoute";
 import { userRoutes } from "./userRoute";
+import { courseRoutes } from "./courseRoute";
 
 export async function registerRoutes(app: FastifyInstance) {
   app.register(authRoutes, { prefix: "/auth" });
   app.register(userRoutes, { prefix: "/users" });
   app.register(fileRoutes, { prefix: "/files" });
   app.register(catalogueRoutes, { prefix: "/catalogues" });
-
+  app.register(courseRoutes, { prefix: "/courses" })
   app.setNotFoundHandler((request) => {
     throw httpError(404, `Route '${request.url}' does not exist`);
   });
