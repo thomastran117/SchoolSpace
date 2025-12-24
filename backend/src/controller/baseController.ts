@@ -1,6 +1,6 @@
-import { FastifyRequest } from "fastify";
+import type { FastifyRequest } from "fastify";
 
-import { UserPayload } from "../models/token";
+import type { UserPayload } from "../models/token";
 import { httpError } from "../utility/httpUtility";
 
 abstract class BaseController {

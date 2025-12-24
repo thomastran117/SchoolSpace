@@ -7,9 +7,9 @@ import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
-import { CatalogueService } from "./catalogueService";
+import type { CatalogueService } from "./catalogueService";
 import type { FileService } from "./fileService";
-import { UserService } from "./userService";
+import type { UserService } from "./userService";
 
 const NOT_FOUND = "__NOT_FOUND__";
 
