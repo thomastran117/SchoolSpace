@@ -1,8 +1,9 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+
 import type { RoleUpdateDto, UserUpdateDto } from "../dto/userSchema";
 import type { UserPayload } from "../models/token";
 import type { UserService } from "../service/userService";
-import { httpError, HttpError } from "../utility/httpUtility";
+import { HttpError, httpError } from "../utility/httpUtility";
 import { sanitizeProfileImage } from "../utility/imageUtility";
 import logger from "../utility/logger";
 
@@ -46,7 +47,7 @@ class UserController {
 
   public async updateUser(
     req: FastifyRequest<{ Body: UserUpdateDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const token = req.cookies.refreshToken;
@@ -76,7 +77,7 @@ class UserController {
           faculty,
           school,
         },
-        effectiveToken,
+        effectiveToken
       );
 
       if (userRole !== "admin") {
@@ -102,7 +103,7 @@ class UserController {
       }
 
       logger.error(
-        `[UserController] updateUser failed: ${err?.message ?? err}`,
+        `[UserController] updateUser failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -111,7 +112,7 @@ class UserController {
 
   public async updateRole(
     req: FastifyRequest<{ Body: RoleUpdateDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const token = req.cookies.refreshToken;
@@ -124,7 +125,7 @@ class UserController {
       if (!(userRole === "admin" || userRole === "undefined"))
         throw httpError(
           409,
-          "The user role is set already. Contact support to change it",
+          "The user role is set already. Contact support to change it"
         );
 
       const effectiveToken = userRole === "admin" ? undefined : token;
@@ -139,7 +140,7 @@ class UserController {
       } = await this.userService.updateRole(
         effectiveUserId,
         requestedRole,
-        effectiveToken,
+        effectiveToken
       );
 
       if (userRole !== "admin") {
@@ -165,7 +166,7 @@ class UserController {
       }
 
       logger.error(
-        `[UserController] updateRole failed: ${err?.message ?? err}`,
+        `[UserController] updateRole failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -201,7 +202,7 @@ class UserController {
         await this.userService.updateAvatar(
           effectiveUserId,
           normalizedFile as any,
-          effectiveToken,
+          effectiveToken
         );
 
       if (userRole !== "admin") {
@@ -227,7 +228,7 @@ class UserController {
       }
 
       logger.error(
-        `[UserController] updateAvatar failed: ${err?.message ?? err}`,
+        `[UserController] updateAvatar failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -252,7 +253,7 @@ class UserController {
       }
 
       logger.error(
-        `[UserController] deleteUser failed: ${err?.message ?? err}`,
+        `[UserController] deleteUser failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");

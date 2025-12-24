@@ -24,7 +24,7 @@ export class HttpError extends Error {
 export function httpError(
   statusCode: number,
   message: string,
-  details?: unknown,
+  details?: unknown
 ): never {
   throw new HttpError(statusCode, message, details);
 }

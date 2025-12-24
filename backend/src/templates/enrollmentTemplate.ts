@@ -1,4 +1,5 @@
-import mongoose, { Schema, type Document, type Model } from "mongoose";
+import mongoose, { type Document, type Model, Schema } from "mongoose";
+
 import { ICourse } from "./courseTemplate";
 import { IUser } from "./userTemplate";
 
@@ -28,7 +29,7 @@ const EnrollmentSchema = new Schema<IEnrollment>(
   {
     timestamps: true,
     versionKey: false,
-  },
+  }
 );
 
 EnrollmentSchema.index({ course_id: 1, user_id: 1 });

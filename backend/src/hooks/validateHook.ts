@@ -1,5 +1,6 @@
 import type { FastifyRequest } from "fastify";
 import { ZodObject, ZodSchema } from "zod";
+
 import env from "../config/envConfigs";
 import { httpError } from "../utility/httpUtility";
 
@@ -8,7 +9,7 @@ type ValidationSource = "body" | "params" | "query";
 
 export function validate<T extends ZodSchema>(
   schema: T,
-  source: ValidationSource = "body",
+  source: ValidationSource = "body"
 ) {
   return async (req: FastifyRequest) => {
     let effectiveSchema = schema;

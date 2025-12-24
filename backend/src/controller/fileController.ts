@@ -1,8 +1,9 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import mime from "mime-types";
+
 import type { FileParams } from "../dto/params.js";
 import type { FileService } from "../service/fileService.js";
-import { httpError, HttpError } from "../utility/httpUtility";
+import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 class FileController {
@@ -18,7 +19,7 @@ class FileController {
 
   public async handleUpload(
     req: FastifyRequest<{ Params: FileParams }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const { type } = req.params;
@@ -31,7 +32,7 @@ class FileController {
       const result = await this.fileService.uploadFile(
         buffer,
         file.filename,
-        type,
+        type
       );
 
       return reply.code(201).send({
@@ -42,7 +43,7 @@ class FileController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[FileController] handleUpload failed: ${err?.message ?? err}`,
+        `[FileController] handleUpload failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -51,7 +52,7 @@ class FileController {
 
   public async handleFetch(
     req: FastifyRequest<{ Params: FileParams }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const { type, fileName } = req.params;
@@ -68,7 +69,7 @@ class FileController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[FileController] handleFetch failed: ${err?.message ?? err}`,
+        `[FileController] handleFetch failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -77,7 +78,7 @@ class FileController {
 
   public async handleDelete(
     req: FastifyRequest<{ Params: FileParams }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const { type, fileName } = req.params;
@@ -92,7 +93,7 @@ class FileController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[FileController] handleDelete failed: ${err?.message ?? err}`,
+        `[FileController] handleDelete failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");

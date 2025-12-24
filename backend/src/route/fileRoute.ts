@@ -7,8 +7,8 @@
  * @version 1.0.0
  * @auth Thomas
  */
-
 import type { FastifyInstance } from "fastify";
+
 import { authDependency } from "../hooks/authHook";
 import { useController } from "../hooks/controllerHook";
 
@@ -18,7 +18,7 @@ async function fileRoutes(app: FastifyInstance) {
     {
       preHandler: authDependency,
     },
-    useController("FileController", (c) => c.handleFetch),
+    useController("FileController", (c) => c.handleFetch)
   );
 }
 

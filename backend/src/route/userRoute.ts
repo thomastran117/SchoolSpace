@@ -6,11 +6,11 @@
  * @version 1.0.0
  * @author Thomas
  */
-
 /**
  * Imports
  */
 import type { FastifyInstance } from "fastify";
+
 import { MongoIdParamSchema } from "../dto/idSchema";
 import { RoleSchema, UserSchema } from "../dto/userSchema";
 import { authDependency } from "../hooks/authHook";
@@ -25,7 +25,7 @@ async function userRoutes(app: FastifyInstance) {
       preHandler: authDependency,
       preValidation: validate(MongoIdParamSchema, "params"),
     },
-    useController("UserController", (c) => c.getUser),
+    useController("UserController", (c) => c.getUser)
   );
 
   app.get(
@@ -33,7 +33,7 @@ async function userRoutes(app: FastifyInstance) {
     {
       preHandler: authDependency,
     },
-    useController("UserController", (c) => c.getUser),
+    useController("UserController", (c) => c.getUser)
   );
 
   app.delete(
@@ -42,7 +42,7 @@ async function userRoutes(app: FastifyInstance) {
       preHandler: authDependency,
       preValidation: validate(MongoIdParamSchema, "params"),
     },
-    useController("UserController", (c) => c.deleteUser),
+    useController("UserController", (c) => c.deleteUser)
   );
 
   app.delete(
@@ -50,7 +50,7 @@ async function userRoutes(app: FastifyInstance) {
     {
       preHandler: authDependency,
     },
-    useController("UserController", (c) => c.deleteUser),
+    useController("UserController", (c) => c.deleteUser)
   );
 
   app.put(
@@ -59,14 +59,14 @@ async function userRoutes(app: FastifyInstance) {
       preHandler: [authDependency, safeUploadAvatar],
       preValidation: validate(MongoIdParamSchema, "params"),
     },
-    useController("UserController", (c) => c.updateAvatar),
+    useController("UserController", (c) => c.updateAvatar)
   );
   app.put(
     "/avatar",
     {
       preHandler: [authDependency, safeUploadAvatar],
     },
-    useController("UserController", (c) => c.updateAvatar),
+    useController("UserController", (c) => c.updateAvatar)
   );
 
   app.put(
@@ -78,7 +78,7 @@ async function userRoutes(app: FastifyInstance) {
         validate(RoleSchema, "body"),
       ],
     },
-    useController("UserController", (c) => c.updateRole),
+    useController("UserController", (c) => c.updateRole)
   );
 
   app.put(
@@ -87,7 +87,7 @@ async function userRoutes(app: FastifyInstance) {
       preHandler: authDependency,
       preValidation: validate(RoleSchema, "body"),
     },
-    useController("UserController", (c) => c.updateRole),
+    useController("UserController", (c) => c.updateRole)
   );
 
   app.put(
@@ -99,7 +99,7 @@ async function userRoutes(app: FastifyInstance) {
         validate(UserSchema, "body"),
       ],
     },
-    useController("UserController", (c) => c.updateUser),
+    useController("UserController", (c) => c.updateUser)
   );
 
   app.put(
@@ -108,7 +108,7 @@ async function userRoutes(app: FastifyInstance) {
       preHandler: authDependency,
       preValidation: validate(UserSchema, "body"),
     },
-    useController("UserController", (c) => c.updateUser),
+    useController("UserController", (c) => c.updateUser)
   );
 }
 

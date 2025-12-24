@@ -1,9 +1,10 @@
 import { Types } from "mongoose";
+
 import {
-  UserModel,
   type IUser,
   type Provider,
   type Role,
+  UserModel,
 } from "../templates/userTemplate";
 import { BaseRepository } from "./baseRepository";
 
@@ -26,44 +27,44 @@ class UserRepository extends BaseRepository {
 
   public async findByEmail(
     email: string,
-    opts?: { includePassword?: boolean },
+    opts?: { includePassword?: boolean }
   ): Promise<IUser | null> {
     return this.executeAsync(async () =>
       UserModel.findOne({ email })
         .select(opts?.includePassword ? "+password" : "")
-        .exec(),
+        .exec()
     );
   }
 
   public async findByUsername(username: string): Promise<IUser | null> {
     return this.executeAsync(async () =>
-      UserModel.findOne({ username }).exec(),
+      UserModel.findOne({ username }).exec()
     );
   }
 
   public async findByGoogleId(googleId: string): Promise<IUser | null> {
     return this.executeAsync(async () =>
-      UserModel.findOne({ googleId }).exec(),
+      UserModel.findOne({ googleId }).exec()
     );
   }
 
   public async findByMicrosoftId(microsoftId: string): Promise<IUser | null> {
     return this.executeAsync(async () =>
-      UserModel.findOne({ microsoftId }).exec(),
+      UserModel.findOne({ microsoftId }).exec()
     );
   }
 
   public async findMicrosoftUser(
     msIssuer: string,
     msTenantId: string,
-    microsoftId: string,
+    microsoftId: string
   ): Promise<IUser | null> {
     return this.executeAsync(async () =>
       UserModel.findOne({
         microsoftId,
         msIssuer,
         msTenantId,
-      }).exec(),
+      }).exec()
     );
   }
 
@@ -71,13 +72,13 @@ class UserRepository extends BaseRepository {
     return this.executeAsync(async () =>
       UserModel.find(role ? { role } : {})
         .sort({ createdAt: 1 })
-        .exec(),
+        .exec()
     );
   }
 
   public async countByAvatar(url: string): Promise<number> {
     return this.executeAsync(async () =>
-      UserModel.countDocuments({ avatar: url }).exec(),
+      UserModel.countDocuments({ avatar: url }).exec()
     );
   }
 
@@ -100,7 +101,7 @@ class UserRepository extends BaseRepository {
     }
 
     return this.executeAsync(async () =>
-      UserModel.find(query).sort({ createdAt: 1 }).exec(),
+      UserModel.find(query).sort({ createdAt: 1 }).exec()
     );
   }
 
@@ -134,7 +135,7 @@ class UserRepository extends BaseRepository {
   public async update(
     id: string,
     data: Partial<Omit<IUser, "_id" | "version">>,
-    version: number,
+    version: number
   ): Promise<IUser> {
     const objectId = this.toObjectId(id);
     if (!objectId) {
@@ -146,7 +147,7 @@ class UserRepository extends BaseRepository {
     }
 
     const cleanData = Object.fromEntries(
-      Object.entries(data).filter(([_, v]) => v !== undefined),
+      Object.entries(data).filter(([_, v]) => v !== undefined)
     );
 
     if (Object.keys(cleanData).length === 0) {
@@ -160,12 +161,12 @@ class UserRepository extends BaseRepository {
           $set: cleanData,
           $inc: { version: 1 },
         },
-        { new: true },
+        { new: true }
       ).exec();
 
       if (!updated) {
         throw new Error(
-          "[UserRepository.update] Concurrent modification detected",
+          "[UserRepository.update] Concurrent modification detected"
         );
       }
 
@@ -178,7 +179,7 @@ class UserRepository extends BaseRepository {
     if (!objectId) return false;
 
     await this.executeAsync(async () =>
-      UserModel.deleteOne({ _id: objectId }).exec(),
+      UserModel.deleteOne({ _id: objectId }).exec()
     );
 
     return true;

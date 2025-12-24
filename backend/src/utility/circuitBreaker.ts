@@ -5,7 +5,7 @@ class CircuitBreaker {
 
   constructor(
     private readonly failureThreshold = 5,
-    private readonly resetTimeoutMs = 10_000,
+    private readonly resetTimeoutMs = 10_000
   ) {}
 
   canExecute(): boolean {

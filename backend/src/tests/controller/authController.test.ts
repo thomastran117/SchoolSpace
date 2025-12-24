@@ -56,13 +56,13 @@ describe("AuthController", () => {
         "test@test.com",
         "pass",
         true,
-        "captcha",
+        "captcha"
       );
 
       expect(reply.setCookie).toHaveBeenCalledWith(
         "refreshToken",
         "refresh",
-        expect.objectContaining({ httpOnly: true }),
+        expect.objectContaining({ httpOnly: true })
       );
 
       expect(reply.code).toHaveBeenCalledWith(200);
@@ -128,7 +128,7 @@ describe("AuthController", () => {
       await controller.localForgotPassword(req, reply);
 
       expect(mockAuthService.forgotPassword).toHaveBeenCalledWith(
-        "test@test.com",
+        "test@test.com"
       );
       expect(reply.code).toHaveBeenCalledWith(200);
     });
@@ -149,7 +149,7 @@ describe("AuthController", () => {
 
       expect(mockAuthService.changePassword).toHaveBeenCalledWith(
         "token",
-        "newpass",
+        "newpass"
       );
       expect(reply.code).toHaveBeenCalledWith(200);
     });
@@ -230,7 +230,7 @@ describe("AuthController", () => {
       expect(mockAuthService.authLogout).toHaveBeenCalledWith("token");
       expect(reply.clearCookie).toHaveBeenCalledWith(
         "refreshToken",
-        expect.any(Object),
+        expect.any(Object)
       );
       expect(reply.code).toHaveBeenCalledWith(200);
     });

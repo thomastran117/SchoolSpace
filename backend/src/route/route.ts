@@ -5,8 +5,8 @@
  *
  * @version 1.0.0
  */
-
 import type { FastifyInstance } from "fastify";
+
 import { httpError } from "../utility/httpUtility";
 import { authRoutes } from "./authRoute";
 import { catalogueRoutes } from "./catalogueRoute";

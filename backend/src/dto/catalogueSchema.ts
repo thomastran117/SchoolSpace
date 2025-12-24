@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { Term } from "../templates/catalogueTemplate";
 
 const CreateCatalogueSchema = z.object({

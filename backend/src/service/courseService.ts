@@ -1,5 +1,6 @@
 import type { MultipartFile } from "@fastify/multipart";
 import crypto from "crypto";
+
 import type { CourseRepository } from "../repository/courseRepository";
 import type { ICourse } from "../templates/courseTemplate";
 import { HttpError, httpError } from "../utility/httpUtility";
@@ -37,7 +38,7 @@ class CourseService extends BaseService {
     cacheService: CacheService,
     userService: UserService,
     catalogueService: CatalogueService,
-    fileService: FileService,
+    fileService: FileService
   ) {
     super();
     this.cacheService = cacheService;
@@ -104,7 +105,7 @@ class CourseService extends BaseService {
     teacherId?: string,
     year?: number,
     page = 1,
-    limit = 15,
+    limit = 15
   ) {
     try {
       const filter: Record<string, unknown> = {};
@@ -120,7 +121,7 @@ class CourseService extends BaseService {
         teacherId ?? "any",
         year ?? "any",
         page,
-        limit,
+        limit
       );
 
       const cached = await this.cacheService.get(cacheKey);
@@ -149,7 +150,7 @@ class CourseService extends BaseService {
         await this.cacheService.set(
           cacheKey,
           response,
-          isHot ? this.HOT_LIST_TTL : this.LIST_TTL,
+          isHot ? this.HOT_LIST_TTL : this.LIST_TTL
         );
 
         return response;
@@ -170,7 +171,7 @@ class CourseService extends BaseService {
       const cacheKey = this.key("id", id);
 
       const cached = await this.cacheService.get<ICourse | typeof NOT_FOUND>(
-        cacheKey,
+        cacheKey
       );
 
       if (cached === NOT_FOUND) {
@@ -202,7 +203,7 @@ class CourseService extends BaseService {
         await this.cacheService.set(
           cacheKey,
           safe,
-          isHot ? this.HOT_DETAIL_TTL : this.DETAIL_TTL,
+          isHot ? this.HOT_DETAIL_TTL : this.DETAIL_TTL
         );
 
         return safe;
@@ -214,7 +215,7 @@ class CourseService extends BaseService {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CourseService] getCourseById failed: ${err?.message ?? err}`,
+        `[CourseService] getCourseById failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -224,7 +225,7 @@ class CourseService extends BaseService {
     catalogueId: string,
     teacherId: string,
     year: number,
-    image: MultipartFile,
+    image: MultipartFile
   ): Promise<ICourse> {
     try {
       await this.userService.getUser(teacherId);
@@ -234,14 +235,14 @@ class CourseService extends BaseService {
       const { publicUrl } = await this.fileService.uploadFile(
         buffer,
         image.filename,
-        "course",
+        "course"
       );
 
       const course = await this.courseRepository.create(
         catalogueId,
         teacherId,
         year,
-        publicUrl,
+        publicUrl
       );
 
       await this.bumpVersion();
@@ -250,7 +251,7 @@ class CourseService extends BaseService {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CourseService] createCourse failed: ${err?.message ?? err}`,
+        `[CourseService] createCourse failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -259,7 +260,7 @@ class CourseService extends BaseService {
   public async updateCourse(
     id: string,
     updates: Partial<ICourse>,
-    image?: MultipartFile,
+    image?: MultipartFile
   ): Promise<ICourse> {
     try {
       const existing = await this.courseRepository.findById(id);
@@ -270,7 +271,7 @@ class CourseService extends BaseService {
         const { publicUrl } = await this.fileService.uploadFile(
           buffer,
           image.filename,
-          "course",
+          "course"
         );
         updates.image_url = publicUrl;
       }
@@ -286,7 +287,7 @@ class CourseService extends BaseService {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CourseService] updateCourse failed: ${err?.message ?? err}`,
+        `[CourseService] updateCourse failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -294,6 +295,9 @@ class CourseService extends BaseService {
 
   public async deleteCourse(id: string): Promise<boolean> {
     try {
+      const existing = await this.courseRepository.findById(id);
+      if (!existing) httpError(404, "Course not found");
+
       const result = await this.courseRepository.delete(id);
 
       await this.bumpVersion();
@@ -304,7 +308,7 @@ class CourseService extends BaseService {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CourseService] deleteCourse failed: ${err?.message ?? err}`,
+        `[CourseService] deleteCourse failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }

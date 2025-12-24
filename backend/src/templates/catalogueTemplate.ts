@@ -1,4 +1,4 @@
-import mongoose, { Schema, type Document, type Model } from "mongoose";
+import mongoose, { type Document, type Model, Schema } from "mongoose";
 
 enum Term {
   SUMMER = "SUMMER",
@@ -49,7 +49,7 @@ const CatalogueSchema = new Schema<ICatalogue>(
       required: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 CatalogueSchema.set("toJSON", {

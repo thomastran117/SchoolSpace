@@ -1,4 +1,5 @@
 import amqp, { Channel } from "amqplib";
+
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 
@@ -52,7 +53,7 @@ class EmailQueue {
     } catch (err) {
       this.available = false;
       logger.warn(
-        `[EmailQueue] Failed to connect — falling back to direct email: ${err}`,
+        `[EmailQueue] Failed to connect — falling back to direct email: ${err}`
       );
     }
   }
@@ -81,7 +82,7 @@ class EmailQueue {
 
         if (attempt > this.maxRetries || !this.isTransientError(err)) {
           logger.warn(
-            `[EmailQueue] Permanent failure after ${attempt} attempts: ${err}`,
+            `[EmailQueue] Permanent failure after ${attempt} attempts: ${err}`
           );
           this.available = false;
           return false;
@@ -90,7 +91,7 @@ class EmailQueue {
         const delay = this.computeBackoff(attempt);
 
         logger.warn(
-          `[EmailQueue] Transient failure, retrying in ${delay}ms (${attempt}/${this.maxRetries})`,
+          `[EmailQueue] Transient failure, retrying in ${delay}ms (${attempt}/${this.maxRetries})`
         );
 
         await this.sleep(delay);

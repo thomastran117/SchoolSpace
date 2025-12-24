@@ -7,10 +7,6 @@
  * @version 2.0.0
  * @auth Thomas
  */
-
-import { httpError, HttpError } from "../utility/httpUtility";
-import logger from "../utility/logger";
-
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import type {
@@ -26,6 +22,8 @@ import type {
 } from "../dto/authSchema";
 import type { TokenQuery } from "../dto/query";
 import type { AuthService } from "../service/authService";
+import { HttpError, httpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 
 class AuthController {
   private readonly authService: AuthService;
@@ -47,7 +45,7 @@ class AuthController {
 
   public async localAuthenticate(
     req: FastifyRequest<{ Body: LoginDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const { email, password, remember, captcha } = req.body;
@@ -59,7 +57,7 @@ class AuthController {
           email,
           password,
           rememberFlag,
-          captcha,
+          captcha
         );
 
       reply.setCookie("refreshToken", refreshToken, {
@@ -83,7 +81,7 @@ class AuthController {
       }
 
       logger.error(
-        `[AuthController] localAuthenticate failed: ${err?.message ?? err}`,
+        `[AuthController] localAuthenticate failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -92,7 +90,7 @@ class AuthController {
 
   public async localSignup(
     req: FastifyRequest<{ Body: SignupDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const { email, password, role, captcha } = req.body;
@@ -108,7 +106,7 @@ class AuthController {
       }
 
       logger.error(
-        `[AuthController] localSignup failed: ${err?.message ?? err}`,
+        `[AuthController] localSignup failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -117,7 +115,7 @@ class AuthController {
 
   public async localVerifyEmail(
     req: FastifyRequest<{ Body: VerifyDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const { email, code, captcha } = req.body;
@@ -133,7 +131,7 @@ class AuthController {
       }
 
       logger.error(
-        `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
+        `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -142,7 +140,7 @@ class AuthController {
 
   public async localForgotPassword(
     req: FastifyRequest<{ Body: ForgotPasswordDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const { email } = req.body;
@@ -157,7 +155,7 @@ class AuthController {
       }
 
       logger.error(
-        `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
+        `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -166,7 +164,7 @@ class AuthController {
 
   public async localChangePassword(
     req: FastifyRequest<{ Body: ChangePasswordDto; Querystring: TokenQuery }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const token = req.query.token;
@@ -184,7 +182,7 @@ class AuthController {
       }
 
       logger.error(
-        `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`,
+        `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -193,7 +191,7 @@ class AuthController {
 
   public async microsoftAuthenticate(
     req: FastifyRequest<{ Body: MicrosoftDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const { id_token: idToken } = req.body ?? {};
@@ -223,7 +221,7 @@ class AuthController {
       }
 
       logger.error(
-        `[AuthController] microsoftAuthenticate failed: ${err?.message ?? err}`,
+        `[AuthController] microsoftAuthenticate failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -232,7 +230,7 @@ class AuthController {
 
   public async googleAuthenticate(
     req: FastifyRequest<{ Body: GoogleDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const { id_token: googleToken } = req.body;
@@ -261,7 +259,7 @@ class AuthController {
       }
 
       logger.error(
-        `[AuthController] googleAuthenticate failed: ${err?.message ?? err}`,
+        `[AuthController] googleAuthenticate failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -270,7 +268,7 @@ class AuthController {
 
   public async appleAuthenticate(
     req: FastifyRequest<{ Body: AppleDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const { id_token: appleToken } = req.body;
@@ -300,7 +298,7 @@ class AuthController {
       }
 
       logger.error(
-        `[AuthController] appleAuthenticate failed: ${err?.message ?? err}`,
+        `[AuthController] appleAuthenticate failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -336,7 +334,7 @@ class AuthController {
       }
 
       logger.error(
-        `[AuthController] refreshAccessToken failed: ${err?.message ?? err}`,
+        `[AuthController] refreshAccessToken failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");
@@ -370,7 +368,7 @@ class AuthController {
       }
 
       logger.error(
-        `[AuthController] logoutRefreshToken failed: ${err?.message ?? err}`,
+        `[AuthController] logoutRefreshToken failed: ${err?.message ?? err}`
       );
 
       throw new HttpError(500, "Internal server error");

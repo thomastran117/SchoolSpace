@@ -1,4 +1,5 @@
 import amqp, { Channel } from "amqplib";
+
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 
@@ -52,7 +53,7 @@ class CourseQueue {
     } catch (err) {
       this.available = false;
       logger.warn(
-        `[CourseQueue] Failed to connect — cache warming disabled: ${err}`,
+        `[CourseQueue] Failed to connect — cache warming disabled: ${err}`
       );
     }
   }
@@ -100,7 +101,7 @@ class CourseQueue {
 
         if (attempt > this.maxRetries || !this.isTransientError(err)) {
           logger.warn(
-            `[CourseQueue] Permanent failure after ${attempt} attempts: ${err}`,
+            `[CourseQueue] Permanent failure after ${attempt} attempts: ${err}`
           );
           this.available = false;
           return false;
@@ -109,7 +110,7 @@ class CourseQueue {
         const delay = this.computeBackoff(attempt);
 
         logger.warn(
-          `[CourseQueue] Transient failure, retrying in ${delay}ms (${attempt}/${this.maxRetries})`,
+          `[CourseQueue] Transient failure, retrying in ${delay}ms (${attempt}/${this.maxRetries})`
         );
 
         await this.sleep(delay);

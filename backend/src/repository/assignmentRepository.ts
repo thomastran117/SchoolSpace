@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import {
   AssignmentModel,
   type IAssignment,
@@ -22,7 +23,7 @@ class AssignmentRepository extends BaseRepository {
   public async findById(id: string): Promise<IAssignment | null> {
     return this.executeAsync(
       (signal) => AssignmentModel.findById(id).setOptions({ signal }).exec(),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -33,7 +34,7 @@ class AssignmentRepository extends BaseRepository {
           .sort({ dueDate: 1 })
           .setOptions({ signal })
           .exec(),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -53,7 +54,7 @@ class AssignmentRepository extends BaseRepository {
 
         return assignment.save();
       },
-      { deadlineMs: 1000 },
+      { deadlineMs: 1000 }
     );
   }
 
@@ -61,7 +62,7 @@ class AssignmentRepository extends BaseRepository {
     id: string,
     updates: Partial<
       Pick<IAssignment, "name" | "description" | "file_url" | "dueDate">
-    >,
+    >
   ): Promise<IAssignment | null> {
     return this.executeAsync(
       (signal) =>
@@ -71,7 +72,7 @@ class AssignmentRepository extends BaseRepository {
         })
           .setOptions({ signal })
           .exec(),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -81,7 +82,7 @@ class AssignmentRepository extends BaseRepository {
         const res = await AssignmentModel.deleteOne({ _id: id });
         return res.deletedCount === 1;
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -134,7 +135,7 @@ class AssignmentRepository extends BaseRepository {
 
         return { data, total, page, limit };
       },
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 }

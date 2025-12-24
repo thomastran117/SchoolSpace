@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import type { ICourse } from "../templates/courseTemplate";
 import { CourseModel } from "../templates/courseTemplate";
 import { BaseRepository } from "./baseRepository";
@@ -16,13 +17,13 @@ class CourseRepository extends BaseRepository {
           .setOptions({ signal })
           .lean()
           .exec(),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
   public async findByTeacher(
     teacherId: string,
-    year?: number,
+    year?: number
   ): Promise<ICourse[]> {
     return this.executeAsync(
       (signal) => {
@@ -36,14 +37,14 @@ class CourseRepository extends BaseRepository {
           .lean()
           .exec();
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
   public async findAllWithFilters(
     filter: Record<string, unknown>,
     page: number,
-    limit: number,
+    limit: number
   ): Promise<{ results: ICourse[]; total: number }> {
     return this.executeAsync(
       async (signal) => {
@@ -64,7 +65,7 @@ class CourseRepository extends BaseRepository {
 
         return { results, total };
       },
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 
@@ -72,7 +73,7 @@ class CourseRepository extends BaseRepository {
     catalogueId: string,
     teacher_id: string,
     year: number,
-    image_url?: string,
+    image_url?: string
   ): Promise<ICourse> {
     return this.executeAsync(
       async () => {
@@ -86,13 +87,13 @@ class CourseRepository extends BaseRepository {
         const saved = await course.save();
         return saved.toObject();
       },
-      { deadlineMs: 1000 },
+      { deadlineMs: 1000 }
     );
   }
 
   public async update(
     id: string,
-    updates: Partial<ICourse>,
+    updates: Partial<ICourse>
   ): Promise<ICourse | null> {
     return this.executeAsync(
       (signal) =>
@@ -104,7 +105,7 @@ class CourseRepository extends BaseRepository {
           .setOptions({ signal })
           .lean()
           .exec(),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -112,14 +113,14 @@ class CourseRepository extends BaseRepository {
     return this.executeAsync(
       (signal) =>
         CourseModel.findByIdAndDelete(id).setOptions({ signal }).lean().exec(),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
   public async countImages(imageUrl: string): Promise<number> {
     return this.executeAsync(
       () => CourseModel.countDocuments({ image_url: imageUrl }),
-      { deadlineMs: 600 },
+      { deadlineMs: 600 }
     );
   }
 }

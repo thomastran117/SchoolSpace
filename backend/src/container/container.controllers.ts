@@ -15,10 +15,8 @@ import { ReviewController } from "../controller/reviewController";
 import { SubmissionController } from "../controller/submissionController";
 import { TutorController } from "../controller/tutorController";
 import { UserController } from "../controller/userController";
-
-import type { Registration } from "./container.types";
-
 import logger from "../utility/logger";
+import type { Registration } from "./container.types";
 
 function registerControllerModules(): Map<string, Registration<any>> {
   try {
@@ -120,7 +118,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
     return controllers;
   } catch (err: any) {
     logger.error(
-      `[Container] Controllers registration failed: ${err?.message ?? err}`,
+      `[Container] Controllers registration failed: ${err?.message ?? err}`
     );
     process.exit(1);
   }

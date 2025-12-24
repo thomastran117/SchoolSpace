@@ -2,8 +2,8 @@
  * @file auth-routes.ts
  * @description Authentication routes (login, signup, OAuth, etc.)
  */
-
 import type { FastifyInstance } from "fastify";
+
 import {
   AppleSchema,
   ChangePasswordSchema,
@@ -24,7 +24,7 @@ async function authRoutes(app: FastifyInstance) {
   app.post(
     "/login",
     { preValidation: validate(LoginSchema, "body") },
-    useController("AuthController", (c) => c.localAuthenticate),
+    useController("AuthController", (c) => c.localAuthenticate)
   );
 
   /**
@@ -33,7 +33,7 @@ async function authRoutes(app: FastifyInstance) {
   app.post(
     "/signup",
     { preValidation: validate(SignupSchema, "body") },
-    useController("AuthController", (c) => c.localSignup),
+    useController("AuthController", (c) => c.localSignup)
   );
 
   /**
@@ -42,7 +42,7 @@ async function authRoutes(app: FastifyInstance) {
   app.post(
     "/verify",
     { preValidation: validate(VerifySchema, "body") },
-    useController("AuthController", (c) => c.localVerifyEmail),
+    useController("AuthController", (c) => c.localVerifyEmail)
   );
 
   /**
@@ -51,7 +51,7 @@ async function authRoutes(app: FastifyInstance) {
   app.post(
     "/forgot-password",
     { preValidation: validate(ForgotPasswordSchema, "body") },
-    useController("AuthController", (c) => c.localForgotPassword),
+    useController("AuthController", (c) => c.localForgotPassword)
   );
 
   /**
@@ -60,7 +60,7 @@ async function authRoutes(app: FastifyInstance) {
   app.post(
     "/change-password",
     { preValidation: validate(ChangePasswordSchema, "body") },
-    useController("AuthController", (c) => c.localChangePassword),
+    useController("AuthController", (c) => c.localChangePassword)
   );
 
   /**
@@ -69,7 +69,7 @@ async function authRoutes(app: FastifyInstance) {
   app.post(
     "/microsoft/verify",
     { preValidation: validate(MicrosoftSchema, "body") },
-    useController("AuthController", (c) => c.microsoftAuthenticate),
+    useController("AuthController", (c) => c.microsoftAuthenticate)
   );
 
   /**
@@ -78,7 +78,7 @@ async function authRoutes(app: FastifyInstance) {
   app.post(
     "/google/verify",
     { preValidation: validate(GoogleSchema, "body") },
-    useController("AuthController", (c) => c.googleAuthenticate),
+    useController("AuthController", (c) => c.googleAuthenticate)
   );
 
   /**
@@ -87,7 +87,7 @@ async function authRoutes(app: FastifyInstance) {
   app.post(
     "/apple/verify",
     { preValidation: validate(AppleSchema, "body") },
-    useController("AuthController", (c) => c.appleAuthenticate),
+    useController("AuthController", (c) => c.appleAuthenticate)
   );
 
   /**
@@ -95,7 +95,7 @@ async function authRoutes(app: FastifyInstance) {
    */
   app.get(
     "/refresh",
-    useController("AuthController", (c) => c.refreshAccessToken),
+    useController("AuthController", (c) => c.refreshAccessToken)
   );
 
   /**
@@ -103,7 +103,7 @@ async function authRoutes(app: FastifyInstance) {
    */
   app.post(
     "/logout",
-    useController("AuthController", (c) => c.logoutRefreshToken),
+    useController("AuthController", (c) => c.logoutRefreshToken)
   );
 }
 

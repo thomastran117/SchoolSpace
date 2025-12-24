@@ -12,9 +12,9 @@
  * @version 2.0.1
  * @auth Thomas
  */
-
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
+
 import env from "../config/envConfigs";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
@@ -77,13 +77,13 @@ class WebService {
         new URLSearchParams({
           secret: GOOGLE_CAPTCHA_SECRET,
           response: token,
-        }),
+        })
       );
 
       return response.data.success === true;
     } catch (err: any) {
       logger.error(
-        `[WebService] verifyGoogleCaptcha failed: ${err?.message ?? err}\n${err.stack || ""}`,
+        `[WebService] verifyGoogleCaptcha failed: ${err?.message ?? err}\n${err.stack || ""}`
       );
       httpError(503, "Captcha verification unavailable");
     }
@@ -92,7 +92,7 @@ class WebService {
   async requestPayPalToken(
     clientId: string,
     secret: string,
-    apiUrl: string,
+    apiUrl: string
   ): Promise<string> {
     try {
       const resp = await axios.post<PayPalAuthResponse>(
@@ -101,14 +101,14 @@ class WebService {
         {
           auth: { username: clientId, password: secret },
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        },
+        }
       );
       return resp.data.access_token;
     } catch (err: any) {
       this.handleAxiosError(
         "requestPayPalToken",
         `${apiUrl}/v1/oauth2/token`,
-        err,
+        err
       );
     }
   }
@@ -119,7 +119,7 @@ class WebService {
     currency: string,
     amount: string,
     returnUrl: string,
-    cancelUrl: string,
+    cancelUrl: string
   ): Promise<PayPalOrder> {
     try {
       const resp = await axios.post<PayPalOrder>(
@@ -131,14 +131,14 @@ class WebService {
           ],
           application_context: { return_url: returnUrl, cancel_url: cancelUrl },
         },
-        { headers: { Authorization: `Bearer ${token}` } },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       return resp.data;
     } catch (err: any) {
       this.handleAxiosError(
         "createPayPalOrder",
         `${apiUrl}/v2/checkout/orders`,
-        err,
+        err
       );
     }
   }
@@ -148,14 +148,14 @@ class WebService {
       const resp = await axios.post(
         `${apiUrl}/v2/checkout/orders/${orderId}/capture`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       return resp.data;
     } catch (err: any) {
       this.handleAxiosError(
         "capturePayPalOrder",
         `${apiUrl}/v2/checkout/orders/${orderId}/capture`,
-        err,
+        err
       );
     }
   }
@@ -165,14 +165,14 @@ class WebService {
       const resp = await axios.post(
         `${apiUrl}/v2/checkout/orders/${orderId}/cancel`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       return resp.data;
     } catch (err: any) {
       this.handleAxiosError(
         "cancelPayPalOrder",
         `${apiUrl}/v2/checkout/orders/${orderId}/cancel`,
-        err,
+        err
       );
     }
   }
@@ -187,7 +187,7 @@ class WebService {
       this.handleAxiosError(
         "getPayPalOrder",
         `${apiUrl}/v2/checkout/orders/${orderId}`,
-        err,
+        err
       );
     }
   }

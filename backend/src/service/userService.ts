@@ -1,4 +1,5 @@
 import type { MultipartFile } from "@fastify/multipart";
+
 import type { AuthResponse } from "../models/auth";
 import type { Role, SafeUser } from "../models/user";
 import type { UserRepository } from "../repository/userRepository";
@@ -20,7 +21,7 @@ class UserService extends BaseService {
     userRepository: UserRepository,
     cacheService: CacheService,
     tokenService?: TokenService,
-    fileService?: FileService,
+    fileService?: FileService
   ) {
     super();
     this.userRepository = userRepository;
@@ -42,7 +43,7 @@ class UserService extends BaseService {
 
   private async writeUserCache(
     userID: string,
-    safeUser: SafeUser,
+    safeUser: SafeUser
   ): Promise<void> {
     await this.cacheService.set(this.userCacheKey(userID), safeUser, this.ttl);
   }
@@ -50,7 +51,7 @@ class UserService extends BaseService {
   public async updateAvatar(
     userID: string,
     image: MultipartFile,
-    oldRefreshToken?: string,
+    oldRefreshToken?: string
   ): Promise<AuthResponse> {
     try {
       if (!this.fileService || !this.tokenService)
@@ -65,13 +66,13 @@ class UserService extends BaseService {
       const { publicUrl } = await this.fileService.uploadFile(
         buffer,
         image.filename,
-        "profile",
+        "profile"
       );
 
       const updated = await this.userRepository.update(
         userID,
         { avatar: publicUrl },
-        user.version,
+        user.version
       );
 
       if (
@@ -87,7 +88,7 @@ class UserService extends BaseService {
           updated.username || updated.email,
           updated.role,
           updated.avatar ?? undefined,
-          true,
+          true
         );
 
       if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
@@ -113,7 +114,7 @@ class UserService extends BaseService {
   public async updateRole(
     userID: string,
     role: Role,
-    oldRefreshToken?: string,
+    oldRefreshToken?: string
   ): Promise<AuthResponse> {
     try {
       if (!this.tokenService) httpError(503, "Service is not ready");
@@ -124,7 +125,7 @@ class UserService extends BaseService {
       const updated = await this.userRepository.update(
         userID,
         { role: role as any },
-        user.version,
+        user.version
       );
 
       const { accessToken, refreshToken } =
@@ -133,7 +134,7 @@ class UserService extends BaseService {
           updated.username || updated.email,
           updated.role,
           updated.avatar ?? undefined,
-          true,
+          true
         );
 
       if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
@@ -166,14 +167,14 @@ class UserService extends BaseService {
       faculty?: string;
       school?: string;
     },
-    oldRefreshToken?: string,
+    oldRefreshToken?: string
   ): Promise<AuthResponse> {
     try {
       if (!this.tokenService) httpError(503, "Service is not ready");
 
       if (data.username) {
         const existing = await this.userRepository.findByUsername(
-          data.username,
+          data.username
         );
         if (existing && existing.id !== userID) {
           httpError(409, "Username already taken");
@@ -186,7 +187,7 @@ class UserService extends BaseService {
       const updated = await this.userRepository.update(
         userID,
         data,
-        user.version,
+        user.version
       );
 
       const { accessToken, refreshToken } =
@@ -195,7 +196,7 @@ class UserService extends BaseService {
           updated.username || updated.email,
           updated.role,
           updated.avatar ?? undefined,
-          true,
+          true
         );
 
       if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
@@ -245,7 +246,7 @@ class UserService extends BaseService {
   public async getUser(id: string): Promise<SafeUser> {
     try {
       const cached = await this.cacheService.get<SafeUser>(
-        this.userCacheKey(id),
+        this.userCacheKey(id)
       );
       if (cached) return cached;
 

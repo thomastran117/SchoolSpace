@@ -1,10 +1,11 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+
 import type { ControllerInstance, ControllerKey } from "../types/controller";
 
 export function useController<K extends ControllerKey>(
   key: K,
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  selector: (instance: ControllerInstance<K>) => Function,
+  selector: (instance: ControllerInstance<K>) => Function
 ) {
   return async (req: FastifyRequest, reply: FastifyReply) => {
     const controller = req.resolve<ControllerInstance<K>>(key);

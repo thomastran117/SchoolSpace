@@ -1,9 +1,7 @@
 import { CourseQueue } from "../queue/courseQueue";
 import { EmailQueue } from "../queue/emailQueue";
-
-import type { Registration } from "./container.types";
-
 import logger from "../utility/logger";
+import type { Registration } from "./container.types";
 
 function registerQueueModules(): Map<string, Registration<any>> {
   try {
@@ -22,7 +20,7 @@ function registerQueueModules(): Map<string, Registration<any>> {
     return queues;
   } catch (err: any) {
     logger.error(
-      `[Container] Queue registration failed: ${err?.message ?? err}`,
+      `[Container] Queue registration failed: ${err?.message ?? err}`
     );
     process.exit(1);
   }

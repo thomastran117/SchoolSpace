@@ -8,15 +8,15 @@
  * @version 2.1.0
  * @auth Thomas
  */
-
 import type { TokenPayload } from "google-auth-library";
 import { OAuth2Client } from "google-auth-library";
 import type { JwtHeader, JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import type { JwksClient } from "jwks-rsa";
 import jwksClient from "jwks-rsa";
+
 import env from "../config/envConfigs";
-import { httpError, HttpError } from "../utility/httpUtility";
+import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 interface GoogleUserInfo {
@@ -62,7 +62,7 @@ class OAuthService {
 
   private async retry<T>(
     fn: () => Promise<T>,
-    operationName: string,
+    operationName: string
   ): Promise<T> {
     let attempt = 0;
 
@@ -72,7 +72,7 @@ class OAuthService {
       } catch (err: any) {
         if (!this.isTransient(err) || attempt >= this.maxRetries) {
           logger.error(
-            `[OAuthService] Fatal error in ${operationName}: ${err?.message}`,
+            `[OAuthService] Fatal error in ${operationName}: ${err?.message}`
           );
           throw err;
         }
@@ -83,7 +83,7 @@ class OAuthService {
           `[OAuthService] Transient error in ${operationName}: ${err?.message}. ` +
             `Retrying in ${Math.round(delay)}ms (attempt ${
               attempt + 1
-            }/${this.maxRetries})`,
+            }/${this.maxRetries})`
         );
 
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -117,7 +117,7 @@ class OAuthService {
 
   private async getSigningKey(
     client: JwksClient,
-    header: JwtHeader,
+    header: JwtHeader
   ): Promise<string> {
     return this.retry<string>(
       () =>
@@ -133,7 +133,7 @@ class OAuthService {
             resolve(pubKey);
           });
         }),
-      "getSigningKey",
+      "getSigningKey"
     );
   }
 
@@ -194,16 +194,16 @@ class OAuthService {
                 }
 
                 resolve(payload);
-              },
+              }
             );
           }),
-        "msTokenVerify",
+        "msTokenVerify"
       );
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[OAuthService] verifyMicrosoftToken failed: ${err?.message}`,
+        `[OAuthService] verifyMicrosoftToken failed: ${err?.message}`
       );
       httpError(500, "Internal server error");
     }
@@ -227,7 +227,7 @@ class OAuthService {
             idToken: googleToken,
             audience: this.GOOGLE_CLIENT_ID!,
           }),
-        "googleTokenVerify",
+        "googleTokenVerify"
       );
 
       const payload: TokenPayload | undefined = ticket.getPayload();

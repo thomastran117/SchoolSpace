@@ -2,6 +2,7 @@ import type { MultipartFile } from "@fastify/multipart";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import path from "path";
 import sanitize from "sanitize-filename";
+
 import { httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
@@ -28,14 +29,14 @@ export function safeUploadImage(options?: ImageUploadOptions) {
     if (!file) {
       throw httpError(
         400,
-        `Missing file. Expected field name '${config.fieldName}'`,
+        `Missing file. Expected field name '${config.fieldName}'`
       );
     }
 
     if (file.file.bytesRead > config.maxSize) {
       throw httpError(
         400,
-        `File too large. Max file size is ${Math.floor(config.maxSize / 1024 / 1024)}MB.`,
+        `File too large. Max file size is ${Math.floor(config.maxSize / 1024 / 1024)}MB.`
       );
     }
 
@@ -47,12 +48,12 @@ export function safeUploadImage(options?: ImageUploadOptions) {
 
     if (!validMime || !validExt) {
       logger.warn(
-        `Rejected image upload: mimetype=${mime}, ext=${ext}, name=${file.filename}`,
+        `Rejected image upload: mimetype=${mime}, ext=${ext}, name=${file.filename}`
       );
 
       throw httpError(
         400,
-        `Invalid image format. Allowed: ${config.allowedExtensions.join(", ")}`,
+        `Invalid image format. Allowed: ${config.allowedExtensions.join(", ")}`
       );
     }
 

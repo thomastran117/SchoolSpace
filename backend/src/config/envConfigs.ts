@@ -11,8 +11,8 @@
  * @version 3.0.0
  * @auth Thomas
  */
-
 import dotenv from "dotenv";
+
 import logger from "../utility/logger";
 
 dotenv.config();
@@ -62,31 +62,31 @@ class EnvConfig {
     this._nodeEnv = (process.env.NODE_ENV as EnvMode) ?? "development";
     this._strictEnv = asBool(
       process.env.STRICT_ENV,
-      this._nodeEnv === "production",
+      this._nodeEnv === "production"
     );
 
     this._redisUrl = this.reqWithDefault("REDIS_URL", "redis://localhost:6379");
 
     this._mongoUrl = this.reqWithDefault(
       "MONGO_URL",
-      "mongodb://localhost:27017/app",
+      "mongodb://localhost:27017/app"
     );
 
     this._rabbitMQUrl = this.reqWithDefault(
       "RABBITMQ_URL",
-      "amqp://guest:guest@localhost:5672",
+      "amqp://guest:guest@localhost:5672"
     );
 
     this._jwtSecretAccess = this.reqWithDefault(
       "JWT_SECRET_ACCESS",
-      "dev-secret",
+      "dev-secret"
     );
 
     this._corsWhitelist = this.opt("CORS_WHITELIST", "http://localhost:3040")!;
 
     this._frontendClient = this.opt(
       "FRONTEND_CLIENT",
-      "http://localhost:3040",
+      "http://localhost:3040"
     )!;
 
     this._zodConfiguration = this.opt("ZOD_CONFIGURATION", "passthrough");
@@ -105,7 +105,7 @@ class EnvConfig {
 
     this._paypalApi = this.opt(
       "PAYPAL_API",
-      "https://api-m.sandbox.paypal.com",
+      "https://api-m.sandbox.paypal.com"
     );
 
     this._paypalCurrency = this.opt("PAYMENT_CURRENCY", "CAD");

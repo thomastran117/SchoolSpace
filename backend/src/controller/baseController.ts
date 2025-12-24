@@ -1,11 +1,12 @@
 import { FastifyRequest } from "fastify";
+
 import { UserPayload } from "../models/token";
 import { httpError } from "../utility/httpUtility";
 
 abstract class BaseController {
   protected parsePositiveInt(
     value: string | undefined,
-    defaultValue: number,
+    defaultValue: number
   ): number {
     const parsed = Number(value);
     return Number.isInteger(parsed) && parsed > 0 ? parsed : defaultValue;
@@ -13,7 +14,7 @@ abstract class BaseController {
 
   protected ensureRole(
     req: FastifyRequest,
-    allowed: UserPayload["role"] | UserPayload["role"][],
+    allowed: UserPayload["role"] | UserPayload["role"][]
   ) {
     const { role } = req.user as UserPayload;
 

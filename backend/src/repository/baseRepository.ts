@@ -1,4 +1,5 @@
 import mongoose, { ClientSession } from "mongoose";
+
 import { RepositoryError } from "../error/repositoryError";
 import { CircuitBreaker } from "../utility/circuitBreaker";
 
@@ -62,7 +63,7 @@ abstract class BaseRepository {
       signal?: AbortSignal;
       deadlineMs?: number;
     },
-    context?: string,
+    context?: string
   ): Promise<T> {
     let attempt = 0;
     const start = Date.now();
@@ -74,7 +75,7 @@ abstract class BaseRepository {
       if (!this.breaker.canExecute()) {
         throw new RepositoryError(
           `[Repository${context ? `:${context}` : ""}] circuit breaker OPEN`,
-          null,
+          null
         );
       }
 
@@ -84,7 +85,7 @@ abstract class BaseRepository {
       if (options?.deadlineMs && Date.now() - start > options.deadlineMs) {
         throw new RepositoryError(
           `[Repository${context ? `:${context}` : ""}] deadline exceeded`,
-          null,
+          null
         );
       }
 
@@ -107,7 +108,7 @@ abstract class BaseRepository {
       if (options?.deadlineMs) {
         timeout = setTimeout(
           () => controller.abort(),
-          options.deadlineMs - (Date.now() - start),
+          options.deadlineMs - (Date.now() - start)
         );
       }
 
@@ -136,7 +137,7 @@ abstract class BaseRepository {
         ) {
           throw new RepositoryError(
             `[Repository${context ? `:${context}` : ""}] failed after ${attempt} attempts`,
-            err,
+            err
           );
         }
 
@@ -145,7 +146,7 @@ abstract class BaseRepository {
          */
         const delay = Math.min(
           this.baseDelay * 2 ** (attempt - 1),
-          this.maxDelay,
+          this.maxDelay
         );
 
         const jitter = Math.random() * delay;
@@ -155,7 +156,7 @@ abstract class BaseRepository {
           {
             code: err?.code,
             labels: err?.errorLabels,
-          },
+          }
         );
 
         await new Promise((r) => setTimeout(r, delay + jitter));
@@ -182,7 +183,7 @@ abstract class BaseRepository {
   protected async executeTransaction<T>(
     fn: (session: ClientSession, signal?: AbortSignal) => Promise<T>,
     context?: string,
-    options?: { deadlineMs?: number },
+    options?: { deadlineMs?: number }
   ): Promise<T> {
     return this.executeAsync(
       async (signal) => {
@@ -200,7 +201,7 @@ abstract class BaseRepository {
         }
       },
       options,
-      context,
+      context
     );
   }
 

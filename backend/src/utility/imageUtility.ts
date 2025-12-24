@@ -12,10 +12,10 @@
  * @version 1.0.0
  * @auth Thomas
  */
-
 import type { MultipartFile } from "@fastify/multipart";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
+
 import { httpError } from "../utility/httpUtility";
 
 const MAX_WIDTH = 2048;
@@ -27,7 +27,7 @@ export interface SanitizedImageResult {
 }
 
 export async function sanitizeProfileImage(
-  file?: MultipartFile,
+  file?: MultipartFile
 ): Promise<SanitizedImageResult> {
   if (!file) {
     httpError(400, "No file uploaded");

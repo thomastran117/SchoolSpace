@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 import {
   EnrollmentModel,
   type IEnrollment,
@@ -13,13 +14,13 @@ class EnrollmentRepository extends BaseRepository {
   public async getById(id: string): Promise<IEnrollment | null> {
     return this.executeAsync(
       (signal) => EnrollmentModel.findById(id).setOptions({ signal }).exec(),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
   public async getByUserAndCourse(
     userId: string,
-    courseId: string,
+    courseId: string
   ): Promise<IEnrollment | null> {
     return this.executeAsync(
       (signal) =>
@@ -29,19 +30,19 @@ class EnrollmentRepository extends BaseRepository {
         })
           .setOptions({ signal })
           .exec(),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
   public async getEnrollmentsByCourse(
-    courseId: string,
+    courseId: string
   ): Promise<IEnrollment[]> {
     return this.executeAsync(
       (signal) =>
         EnrollmentModel.find({ course_id: courseId })
           .setOptions({ signal })
           .exec(),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -49,7 +50,7 @@ class EnrollmentRepository extends BaseRepository {
     return this.executeAsync(
       (signal) =>
         EnrollmentModel.find({ user_id: userId }).setOptions({ signal }).exec(),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -63,13 +64,13 @@ class EnrollmentRepository extends BaseRepository {
 
         return enrollment.save();
       },
-      { deadlineMs: 1000 },
+      { deadlineMs: 1000 }
     );
   }
 
   public async unenrollByUserAndCourse(
     userId: string,
-    courseId: string,
+    courseId: string
   ): Promise<boolean> {
     return this.executeAsync(
       async () => {
@@ -80,7 +81,7 @@ class EnrollmentRepository extends BaseRepository {
 
         return res.deletedCount === 1;
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -90,7 +91,7 @@ class EnrollmentRepository extends BaseRepository {
         const res = await EnrollmentModel.deleteOne({ _id: id });
         return res.deletedCount === 1;
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 }

@@ -1,4 +1,5 @@
 import fp from "fastify-plugin";
+
 import container from "../container";
 import type { BasicTokenService } from "../service/basicTokenService";
 

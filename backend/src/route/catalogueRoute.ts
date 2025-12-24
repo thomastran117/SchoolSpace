@@ -2,8 +2,8 @@
  * @file catalogueRoutes.ts
  * @description Routes for managing course catalogue templates
  */
-
 import type { FastifyInstance } from "fastify";
+
 import {
   CreateCatalogueSchema,
   QueryCatalogueSchema,
@@ -20,7 +20,7 @@ async function catalogueRoutes(app: FastifyInstance) {
     {
       preValidation: validate(MongoIdParamSchema, "params"),
     },
-    useController("CatalogueController", (c) => c.getCourseTemplate),
+    useController("CatalogueController", (c) => c.getCourseTemplate)
   );
 
   app.get(
@@ -28,7 +28,7 @@ async function catalogueRoutes(app: FastifyInstance) {
     {
       preValidation: validate(QueryCatalogueSchema, "query"),
     },
-    useController("CatalogueController", (c) => c.getCourseTemplates),
+    useController("CatalogueController", (c) => c.getCourseTemplates)
   );
 
   app.post(
@@ -37,7 +37,7 @@ async function catalogueRoutes(app: FastifyInstance) {
       preHandler: authDependency,
       preValidation: validate(CreateCatalogueSchema, "body"),
     },
-    useController("CatalogueController", (c) => c.createCourseTemplate),
+    useController("CatalogueController", (c) => c.createCourseTemplate)
   );
 
   app.put(
@@ -49,7 +49,7 @@ async function catalogueRoutes(app: FastifyInstance) {
         validate(UpdateCatalogueSchema, "body"),
       ],
     },
-    useController("CatalogueController", (c) => c.updateCourseTemplate),
+    useController("CatalogueController", (c) => c.updateCourseTemplate)
   );
 
   app.delete(
@@ -58,7 +58,7 @@ async function catalogueRoutes(app: FastifyInstance) {
       preHandler: authDependency,
       preValidation: validate(MongoIdParamSchema, "params"),
     },
-    useController("CatalogueController", (c) => c.deleteCourseTemplate),
+    useController("CatalogueController", (c) => c.deleteCourseTemplate)
   );
 }
 

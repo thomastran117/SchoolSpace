@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+
 import type {
   CreateCourseDto,
   QueryCourseDto,
@@ -25,7 +26,7 @@ class CourseController extends BaseController {
 
   public async getCourses(
     req: FastifyRequest<{ Querystring: QueryCourseDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const page = this.parsePositiveInt(req.query.page, 1);
@@ -34,7 +35,7 @@ class CourseController extends BaseController {
       const result = await this.courseService.getCourses(
         req.query.search,
         page,
-        limit,
+        limit
       );
 
       return reply.code(200).send({
@@ -45,7 +46,7 @@ class CourseController extends BaseController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CourseController] getCourses failed: ${err?.message ?? err}`,
+        `[CourseController] getCourses failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -53,7 +54,7 @@ class CourseController extends BaseController {
 
   public async getCourse(
     req: FastifyRequest<{ Params: { id: string } }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const course = await this.courseService.getCourseById(req.params.id);
@@ -66,7 +67,7 @@ class CourseController extends BaseController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CourseController] createCourse failed: ${err?.message ?? err}`,
+        `[CourseController] createCourse failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -74,7 +75,7 @@ class CourseController extends BaseController {
 
   public async createCourse(
     req: FastifyRequest<{ Body: CreateCourseDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       this.ensureTeacher(req);
@@ -98,7 +99,7 @@ class CourseController extends BaseController {
         req.body.catalogue_id,
         req.user.id,
         req.body.year,
-        normalizedFile as any,
+        normalizedFile as any
       );
 
       return reply.code(200).send({
@@ -109,7 +110,7 @@ class CourseController extends BaseController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CourseController] createCourse failed: ${err?.message ?? err}`,
+        `[CourseController] createCourse failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -117,7 +118,7 @@ class CourseController extends BaseController {
 
   public async updateCourse(
     req: FastifyRequest<{ Body: UpdateCourseDto; Params: { id: string } }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       this.ensureTeacher(req);
@@ -131,7 +132,7 @@ class CourseController extends BaseController {
 
       const result = await this.courseService.updateCourse(
         req.params.id,
-        updates,
+        updates
       );
 
       return reply.code(200).send({
@@ -142,7 +143,7 @@ class CourseController extends BaseController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CourseController] updateCourse failed: ${err?.message ?? err}`,
+        `[CourseController] updateCourse failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -150,7 +151,7 @@ class CourseController extends BaseController {
 
   public async deleteCourse(
     req: FastifyRequest<{ Params: { id: string } }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       this.ensureTeacher(req);
@@ -164,7 +165,7 @@ class CourseController extends BaseController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CourseController] deleteCourse failed: ${err?.message ?? err}`,
+        `[CourseController] deleteCourse failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
