@@ -111,10 +111,7 @@ class CourseRepository extends BaseRepository {
   public async delete(id: string): Promise<ICourse | null> {
     return this.executeAsync(
       (signal) =>
-        CourseModel.findByIdAndDelete(id)
-          .setOptions({ signal })
-          .lean()
-          .exec(),
+        CourseModel.findByIdAndDelete(id).setOptions({ signal }).lean().exec(),
       { deadlineMs: 800 },
     );
   }

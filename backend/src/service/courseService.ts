@@ -1,14 +1,14 @@
 import type { MultipartFile } from "@fastify/multipart";
+import crypto from "crypto";
 import type { CourseRepository } from "../repository/courseRepository";
 import type { ICourse } from "../templates/courseTemplate";
 import { httpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
 import { CatalogueService } from "./catalogueService";
 import type { FileService } from "./fileService";
 import { UserService } from "./userService";
-import logger from "../utility/logger";
-import crypto from "crypto";
 
 const NOT_FOUND = "__NOT_FOUND__";
 
@@ -70,11 +70,7 @@ class CourseService extends BaseService {
 
   private async trackHotCourse(id: string): Promise<boolean> {
     const key = `course:hot:${id}`;
-    const count = await this.cacheService.increment(
-      key,
-      1,
-      HOT_WINDOW_SEC,
-    );
+    const count = await this.cacheService.increment(key, 1, HOT_WINDOW_SEC);
 
     if (count === COURSE_HOT_THRESHOLD) {
       logger.info(`[CourseService] Course ${id} became HOT`);
@@ -86,11 +82,7 @@ class CourseService extends BaseService {
 
   private async trackHotList(cacheKey: string): Promise<boolean> {
     const key = `course:list:hot:${this.hashKey(cacheKey)}`;
-    const count = await this.cacheService.increment(
-      key,
-      1,
-      HOT_WINDOW_SEC,
-    );
+    const count = await this.cacheService.increment(key, 1, HOT_WINDOW_SEC);
 
     if (count === LIST_HOT_THRESHOLD) {
       logger.info(`[CourseService] Course list page became HOT ${cacheKey}`);
@@ -141,12 +133,11 @@ class CourseService extends BaseService {
     }
 
     try {
-      const { results, total } =
-        await this.courseRepository.findAllWithFilters(
-          filter,
-          page,
-          limit,
-        );
+      const { results, total } = await this.courseRepository.findAllWithFilters(
+        filter,
+        page,
+        limit,
+      );
 
       const response = {
         data: this.toSafeArray(results),
@@ -196,11 +187,7 @@ class CourseService extends BaseService {
     try {
       const course = await this.courseRepository.findById(id);
       if (!course) {
-        await this.cacheService.set(
-          cacheKey,
-          NOT_FOUND,
-          this.NEGATIVE_TTL,
-        );
+        await this.cacheService.set(cacheKey, NOT_FOUND, this.NEGATIVE_TTL);
         httpError(404, "Course not found");
       }
 

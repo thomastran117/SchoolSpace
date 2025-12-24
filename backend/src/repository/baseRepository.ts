@@ -18,7 +18,6 @@ import { CircuitBreaker } from "../utility/circuitBreaker";
  * resilience and consistency at the repository layer.
  */
 abstract class BaseRepository {
-
   /** Maximum retry attempts before failing */
   private readonly maxRetries: number;
 
@@ -95,7 +94,6 @@ abstract class BaseRepository {
        *  - deadline-based cancellation is enforced
        */
       const controller = new AbortController();
-
 
       /**
        * If a deadline is specified, schedule an abort

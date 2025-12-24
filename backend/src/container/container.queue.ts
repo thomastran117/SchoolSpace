@@ -1,5 +1,5 @@
-import { EmailQueue } from "../queue/emailQueue";
 import { CourseQueue } from "../queue/courseQueue";
+import { EmailQueue } from "../queue/emailQueue";
 
 import type { Registration } from "./container.types";
 

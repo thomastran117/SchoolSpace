@@ -63,11 +63,9 @@ class CourseQueue {
     }
 
     return this.retry(() => {
-      this.channel!.sendToQueue(
-        QUEUE,
-        Buffer.from(JSON.stringify(job)),
-        { persistent: true },
-      );
+      this.channel!.sendToQueue(QUEUE, Buffer.from(JSON.stringify(job)), {
+        persistent: true,
+      });
     });
   }
 
