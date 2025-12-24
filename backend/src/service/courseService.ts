@@ -2,7 +2,7 @@ import type { MultipartFile } from "@fastify/multipart";
 import crypto from "crypto";
 import type { CourseRepository } from "../repository/courseRepository";
 import type { ICourse } from "../templates/courseTemplate";
-import { httpError } from "../utility/httpUtility";
+import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
@@ -19,9 +19,9 @@ const HOT_WINDOW_SEC = 60;
 class CourseService extends BaseService {
   private readonly cacheService: CacheService;
   private readonly courseRepository: CourseRepository;
-  private readonly catalogueService?: CatalogueService;
-  private readonly fileService?: FileService;
-  private readonly userService?: UserService;
+  private readonly catalogueService: CatalogueService;
+  private readonly fileService: FileService;
+  private readonly userService: UserService;
 
   private readonly LIST_TTL = 300;
   private readonly DETAIL_TTL = 600;
@@ -106,104 +106,117 @@ class CourseService extends BaseService {
     page = 1,
     limit = 15,
   ) {
-    const filter: Record<string, unknown> = {};
-    if (teacherId) filter.teacher_id = teacherId;
-    if (year !== undefined) filter.year = year;
-
-    const version = await this.getVersion();
-
-    const cacheKey = this.key(
-      "v",
-      version,
-      "list",
-      teacherId ?? "any",
-      year ?? "any",
-      page,
-      limit,
-    );
-
-    const cached = await this.cacheService.get(cacheKey);
-    if (cached) return cached;
-
-    const hasLock = await this.acquireSoftLock(cacheKey);
-    if (!hasLock) {
-      await new Promise((r) => setTimeout(r, 50));
-      const retry = await this.cacheService.get(cacheKey);
-      if (retry) return retry;
-    }
-
     try {
-      const { results, total } = await this.courseRepository.findAllWithFilters(
-        filter,
+      const filter: Record<string, unknown> = {};
+      if (teacherId) filter.teacher_id = teacherId;
+      if (year !== undefined) filter.year = year;
+
+      const version = await this.getVersion();
+
+      const cacheKey = this.key(
+        "v",
+        version,
+        "list",
+        teacherId ?? "any",
+        year ?? "any",
         page,
         limit,
       );
 
-      const response = {
-        data: this.toSafeArray(results),
-        total,
-        totalPages: Math.ceil(total / limit),
-        currentPage: page,
-      };
+      const cached = await this.cacheService.get(cacheKey);
+      if (cached) return cached;
 
-      const isHot = await this.trackHotList(cacheKey);
+      const hasLock = await this.acquireSoftLock(cacheKey);
+      if (!hasLock) {
+        await new Promise((r) => setTimeout(r, 50));
+        const retry = await this.cacheService.get(cacheKey);
+        if (retry) return retry;
+      }
 
-      await this.cacheService.set(
-        cacheKey,
-        response,
-        isHot ? this.HOT_LIST_TTL : this.LIST_TTL,
-      );
+      try {
+        const { results, total } =
+          await this.courseRepository.findAllWithFilters(filter, page, limit);
 
-      return response;
-    } catch (err) {
-      await this.releaseSoftLock(cacheKey);
-      throw err;
+        const response = {
+          data: this.toSafeArray(results),
+          total,
+          totalPages: Math.ceil(total / limit),
+          currentPage: page,
+        };
+
+        const isHot = await this.trackHotList(cacheKey);
+
+        await this.cacheService.set(
+          cacheKey,
+          response,
+          isHot ? this.HOT_LIST_TTL : this.LIST_TTL,
+        );
+
+        return response;
+      } catch (err) {
+        await this.releaseSoftLock(cacheKey);
+        throw err;
+      }
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(`[CourseService] getCourses failed: ${err?.message ?? err}`);
+      throw new HttpError(500, "Internal server error");
     }
   }
 
   public async getCourseById(id: string): Promise<ICourse> {
-    const cacheKey = this.key("id", id);
-
-    const cached = await this.cacheService.get<ICourse | typeof NOT_FOUND>(
-      cacheKey,
-    );
-
-    if (cached === NOT_FOUND) {
-      httpError(404, "Course not found");
-    }
-
-    if (cached) {
-      await this.trackHotCourse(id);
-      return cached;
-    }
-
-    const hasLock = await this.acquireSoftLock(cacheKey);
-    if (!hasLock) {
-      await new Promise((r) => setTimeout(r, 50));
-      const retry = await this.cacheService.get<ICourse>(cacheKey);
-      if (retry) return retry;
-    }
-
     try {
-      const course = await this.courseRepository.findById(id);
-      if (!course) {
-        await this.cacheService.set(cacheKey, NOT_FOUND, this.NEGATIVE_TTL);
+      const cacheKey = this.key("id", id);
+
+      const cached = await this.cacheService.get<ICourse | typeof NOT_FOUND>(
+        cacheKey,
+      );
+
+      if (cached === NOT_FOUND) {
         httpError(404, "Course not found");
       }
 
-      const safe = this.toSafe(course);
-      const isHot = await this.trackHotCourse(id);
+      if (cached) {
+        await this.trackHotCourse(id);
+        return cached;
+      }
 
-      await this.cacheService.set(
-        cacheKey,
-        safe,
-        isHot ? this.HOT_DETAIL_TTL : this.DETAIL_TTL,
+      const hasLock = await this.acquireSoftLock(cacheKey);
+      if (!hasLock) {
+        await new Promise((r) => setTimeout(r, 50));
+        const retry = await this.cacheService.get<ICourse>(cacheKey);
+        if (retry) return retry;
+      }
+
+      try {
+        const course = await this.courseRepository.findById(id);
+        if (!course) {
+          await this.cacheService.set(cacheKey, NOT_FOUND, this.NEGATIVE_TTL);
+          httpError(404, "Course not found");
+        }
+
+        const safe = this.toSafe(course);
+        const isHot = await this.trackHotCourse(id);
+
+        await this.cacheService.set(
+          cacheKey,
+          safe,
+          isHot ? this.HOT_DETAIL_TTL : this.DETAIL_TTL,
+        );
+
+        return safe;
+      } catch (err) {
+        await this.releaseSoftLock(cacheKey);
+        throw err;
+      }
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseService] getCourseById failed: ${err?.message ?? err}`,
       );
-
-      return safe;
-    } catch (err) {
-      await this.releaseSoftLock(cacheKey);
-      throw err;
+      throw new HttpError(500, "Internal server error");
     }
   }
 
@@ -213,28 +226,37 @@ class CourseService extends BaseService {
     year: number,
     image: MultipartFile,
   ): Promise<ICourse> {
-    if (!this.fileService || !this.userService || !this.catalogueService)
-      httpError(503, "Service not ready");
+    try {
+      if (!this.fileService || !this.userService || !this.catalogueService)
+        httpError(503, "Service not ready");
 
-    await this.userService.getUser(teacherId);
-    await this.catalogueService.getCourseTemplateById(catalogueId);
+      await this.userService.getUser(teacherId);
+      await this.catalogueService.getCourseTemplateById(catalogueId);
 
-    const buffer = await image.toBuffer();
-    const { publicUrl } = await this.fileService.uploadFile(
-      buffer,
-      image.filename,
-      "course",
-    );
+      const buffer = await image.toBuffer();
+      const { publicUrl } = await this.fileService.uploadFile(
+        buffer,
+        image.filename,
+        "course",
+      );
 
-    const course = await this.courseRepository.create(
-      catalogueId,
-      teacherId,
-      year,
-      publicUrl,
-    );
+      const course = await this.courseRepository.create(
+        catalogueId,
+        teacherId,
+        year,
+        publicUrl,
+      );
 
-    await this.bumpVersion();
-    return this.toSafe(course);
+      await this.bumpVersion();
+      return this.toSafe(course);
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseService] createCourse failed: ${err?.message ?? err}`,
+      );
+      throw new HttpError(500, "Internal server error");
+    }
   }
 
   public async updateCourse(
@@ -242,38 +264,55 @@ class CourseService extends BaseService {
     updates: Partial<ICourse>,
     image?: MultipartFile,
   ): Promise<ICourse> {
-    if (!this.fileService) httpError(503, "Service not ready");
+    try {
+      if (!this.fileService) httpError(503, "Service not ready");
 
-    const existing = await this.courseRepository.findById(id);
-    if (!existing) httpError(404, "Course not found");
+      const existing = await this.courseRepository.findById(id);
+      if (!existing) httpError(404, "Course not found");
 
-    if (image) {
-      const buffer = await image.toBuffer();
-      const { publicUrl } = await this.fileService.uploadFile(
-        buffer,
-        image.filename,
-        "course",
+      if (image) {
+        const buffer = await image.toBuffer();
+        const { publicUrl } = await this.fileService.uploadFile(
+          buffer,
+          image.filename,
+          "course",
+        );
+        updates.image_url = publicUrl;
+      }
+
+      const updated = await this.courseRepository.update(id, updates);
+      if (!updated) httpError(404, "Course not found after update");
+
+      await this.bumpVersion();
+      await this.cacheService.delete(this.key("id", id));
+
+      return this.toSafe(updated);
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseService] updateCourse failed: ${err?.message ?? err}`,
       );
-      updates.image_url = publicUrl;
+      throw new HttpError(500, "Internal server error");
     }
-
-    const updated = await this.courseRepository.update(id, updates);
-    if (!updated) httpError(404, "Course not found after update");
-
-    await this.bumpVersion();
-    await this.cacheService.delete(this.key("id", id));
-
-    return this.toSafe(updated);
   }
 
   public async deleteCourse(id: string): Promise<boolean> {
-    const result = await this.courseRepository.delete(id);
-    if (!result) httpError(404, "Course not found");
+    try {
+      const result = await this.courseRepository.delete(id);
 
-    await this.bumpVersion();
-    await this.cacheService.delete(this.key("id", id));
+      await this.bumpVersion();
+      await this.cacheService.delete(this.key("id", id));
 
-    return true;
+      return true;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseService] deleteCourse failed: ${err?.message ?? err}`,
+      );
+      throw new HttpError(500, "Internal server error");
+    }
   }
 }
 

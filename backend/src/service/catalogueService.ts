@@ -172,8 +172,7 @@ class CatalogueService extends BaseService {
   }
 
   public async deleteCourseTemplate(id: string): Promise<boolean> {
-    const result = await this.catalogueRepository.delete(id);
-    if (!result) httpError(404, "Course template not found");
+    await this.catalogueRepository.delete(id);
 
     await this.cacheService.delete(this.key("id", id));
     await this.bumpCatalogueVersion();
