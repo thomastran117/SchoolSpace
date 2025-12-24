@@ -227,9 +227,6 @@ class CourseService extends BaseService {
     image: MultipartFile,
   ): Promise<ICourse> {
     try {
-      if (!this.fileService || !this.userService || !this.catalogueService)
-        httpError(503, "Service not ready");
-
       await this.userService.getUser(teacherId);
       await this.catalogueService.getCourseTemplateById(catalogueId);
 
@@ -265,8 +262,6 @@ class CourseService extends BaseService {
     image?: MultipartFile,
   ): Promise<ICourse> {
     try {
-      if (!this.fileService) httpError(503, "Service not ready");
-
       const existing = await this.courseRepository.findById(id);
       if (!existing) httpError(404, "Course not found");
 
