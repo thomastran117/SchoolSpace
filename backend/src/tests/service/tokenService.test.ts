@@ -1,8 +1,8 @@
-import { TokenService } from "../../service/tokenService";
-import { HttpError } from "../../utility/httpUtility";
-
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
+
+import { TokenService } from "../../service/tokenService";
+import { HttpError } from "../../utility/httpUtility";
 
 jest.mock("jsonwebtoken");
 jest.mock("uuid");
@@ -55,7 +55,7 @@ describe("TokenService", () => {
       });
 
       expect(() => tokenService.validateAccessToken("expired.jwt")).toThrow(
-        HttpError,
+        HttpError
       );
     });
 
@@ -67,7 +67,7 @@ describe("TokenService", () => {
       });
 
       expect(() => tokenService.validateAccessToken("bad.jwt")).toThrow(
-        HttpError,
+        HttpError
       );
     });
   });
@@ -82,7 +82,7 @@ describe("TokenService", () => {
         "test@test.com",
         "student",
         "img.png",
-        false,
+        false
       );
 
       expect(result).toEqual({
@@ -93,7 +93,7 @@ describe("TokenService", () => {
       expect(mockCache.set).toHaveBeenCalledWith(
         "refresh:uuid-token",
         TEST_REFRESH_PAYLOAD,
-        expect.any(Number),
+        expect.any(Number)
       );
     });
 
@@ -108,7 +108,7 @@ describe("TokenService", () => {
       mockCache.get.mockResolvedValue(null);
 
       await expect(
-        tokenService.validateRefreshToken("missing"),
+        tokenService.validateRefreshToken("missing")
       ).rejects.toBeInstanceOf(HttpError);
     });
 
@@ -131,7 +131,7 @@ describe("TokenService", () => {
       expect(mockCache.set).toHaveBeenCalledWith(
         "refresh:uuid-token",
         TEST_REFRESH_PAYLOAD,
-        expect.any(Number),
+        expect.any(Number)
       );
     });
 
@@ -159,7 +159,7 @@ describe("TokenService", () => {
       const result = await tokenService.createVerifyToken(
         "test@test.com",
         "hash123",
-        "student",
+        "student"
       );
 
       expect(result).toBe("uuid-token");
@@ -171,13 +171,13 @@ describe("TokenService", () => {
           passwordHash: "hash123",
           role: "student",
         },
-        15 * 60,
+        15 * 60
       );
 
       expect(mockCache.set).toHaveBeenCalledWith(
         "verify:email:test@test.com",
         "uuid-token",
-        15 * 60,
+        15 * 60
       );
     });
 
@@ -187,7 +187,7 @@ describe("TokenService", () => {
       const result = await tokenService.createVerifyToken(
         "test@test.com",
         "hash123",
-        "student",
+        "student"
       );
 
       expect(result).toBe("uuid-token");
@@ -210,13 +210,13 @@ describe("TokenService", () => {
 
       expect(mockCache.delete).toHaveBeenCalledWith("verify:uuid-token");
       expect(mockCache.delete).toHaveBeenCalledWith(
-        "verify:email:test@test.com",
+        "verify:email:test@test.com"
       );
 
       expect(mockCache.set).toHaveBeenCalledWith(
         "used:uuid-token",
         "1",
-        24 * 60 * 60,
+        24 * 60 * 60
       );
     });
 
@@ -224,7 +224,7 @@ describe("TokenService", () => {
       mockCache.get.mockResolvedValue(null);
 
       await expect(
-        tokenService.validateVerifyToken("bad-token"),
+        tokenService.validateVerifyToken("bad-token")
       ).rejects.toBeInstanceOf(HttpError);
     });
   });

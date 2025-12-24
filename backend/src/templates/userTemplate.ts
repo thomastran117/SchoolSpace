@@ -1,4 +1,4 @@
-import mongoose, { Schema, type Document, type Model } from "mongoose";
+import mongoose, { type Document, type Model, Schema } from "mongoose";
 
 enum Provider {
   LOCAL = "local",
@@ -145,7 +145,7 @@ const UserSchema = new Schema<IUser>(
       default: 1,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 UserSchema.set("toJSON", {
@@ -167,7 +167,7 @@ UserSchema.index(
       msIssuer: { $exists: true },
       msTenantId: { $exists: true },
     },
-  },
+  }
 );
 
 const UserModel: Model<IUser> =

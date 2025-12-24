@@ -18,7 +18,7 @@ abstract class BaseService {
       return docs.map((d) => this.toSafe(d));
     } catch {
       logger.error(
-        "[BaseService] Something went wrong converting each object's _id to id",
+        "[BaseService] Something went wrong converting each object's _id to id"
       );
       httpError(500, "An internal server error occured");
     }
@@ -32,7 +32,7 @@ abstract class BaseService {
 
       if (!dep) {
         logger.error(
-          `[${this.constructor.name}] ${caller} failed. Missing dependency: ${depName}`,
+          `[${this.constructor.name}] ${caller} failed. Missing dependency: ${depName}`
         );
         httpError(503, `Service is not ready to handle this request`);
       }

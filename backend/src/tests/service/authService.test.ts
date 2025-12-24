@@ -42,7 +42,7 @@ describe("AuthService", () => {
       mockEmailQueue as any,
       mockTokenService as any,
       mockOAuthService as any,
-      mockWebService as any,
+      mockWebService as any
     );
   });
 
@@ -69,7 +69,7 @@ describe("AuthService", () => {
         "test@test.com",
         "password",
         false,
-        "captcha",
+        "captcha"
       );
 
       expect(result).toEqual({
@@ -94,7 +94,7 @@ describe("AuthService", () => {
         .mockResolvedValue(false);
 
       await expect(
-        authService.loginUser("test@test.com", "wrong", false, "captcha"),
+        authService.loginUser("test@test.com", "wrong", false, "captcha")
       ).rejects.toBeInstanceOf(HttpError);
     });
 
@@ -102,7 +102,7 @@ describe("AuthService", () => {
       mockWebService.verifyGoogleCaptcha.mockResolvedValue(false);
 
       await expect(
-        authService.loginUser("x@test.com", "pass", false, "bad"),
+        authService.loginUser("x@test.com", "pass", false, "bad")
       ).rejects.toBeInstanceOf(HttpError);
     });
   });
@@ -121,7 +121,7 @@ describe("AuthService", () => {
         "test@test.com",
         "pass",
         "student",
-        "captcha",
+        "captcha"
       );
 
       expect(result).toBe(true);
@@ -134,7 +134,7 @@ describe("AuthService", () => {
       });
 
       await expect(
-        authService.signupUser("test@test.com", "pass", "student", "captcha"),
+        authService.signupUser("test@test.com", "pass", "student", "captcha")
       ).rejects.toBeInstanceOf(HttpError);
     });
   });

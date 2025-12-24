@@ -1,4 +1,5 @@
-import mongoose, { Schema, type Document, type Model } from "mongoose";
+import mongoose, { type Document, type Model, Schema } from "mongoose";
+
 import { ICatalogue } from "./catalogueTemplate";
 import { IUser } from "./userTemplate";
 
@@ -37,7 +38,7 @@ const CourseSchema = new Schema<ICourse>(
       required: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 const CourseModel: Model<ICourse> =

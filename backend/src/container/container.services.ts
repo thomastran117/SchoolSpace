@@ -21,10 +21,8 @@ import { TokenService } from "../service/tokenService";
 import { TutorService } from "../service/tutorService";
 import { UserService } from "../service/userService";
 import { WebService } from "../service/webService";
-
-import type { Registration } from "./container.types";
-
 import logger from "../utility/logger";
+import type { Registration } from "./container.types";
 
 function registerServiceModules(): Map<string, Registration<any>> {
   try {
@@ -74,7 +72,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
       factory: (scope) =>
         new CatalogueService(
           scope.resolve("CacheService"),
-          scope.resolve("CatalogueRepository"),
+          scope.resolve("CatalogueRepository")
         ),
       lifetime: "scoped",
     });
@@ -124,7 +122,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
         new UserService(
           scope.resolve("UserRepository"),
           scope.resolveOptional("TokenService"),
-          scope.resolveOptional("FileServices"),
+          scope.resolveOptional("FileService")
         ),
       lifetime: "scoped",
     });
@@ -133,7 +131,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
       factory: (scope) =>
         new AssignmentService(
           scope.resolve("CacheService"),
-          scope.resolve("FileService"),
+          scope.resolve("FileService")
         ),
       lifetime: "scoped",
     });
@@ -142,7 +140,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
       factory: (scope) =>
         new LectureService(
           scope.resolve("CacheService"),
-          scope.resolve("FileService"),
+          scope.resolve("FileService")
         ),
       lifetime: "scoped",
     });
@@ -154,7 +152,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           scope.resolve("CacheService"),
           scope.resolve("UserService"),
           scope.resolve("CatalogueService"),
-          scope.resolve("FileService"),
+          scope.resolve("FileService")
         ),
       lifetime: "scoped",
     });
@@ -163,7 +161,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
       factory: (scope) =>
         new EnrollmentService(
           scope.resolve("UserService"),
-          scope.resolve("CourseService"),
+          scope.resolve("CourseService")
         ),
       lifetime: "scoped",
     });
@@ -175,7 +173,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           scope.resolve("EmailQueue"),
           scope.resolve("TokenService"),
           scope.resolve("OAuthService"),
-          scope.resolve("WebService"),
+          scope.resolve("WebService")
         ),
       lifetime: "scoped",
     });
@@ -183,7 +181,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
     return services;
   } catch (err: any) {
     logger.error(
-      `[Container] Services registration failed: ${err?.message ?? err}`,
+      `[Container] Services registration failed: ${err?.message ?? err}`
     );
     process.exit(1);
   }

@@ -77,11 +77,11 @@ export async function buildApp() {
   app.get("/api", async (_, reply) => reply.code(200).send({ message: "ok" }));
 
   app.get("/ping", async (_, reply) =>
-    reply.code(200).send({ message: "ping" }),
+    reply.code(200).send({ message: "ping" })
   );
 
   app.get("/health", async (_, reply) =>
-    reply.code(200).send({ message: "ok" }),
+    reply.code(200).send({ message: "ok" })
   );
 
   app.register(registerRoutes, { prefix: "/api" });

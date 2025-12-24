@@ -12,7 +12,7 @@ const UserSchema = z
       .max(20, "Username cannot exceed 20 characters")
       .regex(
         /^[a-zA-Z0-9_]+$/,
-        "Username can only contain letters, numbers, and underscores",
+        "Username can only contain letters, numbers, and underscores"
       )
       .optional(),
 
@@ -22,7 +22,7 @@ const UserSchema = z
       .max(30, "Name cannot exceed 30 characters")
       .regex(
         /^[a-zA-Z\s'-]+$/,
-        "Name can only contain letters, spaces, apostrophes, or hyphens",
+        "Name can only contain letters, spaces, apostrophes, or hyphens"
       )
       .optional(),
 
@@ -42,7 +42,7 @@ const UserSchema = z
       .string()
       .regex(
         /^\+?[0-9\s\-()]{7,20}$/,
-        "Phone must be a valid phone number (digits, +, -, or spaces)",
+        "Phone must be a valid phone number (digits, +, -, or spaces)"
       )
       .optional(),
 
@@ -66,7 +66,7 @@ const UserSchema = z
       message:
         "At least one field (username, name, address, school, phone, or faculty) must be provided.",
       path: ["body"],
-    },
+    }
   );
 
 type RoleUpdateDto = z.infer<typeof RoleSchema>;

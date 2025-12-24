@@ -13,7 +13,6 @@ $RootDir      = Resolve-Path (Join-Path $PSScriptRoot "../..")
 $FrontendPath = Resolve-Path (Join-Path $RootDir "frontend")
 $BackendPath  = Resolve-Path (Join-Path $RootDir "backend")
 $WorkerPath  = Resolve-Path (Join-Path $RootDir "worker")
-
 function Assert-Package([string]$Path) {
   if (-not (Test-Path (Join-Path $Path "package.json"))) {
     throw "package.json not found in $Path"
@@ -36,7 +35,7 @@ $beProc = Start-Process -FilePath "powershell.exe" `
   -ArgumentList "-NoExit", "-Command", "cd '$BackendPath'; npm run dev" `
   -PassThru
 
-Write-Host ("Starting workers...") -ForegroundColor Cyan
+Write-Host ("Starting email worker...") -ForegroundColor Cyan
 $workerCmd = "cd '$WorkerPath'; npx tsx src/workers/emailWorker.ts"
 $wkProc = Start-Process -FilePath "powershell.exe" `
   -ArgumentList "-NoExit", "-Command", $workerCmd `

@@ -24,7 +24,7 @@ class CatalogueService extends BaseService {
 
   constructor(
     cacheService: CacheService,
-    catalogueRepository: CatalogueRepository,
+    catalogueRepository: CatalogueRepository
   ) {
     super();
     this.cacheService = cacheService;
@@ -64,7 +64,7 @@ class CatalogueService extends BaseService {
     description: string,
     course_code: string,
     term: Term,
-    available = true,
+    available = true
   ): Promise<ICatalogue> {
     const existing =
       await this.catalogueRepository.findByCourseCode(course_code);
@@ -75,7 +75,7 @@ class CatalogueService extends BaseService {
       description,
       course_code,
       term,
-      available,
+      available
     );
 
     await this.bumpCatalogueVersion();
@@ -87,7 +87,7 @@ class CatalogueService extends BaseService {
     available?: boolean,
     search?: string,
     page = CatalogueService.DEFAULT_PAGE,
-    limit = CatalogueService.DEFAULT_LIMIT,
+    limit = CatalogueService.DEFAULT_LIMIT
   ) {
     page = Math.max(1, page);
     limit = Math.min(CatalogueService.MAX_LIMIT, Math.max(1, limit));
@@ -112,7 +112,7 @@ class CatalogueService extends BaseService {
       available,
       search,
       page,
-      limit,
+      limit
     );
 
     const ttl = search
@@ -136,7 +136,7 @@ class CatalogueService extends BaseService {
     const cacheKey = this.key("id", id);
 
     const cached = await this.cacheService.get<ICatalogue | typeof NOT_FOUND>(
-      cacheKey,
+      cacheKey
     );
 
     if (cached === NOT_FOUND) httpError(404, "Course not found");
@@ -147,7 +147,7 @@ class CatalogueService extends BaseService {
       await this.cacheService.set(
         cacheKey,
         NOT_FOUND,
-        CatalogueService.NOT_FOUND_TTL,
+        CatalogueService.NOT_FOUND_TTL
       );
       httpError(404, "Course not found");
     }
@@ -160,7 +160,7 @@ class CatalogueService extends BaseService {
 
   public async updateCourseTemplate(
     id: string,
-    updates: Partial<ICatalogue>,
+    updates: Partial<ICatalogue>
   ): Promise<ICatalogue> {
     const course = await this.catalogueRepository.update(id, updates);
     if (!course) httpError(404, "Course template not found");
@@ -172,8 +172,7 @@ class CatalogueService extends BaseService {
   }
 
   public async deleteCourseTemplate(id: string): Promise<boolean> {
-    const result = await this.catalogueRepository.delete(id);
-    if (!result) httpError(404, "Course template not found");
+    await this.catalogueRepository.delete(id);
 
     await this.cacheService.delete(this.key("id", id));
     await this.bumpCatalogueVersion();

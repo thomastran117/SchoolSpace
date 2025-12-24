@@ -1,11 +1,12 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+
 import container from "../container";
 import type { BasicTokenService } from "../service/basicTokenService";
 import { httpError } from "../utility/httpUtility";
 
 export async function authDependency(
   request: FastifyRequest,
-  reply: FastifyReply,
+  reply: FastifyReply
 ) {
   const authHeader = request.headers.authorization;
 

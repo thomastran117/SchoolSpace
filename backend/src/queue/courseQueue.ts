@@ -3,28 +3,27 @@ import amqp, { Channel } from "amqplib";
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 
-const QUEUE = "email.send";
+const QUEUE = "course.warm";
 
-type EmailJob =
+type CourseWarmJob =
   | {
-      type: "VERIFY_EMAIL";
-      email: string;
-      code: string;
+      type: "COURSE_DETAIL";
+      courseId: string;
     }
   | {
-      type: "WELCOME_EMAIL";
-      email: string;
-    }
-  | {
-      type: "GENERIC";
-      to: string;
-      subject: string;
-      html: string;
+      type: "COURSE_LIST";
+      params: {
+        teacherId?: string;
+        year?: number;
+        page: number;
+        limit: number;
+      };
     };
 
-class EmailQueue {
+class CourseQueue {
   private channel?: Channel;
   private available = false;
+
   private readonly maxRetries = 3;
   private readonly baseDelayMs = 100;
 
@@ -34,7 +33,7 @@ class EmailQueue {
 
   public async init(): Promise<void> {
     if (!env.rabbitMqUrl) {
-      logger.warn("[EmailQueue] RabbitMQ not configured — queue disabled");
+      logger.warn("[CourseQueue] RabbitMQ not configured — queue disabled");
       this.available = false;
       return;
     }
@@ -46,27 +45,47 @@ class EmailQueue {
       await this.channel.assertQueue(QUEUE, {
         durable: true,
         deadLetterExchange: "",
-        deadLetterRoutingKey: "email.send.retry",
+        deadLetterRoutingKey: "course.warm.retry",
       });
 
       this.available = true;
+      logger.info("[CourseQueue] Connected and ready");
     } catch (err) {
       this.available = false;
       logger.warn(
-        `[EmailQueue] Failed to connect — falling back to direct email: ${err}`
+        `[CourseQueue] Failed to connect — cache warming disabled: ${err}`
       );
     }
   }
 
-  public async enqueue(job: EmailJob): Promise<boolean> {
+  public async enqueue(job: CourseWarmJob): Promise<boolean> {
     if (!this.available || !this.channel) {
       return false;
     }
 
-    return this.retry(async () => {
+    return this.retry(() => {
       this.channel!.sendToQueue(QUEUE, Buffer.from(JSON.stringify(job)), {
         persistent: true,
       });
+    });
+  }
+
+  public enqueueWarmCourse(courseId: string): Promise<boolean> {
+    return this.enqueue({
+      type: "COURSE_DETAIL",
+      courseId,
+    });
+  }
+
+  public enqueueWarmCourseList(params: {
+    teacherId?: string;
+    year?: number;
+    page: number;
+    limit: number;
+  }): Promise<boolean> {
+    return this.enqueue({
+      type: "COURSE_LIST",
+      params,
     });
   }
 
@@ -82,7 +101,7 @@ class EmailQueue {
 
         if (attempt > this.maxRetries || !this.isTransientError(err)) {
           logger.warn(
-            `[EmailQueue] Permanent failure after ${attempt} attempts: ${err}`
+            `[CourseQueue] Permanent failure after ${attempt} attempts: ${err}`
           );
           this.available = false;
           return false;
@@ -91,7 +110,7 @@ class EmailQueue {
         const delay = this.computeBackoff(attempt);
 
         logger.warn(
-          `[EmailQueue] Transient failure, retrying in ${delay}ms (${attempt}/${this.maxRetries})`
+          `[CourseQueue] Transient failure, retrying in ${delay}ms (${attempt}/${this.maxRetries})`
         );
 
         await this.sleep(delay);
@@ -121,21 +140,7 @@ class EmailQueue {
       msg.includes("channel closed")
     );
   }
-
-  public enqueueVerifyEmail(email: string, code: string): Promise<boolean> {
-    return this.enqueue({
-      type: "VERIFY_EMAIL",
-      email,
-      code,
-    });
-  }
-
-  public enqueueWelcomeEmail(email: string): Promise<boolean> {
-    return this.enqueue({
-      type: "WELCOME_EMAIL",
-      email,
-    });
-  }
 }
 
-export { EmailQueue };
+export { CourseQueue };
+export type { CourseWarmJob };

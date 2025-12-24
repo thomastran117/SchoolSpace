@@ -8,17 +8,15 @@
  * @version 2.0.0
  * @auth Thomas
  */
-
 // Imports
 import bcrypt from "bcrypt";
 
 import env from "../config/envConfigs";
-import { HttpError, httpError } from "../utility/httpUtility";
-import logger from "../utility/logger";
-
 import type { AuthResponse } from "../models/auth";
 import type { EmailQueue } from "../queue/emailQueue";
 import type { UserRepository } from "../repository/userRepository";
+import { HttpError, httpError } from "../utility/httpUtility";
+import logger from "../utility/logger";
 import type { OAuthService } from "./oauthService";
 import type { TokenService } from "./tokenService";
 import type { WebService } from "./webService";
@@ -40,7 +38,7 @@ class AuthService {
     emailQueue: EmailQueue,
     tokenService: TokenService,
     oauthService: OAuthService,
-    webService: WebService,
+    webService: WebService
   ) {
     this.userRepository = userRepository;
     this.emailQueue = emailQueue;
@@ -70,7 +68,7 @@ class AuthService {
     email: string,
     password: string,
     remember: boolean,
-    captcha: string,
+    captcha: string
   ): Promise<AuthResponse> {
     try {
       const result = await this.webService.verifyGoogleCaptcha(captcha);
@@ -92,7 +90,7 @@ class AuthService {
           user.username || user.email,
           user.role,
           user.avatar ?? undefined,
-          remember,
+          remember
         );
 
       return {
@@ -134,7 +132,7 @@ class AuthService {
     email: string,
     password: string,
     role: string,
-    captcha: string,
+    captcha: string
   ): Promise<boolean> {
     try {
       const result = await this.webService.verifyGoogleCaptcha(captcha);
@@ -147,7 +145,7 @@ class AuthService {
       const { code } = await this.tokenService.createEmailCode(
         email,
         hashedPassword,
-        role,
+        role
       );
 
       if (!code) return true;
@@ -179,7 +177,7 @@ class AuthService {
 
       const { password, role } = await this.tokenService.verifyEmailCode(
         email,
-        token,
+        token
       );
 
       const user = await this.userRepository.create({
@@ -223,7 +221,7 @@ class AuthService {
       const { code } = await this.tokenService.createEmailCode(
         email,
         "empty",
-        "empty",
+        "empty"
       );
 
       if (!code) return;
@@ -235,7 +233,7 @@ class AuthService {
         throw err;
       }
       logger.error(
-        `[AuthService] forgotPassword failed: ${err?.message ?? err}`,
+        `[AuthService] forgotPassword failed: ${err?.message ?? err}`
       );
       httpError(500, "Internal server error");
     }
@@ -254,7 +252,7 @@ class AuthService {
     try {
       const { email } = await this.tokenService.verifyEmailCode(
         "something",
-        token,
+        token
       );
       const hashedPassword = await this.hashPassword(password);
       const user = await this.userRepository.findByEmail(email);
@@ -264,7 +262,7 @@ class AuthService {
       await this.userRepository.update(
         user.id,
         { password: hashedPassword },
-        user.version,
+        user.version
       );
       return;
     } catch (err: any) {
@@ -272,7 +270,7 @@ class AuthService {
         throw err;
       }
       logger.error(
-        `[AuthService] changePassword failed: ${err?.message ?? err}`,
+        `[AuthService] changePassword failed: ${err?.message ?? err}`
       );
       httpError(500, "Internal server error");
     }
@@ -314,7 +312,7 @@ class AuthService {
           user.id,
           user.username || user.email,
           user.role,
-          user.avatar ?? undefined,
+          user.avatar ?? undefined
         );
 
       return {
@@ -330,7 +328,7 @@ class AuthService {
         throw err;
       }
       logger.error(
-        `[AuthService] microsoftOauth failed: ${err?.message ?? err}`,
+        `[AuthService] microsoftOauth failed: ${err?.message ?? err}`
       );
       httpError(500, "Internal server error");
     }
@@ -365,7 +363,7 @@ class AuthService {
           user.id,
           user.username || user.email,
           user.role,
-          user.avatar ?? undefined,
+          user.avatar ?? undefined
         );
 
       return {
@@ -429,7 +427,7 @@ class AuthService {
         throw err;
       }
       logger.error(
-        `[AuthService] generateNewTokens failed: ${err?.message ?? err}`,
+        `[AuthService] generateNewTokens failed: ${err?.message ?? err}`
       );
       httpError(500, "Internal server error");
     }
@@ -466,7 +464,7 @@ class AuthService {
    */
   private async comparePassword(
     plainPassword: string,
-    hashPassword: string,
+    hashPassword: string
   ): Promise<boolean> {
     try {
       return await bcrypt.compare(plainPassword, hashPassword);

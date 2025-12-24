@@ -1,7 +1,7 @@
 import { setRouteMetadata } from "./registry";
 
 export function requireAuth<T extends (...args: unknown[]) => unknown>(
-  handler: T,
+  handler: T
 ): T {
   setRouteMetadata(handler, { requireAuth: true });
   return handler;

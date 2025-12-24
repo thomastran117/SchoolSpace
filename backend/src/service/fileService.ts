@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
+
 import type { GetFileResult, UploadResult } from "../models/file";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
@@ -11,15 +12,15 @@ class FileService {
   constructor() {
     this.init().catch((err) =>
       logger.error(
-        `[FileService:init] Initialization failed: ${err.stack || err}`,
-      ),
+        `[FileService:init] Initialization failed: ${err.stack || err}`
+      )
     );
   }
 
   public async uploadFile(
     buffer: Buffer,
     originalName = "file.bin",
-    type = "general",
+    type = "general"
   ): Promise<UploadResult> {
     try {
       const dir = path.join(UPLOADS_DIR, type);

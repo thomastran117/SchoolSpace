@@ -10,15 +10,13 @@
  * @version 2.0.0
  * @auth Thomas
  */
-
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
 import env from "../config/envConfigs";
 import type { CacheService } from "../service/cacheService";
-
-import { httpError, HttpError } from "../utility/httpUtility";
+import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BasicTokenService } from "./basicTokenService";
 
@@ -52,7 +50,7 @@ class TokenService extends BasicTokenService {
     id: string,
     username: string,
     role: string,
-    avatar?: string,
+    avatar?: string
   ): string {
     const payload = { userId: id, username, role, avatar };
     return jwt.sign(payload, JWT_SECRET_ACCESS, { expiresIn: ACCESS_EXPIRY });
@@ -67,13 +65,13 @@ class TokenService extends BasicTokenService {
       avatar?: string;
       remember?: boolean;
     },
-    ttlSeconds: number,
+    ttlSeconds: number
   ): Promise<void> {
     try {
       await this.cacheService.set(`refresh:${token}`, payload, ttlSeconds);
     } catch (err: any) {
       logger.warn(
-        `[TokenService] saveRefreshToken failed (non-fatal): ${err?.message ?? err}`,
+        `[TokenService] saveRefreshToken failed (non-fatal): ${err?.message ?? err}`
       );
     }
   }
@@ -83,7 +81,7 @@ class TokenService extends BasicTokenService {
     username: string,
     role: string,
     avatar?: string,
-    remember?: boolean,
+    remember?: boolean
   ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const accessToken = this.createAccessToken(id, username, role, avatar);
@@ -94,7 +92,7 @@ class TokenService extends BasicTokenService {
       await this.saveRefreshToken(
         refreshToken,
         { id, username, role, avatar, remember },
-        ttl,
+        ttl
       );
 
       return { accessToken, refreshToken };
@@ -102,7 +100,7 @@ class TokenService extends BasicTokenService {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[TokenService] generateTokens failed: ${err?.message ?? err}`,
+        `[TokenService] generateTokens failed: ${err?.message ?? err}`
       );
       httpError(500, "Internal server error");
     }
@@ -127,7 +125,7 @@ class TokenService extends BasicTokenService {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[TokenService] validateRefreshToken failed: ${err?.message ?? err}`,
+        `[TokenService] validateRefreshToken failed: ${err?.message ?? err}`
       );
       httpError(401, "Refresh token revoked or expired");
     }
@@ -155,7 +153,7 @@ class TokenService extends BasicTokenService {
         payload.id,
         payload.username,
         payload.role,
-        payload.avatar,
+        payload.avatar
       );
 
       const newRefresh = uuidv4();
@@ -175,7 +173,7 @@ class TokenService extends BasicTokenService {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[TokenService] rotateRefreshToken failed: ${err?.message ?? err}`,
+        `[TokenService] rotateRefreshToken failed: ${err?.message ?? err}`
       );
       httpError(500, "Internal server error");
     }
@@ -193,7 +191,7 @@ class TokenService extends BasicTokenService {
   public async createEmailCode(
     email: string,
     passwordHash: string,
-    role: string,
+    role: string
   ): Promise<{ code?: string; alreadySent: boolean }> {
     try {
       const key = `verify:email:${email}`;
@@ -215,13 +213,13 @@ class TokenService extends BasicTokenService {
           attempts: 0,
           createdAt: Date.now(),
         },
-        VERIFY_TTL,
+        VERIFY_TTL
       );
 
       return { code, alreadySent: false };
     } catch (err: any) {
       logger.error(
-        `[TokenService] createEmailCode failed: ${err?.message ?? err}`,
+        `[TokenService] createEmailCode failed: ${err?.message ?? err}`
       );
       httpError(500, "Internal server error");
     }
@@ -247,7 +245,7 @@ class TokenService extends BasicTokenService {
         await this.cacheService.set(
           key,
           { ...data, attempts: data.attempts + 1 },
-          undefined,
+          undefined
         );
 
         httpError(400, "Invalid verification code");
@@ -264,7 +262,7 @@ class TokenService extends BasicTokenService {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[TokenService] verifyEmailCode failed: ${err?.message ?? err}`,
+        `[TokenService] verifyEmailCode failed: ${err?.message ?? err}`
       );
       httpError(500, "Internal server error");
     }

@@ -3,9 +3,8 @@ import { CatalogueRepository } from "../repository/catalogueRepository";
 import { CourseRepository } from "../repository/courseRepository";
 import { EnrollmentRepository } from "../repository/enrollmentRepository";
 import { UserRepository } from "../repository/userRepository";
-import type { Registration } from "./container.types";
-
 import logger from "../utility/logger";
+import type { Registration } from "./container.types";
 
 function registerRepositoryModules(): Map<string, Registration<any>> {
   try {
@@ -39,7 +38,7 @@ function registerRepositoryModules(): Map<string, Registration<any>> {
     return repositories;
   } catch (err: any) {
     logger.error(
-      `[Container] Repositories registration failed: ${err?.message ?? err}`,
+      `[Container] Repositories registration failed: ${err?.message ?? err}`
     );
     process.exit(1);
   }

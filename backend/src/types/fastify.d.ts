@@ -1,4 +1,5 @@
 import "fastify";
+
 import type { UserPayload } from "../../models/token";
 
 declare module "fastify" {

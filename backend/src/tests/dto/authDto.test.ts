@@ -3,7 +3,6 @@ import {
   MicrosoftSchema,
   SignupSchema,
 } from "../../dto/authSchema";
-
 import { validate } from "../../hooks/validateHook";
 import { HttpError } from "../../utility/httpUtility";
 

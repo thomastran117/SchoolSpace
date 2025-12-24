@@ -24,7 +24,7 @@ class CacheCircuitBreaker {
       this.failures = 0;
 
       logger.warn(
-        `[CacheService] Redis circuit opened for ${this.OPEN_DURATION_MS}ms`,
+        `[CacheService] Redis circuit opened for ${this.OPEN_DURATION_MS}ms`
       );
     }
   }
@@ -34,7 +34,7 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error("cache timeout")), timeoutMs),
+      setTimeout(() => reject(new Error("cache timeout")), timeoutMs)
     ),
   ]);
 }
@@ -62,7 +62,7 @@ class CacheService {
     } catch (err: any) {
       this.circuit.recordFailure();
       logger.warn(
-        `[CacheService] Redis GET skipped (${key}): ${err?.message ?? err}`,
+        `[CacheService] Redis GET skipped (${key}): ${err?.message ?? err}`
       );
       return null;
     }
@@ -77,13 +77,13 @@ class CacheService {
       .then(() =>
         ttlSeconds !== undefined
           ? redis.set(key, serialized, "EX", ttlSeconds)
-          : redis.set(key, serialized),
+          : redis.set(key, serialized)
       )
       .then(() => this.circuit.recordSuccess())
       .catch((err) => {
         this.circuit.recordFailure();
         logger.warn(
-          `[CacheService] Redis SET failed (${key}): ${err?.message ?? err}`,
+          `[CacheService] Redis SET failed (${key}): ${err?.message ?? err}`
         );
       });
   }
@@ -94,7 +94,7 @@ class CacheService {
     redis.del(key).catch((err) => {
       this.circuit.recordFailure();
       logger.warn(
-        `[CacheService] Redis DEL failed (${key}): ${err?.message ?? err}`,
+        `[CacheService] Redis DEL failed (${key}): ${err?.message ?? err}`
       );
     });
   }
@@ -105,7 +105,7 @@ class CacheService {
     try {
       const result = await withTimeout(
         redis.exists(key),
-        this.CACHE_TIMEOUT_MS,
+        this.CACHE_TIMEOUT_MS
       );
       this.circuit.recordSuccess();
       return result === 1;
@@ -118,7 +118,7 @@ class CacheService {
   async getOrSet<T>(
     key: string,
     ttl: number,
-    resolver: () => Promise<T>,
+    resolver: () => Promise<T>
   ): Promise<T> {
     const cached = await this.get<T>(key);
     if (cached !== null && cached !== undefined) return cached;
@@ -131,10 +131,9 @@ class CacheService {
   async increment(
     key: string,
     amount = 1,
-    ttlSeconds?: number,
+    ttlSeconds?: number
   ): Promise<number> {
     if (!this.canUseRedis()) {
-      // Fallback: behave as if counter exists and increments
       return amount;
     }
 
@@ -150,7 +149,7 @@ class CacheService {
     } catch (err: any) {
       this.circuit.recordFailure();
       logger.warn(
-        `[CacheService] Redis INCR failed (${key}): ${err?.message ?? err}`,
+        `[CacheService] Redis INCR failed (${key}): ${err?.message ?? err}`
       );
 
       return amount;
@@ -163,18 +162,15 @@ class CacheService {
     redis.decrby(key, amount).catch((err) => {
       this.circuit.recordFailure();
       logger.warn(
-        `[CacheService] Redis DECR failed (${key}): ${err?.message ?? err}`,
+        `[CacheService] Redis DECR failed (${key}): ${err?.message ?? err}`
       );
     });
   }
 
-  // ----------------------------------------
-  // SET IF NOT EXISTS
-  // ----------------------------------------
   async setIfNotExists<T>(
     key: string,
     value: T,
-    ttlSeconds?: number,
+    ttlSeconds?: number
   ): Promise<boolean> {
     if (!this.canUseRedis()) return false;
 
@@ -185,7 +181,7 @@ class CacheService {
         key,
         serialized,
         "NX",
-        ...(ttlSeconds !== undefined ? ["EX", ttlSeconds] : []),
+        ...(ttlSeconds !== undefined ? ["EX", ttlSeconds] : [])
       );
       if (result === "OK") {
         this.circuit.recordSuccess();
@@ -196,7 +192,7 @@ class CacheService {
     } catch (err: any) {
       this.circuit.recordFailure();
       logger.warn(
-        `[CacheService] Redis SETNX failed (${key}): ${err?.message ?? err}`,
+        `[CacheService] Redis SETNX failed (${key}): ${err?.message ?? err}`
       );
       return false;
     }
@@ -221,7 +217,7 @@ class CacheService {
     redis.flushall().catch((err) => {
       this.circuit.recordFailure();
       logger.warn(
-        `[CacheService] Redis FLUSHALL failed: ${err?.message ?? err}`,
+        `[CacheService] Redis FLUSHALL failed: ${err?.message ?? err}`
       );
     });
   }

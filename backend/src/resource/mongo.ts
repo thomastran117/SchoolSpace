@@ -8,8 +8,8 @@
  * @module resource
  * @version 2.0.1
  */
-
 import mongoose from "mongoose";
+
 import config from "../config/envConfigs";
 import logger from "../utility/logger";
 

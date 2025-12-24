@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import type { ICourse } from "../templates/courseTemplate";
 import { CourseModel } from "../templates/courseTemplate";
 import { BaseRepository } from "./baseRepository";
@@ -8,89 +10,118 @@ class CourseRepository extends BaseRepository {
   }
 
   public async findById(id: string): Promise<ICourse | null> {
-    return this.executeAsync(async () => {
-      return await CourseModel.findById(id).populate("catalogue").lean();
-    });
+    return this.executeAsync(
+      (signal) =>
+        CourseModel.findById(id)
+          .populate("catalogue")
+          .setOptions({ signal })
+          .lean()
+          .exec(),
+      { deadlineMs: 800 }
+    );
   }
 
   public async findByTeacher(
-    teacherId: number,
-    year?: number,
+    teacherId: string,
+    year?: number
   ): Promise<ICourse[]> {
-    return this.executeAsync(async () => {
-      const filter: any = { teacher_id: teacherId };
-      if (year) filter.year = year;
+    return this.executeAsync(
+      (signal) => {
+        const filter: Record<string, any> = { teacher_id: teacherId };
+        if (year) filter.year = year;
 
-      return await CourseModel.find(filter)
-        .populate("catalogue")
-        .sort({ createdAt: -1 })
-        .lean();
-    });
+        return CourseModel.find(filter)
+          .populate("catalogue")
+          .sort({ createdAt: -1 })
+          .setOptions({ signal })
+          .lean()
+          .exec();
+      },
+      { deadlineMs: 800 }
+    );
   }
 
   public async findAllWithFilters(
     filter: Record<string, unknown>,
     page: number,
-    limit: number,
+    limit: number
   ): Promise<{ results: ICourse[]; total: number }> {
-    return this.executeAsync(async () => {
-      const skip = (page - 1) * limit;
+    return this.executeAsync(
+      async (signal) => {
+        const skip = (page - 1) * limit;
 
-      const [results, total] = await Promise.all([
-        CourseModel.find(filter)
-          .populate("catalogue")
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(limit)
-          .lean(),
-        CourseModel.countDocuments(filter),
-      ]);
+        const [results, total] = await Promise.all([
+          CourseModel.find(filter)
+            .populate("catalogue")
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .setOptions({ signal })
+            .lean()
+            .exec(),
 
-      return { results, total };
-    });
+          CourseModel.countDocuments(filter),
+        ]);
+
+        return { results, total };
+      },
+      { deadlineMs: 1200 }
+    );
   }
 
   public async create(
     catalogueId: string,
-    teacher_id: number,
+    teacher_id: string,
     year: number,
-    image_url?: string,
+    image_url?: string
   ): Promise<ICourse> {
-    return this.executeAsync(async () => {
-      const course = await CourseModel.create({
-        catalogue: catalogueId,
-        teacher_id,
-        year,
-        image_url,
-      });
+    return this.executeAsync(
+      async () => {
+        const course = new CourseModel({
+          catalogue: new mongoose.Types.ObjectId(catalogueId),
+          teacher_id: new mongoose.Types.ObjectId(teacher_id),
+          year,
+          image_url,
+        });
 
-      return course.toObject();
-    });
+        const saved = await course.save();
+        return saved.toObject();
+      },
+      { deadlineMs: 1000 }
+    );
   }
 
   public async update(
     id: string,
-    updates: Partial<ICourse>,
+    updates: Partial<ICourse>
   ): Promise<ICourse | null> {
-    return this.executeAsync(async () => {
-      return await CourseModel.findByIdAndUpdate(id, updates, {
-        new: true,
-        runValidators: true,
-        lean: true,
-      }).populate("catalogue");
-    });
+    return this.executeAsync(
+      (signal) =>
+        CourseModel.findByIdAndUpdate(id, updates, {
+          new: true,
+          runValidators: true,
+        })
+          .populate("catalogue")
+          .setOptions({ signal })
+          .lean()
+          .exec(),
+      { deadlineMs: 800 }
+    );
   }
 
   public async delete(id: string): Promise<ICourse | null> {
-    return this.executeAsync(async () => {
-      return await CourseModel.findByIdAndDelete(id).lean();
-    });
+    return this.executeAsync(
+      (signal) =>
+        CourseModel.findByIdAndDelete(id).setOptions({ signal }).lean().exec(),
+      { deadlineMs: 800 }
+    );
   }
 
   public async countImages(imageUrl: string): Promise<number> {
-    return this.executeAsync(async () => {
-      return await CourseModel.countDocuments({ image_url: imageUrl });
-    });
+    return this.executeAsync(
+      () => CourseModel.countDocuments({ image_url: imageUrl }),
+      { deadlineMs: 600 }
+    );
   }
 }
 

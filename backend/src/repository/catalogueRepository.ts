@@ -14,7 +14,7 @@ class CatalogueRepository extends BaseRepository {
   }
 
   public async findByCourseCode(
-    course_code: string,
+    course_code: string
   ): Promise<ICatalogue | null> {
     return this.executeAsync(async () => {
       return await CatalogueModel.findOne({ course_code }).lean();
@@ -24,7 +24,7 @@ class CatalogueRepository extends BaseRepository {
   public async findAllWithFilters(
     filter: Record<string, unknown>,
     page: number,
-    limit: number,
+    limit: number
   ): Promise<{ results: ICatalogue[]; total: number }> {
     return this.executeAsync(async () => {
       const skip = (page - 1) * limit;
@@ -47,7 +47,7 @@ class CatalogueRepository extends BaseRepository {
     description: string,
     course_code: string,
     term: Term,
-    available: boolean = true,
+    available: boolean = true
   ): Promise<ICatalogue> {
     return this.executeAsync(async () => {
       const course = await CatalogueModel.create({
@@ -64,7 +64,7 @@ class CatalogueRepository extends BaseRepository {
 
   public async update(
     id: string,
-    updates: Partial<ICatalogue>,
+    updates: Partial<ICatalogue>
   ): Promise<ICatalogue | null> {
     return this.executeAsync(async () => {
       return await CatalogueModel.findByIdAndUpdate(id, updates, {

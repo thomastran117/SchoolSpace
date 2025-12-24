@@ -1,4 +1,5 @@
 import fp from "fastify-plugin";
+
 import { HttpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
@@ -20,7 +21,7 @@ export default fp(async function errorHandler(app) {
     logger.error(
       `${request.method} ${request.url} - ${
         unknownError?.message ?? unknownError
-      }`,
+      }`
     );
 
     return reply.code(500).send({

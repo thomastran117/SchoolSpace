@@ -8,7 +8,6 @@
  * @version 2.0.0
  * @auth Thomas
  */
-
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 import type { WebService } from "./webService";
@@ -38,7 +37,7 @@ class PaymentService {
       return await this.webService.requestPayPalToken(
         this.PAYPAL_CLIENT_ID,
         this.PAYPAL_SECRET_KEY,
-        this.PAYPAL_API,
+        this.PAYPAL_API
       );
     } catch (err: any) {
       logger.error(`[PayPal] Failed to generate token: ${err.message}`);
@@ -47,7 +46,7 @@ class PaymentService {
   }
 
   async createOrder(
-    amount: string,
+    amount: string
   ): Promise<{ id: string; approveLink: string }> {
     const token = await this.getAccessToken();
     const order = await this.webService.createPayPalOrder(
@@ -56,7 +55,7 @@ class PaymentService {
       this.PAYMENT_CURRENCY,
       amount,
       "http://localhost:8040/api/payment/success",
-      "http://localhost:8040/api/payment/cancel",
+      "http://localhost:8040/api/payment/cancel"
     );
 
     const approveLink =
@@ -75,7 +74,7 @@ class PaymentService {
       return await this.webService.cancelPayPalOrder(
         token,
         this.PAYPAL_API,
-        orderId,
+        orderId
       );
     } catch (err: any) {
       logger.warn(`[PayPal] Cancel order ${orderId} failed: ${err.message}`);

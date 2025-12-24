@@ -1,4 +1,5 @@
 import fp from "fastify-plugin";
+
 import container from "../container";
 import type { CacheService } from "../service/cacheService";
 import { httpError } from "../utility/httpUtility";
@@ -106,9 +107,9 @@ export default fp<RateLimiterOptions>(
         await cacheService.set(
           bucketKey,
           { tokens, lastRefill: now },
-          Math.ceil(capacity / refillRate),
+          Math.ceil(capacity / refillRate)
         );
       }
     });
-  },
+  }
 );

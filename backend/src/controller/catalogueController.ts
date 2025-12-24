@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+
 import type {
   CreateCatalogueDto,
   QueryCatalogueDto,
@@ -6,7 +7,7 @@ import type {
 } from "../dto/catalogueSchema";
 import type { UserPayload } from "../models/token";
 import type { CatalogueService } from "../service/catalogueService";
-import { httpError, HttpError } from "../utility/httpUtility";
+import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 class CatalogueController {
@@ -24,7 +25,7 @@ class CatalogueController {
 
   private parsePositiveInt(
     value: string | undefined,
-    defaultValue: number,
+    defaultValue: number
   ): number {
     const parsed = Number(value);
     return Number.isInteger(parsed) && parsed > 0 ? parsed : defaultValue;
@@ -39,7 +40,7 @@ class CatalogueController {
 
   public async createCourseTemplate(
     req: FastifyRequest<{ Body: CreateCatalogueDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       this.ensureAdmin(req);
@@ -49,7 +50,7 @@ class CatalogueController {
         req.body.description,
         req.body.course_code,
         req.body.term,
-        req.body.available,
+        req.body.available
       );
 
       return reply.code(200).send({
@@ -60,7 +61,7 @@ class CatalogueController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CatalogueController] createCourseTemplate failed: ${err?.message ?? err}`,
+        `[CatalogueController] createCourseTemplate failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -68,7 +69,7 @@ class CatalogueController {
 
   public async updateCourseTemplate(
     req: FastifyRequest<{ Body: UpdateCatalogueDto; Params: { id: string } }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       this.ensureAdmin(req);
@@ -82,7 +83,7 @@ class CatalogueController {
 
       const result = await this.catalogueService.updateCourseTemplate(
         req.params.id,
-        updates,
+        updates
       );
 
       return reply.code(200).send({
@@ -93,7 +94,7 @@ class CatalogueController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CatalogueController] updateCourseTemplate failed: ${err?.message ?? err}`,
+        `[CatalogueController] updateCourseTemplate failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -101,7 +102,7 @@ class CatalogueController {
 
   public async deleteCourseTemplate(
     req: FastifyRequest<{ Params: { id: string } }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       this.ensureAdmin(req);
@@ -115,7 +116,7 @@ class CatalogueController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CatalogueController] deleteCourseTemplate failed: ${err?.message ?? err}`,
+        `[CatalogueController] deleteCourseTemplate failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -123,11 +124,11 @@ class CatalogueController {
 
   public async getCourseTemplate(
     req: FastifyRequest<{ Params: { id: string } }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const course = await this.catalogueService.getCourseTemplateById(
-        req.params.id,
+        req.params.id
       );
 
       return reply.code(200).send({
@@ -138,7 +139,7 @@ class CatalogueController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CatalogueController] getCourseTemplate failed: ${err?.message ?? err}`,
+        `[CatalogueController] getCourseTemplate failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }
@@ -146,7 +147,7 @@ class CatalogueController {
 
   public async getCourseTemplates(
     req: FastifyRequest<{ Querystring: QueryCatalogueDto }>,
-    reply: FastifyReply,
+    reply: FastifyReply
   ) {
     try {
       const page = this.parsePositiveInt(req.query.page, 1);
@@ -157,7 +158,7 @@ class CatalogueController {
         req.query.available,
         req.query.search,
         page,
-        limit,
+        limit
       );
 
       return reply.code(200).send({
@@ -168,7 +169,7 @@ class CatalogueController {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[CatalogueController] getCourseTemplates failed: ${err?.message ?? err}`,
+        `[CatalogueController] getCourseTemplates failed: ${err?.message ?? err}`
       );
       throw new HttpError(500, "Internal server error");
     }

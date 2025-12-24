@@ -1,4 +1,5 @@
-import mongoose, { Schema, type Document, type Model } from "mongoose";
+import mongoose, { type Document, type Model, Schema } from "mongoose";
+
 import { ICourse } from "./courseTemplate";
 
 interface IAssignment extends Document {
@@ -58,7 +59,7 @@ const AssignmentSchema = new Schema<IAssignment>(
   {
     timestamps: true,
     versionKey: false,
-  },
+  }
 );
 
 AssignmentSchema.index({ course_id: 1, dueDate: 1 });

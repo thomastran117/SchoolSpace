@@ -9,13 +9,13 @@ const metadataRegistry = new WeakMap<AnyFunction, RouteMetadata>();
 
 export function setRouteMetadata<T extends AnyFunction>(
   handler: T,
-  meta: RouteMetadata,
+  meta: RouteMetadata
 ): void {
   metadataRegistry.set(handler, meta);
 }
 
 export function getRouteMetadata<T extends AnyFunction>(
-  handler: T,
+  handler: T
 ): RouteMetadata {
   return metadataRegistry.get(handler) ?? {};
 }

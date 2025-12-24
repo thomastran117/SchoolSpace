@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 import env from "../config/envConfigs";
-import { httpError, HttpError } from "../utility/httpUtility";
+import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 const { jwtSecretAccess: JWT_SECRET_ACCESS } = env;
@@ -25,7 +25,7 @@ class BasicTokenService {
         httpError(401, "Invalid access token");
 
       logger.error(
-        `[BasicTokenService] validateAccessToken failed: ${err?.message ?? err}`,
+        `[BasicTokenService] validateAccessToken failed: ${err?.message ?? err}`
       );
       httpError(500, "Internal server error");
     }
@@ -46,7 +46,7 @@ class BasicTokenService {
       if (err instanceof HttpError) throw err;
 
       logger.error(
-        `[BasicTokenService] getUserPayload failed: ${err?.message ?? err}`,
+        `[BasicTokenService] getUserPayload failed: ${err?.message ?? err}`
       );
       httpError(500, "Internal server error");
     }
