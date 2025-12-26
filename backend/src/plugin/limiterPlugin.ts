@@ -1,6 +1,7 @@
 import fp from "fastify-plugin";
 
 import container from "../container";
+import type { BasicTokenService } from "../service/basicTokenService";
 import type { CacheService } from "../service/cacheService";
 import { httpError } from "../utility/httpUtility";
 
@@ -8,107 +9,110 @@ type RateLimitMode = "window" | "bucket";
 
 export interface RateLimitPolicy {
   mode: RateLimitMode;
-
-  // fixed window
   windowMs?: number;
   maxRequests?: number;
-
-  // token bucket
   capacity?: number;
   refillRate?: number;
 }
 
 export interface RateLimiterOptions {
   defaultPolicy: RateLimitPolicy;
-
-  /**
-   * Resolve policy per request (auth, refresh, public, etc.)
-   */
   policyResolver?: (request: any) => RateLimitPolicy;
-
-  /**
-   * Resolve rate-limit key per request
-   */
   keyGenerator?: (request: any) => string;
-
   message?: string;
+}
+
+function normalizeIp(ip: string) {
+  if (ip === "::1") return "127.0.0.1";
+  if (ip.startsWith("::ffff:")) return ip.replace("::ffff:", "");
+  return ip;
 }
 
 export default fp<RateLimiterOptions>(
   async function rateLimiterPlugin(app, options) {
     const cacheService = container.cacheService as CacheService;
+    const tokenService = container.basicTokenService as BasicTokenService;
 
     const {
       defaultPolicy,
       policyResolver,
-      keyGenerator = (req) => req.user?.id ?? req.ip,
+      keyGenerator,
       message = "Too many requests",
     } = options;
 
-    app.addHook("preHandler", async (request) => {
-      const policy = policyResolver?.(request) ?? defaultPolicy;
+    app.addHook("onRequest", async (req) => {
+      const auth = req.headers.authorization;
 
-      const key = `ratelimit:${keyGenerator(request)}`;
-      const now = Date.now();
-
-      // ----------------------------------
-      // FIXED WINDOW
-      // ----------------------------------
-      if (policy.mode === "window") {
-        const windowMs = policy.windowMs ?? 60_000;
-        const maxRequests = policy.maxRequests ?? 100;
-
-        const ttlSeconds = Math.ceil(windowMs / 1000);
-
-        const count = await cacheService.increment(key, 1, ttlSeconds);
-
-        if (count == null) return;
-
-        if (count > maxRequests) {
-          throw httpError(429, message);
+      if (auth?.startsWith("Bearer ")) {
+        const userId = tokenService.decodeUserId(auth.slice(7));
+        if (userId) {
+          req.rateLimitIdentity = `u:${userId}`;
+          return;
         }
+      }
 
+      if (req.headers["x-refresh-id"]) {
+        req.rateLimitIdentity = `r:${req.headers["x-refresh-id"]}`;
         return;
       }
 
-      // ----------------------------------
-      // TOKEN BUCKET
-      // ----------------------------------
+      req.rateLimitIdentity = `ip:${normalizeIp(req.ip)}`;
+    });
+
+    app.addHook("preHandler", async (request) => {
+      const policy = policyResolver?.(request) ?? defaultPolicy;
+      const identity = keyGenerator
+        ? keyGenerator(request)
+        : request.rateLimitIdentity;
+
+      const key = `ratelimit:${identity}`;
+      const now = Date.now();
+
+      if (policy.mode === "window") {
+        const windowMs = policy.windowMs ?? 60_000;
+        const maxRequests = policy.maxRequests ?? 100;
+        const ttl = Math.ceil(windowMs / 1000);
+
+        const count = await cacheService.increment(key, 1, ttl);
+        if (count > maxRequests) throw httpError(429, message);
+        return;
+      }
+
       if (policy.mode === "bucket") {
         const capacity = policy.capacity ?? 10;
         const refillRate = policy.refillRate ?? 1;
-
         const bucketKey = `${key}:bucket`;
+        const ttlSeconds = Math.ceil(capacity / refillRate) + 2;
 
-        const raw = await cacheService.get<{
-          tokens: number;
-          lastRefill: number;
-        }>(bucketKey);
+        let attempts = 0;
 
-        let tokens = capacity;
-        let lastRefill = now;
+        while (attempts++ < 5) {
+          const raw = await cacheService.get<{
+            tokens: number;
+            lastRefill: number;
+          }>(bucketKey);
 
-        if (raw) {
-          tokens = raw.tokens;
-          lastRefill = raw.lastRefill;
+          let tokens = raw?.tokens ?? capacity;
+          const lastRefill = raw?.lastRefill ?? now;
+
+          tokens = Math.min(
+            capacity,
+            tokens + ((now - lastRefill) / 1000) * refillRate
+          );
+
+          if (tokens < 1) throw httpError(429, message);
+
+          const ok = await cacheService.compareAndSwap(
+            bucketKey,
+            raw ?? null,
+            { tokens: tokens - 1, lastRefill: now },
+            ttlSeconds
+          );
+
+          if (ok) return;
         }
 
-        const elapsed = (now - lastRefill) / 1000;
-        const refill = elapsed * refillRate;
-
-        tokens = Math.min(capacity, tokens + refill);
-
-        if (tokens < 1) {
-          throw httpError(429, message);
-        }
-
-        tokens -= 1;
-
-        await cacheService.set(
-          bucketKey,
-          { tokens, lastRefill: now },
-          Math.ceil(capacity / refillRate)
-        );
+        throw httpError(429, message);
       }
     });
   }

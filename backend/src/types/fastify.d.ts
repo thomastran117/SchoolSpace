@@ -8,5 +8,6 @@ declare module "fastify" {
     scope: any;
     resolve: <T>(key: string) => T;
     validatedFile?: MultipartFile;
+    rateLimitIdentity?: string;
   }
 }

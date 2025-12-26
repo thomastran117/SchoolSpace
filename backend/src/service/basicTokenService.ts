@@ -51,6 +51,15 @@ class BasicTokenService {
       httpError(500, "Internal server error");
     }
   }
+
+  public decodeUserId(token: string): string | null {
+    try {
+      const payload: any = jwt.decode(token);
+      return payload?.userId?.toString() ?? null;
+    } catch {
+      return null;
+    }
+  }
 }
 
 export { BasicTokenService };
