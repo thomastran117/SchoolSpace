@@ -27,36 +27,20 @@ export async function buildApp() {
     },
 
     policyResolver: (req) => {
-      if (req.url.startsWith("/auth/login")) {
-        return {
-          mode: "bucket",
-          capacity: 5,
-          refillRate: 0.1,
-        };
+      const url = req.url.replace(/^\/api/, "");
+
+      if (url.startsWith("/auth/login")) {
+        return { mode: "bucket", capacity: 5, refillRate: 0.1 };
       }
 
-      if (req.url.startsWith("/auth/refresh")) {
-        return {
-          mode: "bucket",
-          capacity: 10,
-          refillRate: 0.5,
-        };
+      if (url.startsWith("/auth/refresh")) {
+        return { mode: "bucket", capacity: 10, refillRate: 0.5 };
       }
 
-      return {
-        mode: "window",
-        windowMs: 60_000,
-        maxRequests: 120,
-      };
+      return { mode: "window", windowMs: 60_000, maxRequests: 120 };
     },
 
-    keyGenerator: (req) => {
-      if (req.url.startsWith("/auth")) {
-        return `ip:${req.ip}`;
-      }
-
-      return `user:${req.user?.id ?? req.ip}`;
-    },
+    keyGenerator: (req) => req.rateLimitIdentity!,
 
     message: "Too many requests. Please try again later.",
   });

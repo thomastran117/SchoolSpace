@@ -14,12 +14,17 @@ export async function authDependency(
     throw httpError(401, "Missing or invalid authorization header");
   }
 
-  const token = authHeader.split(" ")[1];
+  const token = authHeader.slice(7);
+
   const tokenService = container.basicTokenService as BasicTokenService;
 
-  const user = tokenService.getUserPayload(token);
+  let user;
+  try {
+    user = tokenService.getUserPayload(token);
+  } catch {
+    throw httpError(401, "Invalid or expired token");
+  }
 
   request.user = user;
-
   return user;
 }

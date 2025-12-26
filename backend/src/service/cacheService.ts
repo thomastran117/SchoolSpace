@@ -44,7 +44,9 @@ class CacheService {
   private readonly circuit = new CacheCircuitBreaker();
 
   private canUseRedis(): boolean {
-    return isRedisHealthy() && !this.circuit.isOpen();
+    const healthy = isRedisHealthy();
+    const open = this.circuit.isOpen();
+    return healthy && !open;
   }
 
   async get<T>(key: string): Promise<T | null> {
@@ -232,6 +234,52 @@ class CacheService {
     } catch {
       this.circuit.recordFailure();
       return null;
+    }
+  }
+
+  async compareAndSwap<T>(
+    key: string,
+    expected: T | null,
+    value: T,
+    ttlSeconds?: number
+  ): Promise<boolean> {
+    if (!this.canUseRedis()) return false;
+
+    const serialized = JSON.stringify(value);
+
+    try {
+      await redis.watch(key);
+
+      const currentRaw = await redis.get(key);
+      const current = currentRaw ? JSON.parse(currentRaw) : null;
+
+      if (JSON.stringify(current) !== JSON.stringify(expected)) {
+        await redis.unwatch();
+        return false;
+      }
+
+      const tx = redis.multi();
+
+      if (ttlSeconds !== undefined) {
+        tx.set(key, serialized, "EX", ttlSeconds);
+      } else {
+        tx.set(key, serialized);
+      }
+
+      const res = await tx.exec();
+
+      if (res === null) {
+        return false;
+      }
+
+      this.circuit.recordSuccess();
+      return true;
+    } catch (err: any) {
+      this.circuit.recordFailure();
+      logger.warn(
+        `[CacheService] Redis CAS failed (${key}): ${err?.message ?? err}`
+      );
+      return false;
     }
   }
 }
