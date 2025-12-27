@@ -111,6 +111,18 @@ GradeSchema.index({ course_id: 1, user_id: 1 });
 GradeSchema.index({ assignment_id: 1 }, { sparse: true });
 GradeSchema.index({ test_id: 1 }, { sparse: true });
 GradeSchema.index({ quiz_id: 1 }, { sparse: true });
+GradeSchema.index(
+  { course_id: 1, user_id: 1, assignment_id: 1 },
+  { unique: true, sparse: true }
+);
+GradeSchema.index(
+  { course_id: 1, user_id: 1, test_id: 1 },
+  { unique: true, sparse: true }
+);
+GradeSchema.index(
+  { course_id: 1, user_id: 1, quiz_id: 1 },
+  { unique: true, sparse: true }
+);
 
 const GradeModel: Model<IGrade> =
   mongoose.models.Grade || mongoose.model<IGrade>("Grade", GradeSchema);

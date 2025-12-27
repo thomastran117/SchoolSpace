@@ -144,6 +144,121 @@ class GradeRepository extends BaseRepository {
   public async findForCourseAndUser(courseId: string, userId: string) {
     return this.findAll({ courseId, userId, limit: 100 });
   }
+
+  public async findByTarget(target: {
+    assignmentId?: string;
+    testId?: string;
+    quizId?: string;
+    courseId: string;
+    userId: string;
+  }): Promise<IGrade | null> {
+    const filter: any = {
+      course_id: target.courseId,
+      user_id: target.userId,
+    };
+
+    if (target.assignmentId) filter.assignment_id = target.assignmentId;
+    if (target.testId) filter.test_id = target.testId;
+    if (target.quizId) filter.quiz_id = target.quizId;
+
+    return this.executeAsync(
+      (signal) => GradeModel.findOne(filter).setOptions({ signal }).exec(),
+      { deadlineMs: 800 }
+    );
+  }
+
+  public async existsForTarget(target: {
+    assignmentId?: string;
+    testId?: string;
+    quizId?: string;
+    courseId: string;
+    userId: string;
+  }): Promise<boolean> {
+    const grade = await this.findByTarget(target);
+    return !!grade;
+  }
+
+  public async getUserGradesInCourse(courseId: string, userId: string) {
+    return this.findAll({ courseId, userId, limit: 200 });
+  }
+
+  public async getFinalGrade(courseId: string, userId: string) {
+    return this.executeAsync(
+      (signal) =>
+        GradeModel.findOne({
+          course_id: courseId,
+          user_id: userId,
+          isFinalGrade: true,
+        })
+          .setOptions({ signal })
+          .exec(),
+      { deadlineMs: 800 }
+    );
+  }
+
+  public async upsertForTarget(data: {
+    course_id: string;
+    user_id: string;
+    assignment_id?: string;
+    test_id?: string;
+    quiz_id?: string;
+    name: string;
+    weight: number;
+    obtained: number;
+    total: number;
+    isFinalGrade?: boolean;
+  }): Promise<IGrade> {
+    const filter: any = {
+      course_id: data.course_id,
+      user_id: data.user_id,
+    };
+
+    if (data.assignment_id) filter.assignment_id = data.assignment_id;
+    if (data.test_id) filter.test_id = data.test_id;
+    if (data.quiz_id) filter.quiz_id = data.quiz_id;
+
+    return this.executeAsync(
+      (signal) =>
+        GradeModel.findOneAndUpdate(
+          filter,
+          {
+            $set: {
+              name: data.name,
+              weight: data.weight,
+              obtained: data.obtained,
+              total: data.total,
+              isFinalGrade: data.isFinalGrade ?? false,
+            },
+          },
+          { upsert: true, new: true }
+        )
+          .setOptions({ signal })
+          .exec(),
+      { deadlineMs: 1000 }
+    );
+  }
+
+  public async recalcFinalGrade(courseId: string, userId: string) {
+    return this.executeAsync(async (signal) => {
+      const grades = await GradeModel.find({
+        course_id: courseId,
+        user_id: userId,
+        isFinalGrade: false,
+      })
+        .setOptions({ signal })
+        .exec();
+
+      const totalWeight = grades.reduce((s, g) => s + g.weight, 0);
+
+      if (totalWeight === 0) return null;
+
+      const weightedScore =
+        grades.reduce((s, g) => s + (g.obtained / g.total) * g.weight, 0) /
+        totalWeight;
+
+      return weightedScore * 100;
+    });
+  }
 }
 
 export { GradeRepository };
