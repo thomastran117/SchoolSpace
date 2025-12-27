@@ -88,7 +88,13 @@ function registerServiceModules(): Map<string, Registration<any>> {
     });
 
     services.set("GradeService", {
-      factory: (scope) => new GradeService(scope.resolve("CacheService")),
+      factory: (scope) =>
+        new GradeService(
+          scope.resolve("GradeRepository"),
+          scope.resolve("CacheService"),
+          scope.resolve("CourseService"),
+          scope.resolve("UserService")
+        ),
       lifetime: "scoped",
     });
 
