@@ -2,6 +2,7 @@ import { AssignmentRepository } from "../repository/assignmentRepository";
 import { CatalogueRepository } from "../repository/catalogueRepository";
 import { CourseRepository } from "../repository/courseRepository";
 import { EnrollmentRepository } from "../repository/enrollmentRepository";
+import { GradeRepository } from "../repository/gradeRepository";
 import { UserRepository } from "../repository/userRepository";
 import logger from "../utility/logger";
 import type { Registration } from "./container.types";
@@ -32,6 +33,11 @@ function registerRepositoryModules(): Map<string, Registration<any>> {
 
     repositories.set("AssignmentRepository", {
       factory: () => new AssignmentRepository(),
+      lifetime: "singleton",
+    });
+
+    repositories.set("GradeRepository", {
+      factory: () => new GradeRepository(),
       lifetime: "singleton",
     });
 
