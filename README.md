@@ -19,7 +19,7 @@ For a full documentation, refers to the `docs/` folder
 
 **Server:** TypeScript, Node, Fastify
 
-**Database:** MongoDB, Redis
+**Database:** MySQL, Redis
 
 **Others:** RabbitMQ
 
