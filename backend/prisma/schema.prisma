@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Provider {
+  local
+  google
+  microsoft
+}
+
+enum Role {
+  notdefined
+  student
+  teacher
+  assistant
+  admin
+}
+
+enum Term {
+  SUMMER
+  WINTER
+  FALL
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+
+  email       String   @unique
+  password    String?  @db.VarChar(255)
+
+  role        Role     @default(notdefined)
+  provider    Provider @default(local)
+
+  username    String?  @unique @db.VarChar(191)
+  name        String?
+  avatar      String?
+  phone       String?
+  address     String?
+  faculty     String?
+  school      String?
+
+  googleId    String?  @unique @db.VarChar(191)
+  microsoftId String?  @db.VarChar(191)
+  msTenantId  String?
+  msIssuer    String?
+
+  version     Int      @default(1)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([role])
+  @@index([provider])
+  @@index([username])
+  @@index([avatar])
+
+  @@unique([microsoftId, msIssuer, msTenantId])
+
+  courses Course[]
+  enrollments Enrollment[]
+  grades Grade[]
+}
+
+model Catalogue {
+  id          Int      @id @default(autoincrement())
+
+  courseName  String   @map("course_name")
+  description String
+  available   Boolean  @default(true)
+  courseCode  String   @unique @map("course_code") @db.VarChar(191)
+  term        Term
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([term])
+  @@index([available])
+
+  courses Course[]
+}
+
+model Course {
+  id           Int        @id @default(autoincrement())
+
+  catalogueId  Int        @map("catalogue_id")
+  teacherId    Int        @map("teacher_id")
+
+  imageUrl     String?    @map("image_url")
+  year Int
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  catalogue    Catalogue  @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+  teacher      User       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([catalogueId])
+  @@index([teacherId])
+  @@index([year])
+  enrollments Enrollment[]
+  assignments Assignment[]
+  grades Grade[]
+}
+
+model Enrollment {
+  id        Int      @id @default(autoincrement())
+
+  courseId  Int      @map("course_id")
+  userId    Int      @map("user_id")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([userId])
+
+  @@unique([courseId, userId])
+}
+
+model Assignment {
+  id        Int      @id @default(autoincrement())
+
+  courseId  Int      @map("course_id")
+  name      String   @db.VarChar(200)
+  description String @db.VarChar(5000)
+  fileUrl   String?  @map("file_url")
+  dueDate   DateTime?
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([courseId, dueDate])
+  grades Grade[]
+}
+
+model Grade {
+  id           Int      @id @default(autoincrement())
+
+  courseId     Int      @map("course_id")
+  userId       Int      @map("user_id")
+
+  name         String   @db.VarChar(200)
+  weight       Float
+  obtained     Float
+  total        Float
+  isFinalGrade Boolean  @default(false)
+
+  assignmentId Int?     @map("assignment_id")
+  testId       String?  @map("test_id") @db.VarChar(191)
+  quizId       String?  @map("quiz_id") @db.VarChar(191)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  course       Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignment   Assignment? @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([userId])
+  @@index([assignmentId])
+  @@index([testId])
+  @@index([quizId])
+
+  @@unique([courseId, userId, assignmentId])
+  @@unique([courseId, userId, testId])
+  @@unique([courseId, userId, quizId])
+}
