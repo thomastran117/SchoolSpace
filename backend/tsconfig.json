@@ -13,13 +13,8 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "isolatedModules": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "prisma.config.ts",
-    "prisma"
-  ]
+  "exclude": ["node_modules", "dist", "prisma.config.ts", "prisma"]
 }
