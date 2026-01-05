@@ -72,10 +72,16 @@ class EnvConfig {
       this._nodeEnv === "production"
     );
 
-    this._databaseUrl = this.reqWithDefault("DATABASE_URL", "mysql://root:password123@localhost:3306/schoolspace");
+    this._databaseUrl = this.reqWithDefault(
+      "DATABASE_URL",
+      "mysql://root:password123@localhost:3306/schoolspace"
+    );
     this._databaseHost = this.reqWithDefault("DATABASE_HOST", "localhost");
     this._databaseName = this.reqWithDefault("DATABASE_NAME", "schoolspace");
-    this._databasePassword = this.reqWithDefault("DATABASE_PASSWORD", "password123");
+    this._databasePassword = this.reqWithDefault(
+      "DATABASE_PASSWORD",
+      "password123"
+    );
     this._databasePort = this.reqWithDefault("DATABASE_PORT", "3306");
     this._databaseUsername = this.reqWithDefault("DATABASE_USER", "root");
 

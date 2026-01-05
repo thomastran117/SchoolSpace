@@ -13,8 +13,8 @@
  */
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
-import { PrismaClient } from "../generated/prisma/client";
 import env from "../config/envConfigs";
+import { PrismaClient } from "../generated/prisma/client";
 import logger from "../utility/logger";
 
 const adapter = new PrismaMariaDb({
