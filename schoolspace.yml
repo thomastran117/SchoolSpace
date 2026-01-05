@@ -169,7 +169,7 @@ spec:
           image: school-backend:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8040
+            - containerPort: 8090
           env:
             - name: DATABASE_URL
               value: mysql://root:root@mysql:3306/appdb
@@ -195,7 +195,7 @@ spec:
   selector:
     app: backend
   ports:
-    - port: 8040
+    - port: 8090
   type: ClusterIP
 ---
 apiVersion: apps/v1
@@ -256,6 +256,6 @@ spec:
   selector:
     app: frontend
   ports:
-    - port: 3040
+    - port: 8090
       targetPort: 80
   type: ClusterIP

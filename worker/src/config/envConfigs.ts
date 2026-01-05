@@ -41,7 +41,7 @@ class EnvConfig {
 
     this._frontendClient = this.opt(
       "FRONTEND_CLIENT",
-      "http://localhost:3040",
+      "http://localhost:4090",
     )!;
 
     this._redisUrl = this.reqWithDefault("REDIS_URL", "redis://localhost:6379");

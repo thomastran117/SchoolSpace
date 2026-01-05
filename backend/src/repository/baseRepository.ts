@@ -1,5 +1,3 @@
-import mongoose, { ClientSession } from "mongoose";
-
 import { RepositoryError } from "../error/repositoryError";
 import { CircuitBreaker } from "../utility/circuitBreaker";
 
@@ -36,7 +34,7 @@ abstract class BaseRepository {
     baseDelay?: number;
     maxDelay?: number;
   }) {
-    this.maxRetries = options?.maxRetries ?? 3;
+    this.maxRetries = options?.maxRetries ?? 2;
     this.baseDelay = options?.baseDelay ?? 100;
     this.maxDelay = options?.maxDelay ?? 5_000;
   }
@@ -181,25 +179,13 @@ abstract class BaseRepository {
    * @param options  Deadline configuration
    */
   protected async executeTransaction<T>(
-    fn: (session: ClientSession, signal?: AbortSignal) => Promise<T>,
+    prisma: { $transaction: (fn: (tx: any) => Promise<T>) => Promise<T> },
+    fn: (tx: any, signal?: AbortSignal) => Promise<T>,
     context?: string,
     options?: { deadlineMs?: number }
   ): Promise<T> {
     return this.executeAsync(
-      async (signal) => {
-        const session = await mongoose.startSession();
-        try {
-          let result!: T;
-
-          await session.withTransaction(async () => {
-            result = await fn(session, signal);
-          });
-
-          return result;
-        } finally {
-          await session.endSession();
-        }
-      },
+      async (signal) => prisma.$transaction((tx: any) => fn(tx, signal)),
       options,
       context
     );
@@ -219,19 +205,19 @@ abstract class BaseRepository {
    * must fail fast and never retry.
    */
   protected shouldRetry(err: any): boolean {
-    if (typeof err?.hasErrorLabel === "function") {
-      if (
-        err.hasErrorLabel("TransientTransactionError") ||
-        err.hasErrorLabel("UnknownTransactionCommitResult") ||
-        err.hasErrorLabel("RetryableWriteError")
-      ) {
-        return true;
-      }
+    if (
+      err?.name === "PrismaClientInitializationError" ||
+      err?.name === "PrismaClientUnknownRequestError"
+    ) {
+      return true;
     }
 
-    const retryableCodes = new Set([6, 7, 89, 91, 11600, 11602, 10107, 13435]);
+    // Deadlock / lock timeout
+    if (err?.code === "P2034") {
+      return true;
+    }
 
-    return typeof err?.code === "number" && retryableCodes.has(err.code);
+    return false;
   }
 }
 

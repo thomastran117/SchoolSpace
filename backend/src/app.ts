@@ -15,7 +15,7 @@ export async function buildApp() {
   await container.initialize();
 
   app.register(cors, {
-    origin: ["http://localhost:3040"],
+    origin: ["http://localhost:4090"],
     credentials: true,
   });
 

@@ -1,8 +1,8 @@
 [CmdletBinding()]
 param(
   [string]$Namespace    = "schoolspace",
-  [int]   $FrontendPort = 3040,
-  [int]   $BackendPort  = 8040
+  [int]   $FrontendPort = 4090,
+  [int]   $BackendPort  = 9090
 )
 
 $ErrorActionPreference = "Stop"
@@ -56,13 +56,13 @@ Warn "Starting port-forwards (Ctrl+C to stop)"
 Start-Process powershell -NoNewWindow -ArgumentList @(
   "-NoProfile",
   "-Command",
-  "kubectl port-forward -n $Namespace svc/frontend $FrontendPort`:3040 > `$null 2>&1"
+  "kubectl port-forward -n $Namespace svc/frontend $FrontendPort`:4090 > `$null 2>&1"
 )
 
 Start-Process powershell -NoNewWindow -ArgumentList @(
   "-NoProfile",
   "-Command",
-  "kubectl port-forward -n $Namespace svc/backend $BackendPort`:8040 > `$null 2>&1"
+  "kubectl port-forward -n $Namespace svc/backend $BackendPort`:8090 > `$null 2>&1"
 )
 
 Write-Host ""

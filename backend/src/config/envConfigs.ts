@@ -34,6 +34,13 @@ class EnvConfig {
   private readonly _nodeEnv: EnvMode;
   private readonly _strictEnv: boolean;
 
+  private readonly _databaseUrl: string;
+  private readonly _databaseName: string;
+  private readonly _databasePort: string;
+  private readonly _databaseUsername: string;
+  private readonly _databasePassword: string;
+  private readonly _databaseHost: string;
+
   private readonly _redisUrl: string;
   private readonly _mongoUrl: string;
   private readonly _rabbitMQUrl: string;
@@ -65,6 +72,19 @@ class EnvConfig {
       this._nodeEnv === "production"
     );
 
+    this._databaseUrl = this.reqWithDefault(
+      "DATABASE_URL",
+      "mysql://root:password123@localhost:3306/schoolspace"
+    );
+    this._databaseHost = this.reqWithDefault("DATABASE_HOST", "localhost");
+    this._databaseName = this.reqWithDefault("DATABASE_NAME", "schoolspace");
+    this._databasePassword = this.reqWithDefault(
+      "DATABASE_PASSWORD",
+      "password123"
+    );
+    this._databasePort = this.reqWithDefault("DATABASE_PORT", "3306");
+    this._databaseUsername = this.reqWithDefault("DATABASE_USER", "root");
+
     this._redisUrl = this.reqWithDefault("REDIS_URL", "redis://localhost:6379");
 
     this._mongoUrl = this.reqWithDefault(
@@ -82,11 +102,11 @@ class EnvConfig {
       "dev-secret"
     );
 
-    this._corsWhitelist = this.opt("CORS_WHITELIST", "http://localhost:3040")!;
+    this._corsWhitelist = this.opt("CORS_WHITELIST", "http://localhost:4090")!;
 
     this._frontendClient = this.opt(
       "FRONTEND_CLIENT",
-      "http://localhost:3040"
+      "http://localhost:4090"
     )!;
 
     this._zodConfiguration = this.opt("ZOD_CONFIGURATION", "passthrough");
@@ -142,6 +162,30 @@ class EnvConfig {
 
   get isProduction(): boolean {
     return this._nodeEnv === "production";
+  }
+
+  get databaseUrl(): string {
+    return this._databaseUrl;
+  }
+
+  get databasePort(): string {
+    return this._databasePort;
+  }
+
+  get databaseUser(): string {
+    return this._databaseUsername;
+  }
+
+  get databaseName(): string {
+    return this._databaseName;
+  }
+
+  get databaseHost(): string {
+    return this._databaseHost;
+  }
+
+  get databasePassword(): string {
+    return this._databasePassword;
   }
 
   get redisUrl(): string {
