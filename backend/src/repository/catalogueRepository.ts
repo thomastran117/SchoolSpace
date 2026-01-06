@@ -1,7 +1,7 @@
 import type { CatalogueModel as Catalogue } from "../generated/prisma/models/Catalogue";
+import type { CatalogueCreateInput } from "../models/catalogue";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
-import type { CatalogueCreateInput } from "../models/catalogue";
 
 class CatalogueRepository extends BaseRepository {
   constructor() {
@@ -12,7 +12,7 @@ class CatalogueRepository extends BaseRepository {
     return this.executeAsync(() =>
       prisma.catalogue.findUnique({
         where: { id },
-      }),
+      })
     );
   }
 
@@ -20,14 +20,14 @@ class CatalogueRepository extends BaseRepository {
     return this.executeAsync(() =>
       prisma.catalogue.findUnique({
         where: { courseCode },
-      }),
+      })
     );
   }
 
   public async findAllWithFilters(
     filter: Record<string, unknown>,
     page: number,
-    limit: number,
+    limit: number
   ): Promise<{ results: Catalogue[]; total: number }> {
     return this.executeAsync(async () => {
       const skip = (page - 1) * limit;
@@ -64,13 +64,13 @@ class CatalogueRepository extends BaseRepository {
           term: data.term,
           available: data.available ?? true,
         },
-      }),
+      })
     );
   }
 
   public async update(
     id: number,
-    updates: Partial<Catalogue>,
+    updates: Partial<Catalogue>
   ): Promise<Catalogue | null> {
     return this.executeAsync(async () => {
       try {

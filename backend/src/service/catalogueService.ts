@@ -1,5 +1,6 @@
 import type { CatalogueRepository } from "../repository/catalogueRepository";
-import type { ICatalogue, Term } from "../templates/catalogueTemplate";
+import type { Term } from "../generated/prisma/enums";
+import type { CatalogueModel as Catalogue } from "../generated/prisma/models/Catalogue";
 import { httpError } from "../utility/httpUtility";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
@@ -9,6 +10,7 @@ const NOT_FOUND = "__NF__";
 class CatalogueService extends BaseService {
   private readonly cacheService: CacheService;
   private readonly catalogueRepository: CatalogueRepository;
+
   private static readonly CACHE_NAMESPACE = "catalogue:v1";
 
   private static readonly LIST_TTL = 300;
@@ -22,10 +24,7 @@ class CatalogueService extends BaseService {
 
   private catalogueVersion?: number;
 
-  constructor(
-    cacheService: CacheService,
-    catalogueRepository: CatalogueRepository
-  ) {
+  constructor(cacheService: CacheService, catalogueRepository: CatalogueRepository) {
     super();
     this.cacheService = cacheService;
     this.catalogueRepository = catalogueRepository;
@@ -50,9 +49,7 @@ class CatalogueService extends BaseService {
     return String(value);
   }
 
-  private key(
-    ...parts: (string | number | boolean | undefined | null)[]
-  ): string {
+  private key(...parts: (string | number | boolean | undefined | null)[]): string {
     return [
       CatalogueService.CACHE_NAMESPACE,
       ...parts.map((p) => this.normalize(p)),
@@ -60,23 +57,22 @@ class CatalogueService extends BaseService {
   }
 
   public async createCourseTemplate(
-    course_name: string,
+    courseName: string,
     description: string,
-    course_code: string,
+    courseCode: string,
     term: Term,
-    available = true
-  ): Promise<ICatalogue> {
-    const existing =
-      await this.catalogueRepository.findByCourseCode(course_code);
+    available = true,
+  ): Promise<Catalogue> {
+    const existing = await this.catalogueRepository.findByCourseCode(courseCode);
     if (existing) httpError(409, "Course template already exists");
 
-    const course = await this.catalogueRepository.create(
-      course_name,
+    const course = await this.catalogueRepository.create({
+      courseName,
       description,
-      course_code,
+      courseCode,
       term,
-      available
-    );
+      available,
+    });
 
     await this.bumpCatalogueVersion();
     return this.toSafe(course);
@@ -87,7 +83,7 @@ class CatalogueService extends BaseService {
     available?: boolean,
     search?: string,
     page = CatalogueService.DEFAULT_PAGE,
-    limit = CatalogueService.DEFAULT_LIMIT
+    limit = CatalogueService.DEFAULT_LIMIT,
   ) {
     page = Math.max(1, page);
     limit = Math.min(CatalogueService.MAX_LIMIT, Math.max(1, limit));
@@ -95,29 +91,12 @@ class CatalogueService extends BaseService {
     const filter: Record<string, unknown> = {};
     if (term) filter.term = term;
     if (available !== undefined) filter.available = available;
-    if (search) {
-      filter.$or = [
-        { course_name: { $regex: search, $options: "i" } },
-        { course_code: { $regex: search, $options: "i" } },
-      ];
-    }
+    if (search) filter.search = search;
 
     const version = await this.getCatalogueVersion();
 
-    const cacheKey = this.key(
-      "v",
-      version,
-      "list",
-      term,
-      available,
-      search,
-      page,
-      limit
-    );
-
-    const ttl = search
-      ? CatalogueService.SEARCH_TTL
-      : CatalogueService.LIST_TTL;
+    const cacheKey = this.key("v", version, "list", term, available, search, page, limit);
+    const ttl = search ? CatalogueService.SEARCH_TTL : CatalogueService.LIST_TTL;
 
     return this.cacheService.getOrSet(cacheKey, ttl, async () => {
       const { results, total } =
@@ -132,23 +111,17 @@ class CatalogueService extends BaseService {
     });
   }
 
-  public async getCourseTemplateById(id: string): Promise<ICatalogue> {
+  public async getCourseTemplateById(id: number): Promise<Catalogue> {
     const cacheKey = this.key("id", id);
 
-    const cached = await this.cacheService.get<ICatalogue | typeof NOT_FOUND>(
-      cacheKey
-    );
+    const cached = await this.cacheService.get<Catalogue | typeof NOT_FOUND>(cacheKey);
 
     if (cached === NOT_FOUND) httpError(404, "Course not found");
     if (cached) return cached;
 
     const course = await this.catalogueRepository.findById(id);
     if (!course) {
-      await this.cacheService.set(
-        cacheKey,
-        NOT_FOUND,
-        CatalogueService.NOT_FOUND_TTL
-      );
+      await this.cacheService.set(cacheKey, NOT_FOUND, CatalogueService.NOT_FOUND_TTL);
       httpError(404, "Course not found");
     }
 
@@ -159,9 +132,9 @@ class CatalogueService extends BaseService {
   }
 
   public async updateCourseTemplate(
-    id: string,
-    updates: Partial<ICatalogue>
-  ): Promise<ICatalogue> {
+    id: number,
+    updates: Partial<Catalogue>,
+  ): Promise<Catalogue> {
     const course = await this.catalogueRepository.update(id, updates);
     if (!course) httpError(404, "Course template not found");
 
@@ -171,7 +144,7 @@ class CatalogueService extends BaseService {
     return this.toSafe(course);
   }
 
-  public async deleteCourseTemplate(id: string): Promise<boolean> {
+  public async deleteCourseTemplate(id: number): Promise<boolean> {
     await this.catalogueRepository.delete(id);
 
     await this.cacheService.delete(this.key("id", id));
