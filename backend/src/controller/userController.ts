@@ -23,7 +23,7 @@ class UserController {
   public async getUser(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { id: userId, role: userRole } = req.user as UserPayload;
-      const { id: queryUserId } = req.params as unknown as { id?: string };
+      const { id: queryUserId } = req.params as unknown as { id?: number };
 
       const effectiveUserId =
         userRole === "admin" && queryUserId ? queryUserId : userId;
@@ -54,7 +54,7 @@ class UserController {
       if (!token) httpError(401, "Missing refresh token");
 
       const { id: userId, role: userRole } = req.user as UserPayload;
-      const { id: queryUserId } = req.params as unknown as { id?: string };
+      const { id: queryUserId } = req.params as unknown as { id?: number };
       const effectiveUserId =
         userRole === "admin" && queryUserId ? queryUserId : userId;
       const effectiveToken = userRole === "admin" ? undefined : token;
@@ -118,7 +118,7 @@ class UserController {
       const token = req.cookies.refreshToken;
 
       const { id: userId, role: userRole } = req.user as UserPayload;
-      const { id: queryUserId } = req.params as unknown as { id?: string };
+      const { id: queryUserId } = req.params as unknown as { id?: number };
       const effectiveUserId =
         userRole === "admin" && queryUserId ? queryUserId : userId;
 
@@ -178,7 +178,7 @@ class UserController {
       const token = req.cookies.refreshToken;
 
       const { id: userId, role: userRole } = req.user as UserPayload;
-      const { id: queryUserId } = req.params as { id?: string };
+      const { id: queryUserId } = req.params as { id?: number };
 
       const file = await req.file();
       if (!file) httpError(400, "Missing file");
@@ -239,7 +239,7 @@ class UserController {
     try {
       const token = req.cookies.refreshToken;
       const { id: userId, role: userRole } = req.user as UserPayload;
-      const { id: queryUserId } = req.params as unknown as { id?: string };
+      const { id: queryUserId } = req.params as unknown as { id?: number };
       const effectiveUserId =
         userRole === "admin" && queryUserId ? queryUserId : userId;
       const effectiveToken = userRole === "admin" ? undefined : token;

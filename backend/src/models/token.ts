@@ -1,5 +1,5 @@
 interface UserPayload {
-  id: string;
+  id: number;
   email: string;
   role: string;
 }

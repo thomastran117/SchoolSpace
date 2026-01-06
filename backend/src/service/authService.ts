@@ -74,9 +74,7 @@ class AuthService {
       const result = await this.webService.verifyGoogleCaptcha(captcha);
       if (!result) httpError(401, "Invalid captcha");
 
-      const user = await this.userRepository.findByEmail(email, {
-        includePassword: true,
-      });
+      const user = await this.userRepository.findByEmail(email);
       const hashToCheck = user?.password ?? this.DUMMY_HASH;
 
       const passwordMatches = await this.comparePassword(password, hashToCheck);
@@ -259,11 +257,7 @@ class AuthService {
       if (!user) {
         httpError(404, "User not found");
       }
-      await this.userRepository.update(
-        user.id,
-        { password: hashedPassword },
-        user.version
-      );
+      await this.userRepository.update(user.id, { password: hashedPassword });
       return;
     } catch (err: any) {
       if (err instanceof HttpError) {
