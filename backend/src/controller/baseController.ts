@@ -12,6 +12,11 @@ abstract class BaseController {
     return Number.isInteger(parsed) && parsed > 0 ? parsed : defaultValue;
   }
 
+  protected parseInt(value: string | undefined): number | undefined {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+  }
+
   protected ensureRole(
     req: FastifyRequest,
     allowed: UserPayload["role"] | UserPayload["role"][]

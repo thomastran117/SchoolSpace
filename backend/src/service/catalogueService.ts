@@ -1,6 +1,6 @@
-import type { CatalogueRepository } from "../repository/catalogueRepository";
 import type { Term } from "../generated/prisma/enums";
 import type { CatalogueModel as Catalogue } from "../generated/prisma/models/Catalogue";
+import type { CatalogueRepository } from "../repository/catalogueRepository";
 import { httpError } from "../utility/httpUtility";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
@@ -24,7 +24,10 @@ class CatalogueService extends BaseService {
 
   private catalogueVersion?: number;
 
-  constructor(cacheService: CacheService, catalogueRepository: CatalogueRepository) {
+  constructor(
+    cacheService: CacheService,
+    catalogueRepository: CatalogueRepository
+  ) {
     super();
     this.cacheService = cacheService;
     this.catalogueRepository = catalogueRepository;
@@ -49,7 +52,9 @@ class CatalogueService extends BaseService {
     return String(value);
   }
 
-  private key(...parts: (string | number | boolean | undefined | null)[]): string {
+  private key(
+    ...parts: (string | number | boolean | undefined | null)[]
+  ): string {
     return [
       CatalogueService.CACHE_NAMESPACE,
       ...parts.map((p) => this.normalize(p)),
@@ -61,9 +66,10 @@ class CatalogueService extends BaseService {
     description: string,
     courseCode: string,
     term: Term,
-    available = true,
+    available = true
   ): Promise<Catalogue> {
-    const existing = await this.catalogueRepository.findByCourseCode(courseCode);
+    const existing =
+      await this.catalogueRepository.findByCourseCode(courseCode);
     if (existing) httpError(409, "Course template already exists");
 
     const course = await this.catalogueRepository.create({
@@ -83,7 +89,7 @@ class CatalogueService extends BaseService {
     available?: boolean,
     search?: string,
     page = CatalogueService.DEFAULT_PAGE,
-    limit = CatalogueService.DEFAULT_LIMIT,
+    limit = CatalogueService.DEFAULT_LIMIT
   ) {
     page = Math.max(1, page);
     limit = Math.min(CatalogueService.MAX_LIMIT, Math.max(1, limit));
@@ -95,8 +101,19 @@ class CatalogueService extends BaseService {
 
     const version = await this.getCatalogueVersion();
 
-    const cacheKey = this.key("v", version, "list", term, available, search, page, limit);
-    const ttl = search ? CatalogueService.SEARCH_TTL : CatalogueService.LIST_TTL;
+    const cacheKey = this.key(
+      "v",
+      version,
+      "list",
+      term,
+      available,
+      search,
+      page,
+      limit
+    );
+    const ttl = search
+      ? CatalogueService.SEARCH_TTL
+      : CatalogueService.LIST_TTL;
 
     return this.cacheService.getOrSet(cacheKey, ttl, async () => {
       const { results, total } =
@@ -114,14 +131,20 @@ class CatalogueService extends BaseService {
   public async getCourseTemplateById(id: number): Promise<Catalogue> {
     const cacheKey = this.key("id", id);
 
-    const cached = await this.cacheService.get<Catalogue | typeof NOT_FOUND>(cacheKey);
+    const cached = await this.cacheService.get<Catalogue | typeof NOT_FOUND>(
+      cacheKey
+    );
 
     if (cached === NOT_FOUND) httpError(404, "Course not found");
     if (cached) return cached;
 
     const course = await this.catalogueRepository.findById(id);
     if (!course) {
-      await this.cacheService.set(cacheKey, NOT_FOUND, CatalogueService.NOT_FOUND_TTL);
+      await this.cacheService.set(
+        cacheKey,
+        NOT_FOUND,
+        CatalogueService.NOT_FOUND_TTL
+      );
       httpError(404, "Course not found");
     }
 
@@ -133,7 +156,7 @@ class CatalogueService extends BaseService {
 
   public async updateCourseTemplate(
     id: number,
-    updates: Partial<Catalogue>,
+    updates: Partial<Catalogue>
   ): Promise<Catalogue> {
     const course = await this.catalogueRepository.update(id, updates);
     if (!course) httpError(404, "Course template not found");

@@ -29,11 +29,18 @@ class CourseController extends BaseController {
     reply: FastifyReply
   ) {
     try {
+      const teacherId = req.query.teacherId
+        ? this.parseInt(req.query.teacherId)
+        : undefined;
+
+      const year = req.query.year ? this.parseInt(req.query.year) : undefined;
+
       const page = this.parsePositiveInt(req.query.page, 1);
       const limit = this.parsePositiveInt(req.query.limit, 15);
 
       const result = await this.courseService.getCourses(
-        req.query.search,
+        teacherId,
+        year,
         page,
         limit
       );
@@ -53,7 +60,7 @@ class CourseController extends BaseController {
   }
 
   public async getCourse(
-    req: FastifyRequest<{ Params: { id: string } }>,
+    req: FastifyRequest<{ Params: { id: number } }>,
     reply: FastifyReply
   ) {
     try {
@@ -117,7 +124,7 @@ class CourseController extends BaseController {
   }
 
   public async updateCourse(
-    req: FastifyRequest<{ Body: UpdateCourseDto; Params: { id: string } }>,
+    req: FastifyRequest<{ Body: UpdateCourseDto; Params: { id: number } }>,
     reply: FastifyReply
   ) {
     try {
@@ -150,7 +157,7 @@ class CourseController extends BaseController {
   }
 
   public async deleteCourse(
-    req: FastifyRequest<{ Params: { id: string } }>,
+    req: FastifyRequest<{ Params: { id: number } }>,
     reply: FastifyReply
   ) {
     try {
