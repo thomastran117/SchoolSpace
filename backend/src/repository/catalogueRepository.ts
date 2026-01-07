@@ -24,7 +24,7 @@ class CatalogueRepository extends BaseRepository {
         prisma.catalogue.findMany({
           where: { id: { in: ids } },
         }),
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 

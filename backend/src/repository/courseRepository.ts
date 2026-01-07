@@ -27,7 +27,7 @@ class CourseRepository extends BaseRepository {
         prisma.course.findMany({
           where: { id: { in: ids } },
         }),
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 

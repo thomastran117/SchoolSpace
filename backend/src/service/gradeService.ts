@@ -1,5 +1,5 @@
-import type { GradeRepository } from "../repository/gradeRepository";
 import type { GradeModel as Grade } from "../generated/prisma/models/Grade";
+import type { GradeRepository } from "../repository/gradeRepository";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
@@ -16,17 +16,17 @@ class GradeService extends BaseService {
   private readonly FINAL_TTL = 15;
   private readonly LIST_TTL = 60;
 
-  constructor(
-    gradeRepository: GradeRepository,
-    cacheService: CacheService,
-    courseService: CourseService,
-    userService: UserService,
-  ) {
+  constructor(dependencies: {
+    gradeRepository: GradeRepository;
+    cacheService: CacheService;
+    courseService: CourseService;
+    userService: UserService;
+  }) {
     super();
-    this.gradeRepository = gradeRepository;
-    this.cacheService = cacheService;
-    this.courseService = courseService;
-    this.userService = userService;
+    this.gradeRepository = dependencies.gradeRepository;
+    this.cacheService = dependencies.cacheService;
+    this.courseService = dependencies.courseService;
+    this.userService = dependencies.userService;
   }
 
   private key(...parts: (string | number)[]): string {
@@ -47,9 +47,12 @@ class GradeService extends BaseService {
     courseId: number,
     userId: number,
     incomingWeight: number,
-    excludeId?: number,
+    excludeId?: number
   ) {
-    const { results } = await this.gradeRepository.getUserGradesInCourse(courseId, userId);
+    const { results } = await this.gradeRepository.getUserGradesInCourse(
+      courseId,
+      userId
+    );
 
     const totalWeight = results
       .filter((g) => !g.isFinalGrade && g.id !== excludeId)
@@ -63,7 +66,10 @@ class GradeService extends BaseService {
   private async ensureSingleFinalGrade(courseId: number, userId: number) {
     const existing = await this.getCachedFinalGrade(courseId, userId);
     if (existing) {
-      httpError(409, "Final grade already exists for this student in this course");
+      httpError(
+        409,
+        "Final grade already exists for this student in this course"
+      );
     }
   }
 
@@ -72,14 +78,18 @@ class GradeService extends BaseService {
   }
 
   private async autoFinalize(courseId: number, userId: number) {
-    const { results } = await this.gradeRepository.getUserGradesInCourse(courseId, userId);
+    const { results } = await this.gradeRepository.getUserGradesInCourse(
+      courseId,
+      userId
+    );
 
     const nonFinal = results.filter((g) => !g.isFinalGrade);
     const totalWeight = nonFinal.reduce((s, g) => s + g.weight, 0);
 
     if (totalWeight === 100) {
       const finalScore =
-        nonFinal.reduce((s, g) => s + (g.obtained / g.total) * g.weight, 0) / 100;
+        nonFinal.reduce((s, g) => s + (g.obtained / g.total) * g.weight, 0) /
+        100;
 
       await this.gradeRepository.upsertForTarget({
         courseId,
@@ -112,7 +122,11 @@ class GradeService extends BaseService {
   public async getGradesForCourse(courseId: number, page = 1, limit = 50) {
     await this.courseService.getCourseById(courseId);
 
-    const { results, total } = await this.gradeRepository.findAll({ courseId, page, limit });
+    const { results, total } = await this.gradeRepository.findAll({
+      courseId,
+      page,
+      limit,
+    });
 
     return {
       data: this.toSafeArray(results),
@@ -132,7 +146,10 @@ class GradeService extends BaseService {
     const cached = await this.cacheService.get(cacheKey);
     if (cached) return cached;
 
-    const { results } = await this.gradeRepository.getUserGradesInCourse(courseId, userId);
+    const { results } = await this.gradeRepository.getUserGradesInCourse(
+      courseId,
+      userId
+    );
 
     const safe = this.toSafeArray(results);
     await this.cacheService.set(cacheKey, safe, this.LIST_TTL);
@@ -157,7 +174,8 @@ class GradeService extends BaseService {
       this.getCachedFinalGrade(input.courseId, input.userId),
     ]);
 
-    if (final) httpError(423, "Grades are locked because final grade is already issued");
+    if (final)
+      httpError(423, "Grades are locked because final grade is already issued");
 
     this.validateScore(input.obtained, input.total);
     await this.validateWeights(input.courseId, input.userId, input.weight);

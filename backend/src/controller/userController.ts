@@ -10,8 +10,8 @@ import logger from "../utility/logger";
 class UserController {
   private readonly userService: UserService;
 
-  constructor(userService: UserService) {
-    this.userService = userService;
+  constructor(dependencies: { userService: UserService }) {
+    this.userService = dependencies.userService;
 
     this.getUser = this.getUser.bind(this);
     this.updateAvatar = this.updateAvatar.bind(this);

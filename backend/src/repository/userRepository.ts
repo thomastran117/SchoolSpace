@@ -66,7 +66,7 @@ class UserRepository extends BaseRepository {
         prisma.user.findMany({
           where: { id: { in: ids } },
         }),
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 
@@ -78,7 +78,7 @@ class UserRepository extends BaseRepository {
         prisma.user.findMany({
           where: { username: { in: usernames } },
         }),
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 

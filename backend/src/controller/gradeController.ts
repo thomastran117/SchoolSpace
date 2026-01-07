@@ -3,8 +3,8 @@ import type { GradeService } from "../service/gradeService";
 class GradeController {
   private readonly gradeService: GradeService;
 
-  constructor(gradeService: GradeService) {
-    this.gradeService = gradeService;
+  constructor(dependencies: { gradeService: GradeService }) {
+    this.gradeService = dependencies.gradeService;
   }
 }
 

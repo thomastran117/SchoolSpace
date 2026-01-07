@@ -13,13 +13,13 @@ class EnrollmentRepository extends BaseRepository {
         prisma.enrollment.findUnique({
           where: { id },
         }),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
   public async getByUserAndCourse(
     userId: number,
-    courseId: number,
+    courseId: number
   ): Promise<Enrollment | null> {
     return this.executeAsync(
       () =>
@@ -31,7 +31,7 @@ class EnrollmentRepository extends BaseRepository {
             },
           },
         }),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -41,7 +41,7 @@ class EnrollmentRepository extends BaseRepository {
         prisma.enrollment.findMany({
           where: { courseId },
         }),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -51,7 +51,7 @@ class EnrollmentRepository extends BaseRepository {
         prisma.enrollment.findMany({
           where: { userId },
         }),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -63,10 +63,10 @@ class EnrollmentRepository extends BaseRepository {
         prisma.enrollment.findMany({
           where: { id: { in: ids } },
         }),
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
-  
+
   public async getByUserIds(userIds: number[]): Promise<Enrollment[]> {
     if (!userIds.length) return [];
 
@@ -75,7 +75,7 @@ class EnrollmentRepository extends BaseRepository {
         prisma.enrollment.findMany({
           where: { userId: { in: userIds } },
         }),
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 
@@ -87,13 +87,13 @@ class EnrollmentRepository extends BaseRepository {
         prisma.enrollment.findMany({
           where: { courseId: { in: courseIds } },
         }),
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 
   public async getEnrollmentMapForUser(
     userId: number,
-    courseIds: number[],
+    courseIds: number[]
   ): Promise<Record<number, true>> {
     if (!courseIds.length) return {};
 
@@ -112,7 +112,7 @@ class EnrollmentRepository extends BaseRepository {
           return acc;
         }, {});
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -122,12 +122,12 @@ class EnrollmentRepository extends BaseRepository {
         prisma.enrollment.count({
           where: { courseId },
         }),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
   public async countByCourses(
-    courseIds: number[],
+    courseIds: number[]
   ): Promise<Record<number, number>> {
     if (!courseIds.length) return {};
 
@@ -144,14 +144,14 @@ class EnrollmentRepository extends BaseRepository {
           return acc;
         }, {});
       },
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 
   public async getPagedByCourse(
     courseId: number,
     page = 1,
-    limit = 20,
+    limit = 20
   ): Promise<{ results: Enrollment[]; total: number }> {
     const skip = (page - 1) * limit;
 
@@ -169,14 +169,14 @@ class EnrollmentRepository extends BaseRepository {
 
         return { results, total };
       },
-      { deadlineMs: 1500 },
+      { deadlineMs: 1500 }
     );
   }
 
   public async getPagedByUser(
     userId: number,
     page = 1,
-    limit = 20,
+    limit = 20
   ): Promise<{ results: Enrollment[]; total: number }> {
     const skip = (page - 1) * limit;
 
@@ -194,7 +194,7 @@ class EnrollmentRepository extends BaseRepository {
 
         return { results, total };
       },
-      { deadlineMs: 1500 },
+      { deadlineMs: 1500 }
     );
   }
 
@@ -204,13 +204,13 @@ class EnrollmentRepository extends BaseRepository {
         prisma.enrollment.create({
           data: { userId, courseId },
         }),
-      { deadlineMs: 1000 },
+      { deadlineMs: 1000 }
     );
   }
 
   public async unenrollByUserAndCourse(
     userId: number,
-    courseId: number,
+    courseId: number
   ): Promise<boolean> {
     return this.executeAsync(
       async () => {
@@ -220,7 +220,7 @@ class EnrollmentRepository extends BaseRepository {
 
         return res.count === 1;
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -233,7 +233,7 @@ class EnrollmentRepository extends BaseRepository {
 
         return res.count === 1;
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 }

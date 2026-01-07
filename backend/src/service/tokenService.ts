@@ -41,9 +41,9 @@ type EmailVerificationCache = {
 class TokenService extends BasicTokenService {
   private readonly cacheService: CacheService;
 
-  constructor(cacheService: CacheService) {
+  constructor(dependencies: { cacheService: CacheService }) {
     super();
-    this.cacheService = cacheService;
+    this.cacheService = dependencies.cacheService;
   }
 
   private createAccessToken(

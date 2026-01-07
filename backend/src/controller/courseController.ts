@@ -14,9 +14,9 @@ import { BaseController } from "./baseController";
 class CourseController extends BaseController {
   private readonly courseService: CourseService;
 
-  constructor(courseService: CourseService) {
+  constructor(dependencies: { courseService: CourseService }) {
     super();
-    this.courseService = courseService;
+    this.courseService = dependencies.courseService;
     this.getCourses = this.getCourses.bind(this);
     this.getCourse = this.getCourse.bind(this);
     this.createCourse = this.createCourse.bind(this);

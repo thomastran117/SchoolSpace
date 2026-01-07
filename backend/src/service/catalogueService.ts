@@ -24,13 +24,13 @@ class CatalogueService extends BaseService {
 
   private catalogueVersion?: number;
 
-  constructor(
-    cacheService: CacheService,
-    catalogueRepository: CatalogueRepository
-  ) {
+  constructor(dependencies: {
+    cacheService: CacheService;
+    catalogueRepository: CatalogueRepository;
+  }) {
     super();
-    this.cacheService = cacheService;
-    this.catalogueRepository = catalogueRepository;
+    this.cacheService = dependencies.cacheService;
+    this.catalogueRepository = dependencies.catalogueRepository;
   }
 
   private async getCatalogueVersion(): Promise<number> {
