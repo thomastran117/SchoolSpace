@@ -12,7 +12,7 @@
 import type { FastifyInstance } from "fastify";
 
 import { CreateCourseSchema, UpdateCourseSchema } from "../dto/courseSchema";
-import { MongoIdParamSchema } from "../dto/idSchema";
+import { IdParamSchema } from "../dto/idSchema";
 import { authDependency } from "../hooks/authHook";
 import { useController } from "../hooks/controllerHook";
 import { safeUploadImage } from "../hooks/uploadHook";
@@ -22,7 +22,7 @@ async function courseRoutes(app: FastifyInstance) {
   app.get(
     "/:id",
     {
-      preValidation: validate(MongoIdParamSchema, "params"),
+      preValidation: validate(IdParamSchema, "params"),
     },
     useController("CourseController", (c) => c.getCourse)
   );
@@ -36,7 +36,7 @@ async function courseRoutes(app: FastifyInstance) {
     "/:id",
     {
       preHandler: authDependency,
-      preValidation: validate(MongoIdParamSchema, "params"),
+      preValidation: validate(IdParamSchema, "params"),
     },
     useController("CourseController", (c) => c.deleteCourse)
   );
@@ -55,7 +55,7 @@ async function courseRoutes(app: FastifyInstance) {
     {
       preHandler: [authDependency, safeUploadImage({ fieldName: "course" })],
       preValidation: [
-        validate(MongoIdParamSchema, "params"),
+        validate(IdParamSchema, "params"),
         validate(UpdateCourseSchema, "body"),
       ],
     },

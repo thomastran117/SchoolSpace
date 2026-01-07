@@ -1,13 +1,9 @@
-import mongoose from "mongoose";
-
-import {
-  AssignmentModel,
-  type IAssignment,
-} from "../templates/assignmentTemplate";
+import type { AssignmentModel as Assignment } from "../generated/prisma/models/Assignment";
+import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
 interface AssignmentFilters {
-  courseId?: string;
+  courseId?: number;
   dueBefore?: Date;
   dueAfter?: Date;
   search?: string;
@@ -20,74 +16,77 @@ class AssignmentRepository extends BaseRepository {
     super({ maxRetries: 3, baseDelay: 150 });
   }
 
-  public async findById(id: string): Promise<IAssignment | null> {
+  public async findById(id: number): Promise<Assignment | null> {
     return this.executeAsync(
-      (signal) => AssignmentModel.findById(id).setOptions({ signal }).exec(),
-      { deadlineMs: 800 }
+      () => prisma.assignment.findUnique({ where: { id } }),
+      { deadlineMs: 800 },
     );
   }
 
-  public async findByCourse(courseId: string): Promise<IAssignment[]> {
+  public async findByCourse(courseId: number): Promise<Assignment[]> {
     return this.executeAsync(
-      (signal) =>
-        AssignmentModel.find({ course_id: courseId })
-          .sort({ dueDate: 1 })
-          .setOptions({ signal })
-          .exec(),
-      { deadlineMs: 800 }
+      () =>
+        prisma.assignment.findMany({
+          where: { courseId },
+          orderBy: { dueDate: "asc" },
+        }),
+      { deadlineMs: 800 },
     );
   }
 
   public async create(data: {
-    course_id: string;
+    courseId: number;
     name: string;
     description: string;
-    file_url?: string;
+    fileUrl?: string;
     dueDate?: Date;
-  }): Promise<IAssignment> {
+  }): Promise<Assignment> {
     return this.executeAsync(
-      async () => {
-        const assignment = new AssignmentModel({
-          ...data,
-          course_id: new mongoose.Types.ObjectId(data.course_id),
-        });
-
-        return assignment.save();
-      },
-      { deadlineMs: 1000 }
+      () =>
+        prisma.assignment.create({
+          data: {
+            courseId: data.courseId,
+            name: data.name,
+            description: data.description,
+            fileUrl: data.fileUrl,
+            dueDate: data.dueDate,
+          },
+        }),
+      { deadlineMs: 1000 },
     );
   }
 
   public async update(
-    id: string,
-    updates: Partial<
-      Pick<IAssignment, "name" | "description" | "file_url" | "dueDate">
-    >
-  ): Promise<IAssignment | null> {
+    id: number,
+    updates: Partial<Pick<Assignment, "name" | "description" | "fileUrl" | "dueDate">>,
+  ): Promise<Assignment | null> {
     return this.executeAsync(
-      (signal) =>
-        AssignmentModel.findByIdAndUpdate(id, updates, {
-          new: true,
-          runValidators: true,
-        })
-          .setOptions({ signal })
-          .exec(),
-      { deadlineMs: 800 }
+      async () => {
+        try {
+          return await prisma.assignment.update({
+            where: { id },
+            data: updates,
+          });
+        } catch {
+          return null;
+        }
+      },
+      { deadlineMs: 800 },
     );
   }
 
-  public async delete(id: string): Promise<boolean> {
+  public async delete(id: number): Promise<boolean> {
     return this.executeAsync(
       async () => {
-        const res = await AssignmentModel.deleteOne({ _id: id });
-        return res.deletedCount === 1;
+        const res = await prisma.assignment.deleteMany({ where: { id } });
+        return res.count === 1;
       },
-      { deadlineMs: 800 }
+      { deadlineMs: 800 },
     );
   }
 
   public async findAllWithFilters(filters: AssignmentFilters): Promise<{
-    data: IAssignment[];
+    data: Assignment[];
     total: number;
     page: number;
     limit: number;
@@ -101,41 +100,39 @@ class AssignmentRepository extends BaseRepository {
       limit = 20,
     } = filters;
 
-    const query: Record<string, any> = {};
+    const skip = (page - 1) * limit;
 
-    if (courseId) query.course_id = courseId;
+    const where: any = {};
+    if (courseId) where.courseId = courseId;
 
     if (dueBefore || dueAfter) {
-      query.dueDate = {};
-      if (dueBefore) query.dueDate.$lte = dueBefore;
-      if (dueAfter) query.dueDate.$gte = dueAfter;
+      where.dueDate = {};
+      if (dueBefore) where.dueDate.lte = dueBefore;
+      if (dueAfter) where.dueDate.gte = dueAfter;
     }
 
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
       ];
     }
 
     return this.executeAsync(
-      async (signal) => {
-        const skip = (page - 1) * limit;
-
+      async () => {
         const [data, total] = await Promise.all([
-          AssignmentModel.find(query)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .setOptions({ signal })
-            .exec(),
-
-          AssignmentModel.countDocuments(query),
+          prisma.assignment.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+            skip,
+            take: limit,
+          }),
+          prisma.assignment.count({ where }),
         ]);
 
         return { data, total, page, limit };
       },
-      { deadlineMs: 1200 }
+      { deadlineMs: 1200 },
     );
   }
 }

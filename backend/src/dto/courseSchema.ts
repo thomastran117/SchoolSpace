@@ -2,12 +2,14 @@ import { z } from "zod";
 
 const CreateCourseSchema = z.object({
   year: z.number(),
-  catalogue_id: z.string().length(24),
+  catalogue_id: z.number(),
 });
 
 const UpdateCourseSchema = CreateCourseSchema.partial();
 
 const QueryCourseSchema = z.object({
+  teacherId: z.string().optional(),
+  year: z.string().optional(),
   search: z.string().min(1).max(100).optional(),
   page: z.string().optional(),
   limit: z.string().optional(),

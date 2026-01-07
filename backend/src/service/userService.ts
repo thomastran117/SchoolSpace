@@ -30,26 +30,23 @@ class UserService extends BaseService {
     this.fileService = fileService;
   }
 
-  // -------------------------
-  // Cache helpers (ID is string now)
-  // -------------------------
-  private userCacheKey(userID: string) {
+  private userCacheKey(userID: number) {
     return `user:id:${userID}`;
   }
 
-  private async invalidateUserCache(userID: string): Promise<void> {
+  private async invalidateUserCache(userID: number): Promise<void> {
     await this.cacheService.delete(this.userCacheKey(userID));
   }
 
   private async writeUserCache(
-    userID: string,
+    userID: number,
     safeUser: SafeUser
   ): Promise<void> {
     await this.cacheService.set(this.userCacheKey(userID), safeUser, this.ttl);
   }
 
   public async updateAvatar(
-    userID: string,
+    userID: number,
     image: MultipartFile,
     oldRefreshToken?: string
   ): Promise<AuthResponse> {
@@ -69,11 +66,9 @@ class UserService extends BaseService {
         "profile"
       );
 
-      const updated = await this.userRepository.update(
-        userID,
-        { avatar: publicUrl },
-        user.version
-      );
+      const updated = await this.userRepository.update(userID, {
+        avatar: publicUrl,
+      });
 
       if (
         oldAvatar &&
@@ -112,7 +107,7 @@ class UserService extends BaseService {
   }
 
   public async updateRole(
-    userID: string,
+    userID: number,
     role: Role,
     oldRefreshToken?: string
   ): Promise<AuthResponse> {
@@ -122,11 +117,9 @@ class UserService extends BaseService {
       const user = await this.userRepository.findById(userID);
       if (!user) httpError(404, "User not found");
 
-      const updated = await this.userRepository.update(
-        userID,
-        { role: role as any },
-        user.version
-      );
+      const updated = await this.userRepository.update(userID, {
+        role: role as any,
+      });
 
       const { accessToken, refreshToken } =
         await this.tokenService.generateTokens(
@@ -158,7 +151,7 @@ class UserService extends BaseService {
   }
 
   public async updateUser(
-    userID: string,
+    userID: number,
     data: {
       username?: string;
       name?: string;
@@ -184,11 +177,7 @@ class UserService extends BaseService {
       const user = await this.userRepository.findById(userID);
       if (!user) httpError(404, "User not found");
 
-      const updated = await this.userRepository.update(
-        userID,
-        data,
-        user.version
-      );
+      const updated = await this.userRepository.update(userID, data);
 
       const { accessToken, refreshToken } =
         await this.tokenService.generateTokens(
@@ -219,10 +208,7 @@ class UserService extends BaseService {
     }
   }
 
-  // -------------------------
-  // Delete user
-  // -------------------------
-  public async deleteUser(id: string, oldRefreshToken?: string) {
+  public async deleteUser(id: number, oldRefreshToken?: string) {
     try {
       if (!this.tokenService) httpError(503, "Service is not ready");
 
@@ -240,10 +226,7 @@ class UserService extends BaseService {
     }
   }
 
-  // -------------------------
-  // Reads
-  // -------------------------
-  public async getUser(id: string): Promise<SafeUser> {
+  public async getUser(id: number): Promise<SafeUser> {
     try {
       const cached = await this.cacheService.get<SafeUser>(
         this.userCacheKey(id)

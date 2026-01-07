@@ -4,9 +4,7 @@ import logger from "../utility/logger";
 abstract class BaseService {
   protected toSafe(doc: any) {
     try {
-      if (!doc) return doc;
-      const { _id, __v, ...rest } = doc;
-      return { id: _id.toString(), ...rest };
+      return doc;
     } catch {
       logger.error("[BaseService] Something went wrong converting _id to id");
       httpError(500, "An internal server error occured");

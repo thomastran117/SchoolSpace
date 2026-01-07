@@ -1,11 +1,7 @@
-import { Types } from "mongoose";
-
-import {
-  type IUser,
-  type Provider,
-  type Role,
-  UserModel,
-} from "../templates/userTemplate";
+import type { Provider, Role } from "../generated/prisma/enums";
+import type { UserModel as User } from "../generated/prisma/models/User";
+import type { UserCreateInput } from "../models/user";
+import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
 class UserRepository extends BaseRepository {
@@ -13,44 +9,25 @@ class UserRepository extends BaseRepository {
     super({ maxRetries: 3, baseDelay: 150 });
   }
 
-  private toObjectId(id: string) {
-    if (!Types.ObjectId.isValid(id)) return null;
-    return new Types.ObjectId(id);
+  public async findById(id: number): Promise<User | null> {
+    return this.executeAsync(() => prisma.user.findUnique({ where: { id } }));
   }
 
-  public async findById(id: string): Promise<IUser | null> {
-    const objectId = this.toObjectId(id);
-    if (!objectId) return null;
-
-    return this.executeAsync(async () => UserModel.findById(objectId).exec());
-  }
-
-  public async findByEmail(
-    email: string,
-    opts?: { includePassword?: boolean }
-  ): Promise<IUser | null> {
-    return this.executeAsync(async () =>
-      UserModel.findOne({ email })
-        .select(opts?.includePassword ? "+password" : "")
-        .exec()
+  public async findByEmail(email: string): Promise<User | null> {
+    return this.executeAsync(() =>
+      prisma.user.findUnique({ where: { email } })
     );
   }
 
-  public async findByUsername(username: string): Promise<IUser | null> {
-    return this.executeAsync(async () =>
-      UserModel.findOne({ username }).exec()
+  public async findByUsername(username: string): Promise<User | null> {
+    return this.executeAsync(() =>
+      prisma.user.findUnique({ where: { username } })
     );
   }
 
-  public async findByGoogleId(googleId: string): Promise<IUser | null> {
-    return this.executeAsync(async () =>
-      UserModel.findOne({ googleId }).exec()
-    );
-  }
-
-  public async findByMicrosoftId(microsoftId: string): Promise<IUser | null> {
-    return this.executeAsync(async () =>
-      UserModel.findOne({ microsoftId }).exec()
+  public async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.executeAsync(() =>
+      prisma.user.findUnique({ where: { googleId } })
     );
   }
 
@@ -58,27 +35,56 @@ class UserRepository extends BaseRepository {
     msIssuer: string,
     msTenantId: string,
     microsoftId: string
-  ): Promise<IUser | null> {
-    return this.executeAsync(async () =>
-      UserModel.findOne({
-        microsoftId,
-        msIssuer,
-        msTenantId,
-      }).exec()
+  ): Promise<User | null> {
+    return this.executeAsync(() =>
+      prisma.user.findUnique({
+        where: {
+          microsoftId_msIssuer_msTenantId: {
+            microsoftId,
+            msIssuer,
+            msTenantId,
+          },
+        },
+      })
     );
   }
 
-  public async findAll(role?: Role): Promise<IUser[]> {
-    return this.executeAsync(async () =>
-      UserModel.find(role ? { role } : {})
-        .sort({ createdAt: 1 })
-        .exec()
+  public async findAll(role?: Role): Promise<User[]> {
+    return this.executeAsync(() =>
+      prisma.user.findMany({
+        where: role ? { role } : undefined,
+        orderBy: { createdAt: "asc" },
+      })
+    );
+  }
+
+  public async findByIds(ids: number[]): Promise<User[]> {
+    if (!ids.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.user.findMany({
+          where: { id: { in: ids } },
+        }),
+      { deadlineMs: 1200 },
+    );
+  }
+
+  public async findByUsernames(usernames: string[]): Promise<User[]> {
+    if (!usernames.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.user.findMany({
+          where: { username: { in: usernames } },
+        }),
+      { deadlineMs: 1200 },
     );
   }
 
   public async countByAvatar(url: string): Promise<number> {
-    return this.executeAsync(async () =>
-      UserModel.countDocuments({ avatar: url }).exec()
+    return this.executeAsync(() =>
+      prisma.user.count({ where: { avatar: url } })
     );
   }
 
@@ -87,102 +93,58 @@ class UserRepository extends BaseRepository {
     provider?: Provider;
     email?: string;
     search?: string;
-  }): Promise<IUser[]> {
-    const query: any = {};
+  }): Promise<User[]> {
     const { role, provider, email, search } = opts;
 
-    if (role) query.role = role;
-    if (provider) query.provider = provider;
-    if (email) query.email = email;
-
-    if (search) {
-      const regex = new RegExp(search, "i");
-      query.$or = [{ email: regex }, { username: regex }, { name: regex }];
-    }
-
-    return this.executeAsync(async () =>
-      UserModel.find(query).sort({ createdAt: 1 }).exec()
+    return this.executeAsync(() =>
+      prisma.user.findMany({
+        where: {
+          role,
+          provider,
+          email,
+          ...(search && {
+            OR: [
+              { email: { contains: search, mode: "insensitive" } },
+              { username: { contains: search, mode: "insensitive" } },
+              { name: { contains: search, mode: "insensitive" } },
+            ],
+          }),
+        },
+        orderBy: { createdAt: "asc" },
+      })
     );
   }
 
-  public async create(data: {
-    email: string;
-    provider: Provider;
-    role?: Role;
-    password?: string;
-    googleId?: string | null;
-    microsoftId?: string | null;
-    msTenantId?: string | null;
-    msIssuer?: string | null;
-    username?: string | null;
-    name?: string | null;
-    avatar?: string | null;
-  }): Promise<IUser> {
+  public async create(data: UserCreateInput): Promise<User> {
     return this.executeAsync(async () => {
-      try {
-        const user = new UserModel(data);
-        return await user.save();
-      } catch (err: any) {
-        if (err?.code === 11000) {
-          const field = Object.keys(err.keyPattern ?? {})[0];
-          throw new Error(`Duplicate value for field: ${field}`);
-        }
-        throw err;
-      }
+      return await prisma.user.create({ data });
     });
   }
 
   public async update(
-    id: string,
-    data: Partial<Omit<IUser, "_id" | "version">>,
-    version: number
-  ): Promise<IUser> {
-    const objectId = this.toObjectId(id);
-    if (!objectId) {
-      throw new Error("[UserRepository.update] Invalid user id");
-    }
-
-    if ("version" in data) {
+    id: number,
+    data: Partial<Omit<User, "id" | "createdAt" | "updatedAt">>
+  ): Promise<User> {
+    if ("version" in data)
       throw new Error("Version cannot be updated directly");
-    }
-
-    const cleanData = Object.fromEntries(
-      Object.entries(data).filter(([_, v]) => v !== undefined)
-    );
-
-    if (Object.keys(cleanData).length === 0) {
-      throw new Error("[UserRepository.update] No fields provided for update");
-    }
 
     return this.executeAsync(async () => {
-      const updated = await UserModel.findOneAndUpdate(
-        { _id: objectId, version },
-        {
-          $set: cleanData,
-          $inc: { version: 1 },
+      const result = await prisma.user.update({
+        where: { id },
+        data: {
+          ...data,
         },
-        { new: true }
-      ).exec();
+      });
 
-      if (!updated) {
-        throw new Error(
-          "[UserRepository.update] Concurrent modification detected"
-        );
-      }
-
-      return updated;
+      return result;
     });
   }
 
-  public async delete(id: string): Promise<boolean> {
-    const objectId = this.toObjectId(id);
-    if (!objectId) return false;
-
-    await this.executeAsync(async () =>
-      UserModel.deleteOne({ _id: objectId }).exec()
-    );
-
-    return true;
+  public async delete(id: number): Promise<boolean> {
+    return this.executeAsync(async () => {
+      await prisma.user.delete({ where: { id } });
+      return true;
+    });
   }
 }
 

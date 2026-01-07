@@ -68,7 +68,7 @@ class CatalogueController {
   }
 
   public async updateCourseTemplate(
-    req: FastifyRequest<{ Body: UpdateCatalogueDto; Params: { id: string } }>,
+    req: FastifyRequest<{ Body: UpdateCatalogueDto; Params: { id: number } }>,
     reply: FastifyReply
   ) {
     try {
@@ -101,7 +101,7 @@ class CatalogueController {
   }
 
   public async deleteCourseTemplate(
-    req: FastifyRequest<{ Params: { id: string } }>,
+    req: FastifyRequest<{ Params: { id: number } }>,
     reply: FastifyReply
   ) {
     try {
@@ -123,7 +123,7 @@ class CatalogueController {
   }
 
   public async getCourseTemplate(
-    req: FastifyRequest<{ Params: { id: string } }>,
+    req: FastifyRequest<{ Params: { id: number } }>,
     reply: FastifyReply
   ) {
     try {

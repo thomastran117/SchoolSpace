@@ -1,9 +1,5 @@
-import mongoose from "mongoose";
-
-import {
-  EnrollmentModel,
-  type IEnrollment,
-} from "../templates/enrollmentTemplate";
+import type { EnrollmentModel as Enrollment } from "../generated/prisma/models/Enrollment";
+import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
 class EnrollmentRepository extends BaseRepository {
@@ -11,87 +7,233 @@ class EnrollmentRepository extends BaseRepository {
     super({ maxRetries: 3, baseDelay: 150 });
   }
 
-  public async getById(id: string): Promise<IEnrollment | null> {
+  public async getById(id: number): Promise<Enrollment | null> {
     return this.executeAsync(
-      (signal) => EnrollmentModel.findById(id).setOptions({ signal }).exec(),
-      { deadlineMs: 800 }
+      () =>
+        prisma.enrollment.findUnique({
+          where: { id },
+        }),
+      { deadlineMs: 800 },
     );
   }
 
   public async getByUserAndCourse(
-    userId: string,
-    courseId: string
-  ): Promise<IEnrollment | null> {
+    userId: number,
+    courseId: number,
+  ): Promise<Enrollment | null> {
     return this.executeAsync(
-      (signal) =>
-        EnrollmentModel.findOne({
-          user_id: userId,
-          course_id: courseId,
-        })
-          .setOptions({ signal })
-          .exec(),
-      { deadlineMs: 800 }
+      () =>
+        prisma.enrollment.findUnique({
+          where: {
+            courseId_userId: {
+              courseId,
+              userId,
+            },
+          },
+        }),
+      { deadlineMs: 800 },
     );
   }
 
-  public async getEnrollmentsByCourse(
-    courseId: string
-  ): Promise<IEnrollment[]> {
+  public async getEnrollmentsByCourse(courseId: number): Promise<Enrollment[]> {
     return this.executeAsync(
-      (signal) =>
-        EnrollmentModel.find({ course_id: courseId })
-          .setOptions({ signal })
-          .exec(),
-      { deadlineMs: 800 }
+      () =>
+        prisma.enrollment.findMany({
+          where: { courseId },
+        }),
+      { deadlineMs: 800 },
     );
   }
 
-  public async getEnrollmentsByUser(userId: string): Promise<IEnrollment[]> {
+  public async getEnrollmentsByUser(userId: number): Promise<Enrollment[]> {
     return this.executeAsync(
-      (signal) =>
-        EnrollmentModel.find({ user_id: userId }).setOptions({ signal }).exec(),
-      { deadlineMs: 800 }
+      () =>
+        prisma.enrollment.findMany({
+          where: { userId },
+        }),
+      { deadlineMs: 800 },
     );
   }
 
-  public async enroll(userId: string, courseId: string): Promise<IEnrollment> {
+  public async getByIds(ids: number[]): Promise<Enrollment[]> {
+    if (!ids.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.enrollment.findMany({
+          where: { id: { in: ids } },
+        }),
+      { deadlineMs: 1200 },
+    );
+  }
+  
+  public async getByUserIds(userIds: number[]): Promise<Enrollment[]> {
+    if (!userIds.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.enrollment.findMany({
+          where: { userId: { in: userIds } },
+        }),
+      { deadlineMs: 1200 },
+    );
+  }
+
+  public async getByCourseIds(courseIds: number[]): Promise<Enrollment[]> {
+    if (!courseIds.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.enrollment.findMany({
+          where: { courseId: { in: courseIds } },
+        }),
+      { deadlineMs: 1200 },
+    );
+  }
+
+  public async getEnrollmentMapForUser(
+    userId: number,
+    courseIds: number[],
+  ): Promise<Record<number, true>> {
+    if (!courseIds.length) return {};
+
     return this.executeAsync(
       async () => {
-        const enrollment = new EnrollmentModel({
-          user_id: new mongoose.Types.ObjectId(userId),
-          course_id: new mongoose.Types.ObjectId(courseId),
+        const rows = await prisma.enrollment.findMany({
+          where: {
+            userId,
+            courseId: { in: courseIds },
+          },
+          select: { courseId: true },
         });
 
-        return enrollment.save();
+        return rows.reduce<Record<number, true>>((acc, r) => {
+          acc[r.courseId] = true;
+          return acc;
+        }, {});
       },
-      { deadlineMs: 1000 }
+      { deadlineMs: 800 },
+    );
+  }
+
+  public async countByCourse(courseId: number): Promise<number> {
+    return this.executeAsync(
+      () =>
+        prisma.enrollment.count({
+          where: { courseId },
+        }),
+      { deadlineMs: 800 },
+    );
+  }
+
+  public async countByCourses(
+    courseIds: number[],
+  ): Promise<Record<number, number>> {
+    if (!courseIds.length) return {};
+
+    return this.executeAsync(
+      async () => {
+        const rows = await prisma.enrollment.groupBy({
+          by: ["courseId"],
+          where: { courseId: { in: courseIds } },
+          _count: { _all: true },
+        });
+
+        return rows.reduce<Record<number, number>>((acc, r) => {
+          acc[r.courseId] = r._count._all;
+          return acc;
+        }, {});
+      },
+      { deadlineMs: 1200 },
+    );
+  }
+
+  public async getPagedByCourse(
+    courseId: number,
+    page = 1,
+    limit = 20,
+  ): Promise<{ results: Enrollment[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    return this.executeAsync(
+      async () => {
+        const [results, total] = await prisma.$transaction([
+          prisma.enrollment.findMany({
+            where: { courseId },
+            skip,
+            take: limit,
+            orderBy: { createdAt: "desc" },
+          }),
+          prisma.enrollment.count({ where: { courseId } }),
+        ]);
+
+        return { results, total };
+      },
+      { deadlineMs: 1500 },
+    );
+  }
+
+  public async getPagedByUser(
+    userId: number,
+    page = 1,
+    limit = 20,
+  ): Promise<{ results: Enrollment[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    return this.executeAsync(
+      async () => {
+        const [results, total] = await prisma.$transaction([
+          prisma.enrollment.findMany({
+            where: { userId },
+            skip,
+            take: limit,
+            orderBy: { createdAt: "desc" },
+          }),
+          prisma.enrollment.count({ where: { userId } }),
+        ]);
+
+        return { results, total };
+      },
+      { deadlineMs: 1500 },
+    );
+  }
+
+  public async enroll(userId: number, courseId: number): Promise<Enrollment> {
+    return this.executeAsync(
+      () =>
+        prisma.enrollment.create({
+          data: { userId, courseId },
+        }),
+      { deadlineMs: 1000 },
     );
   }
 
   public async unenrollByUserAndCourse(
-    userId: string,
-    courseId: string
+    userId: number,
+    courseId: number,
   ): Promise<boolean> {
     return this.executeAsync(
       async () => {
-        const res = await EnrollmentModel.deleteOne({
-          user_id: userId,
-          course_id: courseId,
+        const res = await prisma.enrollment.deleteMany({
+          where: { userId, courseId },
         });
 
-        return res.deletedCount === 1;
+        return res.count === 1;
       },
-      { deadlineMs: 800 }
+      { deadlineMs: 800 },
     );
   }
 
-  public async unenrollById(id: string): Promise<boolean> {
+  public async unenrollById(id: number): Promise<boolean> {
     return this.executeAsync(
       async () => {
-        const res = await EnrollmentModel.deleteOne({ _id: id });
-        return res.deletedCount === 1;
+        const res = await prisma.enrollment.deleteMany({
+          where: { id },
+        });
+
+        return res.count === 1;
       },
-      { deadlineMs: 800 }
+      { deadlineMs: 800 },
     );
   }
 }

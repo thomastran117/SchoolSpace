@@ -1,7 +1,6 @@
-import mongoose from "mongoose";
-
-import type { ICourse } from "../templates/courseTemplate";
-import { CourseModel } from "../templates/courseTemplate";
+import type { CourseModel as Course } from "../generated/prisma/models/Course";
+import type { CourseCreateInput } from "../models/course";
+import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
 class CourseRepository extends BaseRepository {
@@ -9,34 +8,43 @@ class CourseRepository extends BaseRepository {
     super({ maxRetries: 3, baseDelay: 150 });
   }
 
-  public async findById(id: string): Promise<ICourse | null> {
+  public async findById(id: number): Promise<Course | null> {
     return this.executeAsync(
-      (signal) =>
-        CourseModel.findById(id)
-          .populate("catalogue")
-          .setOptions({ signal })
-          .lean()
-          .exec(),
+      () =>
+        prisma.course.findUnique({
+          where: { id },
+          include: { catalogue: true },
+        }),
       { deadlineMs: 800 }
     );
   }
 
-  public async findByTeacher(
-    teacherId: string,
-    year?: number
-  ): Promise<ICourse[]> {
-    return this.executeAsync(
-      (signal) => {
-        const filter: Record<string, any> = { teacher_id: teacherId };
-        if (year) filter.year = year;
+  public async findByIds(ids: number[]): Promise<Course[]> {
+    if (!ids.length) return [];
 
-        return CourseModel.find(filter)
-          .populate("catalogue")
-          .sort({ createdAt: -1 })
-          .setOptions({ signal })
-          .lean()
-          .exec();
-      },
+    return this.executeAsync(
+      () =>
+        prisma.course.findMany({
+          where: { id: { in: ids } },
+        }),
+      { deadlineMs: 1200 },
+    );
+  }
+
+  public async findByTeacher(
+    teacherId: number,
+    year?: number
+  ): Promise<Course[]> {
+    return this.executeAsync(
+      () =>
+        prisma.course.findMany({
+          where: {
+            teacherId,
+            ...(year !== undefined ? { year } : {}),
+          },
+          include: { catalogue: true },
+          orderBy: { createdAt: "desc" },
+        }),
       { deadlineMs: 800 }
     );
   }
@@ -45,22 +53,25 @@ class CourseRepository extends BaseRepository {
     filter: Record<string, unknown>,
     page: number,
     limit: number
-  ): Promise<{ results: ICourse[]; total: number }> {
+  ): Promise<{ results: Course[]; total: number }> {
     return this.executeAsync(
-      async (signal) => {
+      async () => {
         const skip = (page - 1) * limit;
 
-        const [results, total] = await Promise.all([
-          CourseModel.find(filter)
-            .populate("catalogue")
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .setOptions({ signal })
-            .lean()
-            .exec(),
+        const where: any = {};
+        if (filter.teacherId) where.teacherId = filter.teacherId;
+        if (filter.catalogueId) where.catalogueId = filter.catalogueId;
+        if (filter.year !== undefined) where.year = filter.year;
 
-          CourseModel.countDocuments(filter),
+        const [results, total] = await Promise.all([
+          prisma.course.findMany({
+            where,
+            include: { catalogue: true },
+            orderBy: { createdAt: "desc" },
+            skip,
+            take: limit,
+          }),
+          prisma.course.count({ where }),
         ]);
 
         return { results, total };
@@ -69,57 +80,55 @@ class CourseRepository extends BaseRepository {
     );
   }
 
-  public async create(
-    catalogueId: string,
-    teacher_id: string,
-    year: number,
-    image_url?: string
-  ): Promise<ICourse> {
+  public async create(data: CourseCreateInput): Promise<Course> {
     return this.executeAsync(
-      async () => {
-        const course = new CourseModel({
-          catalogue: new mongoose.Types.ObjectId(catalogueId),
-          teacher_id: new mongoose.Types.ObjectId(teacher_id),
-          year,
-          image_url,
-        });
-
-        const saved = await course.save();
-        return saved.toObject();
-      },
+      () =>
+        prisma.course.create({
+          data,
+          include: { catalogue: true },
+        }),
       { deadlineMs: 1000 }
     );
   }
 
   public async update(
-    id: string,
-    updates: Partial<ICourse>
-  ): Promise<ICourse | null> {
+    id: number,
+    updates: Partial<Course>
+  ): Promise<Course | null> {
     return this.executeAsync(
-      (signal) =>
-        CourseModel.findByIdAndUpdate(id, updates, {
-          new: true,
-          runValidators: true,
-        })
-          .populate("catalogue")
-          .setOptions({ signal })
-          .lean()
-          .exec(),
+      async () => {
+        try {
+          return await prisma.course.update({
+            where: { id },
+            data: updates,
+            include: { catalogue: true },
+          });
+        } catch {
+          return null;
+        }
+      },
       { deadlineMs: 800 }
     );
   }
 
-  public async delete(id: string): Promise<ICourse | null> {
+  public async delete(id: number): Promise<Course | null> {
     return this.executeAsync(
-      (signal) =>
-        CourseModel.findByIdAndDelete(id).setOptions({ signal }).lean().exec(),
+      async () => {
+        try {
+          return await prisma.course.delete({
+            where: { id },
+          });
+        } catch {
+          return null;
+        }
+      },
       { deadlineMs: 800 }
     );
   }
 
   public async countImages(imageUrl: string): Promise<number> {
     return this.executeAsync(
-      () => CourseModel.countDocuments({ image_url: imageUrl }),
+      () => prisma.course.count({ where: { imageUrl } }),
       { deadlineMs: 600 }
     );
   }

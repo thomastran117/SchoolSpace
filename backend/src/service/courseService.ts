@@ -1,8 +1,8 @@
 import type { MultipartFile } from "@fastify/multipart";
 import crypto from "crypto";
 
+import type { CourseModel as Course } from "../generated/prisma/models/Course";
 import type { CourseRepository } from "../repository/courseRepository";
-import type { ICourse } from "../templates/courseTemplate";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
@@ -69,7 +69,7 @@ class CourseService extends BaseService {
     this.courseVersion = next;
   }
 
-  private async trackHotCourse(id: string): Promise<boolean> {
+  private async trackHotCourse(id: number): Promise<boolean> {
     const key = `course:hot:${id}`;
     const count = await this.cacheService.increment(key, 1, HOT_WINDOW_SEC);
 
@@ -77,7 +77,6 @@ class CourseService extends BaseService {
       logger.info(`[CourseService] Course ${id} became HOT`);
       return true;
     }
-
     return count > COURSE_HOT_THRESHOLD;
   }
 
@@ -89,7 +88,6 @@ class CourseService extends BaseService {
       logger.info(`[CourseService] Course list page became HOT ${cacheKey}`);
       return true;
     }
-
     return count > LIST_HOT_THRESHOLD;
   }
 
@@ -102,18 +100,17 @@ class CourseService extends BaseService {
   }
 
   public async getCourses(
-    teacherId?: string,
+    teacherId?: number,
     year?: number,
     page = 1,
     limit = 15
   ) {
     try {
       const filter: Record<string, unknown> = {};
-      if (teacherId) filter.teacher_id = teacherId;
+      if (teacherId) filter.teacherId = teacherId;
       if (year !== undefined) filter.year = year;
 
       const version = await this.getVersion();
-
       const cacheKey = this.key(
         "v",
         version,
@@ -146,7 +143,6 @@ class CourseService extends BaseService {
         };
 
         const isHot = await this.trackHotList(cacheKey);
-
         await this.cacheService.set(
           cacheKey,
           response,
@@ -154,30 +150,24 @@ class CourseService extends BaseService {
         );
 
         return response;
-      } catch (err) {
+      } finally {
         await this.releaseSoftLock(cacheKey);
-        throw err;
       }
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(`[CourseService] getCourses failed: ${err?.message ?? err}`);
       throw new HttpError(500, "Internal server error");
     }
   }
 
-  public async getCourseById(id: string): Promise<ICourse> {
+  public async getCourseById(id: number): Promise<Course> {
     try {
       const cacheKey = this.key("id", id);
-
-      const cached = await this.cacheService.get<ICourse | typeof NOT_FOUND>(
+      const cached = await this.cacheService.get<Course | typeof NOT_FOUND>(
         cacheKey
       );
 
-      if (cached === NOT_FOUND) {
-        httpError(404, "Course not found");
-      }
-
+      if (cached === NOT_FOUND) httpError(404, "Course not found");
       if (cached) {
         await this.trackHotCourse(id);
         return cached;
@@ -186,7 +176,7 @@ class CourseService extends BaseService {
       const hasLock = await this.acquireSoftLock(cacheKey);
       if (!hasLock) {
         await new Promise((r) => setTimeout(r, 50));
-        const retry = await this.cacheService.get<ICourse>(cacheKey);
+        const retry = await this.cacheService.get<Course>(cacheKey);
         if (retry) return retry;
       }
 
@@ -199,7 +189,6 @@ class CourseService extends BaseService {
 
         const safe = this.toSafe(course);
         const isHot = await this.trackHotCourse(id);
-
         await this.cacheService.set(
           cacheKey,
           safe,
@@ -207,13 +196,11 @@ class CourseService extends BaseService {
         );
 
         return safe;
-      } catch (err) {
+      } finally {
         await this.releaseSoftLock(cacheKey);
-        throw err;
       }
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(
         `[CourseService] getCourseById failed: ${err?.message ?? err}`
       );
@@ -222,11 +209,11 @@ class CourseService extends BaseService {
   }
 
   public async createCourse(
-    catalogueId: string,
-    teacherId: string,
+    catalogueId: number,
+    teacherId: number,
     year: number,
     image: MultipartFile
-  ): Promise<ICourse> {
+  ): Promise<Course> {
     try {
       await this.userService.getUser(teacherId);
       await this.catalogueService.getCourseTemplateById(catalogueId);
@@ -238,18 +225,17 @@ class CourseService extends BaseService {
         "course"
       );
 
-      const course = await this.courseRepository.create(
+      const course = await this.courseRepository.create({
         catalogueId,
         teacherId,
         year,
-        publicUrl
-      );
+        imageUrl: publicUrl,
+      });
 
       await this.bumpVersion();
       return this.toSafe(course);
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(
         `[CourseService] createCourse failed: ${err?.message ?? err}`
       );
@@ -258,10 +244,10 @@ class CourseService extends BaseService {
   }
 
   public async updateCourse(
-    id: string,
-    updates: Partial<ICourse>,
+    id: number,
+    updates: Partial<Course>,
     image?: MultipartFile
-  ): Promise<ICourse> {
+  ): Promise<Course> {
     try {
       const existing = await this.courseRepository.findById(id);
       if (!existing) httpError(404, "Course not found");
@@ -273,7 +259,7 @@ class CourseService extends BaseService {
           image.filename,
           "course"
         );
-        updates.image_url = publicUrl;
+        updates.imageUrl = publicUrl;
       }
 
       const updated = await this.courseRepository.update(id, updates);
@@ -285,7 +271,6 @@ class CourseService extends BaseService {
       return this.toSafe(updated);
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(
         `[CourseService] updateCourse failed: ${err?.message ?? err}`
       );
@@ -293,20 +278,18 @@ class CourseService extends BaseService {
     }
   }
 
-  public async deleteCourse(id: string): Promise<boolean> {
+  public async deleteCourse(id: number): Promise<boolean> {
     try {
       const existing = await this.courseRepository.findById(id);
       if (!existing) httpError(404, "Course not found");
 
-      const result = await this.courseRepository.delete(id);
+      await this.courseRepository.delete(id);
 
       await this.bumpVersion();
       await this.cacheService.delete(this.key("id", id));
-
       return true;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-
       logger.error(
         `[CourseService] deleteCourse failed: ${err?.message ?? err}`
       );

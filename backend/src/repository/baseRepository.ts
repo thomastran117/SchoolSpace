@@ -1,5 +1,6 @@
 import { RepositoryError } from "../error/repositoryError";
 import { CircuitBreaker } from "../utility/circuitBreaker";
+import logger from "../utility/logger";
 
 /**
  * BaseRepository
@@ -11,7 +12,6 @@ import { CircuitBreaker } from "../utility/circuitBreaker";
  *  - Deadline enforcement (timeouts across retries)
  *  - AbortSignal propagation
  *  - Circuit breaker protection
- *  - MongoDB transaction helpers
  *
  * This class is intentionally opinionated to enforce
  * resilience and consistency at the repository layer.
@@ -149,12 +149,8 @@ abstract class BaseRepository {
 
         const jitter = Math.random() * delay;
 
-        console.warn(
-          `[Repository${context ? `:${context}` : ""}] attempt ${attempt} failed; retrying in ${Math.round(delay + jitter)}ms`,
-          {
-            code: err?.code,
-            labels: err?.errorLabels,
-          }
+        logger.warn(
+          `[Repository${context ? `:${context}` : ""}] attempt ${attempt} failed; retrying in ${Math.round(delay + jitter)}ms`
         );
 
         await new Promise((r) => setTimeout(r, delay + jitter));
