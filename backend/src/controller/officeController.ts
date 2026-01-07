@@ -3,8 +3,8 @@ import type { OfficeService } from "../service/officeService";
 class OfficeController {
   private readonly officeService: OfficeService;
 
-  constructor(officeService: OfficeService) {
-    this.officeService = officeService;
+  constructor(dependencies: { officeService: OfficeService }) {
+    this.officeService = dependencies.officeService;
   }
 }
 

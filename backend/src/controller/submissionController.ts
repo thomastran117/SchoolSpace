@@ -3,8 +3,8 @@ import type { SubmissionService } from "../service/submissionService";
 class SubmissionController {
   private readonly submissionService: SubmissionService;
 
-  constructor(submissionService: SubmissionService) {
-    this.submissionService = submissionService;
+  constructor(dependencies: { submissionService: SubmissionService }) {
+    this.submissionService = dependencies.submissionService;
   }
 }
 

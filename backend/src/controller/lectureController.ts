@@ -3,8 +3,8 @@ import type { LectureService } from "../service/lectureService";
 class LectureController {
   private readonly lectureService: LectureService;
 
-  constructor(lectureService: LectureService) {
-    this.lectureService = lectureService;
+  constructor(dependencies: { lectureService: LectureService }) {
+    this.lectureService = dependencies.lectureService;
   }
 }
 

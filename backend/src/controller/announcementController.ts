@@ -3,8 +3,8 @@ import type { AnnoucementService } from "../service/annoucementService";
 class AnnouncementController {
   private readonly annoucementService: AnnoucementService;
 
-  constructor(annoucementService: AnnoucementService) {
-    this.annoucementService = annoucementService;
+  constructor(dependencies: { annoucementService: AnnoucementService }) {
+    this.annoucementService = dependencies.annoucementService;
   }
 }
 

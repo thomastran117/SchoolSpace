@@ -28,8 +28,8 @@ import logger from "../utility/logger";
 class AuthController {
   private readonly authService: AuthService;
 
-  constructor(authService: AuthService) {
-    this.authService = authService;
+  constructor(dependencies: { authService: AuthService }) {
+    this.authService = dependencies.authService;
 
     this.localAuthenticate = this.localAuthenticate.bind(this);
     this.localSignup = this.localSignup.bind(this);
