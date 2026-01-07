@@ -19,6 +19,18 @@ class CourseRepository extends BaseRepository {
     );
   }
 
+  public async findByIds(ids: number[]): Promise<Course[]> {
+    if (!ids.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.course.findMany({
+          where: { id: { in: ids } },
+        }),
+      { deadlineMs: 1200 },
+    );
+  }
+
   public async findByTeacher(
     teacherId: number,
     year?: number

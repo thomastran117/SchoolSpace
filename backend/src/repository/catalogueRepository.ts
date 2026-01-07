@@ -16,6 +16,18 @@ class CatalogueRepository extends BaseRepository {
     );
   }
 
+  public async getByIds(ids: number[]): Promise<Catalogue[]> {
+    if (!ids.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.catalogue.findMany({
+          where: { id: { in: ids } },
+        }),
+      { deadlineMs: 1200 },
+    );
+  }
+
   public async findByCourseCode(courseCode: string): Promise<Catalogue | null> {
     return this.executeAsync(() =>
       prisma.catalogue.findUnique({

@@ -58,6 +58,30 @@ class UserRepository extends BaseRepository {
     );
   }
 
+  public async findByIds(ids: number[]): Promise<User[]> {
+    if (!ids.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.user.findMany({
+          where: { id: { in: ids } },
+        }),
+      { deadlineMs: 1200 },
+    );
+  }
+
+  public async findByUsernames(usernames: string[]): Promise<User[]> {
+    if (!usernames.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.user.findMany({
+          where: { username: { in: usernames } },
+        }),
+      { deadlineMs: 1200 },
+    );
+  }
+
   public async countByAvatar(url: string): Promise<number> {
     return this.executeAsync(() =>
       prisma.user.count({ where: { avatar: url } })
