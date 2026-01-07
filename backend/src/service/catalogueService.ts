@@ -24,12 +24,10 @@ class CatalogueService extends BaseService {
 
   private catalogueVersion?: number;
 
-  constructor(
-    dependencies:{
-    cacheService: CacheService,
-    catalogueRepository: CatalogueRepository
-    }
-  ) {
+  constructor(dependencies: {
+    cacheService: CacheService;
+    catalogueRepository: CatalogueRepository;
+  }) {
     super();
     this.cacheService = dependencies.cacheService;
     this.catalogueRepository = dependencies.catalogueRepository;

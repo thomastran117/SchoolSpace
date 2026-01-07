@@ -5,7 +5,10 @@ class LectureService {
   private readonly cacheService: CacheService;
   private readonly fileService: FileService;
 
-  constructor(dependencies: {cacheService: CacheService, fileService: FileService}) {
+  constructor(dependencies: {
+    cacheService: CacheService;
+    fileService: FileService;
+  }) {
     this.cacheService = dependencies.cacheService;
     this.fileService = dependencies.fileService;
   }

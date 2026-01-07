@@ -33,15 +33,13 @@ class CourseService extends BaseService {
 
   private courseVersion?: number;
 
-  constructor(
-    dependencies:{
-    courseRepository: CourseRepository,
-    cacheService: CacheService,
-    userService: UserService,
-    catalogueService: CatalogueService,
-    fileService: FileService
-    }
-  ) {
+  constructor(dependencies: {
+    courseRepository: CourseRepository;
+    cacheService: CacheService;
+    userService: UserService;
+    catalogueService: CatalogueService;
+    fileService: FileService;
+  }) {
     super();
     this.cacheService = dependencies.cacheService;
     this.courseRepository = dependencies.courseRepository;

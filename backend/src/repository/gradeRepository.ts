@@ -40,19 +40,26 @@ class GradeRepository extends BaseRepository {
             isFinalGrade: data.isFinalGrade ?? false,
           },
         }),
-      { deadlineMs: 1000 },
+      { deadlineMs: 1000 }
     );
   }
 
   public async findById(id: number): Promise<Grade | null> {
-    return this.executeAsync(
-      () => prisma.grade.findUnique({ where: { id } }),
-      { deadlineMs: 800 },
-    );
+    return this.executeAsync(() => prisma.grade.findUnique({ where: { id } }), {
+      deadlineMs: 800,
+    });
   }
 
   public async findAll(options: FindAllOptions = {}) {
-    const { courseId, userId, assignmentId, testId, quizId, page = 1, limit = 20 } = options;
+    const {
+      courseId,
+      userId,
+      assignmentId,
+      testId,
+      quizId,
+      page = 1,
+      limit = 20,
+    } = options;
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -76,11 +83,14 @@ class GradeRepository extends BaseRepository {
 
         return { results, total };
       },
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 
-  public async updateById(id: number, update: Partial<Grade>): Promise<Grade | null> {
+  public async updateById(
+    id: number,
+    update: Partial<Grade>
+  ): Promise<Grade | null> {
     return this.executeAsync(
       async () => {
         try {
@@ -89,7 +99,7 @@ class GradeRepository extends BaseRepository {
           return null;
         }
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -99,7 +109,7 @@ class GradeRepository extends BaseRepository {
         const res = await prisma.grade.deleteMany({ where: { id } });
         return res.count === 1;
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -134,10 +144,9 @@ class GradeRepository extends BaseRepository {
     if (target.testId) where.testId = target.testId;
     if (target.quizId) where.quizId = target.quizId;
 
-    return this.executeAsync(
-      () => prisma.grade.findFirst({ where }),
-      { deadlineMs: 800 },
-    );
+    return this.executeAsync(() => prisma.grade.findFirst({ where }), {
+      deadlineMs: 800,
+    });
   }
 
   public async existsForTarget(target: {
@@ -161,7 +170,7 @@ class GradeRepository extends BaseRepository {
         prisma.grade.findFirst({
           where: { courseId, userId, isFinalGrade: true },
         }),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -184,7 +193,12 @@ class GradeRepository extends BaseRepository {
 
     if (data.assignmentId !== undefined) {
       return prisma.grade.upsert({
-        where: { courseId_userId_assignmentId: { ...base, assignmentId: data.assignmentId } },
+        where: {
+          courseId_userId_assignmentId: {
+            ...base,
+            assignmentId: data.assignmentId,
+          },
+        },
         create: { ...data },
         update: data,
       });

@@ -5,7 +5,10 @@ class EnrollmentService {
   private readonly userService: UserService;
   private readonly courseService: CourseService;
 
-  constructor(dependencies: {userService: UserService, courseService: CourseService}) {
+  constructor(dependencies: {
+    userService: UserService;
+    courseService: CourseService;
+  }) {
     this.userService = dependencies.userService;
     this.courseService = dependencies.courseService;
   }

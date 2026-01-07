@@ -17,15 +17,12 @@ class UserService extends BaseService {
   private readonly fileService?: FileService;
   private readonly ttl = 300;
 
-  constructor(
-    dependencies:
-    {
-    userRepository: UserRepository,
-    cacheService: CacheService,
-    tokenService?: TokenService,
-    fileService?: FileService
-    }
-  ) {
+  constructor(dependencies: {
+    userRepository: UserRepository;
+    cacheService: CacheService;
+    tokenService?: TokenService;
+    fileService?: FileService;
+  }) {
     super();
     this.userRepository = dependencies.userRepository;
     this.cacheService = dependencies.cacheService;

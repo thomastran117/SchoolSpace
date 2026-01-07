@@ -21,7 +21,7 @@ class PaymentService {
   private readonly PAYMENT_CURRENCY: string;
   private readonly webService: WebService;
 
-  constructor(dependencies: {webService: WebService}) {
+  constructor(dependencies: { webService: WebService }) {
     if (!paypalClient || !paypalSecret || !paypalApi || !paypalCurrency) {
       throw new Error("Missing PayPal environment variables");
     }

@@ -33,15 +33,13 @@ class AuthService {
   private readonly DUMMY_HASH =
     "$2b$10$CwTycUXWue0Thq9StjUM0uJ8T8YtAUD3bFIxVYbcEdb87qfEzS1mS";
 
-  constructor(
-    dependencies:{
-    userRepository: UserRepository,
-    emailQueue: EmailQueue,
-    tokenService: TokenService,
-    oauthService: OAuthService,
-    webService: WebService
-    }
-  ) {
+  constructor(dependencies: {
+    userRepository: UserRepository;
+    emailQueue: EmailQueue;
+    tokenService: TokenService;
+    oauthService: OAuthService;
+    webService: WebService;
+  }) {
     this.userRepository = dependencies.userRepository;
     this.emailQueue = dependencies.emailQueue;
     this.tokenService = dependencies.tokenService;

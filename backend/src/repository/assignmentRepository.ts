@@ -19,7 +19,7 @@ class AssignmentRepository extends BaseRepository {
   public async findById(id: number): Promise<Assignment | null> {
     return this.executeAsync(
       () => prisma.assignment.findUnique({ where: { id } }),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -30,7 +30,7 @@ class AssignmentRepository extends BaseRepository {
           where: { courseId },
           orderBy: { dueDate: "asc" },
         }),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -52,13 +52,15 @@ class AssignmentRepository extends BaseRepository {
             dueDate: data.dueDate,
           },
         }),
-      { deadlineMs: 1000 },
+      { deadlineMs: 1000 }
     );
   }
 
   public async update(
     id: number,
-    updates: Partial<Pick<Assignment, "name" | "description" | "fileUrl" | "dueDate">>,
+    updates: Partial<
+      Pick<Assignment, "name" | "description" | "fileUrl" | "dueDate">
+    >
   ): Promise<Assignment | null> {
     return this.executeAsync(
       async () => {
@@ -71,7 +73,7 @@ class AssignmentRepository extends BaseRepository {
           return null;
         }
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -81,7 +83,7 @@ class AssignmentRepository extends BaseRepository {
         const res = await prisma.assignment.deleteMany({ where: { id } });
         return res.count === 1;
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -132,7 +134,7 @@ class AssignmentRepository extends BaseRepository {
 
         return { data, total, page, limit };
       },
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 }
