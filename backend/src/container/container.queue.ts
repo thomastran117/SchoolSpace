@@ -1,5 +1,4 @@
-import { CourseQueue } from "../queue/courseQueue";
-import { EmailQueue } from "../queue/emailQueue";
+import * as Queues from "../queue";
 import logger from "../utility/logger";
 import type { Registration } from "./container.types";
 
@@ -8,12 +7,12 @@ function registerQueueModules(): Map<string, Registration<any>> {
     const queues = new Map<string, Registration<any>>();
 
     queues.set("EmailQueue", {
-      factory: () => new EmailQueue(),
+      factory: () => new Queues.EmailQueue(),
       lifetime: "singleton",
     });
 
     queues.set("CourseQueue", {
-      factory: () => new CourseQueue(),
+      factory: () => new Queues.CourseQueue(),
       lifetime: "singleton",
     });
 

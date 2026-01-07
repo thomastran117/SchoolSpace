@@ -1,9 +1,4 @@
-import { AssignmentRepository } from "../repository/assignmentRepository";
-import { CatalogueRepository } from "../repository/catalogueRepository";
-import { CourseRepository } from "../repository/courseRepository";
-import { EnrollmentRepository } from "../repository/enrollmentRepository";
-import { GradeRepository } from "../repository/gradeRepository";
-import { UserRepository } from "../repository/userRepository";
+import * as Repositories from "../repository";
 import logger from "../utility/logger";
 import type { Registration } from "./container.types";
 
@@ -12,32 +7,32 @@ function registerRepositoryModules(): Map<string, Registration<any>> {
     const repositories = new Map<string, Registration<any>>();
 
     repositories.set("UserRepository", {
-      factory: () => new UserRepository(),
+      factory: () => new Repositories.UserRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("CourseRepository", {
-      factory: () => new CourseRepository(),
+      factory: () => new Repositories.CourseRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("CatalogueRepository", {
-      factory: () => new CatalogueRepository(),
+      factory: () => new Repositories.CatalogueRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("EnrollmentRepository", {
-      factory: () => new EnrollmentRepository(),
+      factory: () => new Repositories.EnrollmentRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("AssignmentRepository", {
-      factory: () => new AssignmentRepository(),
+      factory: () => new Repositories.AssignmentRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("GradeRepository", {
-      factory: () => new GradeRepository(),
+      factory: () => new Repositories.GradeRepository(),
       lifetime: "singleton",
     });
 
