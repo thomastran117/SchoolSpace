@@ -19,8 +19,12 @@ services:
     image: school-backend
     environment:
       DATABASE_URL: mysql://root:root@mysql:3306/appdb
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 3306
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: appdb
+      DATABASE_USER: root
       REDIS_URL: redis:6379
-      MONGO_URL: mongodb://mongo:27017/schoolapp
       RABBITMQ_URL: amqp://appuser:apppass@rabbitmq:5672
       JWT_SECRET_KEY: amazing_secret_key_yup_yes_abcdef123
       JWT_SECRET_KEY_REFRESH: amazing_secret_key_yup_yes_abcdef123
@@ -43,6 +47,11 @@ services:
     command: node dist/workers/emailWorker.js
     environment:
       DATABASE_URL: mysql://root:root@mysql:3306/appdb
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 3306
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: appdb
+      DATABASE_USER: root
       REDIS_URL: redis:6379
       RABBITMQ_URL: amqp://appuser:apppass@rabbitmq:5672
     depends_on:
@@ -86,17 +95,6 @@ services:
     networks:
       - school-network
 
-  mongo:
-    image: mongo:7
-    container_name: school-mongo
-    restart: always
-    ports:
-      - "27018:27017"
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - school-network
-
   rabbitmq:
     image: rabbitmq:3.13-management
     container_name: school-rabbit
@@ -122,4 +120,3 @@ networks:
 volumes:
   mysql_data:
   redis_data:
-  mongo_data:

@@ -57,7 +57,6 @@ DATABASE_PASSWORD="password123"
 DATABASE_NAME="schoolspace"
 DATABASE_USER="root"
 REDIS_URL="redis://127.0.0.1:6379"
-MONGO_URL="mongodb://localhost:27017/app"
 RABBITMQ_URL="amqp://guest:guest@localhost:5672"
 
 ##############################################
@@ -118,7 +117,6 @@ FRONTEND_CLIENT="http://localhost:4090"
 ##############################################
 
 REDIS_URL="redis://127.0.0.1:6379"
-MONGO_URL="mongodb://localhost:27017/app"
 RABBITMQ_URL="amqp://guest:guest@localhost:5672"
 
 ##############################################

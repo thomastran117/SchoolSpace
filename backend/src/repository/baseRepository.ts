@@ -45,7 +45,6 @@ abstract class BaseRepository {
    * Core execution wrapper used by all repository methods.
    *
    * Responsibilities:
-   *  - Enforces retry logic for transient MongoDB failures
    *  - Applies exponential backoff with jitter
    *  - Propagates AbortSignal cancellation
    *  - Enforces overall execution deadlines
@@ -162,9 +161,7 @@ abstract class BaseRepository {
 
   /**
    * executeTransaction
-   *
-   * Helper for executing MongoDB transactions safely.
-   *
+   *   *
    * Guarantees:
    *  - Session lifecycle management
    *  - Automatic retry behavior via executeAsync
@@ -193,7 +190,6 @@ abstract class BaseRepository {
    * Determines whether an error is safe to retry.
    *
    * Retries are allowed only for:
-   *  - MongoDB transient transaction errors
    *  - Retryable write errors
    *  - Known network / replica set failures
    *

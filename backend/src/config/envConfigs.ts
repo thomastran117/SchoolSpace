@@ -42,7 +42,6 @@ class EnvConfig {
   private readonly _databaseHost: string;
 
   private readonly _redisUrl: string;
-  private readonly _mongoUrl: string;
   private readonly _rabbitMQUrl: string;
 
   private readonly _corsWhitelist: string;
@@ -86,11 +85,6 @@ class EnvConfig {
     this._databaseUsername = this.reqWithDefault("DATABASE_USER", "root");
 
     this._redisUrl = this.reqWithDefault("REDIS_URL", "redis://localhost:6379");
-
-    this._mongoUrl = this.reqWithDefault(
-      "MONGO_URL",
-      "mongodb://localhost:27017/app"
-    );
 
     this._rabbitMQUrl = this.reqWithDefault(
       "RABBITMQ_URL",
@@ -190,10 +184,6 @@ class EnvConfig {
 
   get redisUrl(): string {
     return this._redisUrl;
-  }
-
-  get mongoUrl(): string {
-    return this._mongoUrl;
   }
 
   get rabbitMqUrl(): string {

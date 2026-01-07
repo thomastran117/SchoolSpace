@@ -34,7 +34,6 @@ Verify your local environment is working with:
 
 ```bash
   node --version
-  mongosh
   redis-cli ping
   sudo rabbitmq-diagnostics ping
 ```
