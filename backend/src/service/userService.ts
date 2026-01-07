@@ -13,15 +13,15 @@ import type { TokenService } from "./tokenService";
 class UserService extends BaseService {
   private readonly userRepository: UserRepository;
   private readonly cacheService: CacheService;
-  private readonly tokenService?: TokenService;
-  private readonly fileService?: FileService;
+  private readonly tokenService: TokenService;
+  private readonly fileService: FileService;
   private readonly ttl = 300;
 
   constructor(dependencies: {
     userRepository: UserRepository;
     cacheService: CacheService;
-    tokenService?: TokenService;
-    fileService?: FileService;
+    tokenService: TokenService;
+    fileService: FileService;
   }) {
     super();
     this.userRepository = dependencies.userRepository;
