@@ -5,9 +5,9 @@ class AssignmentService {
   private readonly cacheService: CacheService;
   private readonly fileService: FileService;
 
-  constructor(cacheService: CacheService, fileService: FileService) {
-    this.cacheService = cacheService;
-    this.fileService = fileService;
+  constructor(dependencies: {cacheService: CacheService, fileService: FileService}) {
+    this.cacheService = dependencies.cacheService;
+    this.fileService = dependencies.fileService;
   }
 
   public async createAssignment() {

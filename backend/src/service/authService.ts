@@ -34,17 +34,19 @@ class AuthService {
     "$2b$10$CwTycUXWue0Thq9StjUM0uJ8T8YtAUD3bFIxVYbcEdb87qfEzS1mS";
 
   constructor(
+    dependencies:{
     userRepository: UserRepository,
     emailQueue: EmailQueue,
     tokenService: TokenService,
     oauthService: OAuthService,
     webService: WebService
+    }
   ) {
-    this.userRepository = userRepository;
-    this.emailQueue = emailQueue;
-    this.tokenService = tokenService;
-    this.oauthService = oauthService;
-    this.webService = webService;
+    this.userRepository = dependencies.userRepository;
+    this.emailQueue = dependencies.emailQueue;
+    this.tokenService = dependencies.tokenService;
+    this.oauthService = dependencies.oauthService;
+    this.webService = dependencies.webService;
   }
 
   /**

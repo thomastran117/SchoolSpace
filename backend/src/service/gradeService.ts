@@ -17,16 +17,18 @@ class GradeService extends BaseService {
   private readonly LIST_TTL = 60;
 
   constructor(
+    dependencies: {
     gradeRepository: GradeRepository,
     cacheService: CacheService,
     courseService: CourseService,
     userService: UserService,
+    }
   ) {
     super();
-    this.gradeRepository = gradeRepository;
-    this.cacheService = cacheService;
-    this.courseService = courseService;
-    this.userService = userService;
+    this.gradeRepository = dependencies.gradeRepository;
+    this.cacheService = dependencies.cacheService;
+    this.courseService = dependencies.courseService;
+    this.userService = dependencies.userService;
   }
 
   private key(...parts: (string | number)[]): string {

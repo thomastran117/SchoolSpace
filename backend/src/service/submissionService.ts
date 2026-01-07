@@ -2,8 +2,8 @@ import type { FileService } from "./fileService";
 
 class SubmissionService {
   private readonly fileService: FileService;
-  constructor(fileService: FileService) {
-    this.fileService = fileService;
+  constructor(dependencies: {fileService: FileService}) {
+    this.fileService = dependencies.fileService;
   }
 
   public async submitAssignment() {

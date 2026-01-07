@@ -3,8 +3,8 @@ import type { CacheService } from "./cacheService";
 class ReviewService {
   private readonly cacheService: CacheService;
 
-  constructor(cacheService: CacheService) {
-    this.cacheService = cacheService;
+  constructor(dependencies: {cacheService: CacheService}) {
+    this.cacheService = dependencies.cacheService;
   }
 
   public async createReview() {

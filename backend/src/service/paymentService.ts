@@ -21,7 +21,7 @@ class PaymentService {
   private readonly PAYMENT_CURRENCY: string;
   private readonly webService: WebService;
 
-  constructor(webService: WebService) {
+  constructor(dependencies: {webService: WebService}) {
     if (!paypalClient || !paypalSecret || !paypalApi || !paypalCurrency) {
       throw new Error("Missing PayPal environment variables");
     }
@@ -29,7 +29,7 @@ class PaymentService {
     this.PAYPAL_SECRET_KEY = paypalSecret;
     this.PAYPAL_API = paypalApi;
     this.PAYMENT_CURRENCY = paypalCurrency;
-    this.webService = webService;
+    this.webService = dependencies.webService;
   }
 
   private async getAccessToken(): Promise<string> {

@@ -18,16 +18,19 @@ class UserService extends BaseService {
   private readonly ttl = 300;
 
   constructor(
+    dependencies:
+    {
     userRepository: UserRepository,
     cacheService: CacheService,
     tokenService?: TokenService,
     fileService?: FileService
+    }
   ) {
     super();
-    this.userRepository = userRepository;
-    this.cacheService = cacheService;
-    this.tokenService = tokenService;
-    this.fileService = fileService;
+    this.userRepository = dependencies.userRepository;
+    this.cacheService = dependencies.cacheService;
+    this.tokenService = dependencies.tokenService;
+    this.fileService = dependencies.fileService;
   }
 
   private userCacheKey(userID: number) {
