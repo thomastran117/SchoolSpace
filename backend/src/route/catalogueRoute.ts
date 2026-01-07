@@ -9,7 +9,7 @@ import {
   QueryCatalogueSchema,
   UpdateCatalogueSchema,
 } from "../dto/catalogueSchema";
-import { MongoIdParamSchema } from "../dto/idSchema";
+import { IdParamSchema } from "../dto/idSchema";
 import { authDependency } from "../hooks/authHook";
 import { useController } from "../hooks/controllerHook";
 import { validate } from "../hooks/validateHook";
@@ -18,7 +18,7 @@ async function catalogueRoutes(app: FastifyInstance) {
   app.get(
     "/:id",
     {
-      preValidation: validate(MongoIdParamSchema, "params"),
+      preValidation: validate(IdParamSchema, "params"),
     },
     useController("CatalogueController", (c) => c.getCourseTemplate)
   );
@@ -45,7 +45,7 @@ async function catalogueRoutes(app: FastifyInstance) {
     {
       preHandler: authDependency,
       preValidation: [
-        validate(MongoIdParamSchema, "params"),
+        validate(IdParamSchema, "params"),
         validate(UpdateCatalogueSchema, "body"),
       ],
     },
@@ -56,7 +56,7 @@ async function catalogueRoutes(app: FastifyInstance) {
     "/:id",
     {
       preHandler: authDependency,
-      preValidation: validate(MongoIdParamSchema, "params"),
+      preValidation: validate(IdParamSchema, "params"),
     },
     useController("CatalogueController", (c) => c.deleteCourseTemplate)
   );

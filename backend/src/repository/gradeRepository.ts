@@ -1,17 +1,15 @@
-import mongoose, { Types } from "mongoose";
-
-import { GradeModel, type IGrade } from "../templates/gradeTemplate";
+import type { GradeModel as Grade } from "../generated/prisma/models/Grade";
+import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
 interface FindAllOptions {
-  courseId?: string;
-  userId?: string;
-  assignmentId?: string;
+  courseId?: number;
+  userId?: number;
+  assignmentId?: number;
   testId?: string;
   quizId?: string;
   page?: number;
   limit?: number;
-  includeDeleted?: boolean;
 }
 
 class GradeRepository extends BaseRepository {
@@ -20,116 +18,92 @@ class GradeRepository extends BaseRepository {
   }
 
   public async create(data: {
-    course_id: string;
-    user_id: string;
+    courseId: number;
+    userId: number;
     name: string;
     weight: number;
     obtained: number;
     total: number;
     isFinalGrade?: boolean;
-    assignment_id?: string | null;
-    test_id?: string | null;
-    quiz_id?: string | null;
-  }): Promise<IGrade> {
+    assignmentId?: number | null;
+    testId?: string | null;
+    quizId?: string | null;
+  }): Promise<Grade> {
     return this.executeAsync(
-      async () => {
-        const grade = new GradeModel({
-          ...data,
-          course_id: new mongoose.Types.ObjectId(data.course_id),
-          user_id: new mongoose.Types.ObjectId(data.user_id),
-          assignment_id: data.assignment_id
-            ? new mongoose.Types.ObjectId(data.assignment_id)
-            : null,
-          test_id: data.test_id ?? null,
-          quiz_id: data.quiz_id ?? null,
-        });
-
-        return grade.save();
-      },
-      { deadlineMs: 1000 }
+      () =>
+        prisma.grade.create({
+          data: {
+            ...data,
+            assignmentId: data.assignmentId ?? null,
+            testId: data.testId ?? null,
+            quizId: data.quizId ?? null,
+            isFinalGrade: data.isFinalGrade ?? false,
+          },
+        }),
+      { deadlineMs: 1000 },
     );
   }
 
-  public async findById(id: string): Promise<IGrade | null> {
-    if (!Types.ObjectId.isValid(id)) return null;
-
+  public async findById(id: number): Promise<Grade | null> {
     return this.executeAsync(
-      (signal) => GradeModel.findById(id).setOptions({ signal }).exec(),
-      { deadlineMs: 800 }
+      () => prisma.grade.findUnique({ where: { id } }),
+      { deadlineMs: 800 },
     );
   }
 
   public async findAll(options: FindAllOptions = {}) {
-    const {
-      courseId,
-      userId,
-      assignmentId,
-      testId,
-      quizId,
-      page = 1,
-      limit = 20,
-      includeDeleted = false,
-    } = options;
-
-    const filter: Record<string, any> = {};
-
-    if (courseId) filter.course_id = courseId;
-    if (userId) filter.user_id = userId;
-    if (assignmentId) filter.assignment_id = assignmentId;
-    if (testId) filter.test_id = testId;
-    if (quizId) filter.quiz_id = quizId;
-
-    if (!includeDeleted) filter.deletedAt = null;
-
+    const { courseId, userId, assignmentId, testId, quizId, page = 1, limit = 20 } = options;
     const skip = (page - 1) * limit;
 
-    return this.executeAsync(
-      async (signal) => {
-        const [results, total] = await Promise.all([
-          GradeModel.find(filter)
-            .skip(skip)
-            .limit(limit)
-            .sort({ createdAt: -1 })
-            .setOptions({ signal })
-            .exec(),
+    const where: any = {};
+    if (courseId) where.courseId = courseId;
+    if (userId) where.userId = userId;
+    if (assignmentId) where.assignmentId = assignmentId;
+    if (testId) where.testId = testId;
+    if (quizId) where.quizId = quizId;
 
-          GradeModel.countDocuments(filter).setOptions({ signal }).exec(),
+    return this.executeAsync(
+      async () => {
+        const [results, total] = await Promise.all([
+          prisma.grade.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+            skip,
+            take: limit,
+          }),
+          prisma.grade.count({ where }),
         ]);
 
         return { results, total };
       },
-      { deadlineMs: 1200 }
+      { deadlineMs: 1200 },
     );
   }
 
-  public async updateById(
-    id: string,
-    update: Partial<IGrade>
-  ): Promise<IGrade | null> {
-    if (!Types.ObjectId.isValid(id)) return null;
-
-    return this.executeAsync(
-      (signal) =>
-        GradeModel.findByIdAndUpdate(id, update, {
-          new: true,
-        })
-          .setOptions({ signal })
-          .exec(),
-      { deadlineMs: 800 }
-    );
-  }
-
-  public async delete(id: string): Promise<boolean> {
+  public async updateById(id: number, update: Partial<Grade>): Promise<Grade | null> {
     return this.executeAsync(
       async () => {
-        const res = await GradeModel.deleteOne({ _id: id });
-        return res.deletedCount === 1;
+        try {
+          return await prisma.grade.update({ where: { id }, data: update });
+        } catch {
+          return null;
+        }
       },
-      { deadlineMs: 800 }
+      { deadlineMs: 800 },
     );
   }
 
-  public async findByAssignmentId(assignmentId: string) {
+  public async delete(id: number): Promise<boolean> {
+    return this.executeAsync(
+      async () => {
+        const res = await prisma.grade.deleteMany({ where: { id } });
+        return res.count === 1;
+      },
+      { deadlineMs: 800 },
+    );
+  }
+
+  public async findByAssignmentId(assignmentId: number) {
     return this.findAll({ assignmentId, limit: 100 });
   }
 
@@ -141,122 +115,114 @@ class GradeRepository extends BaseRepository {
     return this.findAll({ quizId, limit: 100 });
   }
 
-  public async findForCourseAndUser(courseId: string, userId: string) {
+  public async findForCourseAndUser(courseId: number, userId: number) {
     return this.findAll({ courseId, userId, limit: 100 });
   }
 
   public async findByTarget(target: {
-    assignmentId?: string;
+    assignmentId?: number;
     testId?: string;
     quizId?: string;
-    courseId: string;
-    userId: string;
-  }): Promise<IGrade | null> {
-    const filter: any = {
-      course_id: target.courseId,
-      user_id: target.userId,
+    courseId: number;
+    userId: number;
+  }): Promise<Grade | null> {
+    const where: any = {
+      courseId: target.courseId,
+      userId: target.userId,
     };
-
-    if (target.assignmentId) filter.assignment_id = target.assignmentId;
-    if (target.testId) filter.test_id = target.testId;
-    if (target.quizId) filter.quiz_id = target.quizId;
+    if (target.assignmentId) where.assignmentId = target.assignmentId;
+    if (target.testId) where.testId = target.testId;
+    if (target.quizId) where.quizId = target.quizId;
 
     return this.executeAsync(
-      (signal) => GradeModel.findOne(filter).setOptions({ signal }).exec(),
-      { deadlineMs: 800 }
+      () => prisma.grade.findFirst({ where }),
+      { deadlineMs: 800 },
     );
   }
 
   public async existsForTarget(target: {
-    assignmentId?: string;
+    assignmentId?: number;
     testId?: string;
     quizId?: string;
-    courseId: string;
-    userId: string;
+    courseId: number;
+    userId: number;
   }): Promise<boolean> {
-    const grade = await this.findByTarget(target);
-    return !!grade;
+    const found = await this.findByTarget(target);
+    return !!found;
   }
 
-  public async getUserGradesInCourse(courseId: string, userId: string) {
+  public async getUserGradesInCourse(courseId: number, userId: number) {
     return this.findAll({ courseId, userId, limit: 200 });
   }
 
-  public async getFinalGrade(courseId: string, userId: string) {
+  public async getFinalGrade(courseId: number, userId: number) {
     return this.executeAsync(
-      (signal) =>
-        GradeModel.findOne({
-          course_id: courseId,
-          user_id: userId,
-          isFinalGrade: true,
-        })
-          .setOptions({ signal })
-          .exec(),
-      { deadlineMs: 800 }
+      () =>
+        prisma.grade.findFirst({
+          where: { courseId, userId, isFinalGrade: true },
+        }),
+      { deadlineMs: 800 },
     );
   }
 
   public async upsertForTarget(data: {
-    course_id: string;
-    user_id: string;
-    assignment_id?: string;
-    test_id?: string;
-    quiz_id?: string;
+    courseId: number;
+    userId: number;
+    assignmentId?: number;
+    testId?: string;
+    quizId?: string;
     name: string;
     weight: number;
     obtained: number;
     total: number;
     isFinalGrade?: boolean;
-  }): Promise<IGrade> {
-    const filter: any = {
-      course_id: data.course_id,
-      user_id: data.user_id,
+  }): Promise<Grade> {
+    const base = {
+      courseId: data.courseId,
+      userId: data.userId,
     };
 
-    if (data.assignment_id) filter.assignment_id = data.assignment_id;
-    if (data.test_id) filter.test_id = data.test_id;
-    if (data.quiz_id) filter.quiz_id = data.quiz_id;
+    if (data.assignmentId !== undefined) {
+      return prisma.grade.upsert({
+        where: { courseId_userId_assignmentId: { ...base, assignmentId: data.assignmentId } },
+        create: { ...data },
+        update: data,
+      });
+    }
 
-    return this.executeAsync(
-      (signal) =>
-        GradeModel.findOneAndUpdate(
-          filter,
-          {
-            $set: {
-              name: data.name,
-              weight: data.weight,
-              obtained: data.obtained,
-              total: data.total,
-              isFinalGrade: data.isFinalGrade ?? false,
-            },
-          },
-          { upsert: true, new: true }
-        )
-          .setOptions({ signal })
-          .exec(),
-      { deadlineMs: 1000 }
-    );
+    if (data.testId !== undefined) {
+      return prisma.grade.upsert({
+        where: { courseId_userId_testId: { ...base, testId: data.testId } },
+        create: { ...data },
+        update: data,
+      });
+    }
+
+    if (data.quizId !== undefined) {
+      return prisma.grade.upsert({
+        where: { courseId_userId_quizId: { ...base, quizId: data.quizId } },
+        create: { ...data },
+        update: data,
+      });
+    }
+
+    throw new Error("Target identifier missing");
   }
 
-  public async recalcFinalGrade(courseId: string, userId: string) {
-    return this.executeAsync(async (signal) => {
-      const grades = await GradeModel.find({
-        course_id: courseId,
-        user_id: userId,
-        isFinalGrade: false,
-      })
-        .setOptions({ signal })
-        .exec();
+  public async recalcFinalGrade(courseId: number, userId: number) {
+    return this.executeAsync(async () => {
+      const grades = await prisma.grade.findMany({
+        where: { courseId, userId, isFinalGrade: false },
+      });
 
       const totalWeight = grades.reduce((s, g) => s + g.weight, 0);
-
       if (totalWeight === 0) return null;
 
-      const weightedScore =
+      const weighted =
         grades.reduce((s, g) => s + (g.obtained / g.total) * g.weight, 0) /
         totalWeight;
 
-      return weightedScore * 100;
+      return weighted * 100;
     });
   }
 }
