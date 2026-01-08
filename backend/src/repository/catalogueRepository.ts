@@ -1,8 +1,6 @@
-import type { CatalogueModel as Catalogue } from "../generated/prisma/models/Catalogue";
+import type { Catalogue, Term } from "../models/catalogue";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
-
-type Term = "WINTER" | "FALL" | "SUMMER";
 
 class CatalogueRepository extends BaseRepository {
   constructor() {

@@ -1,4 +1,4 @@
-import type { GradeModel as Grade } from "../generated/prisma/models/Grade";
+import { Grade } from "../models/grade";
 import type { GradeRepository } from "../repository/gradeRepository";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";

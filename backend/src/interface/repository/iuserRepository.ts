@@ -1,4 +1,4 @@
-import type { User, Role, Provider } from "../../models/user";
+import type { Provider, Role, User } from "../../models/user";
 
 interface IUserRepository {
   findById(id: number): Promise<User | null>;

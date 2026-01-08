@@ -1,4 +1,4 @@
-import type { GradeModel as Grade } from "../generated/prisma/models/Grade";
+import { Grade } from "../models/grade";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
@@ -40,15 +40,17 @@ class GradeRepository extends BaseRepository {
     });
   }
 
-  public async findAll(options: {
-    courseId?: number;
-    userId?: number;
-    assignmentId?: number;
-    testId?: string;
-    quizId?: string;
-    page?: number;
-    limit?: number;
-  } = {}) {
+  public async findAll(
+    options: {
+      courseId?: number;
+      userId?: number;
+      assignmentId?: number;
+      testId?: string;
+      quizId?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ) {
     const {
       courseId,
       userId,

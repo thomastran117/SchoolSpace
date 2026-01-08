@@ -1,4 +1,4 @@
-import type { CourseModel as Course } from "../generated/prisma/models/Course";
+import type { Course } from "../models/course";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 

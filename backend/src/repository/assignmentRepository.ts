@@ -1,4 +1,4 @@
-import type { AssignmentModel as Assignment } from "../generated/prisma/models/Assignment";
+import type { Assignment } from "../models/assignment";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 

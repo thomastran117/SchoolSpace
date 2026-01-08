@@ -8,7 +8,9 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("AuthController", {
       factory: (scope) =>
-        new Controllers.AuthController({authService: scope.resolve("AuthService")}),
+        new Controllers.AuthController({
+          authService: scope.resolve("AuthService"),
+        }),
       lifetime: "scoped",
     });
 
@@ -22,7 +24,9 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("UserController", {
       factory: (scope) =>
-        new Controllers.UserController({userService: scope.resolve("UserService")}),
+        new Controllers.UserController({
+          userService: scope.resolve("UserService"),
+        }),
       lifetime: "scoped",
     });
 
@@ -41,7 +45,6 @@ function registerControllerModules(): Map<string, Registration<any>> {
         }),
       lifetime: "scoped",
     });
-
 
     controllers.set("AssignmentController", {
       factory: (scope) =>

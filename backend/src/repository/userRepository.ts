@@ -1,6 +1,4 @@
-import type { Provider, Role } from "../generated/prisma/enums";
-import type { UserModel as User } from "../generated/prisma/models/User";
-import type { UserCreateInput } from "../models/user";
+import { Provider, Role, User } from "../models/user";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
