@@ -132,7 +132,7 @@ class CacheService {
 
   async increment(
     key: string,
-    amount = 1,
+    amount: number = 1,
     ttlSeconds?: number
   ): Promise<number> {
     if (!this.canUseRedis()) {
@@ -158,7 +158,7 @@ class CacheService {
     }
   }
 
-  async decrement(key: string, amount = 1): Promise<void> {
+  async decrement(key: string, amount: number = 1): Promise<void> {
     if (!this.canUseRedis()) return;
 
     redis.decrby(key, amount).catch((err) => {

@@ -8,25 +8,37 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("AuthController", {
       factory: (scope) =>
+<<<<<<< HEAD
+        new Controllers.AuthController(scope.resolve("AuthService")),
+=======
         new Controllers.AuthController({
           authService: scope.resolve("AuthService"),
         }),
+>>>>>>> main
       lifetime: "scoped",
     });
 
     controllers.set("FileController", {
       factory: (scope) =>
+<<<<<<< HEAD
+        new Controllers.FileController(scope.resolve("FileService")),
+=======
         new Controllers.FileController({
           fileService: scope.resolve("FileService"),
         }),
+>>>>>>> main
       lifetime: "scoped",
     });
 
     controllers.set("UserController", {
       factory: (scope) =>
+<<<<<<< HEAD
+        new Controllers.UserController(scope.resolve("UserService")),
+=======
         new Controllers.UserController({
           userService: scope.resolve("UserService"),
         }),
+>>>>>>> main
       lifetime: "scoped",
     });
 
@@ -39,6 +51,10 @@ function registerControllerModules(): Map<string, Registration<any>> {
     });
 
     controllers.set("CourseController", {
+<<<<<<< HEAD
+      factory: (scope) =>
+        new Controllers.CourseController(scope.resolve("CourseService")),
+=======
       factory: (scope) =>
         new Controllers.CourseController({
           courseService: scope.resolve("CourseService"),
@@ -51,11 +67,17 @@ function registerControllerModules(): Map<string, Registration<any>> {
         new Controllers.AnnouncementController({
           annoucementService: scope.resolve("AnnoucementService"),
         }),
+>>>>>>> main
       lifetime: "scoped",
     });
 
     controllers.set("AssignmentController", {
       factory: (scope) =>
+<<<<<<< HEAD
+        new Controllers.AssignmentController(
+          scope.resolve("AssignmentService")
+        ),
+=======
         new Controllers.AssignmentController({
           assignmentService: scope.resolve("AssignmentService"),
         }),
@@ -67,18 +89,32 @@ function registerControllerModules(): Map<string, Registration<any>> {
         new Controllers.DiscussionController({
           discussionService: scope.resolve("DiscussionService"),
         }),
+>>>>>>> main
       lifetime: "scoped",
     });
 
     controllers.set("EnrollmentController", {
       factory: (scope) =>
+<<<<<<< HEAD
+        new Controllers.EnrollmentController(
+          scope.resolve("EnrollmentService")
+        ),
+=======
         new Controllers.EnrollmentController({
           enrollmentService: scope.resolve("EnrollmentService"),
         }),
+>>>>>>> main
       lifetime: "scoped",
     });
 
     controllers.set("GradeController", {
+<<<<<<< HEAD
+      factory: (scope) =>
+        new Controllers.GradeController(scope.resolve("GradeService")),
+      lifetime: "scoped",
+    });
+
+=======
       factory: (scope) =>
         new Controllers.GradeController({
           gradeService: scope.resolve("GradeService"),
@@ -141,6 +177,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
         }),
       lifetime: "scoped",
     });
+>>>>>>> main
     return controllers;
   } catch (err: any) {
     logger.error(

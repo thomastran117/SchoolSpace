@@ -16,12 +16,21 @@ class GradeService extends BaseService {
   private readonly FINAL_TTL = 15;
   private readonly LIST_TTL = 60;
 
+<<<<<<< HEAD
+  constructor(
+    gradeRepository: GradeRepository,
+    cacheService: CacheService,
+    courseService: CourseService,
+    userService: UserService
+  ) {
+=======
   constructor(dependencies: {
     gradeRepository: GradeRepository;
     cacheService: CacheService;
     courseService: CourseService;
     userService: UserService;
   }) {
+>>>>>>> main
     super();
     this.gradeRepository = dependencies.gradeRepository;
     this.cacheService = dependencies.cacheService;

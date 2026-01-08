@@ -2,16 +2,6 @@ import type { GradeModel as Grade } from "../generated/prisma/models/Grade";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
-interface FindAllOptions {
-  courseId?: number;
-  userId?: number;
-  assignmentId?: number;
-  testId?: string;
-  quizId?: string;
-  page?: number;
-  limit?: number;
-}
-
 class GradeRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
@@ -50,7 +40,21 @@ class GradeRepository extends BaseRepository {
     });
   }
 
+<<<<<<< HEAD
+  public async findAll(
+    options: {
+      courseId?: number;
+      userId?: number;
+      assignmentId?: number;
+      testId?: string;
+      quizId?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<{ results: Grade[]; total: number }> {
+=======
   public async findAll(options: FindAllOptions = {}) {
+>>>>>>> main
     const {
       courseId,
       userId,
@@ -113,19 +117,34 @@ class GradeRepository extends BaseRepository {
     );
   }
 
-  public async findByAssignmentId(assignmentId: number) {
+  public async findByAssignmentId(assignmentId: number): Promise<{
+    results: Grade[];
+    total: number;
+  }> {
     return this.findAll({ assignmentId, limit: 100 });
   }
 
-  public async findByTestId(testId: string) {
+  public async findByTestId(testId: string): Promise<{
+    results: Grade[];
+    total: number;
+  }> {
     return this.findAll({ testId, limit: 100 });
   }
 
-  public async findByQuizId(quizId: string) {
+  public async findByQuizId(quizId: string): Promise<{
+    results: Grade[];
+    total: number;
+  }> {
     return this.findAll({ quizId, limit: 100 });
   }
 
-  public async findForCourseAndUser(courseId: number, userId: number) {
+  public async findForCourseAndUser(
+    courseId: number,
+    userId: number
+  ): Promise<{
+    results: Grade[];
+    total: number;
+  }> {
     return this.findAll({ courseId, userId, limit: 100 });
   }
 
@@ -160,11 +179,20 @@ class GradeRepository extends BaseRepository {
     return !!found;
   }
 
-  public async getUserGradesInCourse(courseId: number, userId: number) {
+  public async getUserGradesInCourse(
+    courseId: number,
+    userId: number
+  ): Promise<{
+    results: Grade[];
+    total: number;
+  }> {
     return this.findAll({ courseId, userId, limit: 200 });
   }
 
-  public async getFinalGrade(courseId: number, userId: number) {
+  public async getFinalGrade(
+    courseId: number,
+    userId: number
+  ): Promise<Grade | null> {
     return this.executeAsync(
       () =>
         prisma.grade.findFirst({
@@ -223,7 +251,10 @@ class GradeRepository extends BaseRepository {
     throw new Error("Target identifier missing");
   }
 
-  public async recalcFinalGrade(courseId: number, userId: number) {
+  public async recalcFinalGrade(
+    courseId: number,
+    userId: number
+  ): Promise<number | null> {
     return this.executeAsync(async () => {
       const grades = await prisma.grade.findMany({
         where: { courseId, userId, isFinalGrade: false },

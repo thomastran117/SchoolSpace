@@ -9,5 +9,6 @@ declare module "fastify" {
     resolve: <T>(key: string) => T;
     validatedFile?: MultipartFile;
     rateLimitIdentity?: string;
+    override<T>(key: string, factory: (scope: ScopedContainer) => T): void;
   }
 }

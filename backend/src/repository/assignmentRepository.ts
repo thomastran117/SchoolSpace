@@ -2,15 +2,6 @@ import type { AssignmentModel as Assignment } from "../generated/prisma/models/A
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
-interface AssignmentFilters {
-  courseId?: number;
-  dueBefore?: Date;
-  dueAfter?: Date;
-  search?: string;
-  page?: number;
-  limit?: number;
-}
-
 class AssignmentRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
@@ -20,6 +11,21 @@ class AssignmentRepository extends BaseRepository {
     return this.executeAsync(
       () => prisma.assignment.findUnique({ where: { id } }),
       { deadlineMs: 800 }
+<<<<<<< HEAD
+    );
+  }
+
+  public async findByIds(ids: number[]): Promise<Assignment[]> {
+    if (!ids.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.assignment.findMany({
+          where: { id: { in: ids } },
+        }),
+      { deadlineMs: 1200 }
+=======
+>>>>>>> main
     );
   }
 
@@ -87,7 +93,14 @@ class AssignmentRepository extends BaseRepository {
     );
   }
 
-  public async findAllWithFilters(filters: AssignmentFilters): Promise<{
+  public async findAllWithFilters(filters: {
+    courseId?: number;
+    dueBefore?: Date;
+    dueAfter?: Date;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{
     data: Assignment[];
     total: number;
     page: number;

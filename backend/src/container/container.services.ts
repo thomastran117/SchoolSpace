@@ -33,14 +33,21 @@ function registerServiceModules(): Map<string, Registration<any>> {
 
     services.set("TokenService", {
       factory: (scope) =>
+<<<<<<< HEAD
+        new Services.TokenService(scope.resolve("CacheService")),
+=======
         new Services.TokenService({
           cacheService: scope.resolve("CacheService"),
         }),
+>>>>>>> main
       lifetime: "transient",
     });
 
     services.set("PaymentService", {
       factory: (scope) =>
+<<<<<<< HEAD
+        new Services.PaymentService(scope.resolve("WebService")),
+=======
         new Services.PaymentService({
           webService: scope.resolve("WebService"),
         }),
@@ -52,6 +59,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
         new Services.SubmissionService({
           fileService: scope.resolve("FileService"),
         }),
+>>>>>>> main
       lifetime: "scoped",
     });
 
@@ -64,6 +72,8 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
+<<<<<<< HEAD
+=======
     services.set("AnnoucementService", {
       factory: (scope) =>
         new Services.AnnoucementService({
@@ -80,6 +90,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
+>>>>>>> main
     services.set("GradeService", {
       factory: (scope) =>
         new Services.GradeService({
@@ -91,6 +102,8 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
+<<<<<<< HEAD
+=======
     services.set("ReviewService", {
       factory: (scope) =>
         new Services.ReviewService({
@@ -131,6 +144,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
+>>>>>>> main
     services.set("UserService", {
       factory: (scope) =>
         new Services.UserService({
@@ -151,6 +165,8 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
+<<<<<<< HEAD
+=======
     services.set("LectureService", {
       factory: (scope) =>
         new Services.LectureService({
@@ -160,6 +176,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
+>>>>>>> main
     services.set("CourseService", {
       factory: (scope) =>
         new Services.CourseService({

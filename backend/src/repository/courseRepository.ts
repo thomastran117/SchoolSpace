@@ -1,5 +1,4 @@
 import type { CourseModel as Course } from "../generated/prisma/models/Course";
-import type { CourseCreateInput } from "../models/course";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
@@ -80,7 +79,12 @@ class CourseRepository extends BaseRepository {
     );
   }
 
-  public async create(data: CourseCreateInput): Promise<Course> {
+  public async create(data: {
+    catalogueId: number;
+    teacherId: number;
+    year: number;
+    imageUrl?: string | undefined;
+  }): Promise<Course> {
     return this.executeAsync(
       () =>
         prisma.course.create({

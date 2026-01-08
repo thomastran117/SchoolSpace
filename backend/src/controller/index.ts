@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+export { AssignmentController } from "../controller/assignmentController";
+export { AuthController } from "../controller/authController";
+export { CatalogueController } from "../controller/catalogueController";
+export { CourseController } from "../controller/courseController";
+export { EnrollmentController } from "../controller/enrollmentController";
+export { FileController } from "../controller/fileController";
+export { GradeController } from "../controller/gradeController";
+=======
 export { AnnouncementController } from "../controller/announcementController";
 export { AppointmentController } from "../controller/appointmentController";
 export { AssignmentController } from "../controller/assignmentController";
@@ -14,4 +23,5 @@ export { OfficeController } from "../controller/officeController";
 export { ReviewController } from "../controller/reviewController";
 export { SubmissionController } from "../controller/submissionController";
 export { TutorController } from "../controller/tutorController";
+>>>>>>> main
 export { UserController } from "../controller/userController";

@@ -115,7 +115,23 @@ class UserRepository extends BaseRepository {
     );
   }
 
-  public async create(data: UserCreateInput): Promise<User> {
+  public async create(data: {
+    email: string;
+    provider: Provider;
+    role?: Role;
+    password?: string | null;
+    googleId?: string | null;
+    microsoftId?: string | null;
+    msTenantId?: string | null;
+    msIssuer?: string | null;
+    username?: string | null;
+    name?: string | null;
+    avatar?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    faculty?: string | null;
+    school?: string | null;
+  }): Promise<User> {
     return this.executeAsync(async () => {
       return await prisma.user.create({ data });
     });
