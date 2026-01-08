@@ -1,27 +1,8 @@
-<<<<<<< HEAD
-export { AssignmentController } from "../controller/assignmentController";
-export { AuthController } from "../controller/authController";
-export { CatalogueController } from "../controller/catalogueController";
-export { CourseController } from "../controller/courseController";
-export { EnrollmentController } from "../controller/enrollmentController";
-export { FileController } from "../controller/fileController";
-export { GradeController } from "../controller/gradeController";
-=======
-export { AnnouncementController } from "../controller/announcementController";
-export { AppointmentController } from "../controller/appointmentController";
-export { AssignmentController } from "../controller/assignmentController";
-export { AuthController } from "../controller/authController";
-export { BookingController } from "../controller/bookingController";
-export { CatalogueController } from "../controller/catalogueController";
-export { CourseController } from "../controller/courseController";
-export { DiscussionController } from "../controller/discussionController";
-export { EnrollmentController } from "../controller/enrollmentController";
-export { FileController } from "../controller/fileController";
-export { GradeController } from "../controller/gradeController";
-export { LectureController } from "../controller/lectureController";
-export { OfficeController } from "../controller/officeController";
-export { ReviewController } from "../controller/reviewController";
-export { SubmissionController } from "../controller/submissionController";
-export { TutorController } from "../controller/tutorController";
->>>>>>> main
-export { UserController } from "../controller/userController";
+export { AssignmentController } from "./assignmentController";
+export { AuthController } from "./authController";
+export { CatalogueController } from "./catalogueController";
+export { CourseController } from "./courseController";
+export { EnrollmentController } from "./enrollmentController";
+export { FileController } from "./fileController";
+export { GradeController } from "./gradeController";
+export { UserController } from "./userController";

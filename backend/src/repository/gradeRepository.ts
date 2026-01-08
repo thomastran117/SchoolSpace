@@ -1,8 +1,8 @@
-import { Grade } from "../models/grade";
-import prisma from "../resource/prisma";
+import { IGradeRepository } from "../interface/repository";
+import type { Grade } from "../models/grade";
 import { BaseRepository } from "./baseRepository";
 
-class GradeRepository extends BaseRepository {
+class GradeRepository extends BaseRepository implements IGradeRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }
@@ -21,7 +21,7 @@ class GradeRepository extends BaseRepository {
   }): Promise<Grade> {
     return this.executeAsync(
       () =>
-        prisma.grade.create({
+        this.prisma.grade.create({
           data: {
             ...data,
             assignmentId: data.assignmentId ?? null,
@@ -35,9 +35,12 @@ class GradeRepository extends BaseRepository {
   }
 
   public async findById(id: number): Promise<Grade | null> {
-    return this.executeAsync(() => prisma.grade.findUnique({ where: { id } }), {
-      deadlineMs: 800,
-    });
+    return this.executeAsync(
+      () => this.prisma.grade.findUnique({ where: { id } }),
+      {
+        deadlineMs: 800,
+      }
+    );
   }
 
   public async findAll(
@@ -72,13 +75,13 @@ class GradeRepository extends BaseRepository {
     return this.executeAsync(
       async () => {
         const [results, total] = await Promise.all([
-          prisma.grade.findMany({
+          this.prisma.grade.findMany({
             where,
             orderBy: { createdAt: "desc" },
             skip,
             take: limit,
           }),
-          prisma.grade.count({ where }),
+          this.prisma.grade.count({ where }),
         ]);
 
         return { results, total };
@@ -94,7 +97,10 @@ class GradeRepository extends BaseRepository {
     return this.executeAsync(
       async () => {
         try {
-          return await prisma.grade.update({ where: { id }, data: update });
+          return await this.prisma.grade.update({
+            where: { id },
+            data: update,
+          });
         } catch {
           return null;
         }
@@ -106,7 +112,7 @@ class GradeRepository extends BaseRepository {
   public async delete(id: number): Promise<boolean> {
     return this.executeAsync(
       async () => {
-        const res = await prisma.grade.deleteMany({ where: { id } });
+        const res = await this.prisma.grade.deleteMany({ where: { id } });
         return res.count === 1;
       },
       { deadlineMs: 800 }
@@ -159,7 +165,7 @@ class GradeRepository extends BaseRepository {
     if (target.testId) where.testId = target.testId;
     if (target.quizId) where.quizId = target.quizId;
 
-    return this.executeAsync(() => prisma.grade.findFirst({ where }), {
+    return this.executeAsync(() => this.prisma.grade.findFirst({ where }), {
       deadlineMs: 800,
     });
   }
@@ -191,7 +197,7 @@ class GradeRepository extends BaseRepository {
   ): Promise<Grade | null> {
     return this.executeAsync(
       () =>
-        prisma.grade.findFirst({
+        this.prisma.grade.findFirst({
           where: { courseId, userId, isFinalGrade: true },
         }),
       { deadlineMs: 800 }
@@ -216,7 +222,7 @@ class GradeRepository extends BaseRepository {
     };
 
     if (data.assignmentId !== undefined) {
-      return prisma.grade.upsert({
+      return this.prisma.grade.upsert({
         where: {
           courseId_userId_assignmentId: {
             ...base,
@@ -229,7 +235,7 @@ class GradeRepository extends BaseRepository {
     }
 
     if (data.testId !== undefined) {
-      return prisma.grade.upsert({
+      return this.prisma.grade.upsert({
         where: { courseId_userId_testId: { ...base, testId: data.testId } },
         create: { ...data },
         update: data,
@@ -237,7 +243,7 @@ class GradeRepository extends BaseRepository {
     }
 
     if (data.quizId !== undefined) {
-      return prisma.grade.upsert({
+      return this.prisma.grade.upsert({
         where: { courseId_userId_quizId: { ...base, quizId: data.quizId } },
         create: { ...data },
         update: data,
@@ -252,7 +258,7 @@ class GradeRepository extends BaseRepository {
     userId: number
   ): Promise<number | null> {
     return this.executeAsync(async () => {
-      const grades = await prisma.grade.findMany({
+      const grades = await this.prisma.grade.findMany({
         where: { courseId, userId, isFinalGrade: false },
       });
 

@@ -1,4 +1,6 @@
 import { RepositoryError } from "../error/repositoryError";
+import { PrismaClient } from "../generated/prisma/client";
+import prisma from "../resource/prisma";
 import { CircuitBreaker } from "../utility/circuitBreaker";
 import logger from "../utility/logger";
 
@@ -29,11 +31,14 @@ abstract class BaseRepository {
   /** Circuit breaker guarding repository execution */
   private readonly breaker = new CircuitBreaker();
 
+  protected prisma: PrismaClient;
+
   constructor(options?: {
     maxRetries?: number;
     baseDelay?: number;
     maxDelay?: number;
   }) {
+    this.prisma = prisma;
     this.maxRetries = options?.maxRetries ?? 2;
     this.baseDelay = options?.baseDelay ?? 100;
     this.maxDelay = options?.maxDelay ?? 5_000;

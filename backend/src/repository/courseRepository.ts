@@ -1,8 +1,8 @@
+import type { ICourseRepository } from "../interface/repository";
 import type { Course } from "../models/course";
-import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
-class CourseRepository extends BaseRepository {
+class CourseRepository extends BaseRepository implements ICourseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }
@@ -10,7 +10,7 @@ class CourseRepository extends BaseRepository {
   public async findById(id: number): Promise<Course | null> {
     return this.executeAsync(
       () =>
-        prisma.course.findUnique({
+        this.prisma.course.findUnique({
           where: { id },
           include: { catalogue: true },
         }),
@@ -23,7 +23,7 @@ class CourseRepository extends BaseRepository {
 
     return this.executeAsync(
       () =>
-        prisma.course.findMany({
+        this.prisma.course.findMany({
           where: { id: { in: ids } },
         }),
       { deadlineMs: 1200 }
@@ -36,7 +36,7 @@ class CourseRepository extends BaseRepository {
   ): Promise<Course[]> {
     return this.executeAsync(
       () =>
-        prisma.course.findMany({
+        this.prisma.course.findMany({
           where: {
             teacherId,
             ...(year !== undefined ? { year } : {}),
@@ -63,14 +63,14 @@ class CourseRepository extends BaseRepository {
         if (filter.year !== undefined) where.year = filter.year;
 
         const [results, total] = await Promise.all([
-          prisma.course.findMany({
+          this.prisma.course.findMany({
             where,
             include: { catalogue: true },
             orderBy: { createdAt: "desc" },
             skip,
             take: limit,
           }),
-          prisma.course.count({ where }),
+          this.prisma.course.count({ where }),
         ]);
 
         return { results, total };
@@ -87,7 +87,7 @@ class CourseRepository extends BaseRepository {
   }): Promise<Course> {
     return this.executeAsync(
       () =>
-        prisma.course.create({
+        this.prisma.course.create({
           data,
           include: { catalogue: true },
         }),
@@ -102,7 +102,7 @@ class CourseRepository extends BaseRepository {
     return this.executeAsync(
       async () => {
         try {
-          return await prisma.course.update({
+          return await this.prisma.course.update({
             where: { id },
             data: updates,
             include: { catalogue: true },
@@ -119,7 +119,7 @@ class CourseRepository extends BaseRepository {
     return this.executeAsync(
       async () => {
         try {
-          return await prisma.course.delete({
+          return await this.prisma.course.delete({
             where: { id },
           });
         } catch {
@@ -132,7 +132,7 @@ class CourseRepository extends BaseRepository {
 
   public async countImages(imageUrl: string): Promise<number> {
     return this.executeAsync(
-      () => prisma.course.count({ where: { imageUrl } }),
+      () => this.prisma.course.count({ where: { imageUrl } }),
       { deadlineMs: 600 }
     );
   }

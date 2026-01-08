@@ -1,15 +1,18 @@
+import type { ICatalogueRepository } from "../interface/repository";
 import type { Catalogue, Term } from "../models/catalogue";
-import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
-class CatalogueRepository extends BaseRepository {
+class CatalogueRepository
+  extends BaseRepository
+  implements ICatalogueRepository
+{
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }
 
   public async findById(id: number): Promise<Catalogue | null> {
     return this.executeAsync(() =>
-      prisma.catalogue.findUnique({
+      this.prisma.catalogue.findUnique({
         where: { id },
       })
     );
@@ -20,7 +23,7 @@ class CatalogueRepository extends BaseRepository {
 
     return this.executeAsync(
       () =>
-        prisma.catalogue.findMany({
+        this.prisma.catalogue.findMany({
           where: { id: { in: ids } },
         }),
       { deadlineMs: 1200 }
@@ -29,7 +32,7 @@ class CatalogueRepository extends BaseRepository {
 
   public async findByCourseCode(courseCode: string): Promise<Catalogue | null> {
     return this.executeAsync(() =>
-      prisma.catalogue.findUnique({
+      this.prisma.catalogue.findUnique({
         where: { courseCode },
       })
     );
@@ -52,13 +55,13 @@ class CatalogueRepository extends BaseRepository {
         where.courseName = { contains: filter.courseName, mode: "insensitive" };
 
       const [results, total] = await Promise.all([
-        prisma.catalogue.findMany({
+        this.prisma.catalogue.findMany({
           where,
           orderBy: { createdAt: "desc" },
           skip,
           take: limit,
         }),
-        prisma.catalogue.count({ where }),
+        this.prisma.catalogue.count({ where }),
       ]);
 
       return { results, total };
@@ -73,7 +76,7 @@ class CatalogueRepository extends BaseRepository {
     available?: boolean;
   }): Promise<Catalogue> {
     return this.executeAsync(() =>
-      prisma.catalogue.create({
+      this.prisma.catalogue.create({
         data: {
           courseName: data.courseName,
           description: data.description,
@@ -91,7 +94,7 @@ class CatalogueRepository extends BaseRepository {
   ): Promise<Catalogue | null> {
     return this.executeAsync(async () => {
       try {
-        return await prisma.catalogue.update({
+        return await this.prisma.catalogue.update({
           where: { id },
           data: updates,
         });
@@ -104,7 +107,7 @@ class CatalogueRepository extends BaseRepository {
   public async delete(id: number): Promise<Catalogue | null> {
     return this.executeAsync(async () => {
       try {
-        return await prisma.catalogue.delete({
+        return await this.prisma.catalogue.delete({
           where: { id },
         });
       } catch {
