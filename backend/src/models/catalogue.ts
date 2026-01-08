@@ -1,11 +1,14 @@
 type Term = "WINTER" | "FALL" | "SUMMER";
 
-type CatalogueCreateInput = {
-  courseName: string;
-  description: string;
-  courseCode: string;
-  term: Term;
-  available?: boolean;
-};
+type Catalogue = {
+    id: number;
+    description: string;
+    createdAt: Date;
+    updatedAt: Date;
+    courseName: string;
+    available: boolean;
+    courseCode: string;
+    term: Term;
+}
 
-export type { CatalogueCreateInput };
+export type { Catalogue, Term };

@@ -1,4 +1,4 @@
-import { Grade } from "../../generated/prisma/client";
+import type { Grade } from "../../models/grade";
 
 interface IGradeRepository {
   create(data: {

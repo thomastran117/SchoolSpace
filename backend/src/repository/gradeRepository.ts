@@ -40,21 +40,15 @@ class GradeRepository extends BaseRepository {
     });
   }
 
-<<<<<<< HEAD
-  public async findAll(
-    options: {
-      courseId?: number;
-      userId?: number;
-      assignmentId?: number;
-      testId?: string;
-      quizId?: string;
-      page?: number;
-      limit?: number;
-    } = {}
-  ): Promise<{ results: Grade[]; total: number }> {
-=======
-  public async findAll(options: FindAllOptions = {}) {
->>>>>>> main
+  public async findAll(options: {
+    courseId?: number;
+    userId?: number;
+    assignmentId?: number;
+    testId?: string;
+    quizId?: string;
+    page?: number;
+    limit?: number;
+  } = {}) {
     const {
       courseId,
       userId,
