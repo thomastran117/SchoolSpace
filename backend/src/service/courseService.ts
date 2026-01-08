@@ -1,8 +1,8 @@
 import type { MultipartFile } from "@fastify/multipart";
 import crypto from "crypto";
 
-import { Course } from "../models/course";
-import type { CourseRepository } from "../repository/courseRepository";
+import type { ICourseRepository } from "../interface/repository";
+import type { Course } from "../models/course";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
@@ -19,7 +19,7 @@ const HOT_WINDOW_SEC = 60;
 
 class CourseService extends BaseService {
   private readonly cacheService: CacheService;
-  private readonly courseRepository: CourseRepository;
+  private readonly courseRepository: ICourseRepository;
   private readonly catalogueService: CatalogueService;
   private readonly fileService: FileService;
   private readonly userService: UserService;
@@ -34,7 +34,7 @@ class CourseService extends BaseService {
   private courseVersion?: number;
 
   constructor(dependencies: {
-    courseRepository: CourseRepository;
+    courseRepository: ICourseRepository;
     cacheService: CacheService;
     userService: UserService;
     catalogueService: CatalogueService;

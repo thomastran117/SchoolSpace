@@ -1,5 +1,5 @@
-import { Grade } from "../models/grade";
-import type { GradeRepository } from "../repository/gradeRepository";
+import type { IGradeRepository } from "../interface/repository";
+import type { Grade } from "../models/grade";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
@@ -8,7 +8,7 @@ import type { CourseService } from "./courseService";
 import type { UserService } from "./userService";
 
 class GradeService extends BaseService {
-  private readonly gradeRepository: GradeRepository;
+  private readonly gradeRepository: IGradeRepository;
   private readonly cacheService: CacheService;
   private readonly courseService: CourseService;
   private readonly userService: UserService;
@@ -17,7 +17,7 @@ class GradeService extends BaseService {
   private readonly LIST_TTL = 60;
 
   constructor(dependencies: {
-    gradeRepository: GradeRepository;
+    gradeRepository: IGradeRepository;
     cacheService: CacheService;
     courseService: CourseService;
     userService: UserService;

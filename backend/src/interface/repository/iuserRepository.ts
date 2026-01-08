@@ -41,6 +41,7 @@ interface IUserRepository {
     data: Partial<Omit<User, "id" | "createdAt" | "updatedAt">>
   ): Promise<User>;
   delete(id: number): Promise<boolean>;
+  countByAvatar(url: string): Promise<number>;
 }
 
 export type { IUserRepository };
