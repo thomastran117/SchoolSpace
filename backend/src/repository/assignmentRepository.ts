@@ -11,6 +11,7 @@ class AssignmentRepository extends BaseRepository {
     return this.executeAsync(
       () => prisma.assignment.findUnique({ where: { id } }),
       { deadlineMs: 800 }
+<<<<<<< HEAD
     );
   }
 
@@ -23,6 +24,8 @@ class AssignmentRepository extends BaseRepository {
           where: { id: { in: ids } },
         }),
       { deadlineMs: 1200 }
+=======
+>>>>>>> main
     );
   }
 

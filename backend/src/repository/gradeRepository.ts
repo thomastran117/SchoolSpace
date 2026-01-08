@@ -40,6 +40,7 @@ class GradeRepository extends BaseRepository {
     });
   }
 
+<<<<<<< HEAD
   public async findAll(
     options: {
       courseId?: number;
@@ -51,6 +52,9 @@ class GradeRepository extends BaseRepository {
       limit?: number;
     } = {}
   ): Promise<{ results: Grade[]; total: number }> {
+=======
+  public async findAll(options: FindAllOptions = {}) {
+>>>>>>> main
     const {
       courseId,
       userId,

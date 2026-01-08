@@ -33,19 +33,19 @@ class CourseService extends BaseService {
 
   private courseVersion?: number;
 
-  constructor(
-    courseRepository: CourseRepository,
-    cacheService: CacheService,
-    userService: UserService,
-    catalogueService: CatalogueService,
-    fileService: FileService
-  ) {
+  constructor(dependencies: {
+    courseRepository: CourseRepository;
+    cacheService: CacheService;
+    userService: UserService;
+    catalogueService: CatalogueService;
+    fileService: FileService;
+  }) {
     super();
-    this.cacheService = cacheService;
-    this.courseRepository = courseRepository;
-    this.catalogueService = catalogueService;
-    this.fileService = fileService;
-    this.userService = userService;
+    this.cacheService = dependencies.cacheService;
+    this.courseRepository = dependencies.courseRepository;
+    this.catalogueService = dependencies.catalogueService;
+    this.fileService = dependencies.fileService;
+    this.userService = dependencies.userService;
   }
 
   private key(...parts: (string | number | boolean)[]): string {

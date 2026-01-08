@@ -13,8 +13,8 @@ import logger from "../utility/logger";
 class CatalogueController {
   private readonly catalogueService: CatalogueService;
 
-  constructor(catalogueService: CatalogueService) {
-    this.catalogueService = catalogueService;
+  constructor(dependencies: { catalogueService: CatalogueService }) {
+    this.catalogueService = dependencies.catalogueService;
 
     this.createCourseTemplate = this.createCourseTemplate.bind(this);
     this.updateCourseTemplate = this.updateCourseTemplate.bind(this);

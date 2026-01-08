@@ -9,8 +9,8 @@ import logger from "../utility/logger";
 class FileController {
   private readonly fileService: FileService;
 
-  constructor(fileService: FileService) {
-    this.fileService = fileService;
+  constructor(dependencies: { fileService: FileService }) {
+    this.fileService = dependencies.fileService;
 
     this.handleUpload = this.handleUpload.bind(this);
     this.handleFetch = this.handleFetch.bind(this);
