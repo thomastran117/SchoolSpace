@@ -1,29 +1,32 @@
-import { Enrollment } from "../models/enrollment";
-import prisma from "../resource/prisma";
+import type { IEnrollmentRepository } from "../interface/repository";
+import type { Enrollment } from "../models/enrollment";
 import { BaseRepository } from "./baseRepository";
 
-class EnrollmentRepository extends BaseRepository {
+class EnrollmentRepository
+  extends BaseRepository
+  implements IEnrollmentRepository
+{
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }
 
-  public async getById(id: number): Promise<Enrollment | null> {
+  public async findById(id: number): Promise<Enrollment | null> {
     return this.executeAsync(
       () =>
-        prisma.enrollment.findUnique({
+        this.prisma.enrollment.findUnique({
           where: { id },
         }),
       { deadlineMs: 800 }
     );
   }
 
-  public async getByUserAndCourse(
+  public async findByUserAndCourse(
     userId: number,
     courseId: number
   ): Promise<Enrollment | null> {
     return this.executeAsync(
       () =>
-        prisma.enrollment.findUnique({
+        this.prisma.enrollment.findUnique({
           where: {
             courseId_userId: {
               courseId,
@@ -35,56 +38,58 @@ class EnrollmentRepository extends BaseRepository {
     );
   }
 
-  public async getEnrollmentsByCourse(courseId: number): Promise<Enrollment[]> {
+  public async findEnrollmentsByCourse(
+    courseId: number
+  ): Promise<Enrollment[]> {
     return this.executeAsync(
       () =>
-        prisma.enrollment.findMany({
+        this.prisma.enrollment.findMany({
           where: { courseId },
         }),
       { deadlineMs: 800 }
     );
   }
 
-  public async getEnrollmentsByUser(userId: number): Promise<Enrollment[]> {
+  public async findEnrollmentsByUser(userId: number): Promise<Enrollment[]> {
     return this.executeAsync(
       () =>
-        prisma.enrollment.findMany({
+        this.prisma.enrollment.findMany({
           where: { userId },
         }),
       { deadlineMs: 800 }
     );
   }
 
-  public async getByIds(ids: number[]): Promise<Enrollment[]> {
+  public async findByIds(ids: number[]): Promise<Enrollment[]> {
     if (!ids.length) return [];
 
     return this.executeAsync(
       () =>
-        prisma.enrollment.findMany({
+        this.prisma.enrollment.findMany({
           where: { id: { in: ids } },
         }),
       { deadlineMs: 1200 }
     );
   }
 
-  public async getByUserIds(userIds: number[]): Promise<Enrollment[]> {
+  public async findByUserIds(userIds: number[]): Promise<Enrollment[]> {
     if (!userIds.length) return [];
 
     return this.executeAsync(
       () =>
-        prisma.enrollment.findMany({
+        this.prisma.enrollment.findMany({
           where: { userId: { in: userIds } },
         }),
       { deadlineMs: 1200 }
     );
   }
 
-  public async getByCourseIds(courseIds: number[]): Promise<Enrollment[]> {
+  public async findByCourseIds(courseIds: number[]): Promise<Enrollment[]> {
     if (!courseIds.length) return [];
 
     return this.executeAsync(
       () =>
-        prisma.enrollment.findMany({
+        this.prisma.enrollment.findMany({
           where: { courseId: { in: courseIds } },
         }),
       { deadlineMs: 1200 }
@@ -99,7 +104,7 @@ class EnrollmentRepository extends BaseRepository {
 
     return this.executeAsync(
       async () => {
-        const rows = await prisma.enrollment.findMany({
+        const rows = await this.prisma.enrollment.findMany({
           where: {
             userId,
             courseId: { in: courseIds },
@@ -119,7 +124,7 @@ class EnrollmentRepository extends BaseRepository {
   public async countByCourse(courseId: number): Promise<number> {
     return this.executeAsync(
       () =>
-        prisma.enrollment.count({
+        this.prisma.enrollment.count({
           where: { courseId },
         }),
       { deadlineMs: 800 }
@@ -133,7 +138,7 @@ class EnrollmentRepository extends BaseRepository {
 
     return this.executeAsync(
       async () => {
-        const rows = await prisma.enrollment.groupBy({
+        const rows = await this.prisma.enrollment.groupBy({
           by: ["courseId"],
           where: { courseId: { in: courseIds } },
           _count: { _all: true },
@@ -157,14 +162,14 @@ class EnrollmentRepository extends BaseRepository {
 
     return this.executeAsync(
       async () => {
-        const [results, total] = await prisma.$transaction([
-          prisma.enrollment.findMany({
+        const [results, total] = await this.prisma.$transaction([
+          this.prisma.enrollment.findMany({
             where: { courseId },
             skip,
             take: limit,
             orderBy: { createdAt: "desc" },
           }),
-          prisma.enrollment.count({ where: { courseId } }),
+          this.prisma.enrollment.count({ where: { courseId } }),
         ]);
 
         return { results, total };
@@ -182,14 +187,14 @@ class EnrollmentRepository extends BaseRepository {
 
     return this.executeAsync(
       async () => {
-        const [results, total] = await prisma.$transaction([
-          prisma.enrollment.findMany({
+        const [results, total] = await this.prisma.$transaction([
+          this.prisma.enrollment.findMany({
             where: { userId },
             skip,
             take: limit,
             orderBy: { createdAt: "desc" },
           }),
-          prisma.enrollment.count({ where: { userId } }),
+          this.prisma.enrollment.count({ where: { userId } }),
         ]);
 
         return { results, total };
@@ -201,7 +206,7 @@ class EnrollmentRepository extends BaseRepository {
   public async enroll(userId: number, courseId: number): Promise<Enrollment> {
     return this.executeAsync(
       () =>
-        prisma.enrollment.create({
+        this.prisma.enrollment.create({
           data: { userId, courseId },
         }),
       { deadlineMs: 1000 }
@@ -214,7 +219,7 @@ class EnrollmentRepository extends BaseRepository {
   ): Promise<boolean> {
     return this.executeAsync(
       async () => {
-        const res = await prisma.enrollment.deleteMany({
+        const res = await this.prisma.enrollment.deleteMany({
           where: { userId, courseId },
         });
 
@@ -227,7 +232,7 @@ class EnrollmentRepository extends BaseRepository {
   public async unenrollById(id: number): Promise<boolean> {
     return this.executeAsync(
       async () => {
-        const res = await prisma.enrollment.deleteMany({
+        const res = await this.prisma.enrollment.deleteMany({
           where: { id },
         });
 

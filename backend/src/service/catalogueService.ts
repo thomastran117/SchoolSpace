@@ -1,5 +1,5 @@
-import { Catalogue, Term } from "../models/catalogue";
-import type { CatalogueRepository } from "../repository/catalogueRepository";
+import type { ICatalogueRepository } from "../interface/repository";
+import type { Catalogue, Term } from "../models/catalogue";
 import { httpError } from "../utility/httpUtility";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
@@ -8,7 +8,7 @@ const NOT_FOUND = "__NF__";
 
 class CatalogueService extends BaseService {
   private readonly cacheService: CacheService;
-  private readonly catalogueRepository: CatalogueRepository;
+  private readonly catalogueRepository: ICatalogueRepository;
 
   private static readonly CACHE_NAMESPACE = "catalogue:v1";
 
@@ -25,7 +25,7 @@ class CatalogueService extends BaseService {
 
   constructor(dependencies: {
     cacheService: CacheService;
-    catalogueRepository: CatalogueRepository;
+    catalogueRepository: ICatalogueRepository;
   }) {
     super();
     this.cacheService = dependencies.cacheService;

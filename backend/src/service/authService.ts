@@ -11,20 +11,17 @@
 // Imports
 import bcrypt from "bcrypt";
 
-import env from "../config/envConfigs";
+import type { IUserRepository } from "../interface/repository";
 import type { AuthResponse } from "../models/auth";
 import type { EmailQueue } from "../queue/emailQueue";
-import type { UserRepository } from "../repository/userRepository";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import type { OAuthService } from "./oauthService";
 import type { TokenService } from "./tokenService";
 import type { WebService } from "./webService";
 
-const { frontendClient: FRONTEND_CLIENT } = env;
-
 class AuthService {
-  private readonly userRepository: UserRepository;
+  private readonly userRepository: IUserRepository;
   private readonly emailQueue: EmailQueue;
   private readonly tokenService: TokenService;
   private readonly oauthService: OAuthService;
@@ -34,7 +31,7 @@ class AuthService {
     "$2b$10$CwTycUXWue0Thq9StjUM0uJ8T8YtAUD3bFIxVYbcEdb87qfEzS1mS";
 
   constructor(dependencies: {
-    userRepository: UserRepository;
+    userRepository: IUserRepository;
     emailQueue: EmailQueue;
     tokenService: TokenService;
     oauthService: OAuthService;
@@ -285,7 +282,6 @@ class AuthService {
 
       const microsoftSub = (claims as any).sub || (claims as any).oid;
       const email = (claims as any).email || (claims as any).preferred_username;
-      const name = (claims as any).name || "";
 
       if (!email) httpError(400, "Microsoft email missing");
       if (!microsoftSub) httpError(400, "Microsoft subject missing");

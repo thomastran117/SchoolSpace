@@ -1,15 +1,18 @@
+import type { IAssignmentRepository } from "../interface/repository";
 import type { Assignment } from "../models/assignment";
-import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
-class AssignmentRepository extends BaseRepository {
+class AssignmentRepository
+  extends BaseRepository
+  implements IAssignmentRepository
+{
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }
 
   public async findById(id: number): Promise<Assignment | null> {
     return this.executeAsync(
-      () => prisma.assignment.findUnique({ where: { id } }),
+      () => this.prisma.assignment.findUnique({ where: { id } }),
       { deadlineMs: 800 }
     );
   }
@@ -19,7 +22,7 @@ class AssignmentRepository extends BaseRepository {
 
     return this.executeAsync(
       () =>
-        prisma.assignment.findMany({
+        this.prisma.assignment.findMany({
           where: { id: { in: ids } },
         }),
       { deadlineMs: 1200 }
@@ -29,7 +32,7 @@ class AssignmentRepository extends BaseRepository {
   public async findByCourse(courseId: number): Promise<Assignment[]> {
     return this.executeAsync(
       () =>
-        prisma.assignment.findMany({
+        this.prisma.assignment.findMany({
           where: { courseId },
           orderBy: { dueDate: "asc" },
         }),
@@ -46,7 +49,7 @@ class AssignmentRepository extends BaseRepository {
   }): Promise<Assignment> {
     return this.executeAsync(
       () =>
-        prisma.assignment.create({
+        this.prisma.assignment.create({
           data: {
             courseId: data.courseId,
             name: data.name,
@@ -68,7 +71,7 @@ class AssignmentRepository extends BaseRepository {
     return this.executeAsync(
       async () => {
         try {
-          return await prisma.assignment.update({
+          return await this.prisma.assignment.update({
             where: { id },
             data: updates,
           });
@@ -83,7 +86,7 @@ class AssignmentRepository extends BaseRepository {
   public async delete(id: number): Promise<boolean> {
     return this.executeAsync(
       async () => {
-        const res = await prisma.assignment.deleteMany({ where: { id } });
+        const res = await this.prisma.assignment.deleteMany({ where: { id } });
         return res.count === 1;
       },
       { deadlineMs: 800 }
@@ -133,13 +136,13 @@ class AssignmentRepository extends BaseRepository {
     return this.executeAsync(
       async () => {
         const [data, total] = await Promise.all([
-          prisma.assignment.findMany({
+          this.prisma.assignment.findMany({
             where,
             orderBy: { createdAt: "desc" },
             skip,
             take: limit,
           }),
-          prisma.assignment.count({ where }),
+          this.prisma.assignment.count({ where }),
         ]);
 
         return { data, total, page, limit };

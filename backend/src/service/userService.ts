@@ -1,8 +1,8 @@
 import type { MultipartFile } from "@fastify/multipart";
 
+import type { IUserRepository } from "../interface/repository";
 import type { AuthResponse } from "../models/auth";
 import type { Role, SafeUser } from "../models/user";
-import type { UserRepository } from "../repository/userRepository";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
@@ -11,14 +11,14 @@ import type { FileService } from "./fileService";
 import type { TokenService } from "./tokenService";
 
 class UserService extends BaseService {
-  private readonly userRepository: UserRepository;
+  private readonly userRepository: IUserRepository;
   private readonly cacheService: CacheService;
   private readonly tokenService: TokenService;
   private readonly fileService: FileService;
   private readonly ttl = 300;
 
   constructor(dependencies: {
-    userRepository: UserRepository;
+    userRepository: IUserRepository;
     cacheService: CacheService;
     tokenService: TokenService;
     fileService: FileService;
