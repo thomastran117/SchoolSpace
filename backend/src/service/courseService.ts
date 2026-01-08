@@ -1,7 +1,7 @@
 import type { MultipartFile } from "@fastify/multipart";
 import crypto from "crypto";
 
-import type { CourseModel as Course } from "../generated/prisma/models/Course";
+import { Course } from "../models/course";
 import type { CourseRepository } from "../repository/courseRepository";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";

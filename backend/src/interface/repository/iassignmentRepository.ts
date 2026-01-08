@@ -1,4 +1,4 @@
-import { Assignment } from "../../generated/prisma/client";
+import type { Assignment } from "../../models/assignment";
 
 interface IAssignmentRepository {
   findById(id: number): Promise<Assignment | null>;

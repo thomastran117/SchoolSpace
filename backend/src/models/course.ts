@@ -1,8 +1,11 @@
-type CourseCreateInput = {
+type Course = {
+  id: number;
   catalogueId: number;
   teacherId: number;
+  imageUrl: string | null;
   year: number;
-  imageUrl?: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
-export type { CourseCreateInput };
+export type { Course };

@@ -1,4 +1,4 @@
-import type { GradeModel as Grade } from "../generated/prisma/models/Grade";
+import { Grade } from "../models/grade";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
@@ -40,7 +40,6 @@ class GradeRepository extends BaseRepository {
     });
   }
 
-<<<<<<< HEAD
   public async findAll(
     options: {
       courseId?: number;
@@ -51,10 +50,7 @@ class GradeRepository extends BaseRepository {
       page?: number;
       limit?: number;
     } = {}
-  ): Promise<{ results: Grade[]; total: number }> {
-=======
-  public async findAll(options: FindAllOptions = {}) {
->>>>>>> main
+  ) {
     const {
       courseId,
       userId,

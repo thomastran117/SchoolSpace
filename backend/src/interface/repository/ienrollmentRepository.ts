@@ -1,4 +1,4 @@
-import { Enrollment } from "../../generated/prisma/client";
+import type { Enrollment } from "../../models/enrollment";
 
 interface IEnrollmentRepository {
   findById(id: number): Promise<Enrollment | null>;

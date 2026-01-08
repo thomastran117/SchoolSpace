@@ -1,4 +1,4 @@
-import { Catalogue } from "../../generated/prisma/client";
+import type { Catalogue } from "../../models/catalogue";
 
 type Term = "WINTER" | "FALL" | "SUMMER";
 

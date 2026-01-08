@@ -1,24 +1,6 @@
 type Provider = "local" | "google" | "microsoft";
 type Role = "notdefined" | "student" | "teacher" | "assistant" | "admin";
 
-type UserCreateInput = {
-  email: string;
-  provider: Provider;
-  role?: Role;
-  password?: string | null;
-  googleId?: string | null;
-  microsoftId?: string | null;
-  msTenantId?: string | null;
-  msIssuer?: string | null;
-  username?: string | null;
-  name?: string | null;
-  avatar?: string | null;
-  phone?: string | null;
-  address?: string | null;
-  faculty?: string | null;
-  school?: string | null;
-};
-
 interface User {
   id: number;
   email: string;
@@ -53,4 +35,4 @@ type SafeUser = Omit<
   | "provider"
 >;
 
-export type { Provider, Role, SafeUser, User, UserCreateInput };
+export type { Provider, Role, SafeUser, User };

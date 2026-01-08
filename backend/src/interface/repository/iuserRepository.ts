@@ -1,5 +1,4 @@
-import { User } from "../../generated/prisma/client";
-import type { Provider, Role } from "../../generated/prisma/enums";
+import type { Provider, Role, User } from "../../models/user";
 
 interface IUserRepository {
   findById(id: number): Promise<User | null>;

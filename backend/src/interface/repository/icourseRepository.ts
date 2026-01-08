@@ -1,4 +1,4 @@
-import { Course } from "../../generated/prisma/client";
+import type { Course } from "../../models/course";
 
 interface ICourseRepository {
   findById(id: number): Promise<Course | null>;

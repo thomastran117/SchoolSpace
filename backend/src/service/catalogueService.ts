@@ -1,5 +1,4 @@
-import type { Term } from "../generated/prisma/enums";
-import type { CatalogueModel as Catalogue } from "../generated/prisma/models/Catalogue";
+import { Catalogue, Term } from "../models/catalogue";
 import type { CatalogueRepository } from "../repository/catalogueRepository";
 import { httpError } from "../utility/httpUtility";
 import { BaseService } from "./baseService";

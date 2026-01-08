@@ -1,4 +1,4 @@
-import type { EnrollmentModel as Enrollment } from "../generated/prisma/models/Enrollment";
+import { Enrollment } from "../models/enrollment";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 

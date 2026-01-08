@@ -1,4 +1,4 @@
-import type { AssignmentModel as Assignment } from "../generated/prisma/models/Assignment";
+import type { Assignment } from "../models/assignment";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
@@ -11,7 +11,6 @@ class AssignmentRepository extends BaseRepository {
     return this.executeAsync(
       () => prisma.assignment.findUnique({ where: { id } }),
       { deadlineMs: 800 }
-<<<<<<< HEAD
     );
   }
 
@@ -24,8 +23,6 @@ class AssignmentRepository extends BaseRepository {
           where: { id: { in: ids } },
         }),
       { deadlineMs: 1200 }
-=======
->>>>>>> main
     );
   }
 

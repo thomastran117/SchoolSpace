@@ -1,4 +1,4 @@
-import type { GradeModel as Grade } from "../generated/prisma/models/Grade";
+import { Grade } from "../models/grade";
 import type { GradeRepository } from "../repository/gradeRepository";
 import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
@@ -16,21 +16,12 @@ class GradeService extends BaseService {
   private readonly FINAL_TTL = 15;
   private readonly LIST_TTL = 60;
 
-<<<<<<< HEAD
-  constructor(
-    gradeRepository: GradeRepository,
-    cacheService: CacheService,
-    courseService: CourseService,
-    userService: UserService
-  ) {
-=======
   constructor(dependencies: {
     gradeRepository: GradeRepository;
     cacheService: CacheService;
     courseService: CourseService;
     userService: UserService;
   }) {
->>>>>>> main
     super();
     this.gradeRepository = dependencies.gradeRepository;
     this.cacheService = dependencies.cacheService;
