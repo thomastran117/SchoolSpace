@@ -32,17 +32,14 @@ function registerServiceModules(): Map<string, Registration<any>> {
     });
 
     services.set("TokenService", {
-      factory: (scope) => new Services.TokenService(scope.resolve("CacheService")),
+      factory: (scope) =>
+        new Services.TokenService(scope.resolve("CacheService")),
       lifetime: "transient",
     });
 
     services.set("PaymentService", {
-      factory: (scope) => new Services.PaymentService(scope.resolve("WebService")),
-      lifetime: "scoped",
-    });
-
-    services.set("SubmissionService", {
-      factory: (scope) => new Services.SubmissionService(scope.resolve("FileService")),
+      factory: (scope) =>
+        new Services.PaymentService(scope.resolve("WebService")),
       lifetime: "scoped",
     });
 
@@ -55,16 +52,6 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
-    services.set("AnnoucementService", {
-      factory: (scope) => new Services.AnnoucementService(scope.resolve("CacheService")),
-      lifetime: "scoped",
-    });
-
-    services.set("DiscussionService", {
-      factory: (scope) => new Services.DiscussionService(scope.resolve("CacheService")),
-      lifetime: "scoped",
-    });
-
     services.set("GradeService", {
       factory: (scope) =>
         new Services.GradeService(
@@ -73,31 +60,6 @@ function registerServiceModules(): Map<string, Registration<any>> {
           scope.resolve("CourseService"),
           scope.resolve("UserService")
         ),
-      lifetime: "scoped",
-    });
-
-    services.set("ReviewService", {
-      factory: (scope) => new Services.ReviewService(scope.resolve("CacheService")),
-      lifetime: "scoped",
-    });
-
-    services.set("AppointmentService", {
-      factory: (scope) => new Services.AppointmentService(scope.resolve("CacheService")),
-      lifetime: "scoped",
-    });
-
-    services.set("TutorService", {
-      factory: (scope) => new Services.TutorService(scope.resolve("CacheService")),
-      lifetime: "scoped",
-    });
-
-    services.set("OfficeService", {
-      factory: (scope) => new Services.OfficeService(scope.resolve("CacheService")),
-      lifetime: "scoped",
-    });
-
-    services.set("BookingService", {
-      factory: (scope) => new Services.BookingService(scope.resolve("CacheService")),
       lifetime: "scoped",
     });
 
@@ -114,15 +76,6 @@ function registerServiceModules(): Map<string, Registration<any>> {
     services.set("AssignmentService", {
       factory: (scope) =>
         new Services.AssignmentService(
-          scope.resolve("CacheService"),
-          scope.resolve("FileService")
-        ),
-      lifetime: "scoped",
-    });
-
-    services.set("LectureService", {
-      factory: (scope) =>
-        new Services.LectureService(
           scope.resolve("CacheService"),
           scope.resolve("FileService")
         ),

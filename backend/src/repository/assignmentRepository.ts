@@ -2,15 +2,6 @@ import type { AssignmentModel as Assignment } from "../generated/prisma/models/A
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
 
-interface AssignmentFilters {
-  courseId?: number;
-  dueBefore?: Date;
-  dueAfter?: Date;
-  search?: string;
-  page?: number;
-  limit?: number;
-}
-
 class AssignmentRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
@@ -19,7 +10,19 @@ class AssignmentRepository extends BaseRepository {
   public async findById(id: number): Promise<Assignment | null> {
     return this.executeAsync(
       () => prisma.assignment.findUnique({ where: { id } }),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
+    );
+  }
+
+  public async findByIds(ids: number[]): Promise<Assignment[]> {
+    if (!ids.length) return [];
+
+    return this.executeAsync(
+      () =>
+        prisma.assignment.findMany({
+          where: { id: { in: ids } },
+        }),
+      { deadlineMs: 1200 }
     );
   }
 
@@ -30,7 +33,7 @@ class AssignmentRepository extends BaseRepository {
           where: { courseId },
           orderBy: { dueDate: "asc" },
         }),
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -52,13 +55,15 @@ class AssignmentRepository extends BaseRepository {
             dueDate: data.dueDate,
           },
         }),
-      { deadlineMs: 1000 },
+      { deadlineMs: 1000 }
     );
   }
 
   public async update(
     id: number,
-    updates: Partial<Pick<Assignment, "name" | "description" | "fileUrl" | "dueDate">>,
+    updates: Partial<
+      Pick<Assignment, "name" | "description" | "fileUrl" | "dueDate">
+    >
   ): Promise<Assignment | null> {
     return this.executeAsync(
       async () => {
@@ -71,7 +76,7 @@ class AssignmentRepository extends BaseRepository {
           return null;
         }
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
@@ -81,11 +86,18 @@ class AssignmentRepository extends BaseRepository {
         const res = await prisma.assignment.deleteMany({ where: { id } });
         return res.count === 1;
       },
-      { deadlineMs: 800 },
+      { deadlineMs: 800 }
     );
   }
 
-  public async findAllWithFilters(filters: AssignmentFilters): Promise<{
+  public async findAllWithFilters(filters: {
+    courseId?: number;
+    dueBefore?: Date;
+    dueAfter?: Date;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{
     data: Assignment[];
     total: number;
     page: number;
@@ -132,7 +144,7 @@ class AssignmentRepository extends BaseRepository {
 
         return { data, total, page, limit };
       },
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 }

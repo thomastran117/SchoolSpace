@@ -1,7 +1,8 @@
 import type { CatalogueModel as Catalogue } from "../generated/prisma/models/Catalogue";
-import type { CatalogueCreateInput } from "../models/catalogue";
 import prisma from "../resource/prisma";
 import { BaseRepository } from "./baseRepository";
+
+type Term = "WINTER" | "FALL" | "SUMMER";
 
 class CatalogueRepository extends BaseRepository {
   constructor() {
@@ -16,7 +17,7 @@ class CatalogueRepository extends BaseRepository {
     );
   }
 
-  public async getByIds(ids: number[]): Promise<Catalogue[]> {
+  public async findByIds(ids: number[]): Promise<Catalogue[]> {
     if (!ids.length) return [];
 
     return this.executeAsync(
@@ -24,7 +25,7 @@ class CatalogueRepository extends BaseRepository {
         prisma.catalogue.findMany({
           where: { id: { in: ids } },
         }),
-      { deadlineMs: 1200 },
+      { deadlineMs: 1200 }
     );
   }
 
@@ -66,7 +67,13 @@ class CatalogueRepository extends BaseRepository {
     });
   }
 
-  public async create(data: CatalogueCreateInput): Promise<Catalogue> {
+  public async create(data: {
+    courseName: string;
+    description: string;
+    courseCode: string;
+    term: Term;
+    available?: boolean;
+  }): Promise<Catalogue> {
     return this.executeAsync(() =>
       prisma.catalogue.create({
         data: {

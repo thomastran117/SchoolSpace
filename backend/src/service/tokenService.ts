@@ -25,8 +25,6 @@ const { jwtSecretAccess: JWT_SECRET_ACCESS } = env;
 const ACCESS_EXPIRY = "30m";
 const SHORT_REFRESH_TTL = 24 * 60 * 60; // 1 day
 const LONG_REFRESH_TTL = 7 * 24 * 60 * 60; // 7 days
-const VERIFY_TOKEN_TTL = 15 * 60; // 15 minutes
-const USED_VERIFY_TTL = 24 * 60 * 60; // 24 hours
 const VERIFY_TTL = 15 * 60; // 15 minutes
 const MAX_ATTEMPTS = 5;
 
