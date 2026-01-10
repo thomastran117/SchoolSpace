@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 import env from "../config/envConfigs";
-import { HttpError, httpError } from "../utility/httpUtility";
+import { HttpError, InternalServerError, UnauthorizedError } from "../error";
 import logger from "../utility/logger";
 
 const { jwtSecretAccess: JWT_SECRET_ACCESS } = env;
@@ -20,14 +20,14 @@ class BasicTokenService {
       };
     } catch (err: any) {
       if (err.name === "TokenExpiredError")
-        httpError(401, "Expired access token");
+        throw new UnauthorizedError({ message: "Expired access token" });
       if (err.name === "JsonWebTokenError")
-        httpError(401, "Invalid access token");
+        throw new UnauthorizedError({ message: "Invalid access token" });
 
       logger.error(
         `[BasicTokenService] validateAccessToken failed: ${err?.message ?? err}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -48,7 +48,7 @@ class BasicTokenService {
       logger.error(
         `[BasicTokenService] getUserPayload failed: ${err?.message ?? err}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 

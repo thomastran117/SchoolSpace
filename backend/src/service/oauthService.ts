@@ -16,7 +16,14 @@ import type { JwksClient } from "jwks-rsa";
 import jwksClient from "jwks-rsa";
 
 import env from "../config/envConfigs";
-import { HttpError, httpError } from "../utility/httpUtility";
+import {
+  BadRequestError,
+  HttpError,
+  InternalServerError,
+  NotImplementedError,
+  ServiceUnavaliableError,
+  UnauthorizedError,
+} from "../error";
 import logger from "../utility/logger";
 
 interface GoogleUserInfo {
@@ -95,7 +102,7 @@ class OAuthService {
 
   private createJwksClient(issuer: string): JwksClient {
     try {
-      if (!issuer) httpError(400, "Missing issuer");
+      if (!issuer) throw new BadRequestError({ message: "Missing issuer" });
 
       const tenantBase = issuer.replace(/\/v2\.0\/?$/, "");
       const jwksUri = `${tenantBase}/discovery/v2.0/keys`;
@@ -111,7 +118,7 @@ class OAuthService {
       if (err instanceof HttpError) throw err;
 
       logger.error(`[OAuthService] createJwksClient failed: ${err?.message}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -140,14 +147,17 @@ class OAuthService {
   async verifyMicrosoftToken(microsoftToken: string): Promise<JwtPayload> {
     try {
       if (!this.MS_CLIENT_ID) {
-        httpError(503, "Microsoft client ID not configured");
+        throw new ServiceUnavaliableError({
+          message: "Microsoft service is unavaliable",
+        });
       }
 
-      if (!microsoftToken) httpError(400, "Missing Microsoft ID token");
+      if (!microsoftToken)
+        throw new BadRequestError({ message: "Missing Microsoft token" });
 
       const decoded = jwt.decode(microsoftToken, { complete: true });
       if (!decoded || typeof decoded !== "object") {
-        httpError(401, "Invalid Microsoft token");
+        throw new UnauthorizedError({ message: "Invalid Microsoft token" });
       }
 
       const { header, payload } = decoded as {
@@ -161,11 +171,11 @@ class OAuthService {
         !iss ||
         !/^https:\/\/login\.microsoftonline\.com\/[^/]+\/v2\.0$/i.test(iss)
       ) {
-        httpError(401, "Invalid issuer");
+        throw new UnauthorizedError({ message: "Invalid Microsoft token" });
       }
 
       if (aud !== this.MS_CLIENT_ID) {
-        httpError(401, "Audience mismatch");
+        throw new UnauthorizedError({ message: "Invalid Microsoft token" });
       }
 
       const client = this.createJwksClient(iss);
@@ -174,7 +184,7 @@ class OAuthService {
 
       return await this.retry<JwtPayload>(
         () =>
-          new Promise((resolve, reject) => {
+          new Promise((resolve) => {
             jwt.verify(
               microsoftToken,
               publicKey,
@@ -186,11 +196,15 @@ class OAuthService {
               },
               (err, verified) => {
                 if (err)
-                  return reject(httpError(401, "Invalid Microsoft Token"));
+                  throw new UnauthorizedError({
+                    message: "Invalid Microsoft token",
+                  });
 
                 const payload = verified as JwtPayload;
                 if (!payload || (!payload.sub && !(payload as any).oid)) {
-                  return reject(httpError(401, "Invalid Microsoft Token"));
+                  throw new UnauthorizedError({
+                    message: "Invalid Microsoft token",
+                  });
                 }
 
                 resolve(payload);
@@ -205,21 +219,26 @@ class OAuthService {
       logger.error(
         `[OAuthService] verifyMicrosoftToken failed: ${err?.message}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
   async verifyGoogleToken(googleToken: string): Promise<GoogleUserInfo> {
     try {
       if (!this.GOOGLE_CLIENT_ID) {
-        httpError(503, "Google client ID not configured");
+        throw new ServiceUnavaliableError({
+          message: "Google service is unavaliable",
+        });
       }
 
       if (!this.googleClient) {
-        httpError(503, "Google OAuth2 client not initialized");
+        throw new ServiceUnavaliableError({
+          message: "Google service is unavaliable",
+        });
       }
 
-      if (!googleToken) httpError(400, "Missing Google ID token");
+      if (!googleToken)
+        throw new BadRequestError({ message: "Missing Google token" });
 
       const ticket = await this.retry(
         () =>
@@ -232,7 +251,9 @@ class OAuthService {
 
       const payload: TokenPayload | undefined = ticket.getPayload();
       if (!payload || !payload.sub) {
-        httpError(401, "Invalid Google token payload");
+        throw new UnauthorizedError({
+          message: "Invalid Google token payload",
+        });
       }
 
       return {
@@ -245,12 +266,14 @@ class OAuthService {
       if (err instanceof HttpError) throw err;
 
       logger.error(`[OAuthService] verifyGoogleToken failed: ${err?.message}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
   async verifyAppleToken(appleToken: string) {
-    httpError(503, "Apple OAuth is not available");
+    throw new NotImplementedError({
+      message: "Apple OAuth is not implemented",
+    });
   }
 }
 

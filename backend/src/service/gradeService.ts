@@ -1,6 +1,11 @@
+import {
+  BadRequestError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from "../error";
 import type { IGradeRepository } from "../interface/repository";
 import type { Grade } from "../models/grade";
-import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
@@ -39,7 +44,9 @@ class GradeService extends BaseService {
 
   private validateScore(obtained: number, total: number) {
     if (obtained < 0 || obtained > total) {
-      httpError(400, "Obtained score cannot exceed total score");
+      throw new BadRequestError({
+        message: "Obtained score cannot exceed total score",
+      });
     }
   }
 
@@ -59,22 +66,20 @@ class GradeService extends BaseService {
       .reduce((sum, g) => sum + g.weight, 0);
 
     if (totalWeight + incomingWeight > 100) {
-      httpError(400, "Total grade weight exceeds 100%");
+      throw new BadRequestError({ message: "Total weight exceeds 100%" });
     }
   }
 
   private async ensureSingleFinalGrade(courseId: number, userId: number) {
     const existing = await this.getCachedFinalGrade(courseId, userId);
     if (existing) {
-      httpError(
-        409,
-        "Final grade already exists for this student in this course"
-      );
+      throw new ConflictError({ message: "Final grade exists" });
     }
   }
 
   private preventFinalDelete(grade: Grade) {
-    if (grade.isFinalGrade) httpError(403, "Final grades cannot be deleted");
+    if (grade.isFinalGrade)
+      throw new ForbiddenError({ message: "Final grades can't be deleted" });
   }
 
   private async autoFinalize(courseId: number, userId: number) {
@@ -115,7 +120,8 @@ class GradeService extends BaseService {
 
   public async getGradeById(id: number): Promise<Grade> {
     const grade = await this.gradeRepository.findById(id);
-    if (!grade) httpError(404, "Grade not found");
+    if (!grade) throw new NotFoundError({ message: "Grade not found" });
+
     return this.toSafe(grade);
   }
 
@@ -174,8 +180,7 @@ class GradeService extends BaseService {
       this.getCachedFinalGrade(input.courseId, input.userId),
     ]);
 
-    if (final)
-      httpError(423, "Grades are locked because final grade is already issued");
+    if (final) throw new ConflictError({ message: "Grade are locked" });
 
     this.validateScore(input.obtained, input.total);
     await this.validateWeights(input.courseId, input.userId, input.weight);
@@ -197,7 +202,7 @@ class GradeService extends BaseService {
 
   public async deleteGrade(id: number): Promise<boolean> {
     const grade = await this.gradeRepository.findById(id);
-    if (!grade) httpError(404, "Grade not found");
+    if (!grade) throw new NotFoundError({ message: "Grade not found" });
 
     this.preventFinalDelete(grade);
     return this.gradeRepository.delete(id);

@@ -2,7 +2,7 @@ import type { FastifyRequest } from "fastify";
 import { ZodObject, ZodSchema } from "zod";
 
 import env from "../config/envConfigs";
-import { httpError } from "../utility/httpUtility";
+import { BadRequestError } from "../error";
 
 const VALIDATION_MODE = env.zodConfiguration ?? "strict";
 type ValidationSource = "body" | "params" | "query";
@@ -48,21 +48,27 @@ export function validate<T extends ZodSchema>(
           ? Object.keys(effectiveSchema.shape)
           : [];
 
-      throw httpError(400, "Missing or empty input", {
-        source,
-        expectedFields,
+      throw new BadRequestError({
+        message: "Missing or empty input",
+        details: {
+          source,
+          expectedFields,
+        },
       });
     }
 
     const parseResult = effectiveSchema.safeParse(data);
 
     if (!parseResult.success) {
-      throw httpError(400, "Validation failed", {
-        source,
-        errors: parseResult.error.issues.map((issue) => ({
-          field: issue.path.join(".") || source,
-          message: issue.message,
-        })),
+      throw new BadRequestError({
+        message: "Validation failed",
+        details: {
+          source,
+          errors: parseResult.error.issues.map((issue) => ({
+            field: issue.path.join(".") || source,
+            message: issue.message,
+          })),
+        },
       });
     }
 

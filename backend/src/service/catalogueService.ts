@@ -1,6 +1,6 @@
+import { ConflictError, NotFoundError } from "../error";
 import type { ICatalogueRepository } from "../interface/repository";
 import type { Catalogue, Term } from "../models/catalogue";
-import { httpError } from "../utility/httpUtility";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
 
@@ -69,7 +69,8 @@ class CatalogueService extends BaseService {
   ): Promise<Catalogue> {
     const existing =
       await this.catalogueRepository.findByCourseCode(courseCode);
-    if (existing) httpError(409, "Course template already exists");
+    if (existing)
+      throw new ConflictError({ message: "Course template already exists" });
 
     const course = await this.catalogueRepository.create({
       courseName,
@@ -134,7 +135,8 @@ class CatalogueService extends BaseService {
       cacheKey
     );
 
-    if (cached === NOT_FOUND) httpError(404, "Course not found");
+    if (cached === NOT_FOUND)
+      throw new NotFoundError({ message: "Course template not found" });
     if (cached) return cached;
 
     const course = await this.catalogueRepository.findById(id);
@@ -144,7 +146,7 @@ class CatalogueService extends BaseService {
         NOT_FOUND,
         CatalogueService.NOT_FOUND_TTL
       );
-      httpError(404, "Course not found");
+      throw new NotFoundError({ message: "Course template not found" });
     }
 
     const safe = this.toSafe(course);
@@ -158,7 +160,8 @@ class CatalogueService extends BaseService {
     updates: Partial<Catalogue>
   ): Promise<Catalogue> {
     const course = await this.catalogueRepository.update(id, updates);
-    if (!course) httpError(404, "Course template not found");
+    if (!course)
+      throw new NotFoundError({ message: "Course template not found" });
 
     await this.cacheService.delete(this.key("id", id));
     await this.bumpCatalogueVersion();

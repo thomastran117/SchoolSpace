@@ -1,7 +1,7 @@
 import type { FastifyRequest } from "fastify";
 
+import { ForbiddenError } from "../error";
 import type { UserPayload } from "../models/token";
-import { httpError } from "../utility/httpUtility";
 
 abstract class BaseController {
   protected parsePositiveInt(
@@ -26,7 +26,9 @@ abstract class BaseController {
     const roles = Array.isArray(allowed) ? allowed : [allowed];
 
     if (!roles.includes(role)) {
-      httpError(403, "You lack permissions to perform this action.");
+      throw new ForbiddenError({
+        message: "You lack permissions to perform this action.",
+      });
     }
   }
 

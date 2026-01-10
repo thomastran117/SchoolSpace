@@ -1,9 +1,14 @@
 import type { MultipartFile } from "@fastify/multipart";
 
+import {
+  ConflictError,
+  HttpError,
+  InternalServerError,
+  NotFoundError,
+} from "../error";
 import type { IUserRepository } from "../interface/repository";
 import type { AuthResponse } from "../models/auth";
 import type { Role, SafeUser } from "../models/user";
-import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
@@ -51,11 +56,8 @@ class UserService extends BaseService {
     oldRefreshToken?: string
   ): Promise<AuthResponse> {
     try {
-      if (!this.fileService || !this.tokenService)
-        httpError(503, "Service is not ready");
-
       const user = await this.userRepository.findById(userID);
-      if (!user) httpError(404, "User not found");
+      if (!user) throw new NotFoundError({ message: "User is not found" });
 
       const oldAvatar = user.avatar;
       const buffer = await image.toBuffer();
@@ -102,7 +104,7 @@ class UserService extends BaseService {
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
       logger.error(`[UserService] updateAvatar failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -112,10 +114,8 @@ class UserService extends BaseService {
     oldRefreshToken?: string
   ): Promise<AuthResponse> {
     try {
-      if (!this.tokenService) httpError(503, "Service is not ready");
-
       const user = await this.userRepository.findById(userID);
-      if (!user) httpError(404, "User not found");
+      if (!user) throw new NotFoundError({ message: "User is not found" });
 
       const updated = await this.userRepository.update(userID, {
         role: role as any,
@@ -146,7 +146,7 @@ class UserService extends BaseService {
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
       logger.error(`[UserService] updateRole failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -163,19 +163,17 @@ class UserService extends BaseService {
     oldRefreshToken?: string
   ): Promise<AuthResponse> {
     try {
-      if (!this.tokenService) httpError(503, "Service is not ready");
-
       if (data.username) {
         const existing = await this.userRepository.findByUsername(
           data.username
         );
         if (existing && existing.id !== userID) {
-          httpError(409, "Username already taken");
+          throw new ConflictError({ message: "Username is already taken" });
         }
       }
 
       const user = await this.userRepository.findById(userID);
-      if (!user) httpError(404, "User not found");
+      if (!user) throw new NotFoundError({ message: "User is not found" });
 
       const updated = await this.userRepository.update(userID, data);
 
@@ -204,16 +202,14 @@ class UserService extends BaseService {
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
       logger.error(`[UserService] updateUser failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
   public async deleteUser(id: number, oldRefreshToken?: string) {
     try {
-      if (!this.tokenService) httpError(503, "Service is not ready");
-
       const user = await this.userRepository.findById(id);
-      if (!user) httpError(404, "User not found");
+      if (!user) throw new NotFoundError({ message: "User is not found" });
 
       await this.userRepository.delete(id);
       if (oldRefreshToken) await this.tokenService.logoutToken(oldRefreshToken);
@@ -222,7 +218,7 @@ class UserService extends BaseService {
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
       logger.error(`[UserService] deleteUser failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -234,7 +230,7 @@ class UserService extends BaseService {
       if (cached) return cached;
 
       const user = await this.userRepository.findById(id);
-      if (!user) httpError(404, "User not found");
+      if (!user) throw new NotFoundError({ message: "User is not found" });
 
       const safe = this.toSafeUser(user);
       await this.writeUserCache(id, safe);
@@ -243,7 +239,7 @@ class UserService extends BaseService {
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
       logger.error(`[UserService] getUser failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -254,7 +250,7 @@ class UserService extends BaseService {
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
       logger.error(`[UserService] getUsers failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 

@@ -1,6 +1,6 @@
 import fp from "fastify-plugin";
 
-import { HttpError } from "../utility/httpUtility";
+import { HttpError } from "../error";
 import logger from "../utility/logger";
 
 export default fp(async function errorHandler(app) {

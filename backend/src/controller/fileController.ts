@@ -1,9 +1,10 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import mime from "mime-types";
 
-import type { FileParams } from "../dto/params.js";
-import type { FileService } from "../service/fileService.js";
-import { HttpError, httpError } from "../utility/httpUtility";
+import type { FileParams } from "../dto/params";
+import { BadRequestError, HttpError } from "../error/index";
+import { InternalServerError } from "../error/internalServerError";
+import type { FileService } from "../service/fileService";
 import logger from "../utility/logger";
 
 class FileController {
@@ -25,7 +26,7 @@ class FileController {
       const { type } = req.params;
 
       const file = await req.file();
-      if (!file) httpError(400, "Missing file");
+      if (!file) throw new BadRequestError({ message: "Missing file." });
 
       const buffer = await file.toBuffer();
 
@@ -46,7 +47,7 @@ class FileController {
         `[FileController] handleUpload failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -56,7 +57,8 @@ class FileController {
   ) {
     try {
       const { type, fileName } = req.params;
-      if (!fileName) httpError(400, "Missing file name");
+      if (!fileName)
+        throw new BadRequestError({ message: "Missing file name." });
 
       const { filePath } = await this.fileService.getFile(type, fileName);
 
@@ -72,7 +74,7 @@ class FileController {
         `[FileController] handleFetch failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -82,7 +84,8 @@ class FileController {
   ) {
     try {
       const { type, fileName } = req.params;
-      if (!fileName) httpError(400, "Missing file name");
+      if (!fileName)
+        throw new BadRequestError({ message: "Missing file name." });
 
       await this.fileService.deleteFile(type, fileName);
 
@@ -96,7 +99,7 @@ class FileController {
         `[FileController] handleDelete failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 }

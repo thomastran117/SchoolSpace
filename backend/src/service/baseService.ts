@@ -1,4 +1,4 @@
-import { httpError } from "../utility/httpUtility";
+import { InternalServerError, ServiceUnavaliableError } from "../error";
 import logger from "../utility/logger";
 
 abstract class BaseService {
@@ -7,7 +7,7 @@ abstract class BaseService {
       return doc;
     } catch {
       logger.error("[BaseService] Something went wrong converting _id to id");
-      httpError(500, "An internal server error occured");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -18,7 +18,7 @@ abstract class BaseService {
       logger.error(
         "[BaseService] Something went wrong converting each object's _id to id"
       );
-      httpError(500, "An internal server error occured");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -32,7 +32,7 @@ abstract class BaseService {
         logger.error(
           `[${this.constructor.name}] ${caller} failed. Missing dependency: ${depName}`
         );
-        httpError(503, `Service is not ready to handle this request`);
+        throw new ServiceUnavaliableError({ message: "Not ready" });
       }
     }
   }

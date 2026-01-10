@@ -3,7 +3,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import path from "path";
 import sanitize from "sanitize-filename";
 
-import { httpError } from "../utility/httpUtility";
+import { BadRequestError } from "../error";
 import logger from "../utility/logger";
 
 type ImageUploadOptions = {
@@ -27,17 +27,15 @@ export function safeUploadImage(options?: ImageUploadOptions) {
     const file: MultipartFile | undefined = await req.file();
 
     if (!file) {
-      throw httpError(
-        400,
-        `Missing file. Expected field name '${config.fieldName}'`
-      );
+      throw new BadRequestError({
+        message: `Missing file. Expected field name '${config.fieldName}'`,
+      });
     }
 
     if (file.file.bytesRead > config.maxSize) {
-      throw httpError(
-        400,
-        `File too large. Max file size is ${Math.floor(config.maxSize / 1024 / 1024)}MB.`
-      );
+      throw new BadRequestError({
+        message: `File too large. Max file size is ${Math.floor(config.maxSize / 1024 / 1024)}MB.`,
+      });
     }
 
     const ext = path.extname(file.filename).toLowerCase();
@@ -51,10 +49,9 @@ export function safeUploadImage(options?: ImageUploadOptions) {
         `Rejected image upload: mimetype=${mime}, ext=${ext}, name=${file.filename}`
       );
 
-      throw httpError(
-        400,
-        `Invalid image format. Allowed: ${config.allowedExtensions.join(", ")}`
-      );
+      throw new BadRequestError({
+        message: `Invalid image format. Allowed: ${config.allowedExtensions.join(", ")}`,
+      });
     }
 
     file.filename = sanitize(file.filename);
