@@ -5,9 +5,9 @@ import type {
   QueryCatalogueDto,
   UpdateCatalogueDto,
 } from "../dto/catalogueSchema";
+import { HttpError, InternalServerError } from "../error";
 import type { UserPayload } from "../models/token";
 import type { CatalogueService } from "../service/catalogueService";
-import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 class CatalogueController {
@@ -63,7 +63,7 @@ class CatalogueController {
       logger.error(
         `[CatalogueController] createCourseTemplate failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -96,7 +96,7 @@ class CatalogueController {
       logger.error(
         `[CatalogueController] updateCourseTemplate failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -118,7 +118,7 @@ class CatalogueController {
       logger.error(
         `[CatalogueController] deleteCourseTemplate failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -141,7 +141,7 @@ class CatalogueController {
       logger.error(
         `[CatalogueController] getCourseTemplate failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -171,7 +171,7 @@ class CatalogueController {
       logger.error(
         `[CatalogueController] getCourseTemplates failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 }

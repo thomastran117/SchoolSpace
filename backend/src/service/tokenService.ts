@@ -15,8 +15,14 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
 import env from "../config/envConfigs";
+import {
+  BadRequestError,
+  HttpError,
+  InternalServerError,
+  TooManyRequestError,
+  UnauthorizedError,
+} from "../error";
 import type { CacheService } from "../service/cacheService";
-import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BasicTokenService } from "./basicTokenService";
 
@@ -100,7 +106,7 @@ class TokenService extends BasicTokenService {
       logger.error(
         `[TokenService] generateTokens failed: ${err?.message ?? err}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -115,7 +121,7 @@ class TokenService extends BasicTokenService {
       }>(`refresh:${token}`);
 
       if (!data) {
-        httpError(401, "Refresh token revoked or expired");
+        throw new UnauthorizedError({ message: "Invalid refresh token" });
       }
 
       return data;
@@ -125,7 +131,7 @@ class TokenService extends BasicTokenService {
       logger.error(
         `[TokenService] validateRefreshToken failed: ${err?.message ?? err}`
       );
-      httpError(401, "Refresh token revoked or expired");
+      throw new UnauthorizedError({ message: "Invalid refresh token" });
     }
   }
 
@@ -173,7 +179,7 @@ class TokenService extends BasicTokenService {
       logger.error(
         `[TokenService] rotateRefreshToken failed: ${err?.message ?? err}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -219,7 +225,7 @@ class TokenService extends BasicTokenService {
       logger.error(
         `[TokenService] createEmailCode failed: ${err?.message ?? err}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -229,12 +235,16 @@ class TokenService extends BasicTokenService {
 
       const data = await this.cacheService.get<EmailVerificationCache>(key);
       if (!data) {
-        httpError(400, "Verification code expired or invalid");
+        throw new BadRequestError({
+          message: "Verification code expired or invalid",
+        });
       }
 
       if (data.attempts >= MAX_ATTEMPTS) {
         await this.cacheService.delete(key);
-        httpError(429, "Too many verification attempts");
+        throw new TooManyRequestError({
+          message: "Too many verification attempts",
+        });
       }
 
       const isValid = await bcrypt.compare(code, data.codeHash);
@@ -245,8 +255,7 @@ class TokenService extends BasicTokenService {
           { ...data, attempts: data.attempts + 1 },
           undefined
         );
-
-        httpError(400, "Invalid verification code");
+        throw new BadRequestError({ message: "Invalid verification code" });
       }
 
       await this.cacheService.delete(key);
@@ -262,7 +271,7 @@ class TokenService extends BasicTokenService {
       logger.error(
         `[TokenService] verifyEmailCode failed: ${err?.message ?? err}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 

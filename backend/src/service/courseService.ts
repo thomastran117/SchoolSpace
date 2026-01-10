@@ -1,9 +1,9 @@
 import type { MultipartFile } from "@fastify/multipart";
 import crypto from "crypto";
 
+import { HttpError, InternalServerError, NotFoundError } from "../error";
 import type { ICourseRepository } from "../interface/repository";
 import type { Course } from "../models/course";
-import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
@@ -156,7 +156,7 @@ class CourseService extends BaseService {
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
       logger.error(`[CourseService] getCourses failed: ${err?.message ?? err}`);
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -167,7 +167,8 @@ class CourseService extends BaseService {
         cacheKey
       );
 
-      if (cached === NOT_FOUND) httpError(404, "Course not found");
+      if (cached === NOT_FOUND)
+        throw new NotFoundError({ message: "Course not found" });
       if (cached) {
         await this.trackHotCourse(id);
         return cached;
@@ -184,7 +185,7 @@ class CourseService extends BaseService {
         const course = await this.courseRepository.findById(id);
         if (!course) {
           await this.cacheService.set(cacheKey, NOT_FOUND, this.NEGATIVE_TTL);
-          httpError(404, "Course not found");
+          throw new NotFoundError({ message: "Course not found" });
         }
 
         const safe = this.toSafe(course);
@@ -204,7 +205,7 @@ class CourseService extends BaseService {
       logger.error(
         `[CourseService] getCourseById failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -239,7 +240,7 @@ class CourseService extends BaseService {
       logger.error(
         `[CourseService] createCourse failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -250,7 +251,7 @@ class CourseService extends BaseService {
   ): Promise<Course> {
     try {
       const existing = await this.courseRepository.findById(id);
-      if (!existing) httpError(404, "Course not found");
+      if (!existing) throw new NotFoundError({ message: "Course not found" });
 
       if (image) {
         const buffer = await image.toBuffer();
@@ -263,7 +264,7 @@ class CourseService extends BaseService {
       }
 
       const updated = await this.courseRepository.update(id, updates);
-      if (!updated) httpError(404, "Course not found after update");
+      if (!updated) throw new NotFoundError({ message: "Course not found" });
 
       await this.bumpVersion();
       await this.cacheService.delete(this.key("id", id));
@@ -274,14 +275,14 @@ class CourseService extends BaseService {
       logger.error(
         `[CourseService] updateCourse failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
   public async deleteCourse(id: number): Promise<boolean> {
     try {
       const existing = await this.courseRepository.findById(id);
-      if (!existing) httpError(404, "Course not found");
+      if (!existing) throw new NotFoundError({ message: "Course not found" });
 
       await this.courseRepository.delete(id);
 
@@ -293,7 +294,7 @@ class CourseService extends BaseService {
       logger.error(
         `[CourseService] deleteCourse failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 }

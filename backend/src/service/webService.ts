@@ -16,7 +16,7 @@ import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
 
 import env from "../config/envConfigs";
-import { HttpError, httpError } from "../utility/httpUtility";
+import { HttpError, InternalServerError } from "../error";
 import logger from "../utility/logger";
 
 const { googleCaptcha: GOOGLE_CAPTCHA_SECRET } = env;
@@ -85,7 +85,7 @@ class WebService {
       logger.error(
         `[WebService] verifyGoogleCaptcha failed: ${err?.message ?? err}\n${err.stack || ""}`
       );
-      httpError(503, "Captcha verification unavailable");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -207,7 +207,7 @@ class WebService {
       err.code === "ETIMEDOUT"
     ) {
       logger.error(`${prefix}: ${message}\n${stack}`);
-      httpError(503, "External service unavailable");
+      throw new InternalServerError({ message: "Internal server error" });
     }
 
     if (isAxios) {
@@ -215,17 +215,17 @@ class WebService {
 
       if (status && status >= 500) {
         logger.error(`${prefix}: ${message}\n${stack}`);
-        httpError(503, "External service unavailable");
+        throw new InternalServerError({ message: "Internal server error" });
       }
 
       if (status && status >= 400 && status < 500) {
         logger.error(`${prefix}: ${message}\n${stack}`);
-        httpError(503, "External service unavailable");
+        throw new InternalServerError({ message: "Internal server error" });
       }
     }
 
     logger.error(`${prefix}: ${message}\n${stack}`);
-    httpError(500, "Internal server error");
+    throw new InternalServerError({ message: "Internal server error" });
   }
 }
 

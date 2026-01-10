@@ -5,8 +5,8 @@ import type {
   QueryCourseDto,
   UpdateCourseDto,
 } from "../dto/courseSchema";
+import { HttpError, InternalServerError } from "../error";
 import type { CourseService } from "../service/courseService";
-import { HttpError } from "../utility/httpUtility";
 import { sanitizeProfileImage } from "../utility/imageUtility";
 import logger from "../utility/logger";
 import { BaseController } from "./baseController";
@@ -55,7 +55,7 @@ class CourseController extends BaseController {
       logger.error(
         `[CourseController] getCourses failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -76,7 +76,7 @@ class CourseController extends BaseController {
       logger.error(
         `[CourseController] createCourse failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -119,7 +119,7 @@ class CourseController extends BaseController {
       logger.error(
         `[CourseController] createCourse failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -152,7 +152,7 @@ class CourseController extends BaseController {
       logger.error(
         `[CourseController] updateCourse failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -174,7 +174,7 @@ class CourseController extends BaseController {
       logger.error(
         `[CourseController] deleteCourse failed: ${err?.message ?? err}`
       );
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 }

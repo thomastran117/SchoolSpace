@@ -11,10 +11,16 @@
 // Imports
 import bcrypt from "bcrypt";
 
+import {
+  ConflictError,
+  HttpError,
+  InternalServerError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../error";
 import type { IUserRepository } from "../interface/repository";
 import type { AuthResponse } from "../models/auth";
 import type { EmailQueue } from "../queue/emailQueue";
-import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 import type { OAuthService } from "./oauthService";
 import type { TokenService } from "./tokenService";
@@ -69,14 +75,15 @@ class AuthService {
   ): Promise<AuthResponse> {
     try {
       const result = await this.webService.verifyGoogleCaptcha(captcha);
-      if (!result) httpError(401, "Invalid captcha");
+      if (!result)
+        throw new UnauthorizedError({ message: "Invalid recaptcha" });
 
       const user = await this.userRepository.findByEmail(email);
       const hashToCheck = user?.password ?? this.DUMMY_HASH;
 
       const passwordMatches = await this.comparePassword(password, hashToCheck);
       if (!user || !passwordMatches || !user.password) {
-        httpError(401, "Invalid credentials");
+        throw new UnauthorizedError({ message: "Invalid credentials" });
       }
 
       const { accessToken, refreshToken } =
@@ -101,7 +108,7 @@ class AuthService {
         throw err;
       }
       logger.error(`[AuthService] loginUser failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -131,10 +138,12 @@ class AuthService {
   ): Promise<boolean> {
     try {
       const result = await this.webService.verifyGoogleCaptcha(captcha);
-      if (!result) httpError(401, "Invalid captcha");
+      if (!result)
+        throw new UnauthorizedError({ message: "Invalid recaptcha" });
 
       const existingUser = await this.userRepository.findByEmail(email);
-      if (existingUser) httpError(409, "Email already in use");
+      if (existingUser)
+        throw new ConflictError({ message: "Email already exists" });
 
       const hashedPassword = await this.hashPassword(password);
       const { code } = await this.tokenService.createEmailCode(
@@ -153,7 +162,7 @@ class AuthService {
         throw err;
       }
       logger.error(`[AuthService] signupUser failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -168,7 +177,8 @@ class AuthService {
   public async verifyUser(email: string, token: string, captcha: string) {
     try {
       const result = await this.webService.verifyGoogleCaptcha(captcha);
-      if (!result) httpError(401, "Invalid captcha");
+      if (!result)
+        throw new UnauthorizedError({ message: "Invalid recaptcha" });
 
       const { password, role } = await this.tokenService.verifyEmailCode(
         email,
@@ -190,7 +200,7 @@ class AuthService {
         throw err;
       }
       logger.error(`[AuthService] verifyUser failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -230,7 +240,7 @@ class AuthService {
       logger.error(
         `[AuthService] forgotPassword failed: ${err?.message ?? err}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -252,7 +262,7 @@ class AuthService {
       const hashedPassword = await this.hashPassword(password);
       const user = await this.userRepository.findByEmail(email);
       if (!user) {
-        httpError(404, "User not found");
+        throw new NotFoundError({ message: "Requested user is not found" });
       }
       await this.userRepository.update(user.id, { password: hashedPassword });
       return;
@@ -263,7 +273,7 @@ class AuthService {
       logger.error(
         `[AuthService] changePassword failed: ${err?.message ?? err}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -283,8 +293,8 @@ class AuthService {
       const microsoftSub = (claims as any).sub || (claims as any).oid;
       const email = (claims as any).email || (claims as any).preferred_username;
 
-      if (!email) httpError(400, "Microsoft email missing");
-      if (!microsoftSub) httpError(400, "Microsoft subject missing");
+      if (!email || !microsoftSub)
+        throw new UnauthorizedError({ message: "Invalid Microsoft token" });
 
       let user = await this.userRepository.findByEmail(email);
 
@@ -320,7 +330,7 @@ class AuthService {
       logger.error(
         `[AuthService] microsoftOauth failed: ${err?.message ?? err}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -335,7 +345,8 @@ class AuthService {
   public async googleOAuth(googleToken: string): Promise<AuthResponse> {
     try {
       const googleUser = await this.oauthService.verifyGoogleToken(googleToken);
-      if (!googleUser?.email) httpError(401, "Invalid Google token");
+      if (!googleUser?.email)
+        throw new UnauthorizedError({ message: "Invalid Google token" });
 
       let user = await this.userRepository.findByEmail(googleUser.email);
 
@@ -369,7 +380,7 @@ class AuthService {
         throw err;
       }
       logger.error(`[AuthService] googleOAuth failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -389,7 +400,7 @@ class AuthService {
         throw err;
       }
       logger.error(`[AuthService] appleOAuth failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -419,7 +430,7 @@ class AuthService {
       logger.error(
         `[AuthService] generateNewTokens failed: ${err?.message ?? err}`
       );
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -439,7 +450,7 @@ class AuthService {
         throw err;
       }
       logger.error(`[AuthService] authLogout failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -462,8 +473,10 @@ class AuthService {
       if (err instanceof HttpError) {
         throw err;
       }
-      logger.error(`[AuthService] authLogout failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      logger.error(
+        `[AuthService] comparePassword failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -483,7 +496,7 @@ class AuthService {
         throw err;
       }
       logger.error(`[AuthService] hashPassword failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 }

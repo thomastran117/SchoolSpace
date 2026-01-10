@@ -16,7 +16,7 @@ import type { MultipartFile } from "@fastify/multipart";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 
-import { httpError } from "../utility/httpUtility";
+import { BadRequestError } from "../error";
 
 const MAX_WIDTH = 2048;
 const MAX_HEIGHT = 2048;
@@ -30,7 +30,7 @@ export async function sanitizeProfileImage(
   file?: MultipartFile
 ): Promise<SanitizedImageResult> {
   if (!file) {
-    httpError(400, "No file uploaded");
+    throw new BadRequestError({ message: "No file uploaded" });
   }
 
   const buffer = await file.toBuffer();

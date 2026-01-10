@@ -2,8 +2,13 @@ import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
 
+import {
+  BadRequestError,
+  HttpError,
+  InternalServerError,
+  NotFoundError,
+} from "../error";
 import type { GetFileResult, UploadResult } from "../models/file";
-import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 const UPLOADS_DIR = path.resolve(__dirname, "../../../uploads");
@@ -55,7 +60,7 @@ class FileService {
       if (err instanceof HttpError) throw err;
 
       logger.error(`[FileService] uploadFile failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -66,13 +71,13 @@ class FileService {
       return { file, filePath };
     } catch (err: any) {
       if (err.code === "ENOENT") {
-        httpError(404, "File not found");
+        throw new NotFoundError({ message: "File is not found" });
       }
 
       if (err instanceof HttpError) throw err;
 
       logger.error(`[FileService] getFile failed: ${err?.message ?? err}`);
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -84,17 +89,18 @@ class FileService {
       if (fileName.startsWith(prefix)) fileName = fileName.replace(prefix, "");
 
       if (fileName.includes("..") || fileName.includes("/")) {
-        httpError(400, "Invalid file name");
+        throw new BadRequestError({ message: "Invalid file name" });
       }
 
       const filePath = path.join(UPLOADS_DIR, type, fileName);
       await fs.unlink(filePath);
     } catch (err: any) {
-      if (err.code === "ENOENT") httpError(404, "File not found");
+      if (err.code === "ENOENT")
+        throw new NotFoundError({ message: "File is not found" });
 
       logger.error(`[FileService] deleteFile failed: ${err?.message ?? err}`);
 
-      httpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -106,7 +112,7 @@ class FileService {
         await fs.mkdir(UPLOADS_DIR, { recursive: true });
       } catch (err: any) {
         logger.error(`[FileService] init failed: ${err?.message ?? err}`);
-        httpError(500, "Internal server error");
+        throw new InternalServerError({ message: "Internal server error" });
       }
     }
   }

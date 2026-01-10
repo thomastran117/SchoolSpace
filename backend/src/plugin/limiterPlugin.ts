@@ -1,9 +1,9 @@
 import fp from "fastify-plugin";
 
 import container from "../container";
+import { TooManyRequestError } from "../error";
 import type { BasicTokenService } from "../service/basicTokenService";
 import type { CacheService } from "../service/cacheService";
-import { httpError } from "../utility/httpUtility";
 
 type RateLimitMode = "window" | "bucket";
 
@@ -74,7 +74,7 @@ export default fp<RateLimiterOptions>(
         const ttl = Math.ceil(windowMs / 1000);
 
         const count = await cacheService.increment(key, 1, ttl);
-        if (count > maxRequests) throw httpError(429, message);
+        if (count > maxRequests) throw new TooManyRequestError({ message });
         return;
       }
 
@@ -100,7 +100,7 @@ export default fp<RateLimiterOptions>(
             tokens + ((now - lastRefill) / 1000) * refillRate
           );
 
-          if (tokens < 1) throw httpError(429, message);
+          if (tokens < 1) throw new TooManyRequestError({ message });
 
           const ok = await cacheService.compareAndSwap(
             bucketKey,
@@ -112,7 +112,7 @@ export default fp<RateLimiterOptions>(
           if (ok) return;
         }
 
-        throw httpError(429, message);
+        throw new TooManyRequestError({ message });
       }
     });
   }

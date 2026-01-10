@@ -1,8 +1,8 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import container from "../container";
+import { UnauthorizedError } from "../error";
 import type { BasicTokenService } from "../service/basicTokenService";
-import { httpError } from "../utility/httpUtility";
 
 export async function authDependency(
   request: FastifyRequest,
@@ -11,7 +11,9 @@ export async function authDependency(
   const authHeader = request.headers.authorization;
 
   if (!authHeader?.startsWith("Bearer ")) {
-    throw httpError(401, "Missing or invalid authorization header");
+    throw new UnauthorizedError({
+      message: "Missing or invalid authorization header",
+    });
   }
 
   const token = authHeader.slice(7);
@@ -22,7 +24,7 @@ export async function authDependency(
   try {
     user = tokenService.getUserPayload(token);
   } catch {
-    throw httpError(401, "Invalid or expired token");
+    throw new UnauthorizedError({ message: "Invalid or expired access token" });
   }
 
   request.user = user;

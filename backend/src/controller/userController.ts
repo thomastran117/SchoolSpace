@@ -1,9 +1,15 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import type { RoleUpdateDto, UserUpdateDto } from "../dto/userSchema";
+import {
+  BadRequestError,
+  ConflictError,
+  HttpError,
+  InternalServerError,
+  UnauthorizedError,
+} from "../error";
 import type { UserPayload } from "../models/token";
 import type { UserService } from "../service/userService";
-import { HttpError, httpError } from "../utility/httpUtility";
 import { sanitizeProfileImage } from "../utility/imageUtility";
 import logger from "../utility/logger";
 
@@ -41,7 +47,7 @@ class UserController {
 
       logger.error(`[UserController] getUser failed: ${err?.message ?? err}`);
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -51,7 +57,8 @@ class UserController {
   ) {
     try {
       const token = req.cookies.refreshToken;
-      if (!token) httpError(401, "Missing refresh token");
+      if (!token)
+        throw new UnauthorizedError({ message: "Missing refresh token" });
 
       const { id: userId, role: userRole } = req.user as UserPayload;
       const { id: queryUserId } = req.params as unknown as { id?: number };
@@ -106,7 +113,7 @@ class UserController {
         `[UserController] updateUser failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -123,10 +130,9 @@ class UserController {
         userRole === "admin" && queryUserId ? queryUserId : userId;
 
       if (!(userRole === "admin" || userRole === "undefined"))
-        throw httpError(
-          409,
-          "The user role is set already. Contact support to change it"
-        );
+        throw new ConflictError({
+          message: "The user role is set already. Contact support to change it",
+        });
 
       const effectiveToken = userRole === "admin" ? undefined : token;
       const { role: requestedRole } = req.body;
@@ -169,7 +175,7 @@ class UserController {
         `[UserController] updateRole failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -181,7 +187,7 @@ class UserController {
       const { id: queryUserId } = req.params as { id?: number };
 
       const file = await req.file();
-      if (!file) httpError(400, "Missing file");
+      if (!file) throw new BadRequestError({ message: "Missing file" });
 
       const effectiveUserId =
         userRole === "admin" && queryUserId ? queryUserId : userId;
@@ -231,7 +237,7 @@ class UserController {
         `[UserController] updateAvatar failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -256,7 +262,7 @@ class UserController {
         `[UserController] deleteUser failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 }

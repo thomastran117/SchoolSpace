@@ -7,7 +7,7 @@
  */
 import type { FastifyInstance } from "fastify";
 
-import { httpError } from "../utility/httpUtility";
+import { NotFoundError } from "../error";
 import { authRoutes } from "./authRoute";
 import { catalogueRoutes } from "./catalogueRoute";
 import { courseRoutes } from "./courseRoute";
@@ -21,6 +21,8 @@ export async function registerRoutes(app: FastifyInstance) {
   app.register(catalogueRoutes, { prefix: "/catalogues" });
   app.register(courseRoutes, { prefix: "/courses" });
   app.setNotFoundHandler((request) => {
-    throw httpError(404, `Route '${request.url}' does not exist`);
+    throw new NotFoundError({
+      message: `Route '${request.url}' does not exist`,
+    });
   });
 }

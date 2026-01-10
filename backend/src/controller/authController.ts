@@ -21,8 +21,13 @@ import type {
   VerifyDto,
 } from "../dto/authSchema";
 import type { TokenQuery } from "../dto/query";
+import {
+  BadRequestError,
+  HttpError,
+  InternalServerError,
+  UnauthorizedError,
+} from "../error";
 import type { AuthService } from "../service/authService";
-import { HttpError, httpError } from "../utility/httpUtility";
 import logger from "../utility/logger";
 
 class AuthController {
@@ -84,7 +89,7 @@ class AuthController {
         `[AuthController] localAuthenticate failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -109,7 +114,7 @@ class AuthController {
         `[AuthController] localSignup failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -134,7 +139,7 @@ class AuthController {
         `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -158,7 +163,7 @@ class AuthController {
         `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -168,7 +173,7 @@ class AuthController {
   ) {
     try {
       const token = req.query.token;
-      if (!token) httpError(400, "Missing token");
+      if (!token) throw new BadRequestError({ message: "Missing token" });
 
       const { password } = req.body;
       await this.authService.changePassword(token, password);
@@ -185,7 +190,7 @@ class AuthController {
         `[AuthController] localVerifyEmail failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -195,7 +200,8 @@ class AuthController {
   ) {
     try {
       const { id_token: idToken } = req.body ?? {};
-      if (!idToken) httpError(400, "Missing id_token");
+      if (!idToken)
+        throw new BadRequestError({ message: "Missing microsoft token" });
 
       const { accessToken, refreshToken, role, username, avatar } =
         await this.authService.microsoftOAuth(idToken);
@@ -224,7 +230,7 @@ class AuthController {
         `[AuthController] microsoftAuthenticate failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -234,7 +240,8 @@ class AuthController {
   ) {
     try {
       const { id_token: googleToken } = req.body;
-      if (!googleToken) httpError(400, "Google token missing");
+      if (!googleToken)
+        throw new BadRequestError({ message: "Missing google token" });
 
       const { accessToken, refreshToken, role, username, avatar } =
         await this.authService.googleOAuth(googleToken);
@@ -262,7 +269,7 @@ class AuthController {
         `[AuthController] googleAuthenticate failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -272,7 +279,8 @@ class AuthController {
   ) {
     try {
       const { id_token: appleToken } = req.body;
-      if (!appleToken) httpError(400, "Apple token missing");
+      if (!appleToken)
+        throw new BadRequestError({ message: "Missing apple token" });
 
       const { accessToken, refreshToken, role, username, avatar } =
         await this.authService.googleOAuth(appleToken); //change to appleOAuth later
@@ -301,14 +309,15 @@ class AuthController {
         `[AuthController] appleAuthenticate failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
   public async refreshAccessToken(req: FastifyRequest, reply: FastifyReply) {
     try {
       const token = req.cookies.refreshToken;
-      if (!token) httpError(401, "Missing refresh token");
+      if (!token)
+        throw new UnauthorizedError({ message: "Missing refresh token" });
 
       const { accessToken, refreshToken, role, username, avatar } =
         await this.authService.generateNewTokens(token);
@@ -337,7 +346,7 @@ class AuthController {
         `[AuthController] refreshAccessToken failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 
@@ -371,7 +380,7 @@ class AuthController {
         `[AuthController] logoutRefreshToken failed: ${err?.message ?? err}`
       );
 
-      throw new HttpError(500, "Internal server error");
+      throw new InternalServerError({ message: "Internal server error" });
     }
   }
 }
