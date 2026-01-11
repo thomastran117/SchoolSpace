@@ -15,3 +15,4 @@ export { TooManyRequestError } from "./tooManyRequestError";
 export { UnauthorizedError } from "./unauthorizedError";
 export { UnprocessableEntityError } from "./unprocessableEntityError";
 export { UnsupportedMediaError } from "./unsupportedMediaError";
+export { MethodNotAllowedError } from "./methodNotAllowedError";

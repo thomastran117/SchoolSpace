@@ -25,6 +25,7 @@
     "chalk": "^4.1.2",
     "dotenv": "^16.6.1",
     "fastify": "^5.6.2",
+    "fastify-method-not-allowed": "^1.0.2",
     "fastify-plugin": "^5.1.0",
     "file-type": "^21.0.0",
     "google-auth-library": "^10.3.0",

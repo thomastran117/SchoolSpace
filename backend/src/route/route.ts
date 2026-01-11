@@ -20,9 +20,4 @@ export async function registerRoutes(app: FastifyInstance) {
   app.register(fileRoutes, { prefix: "/files" });
   app.register(catalogueRoutes, { prefix: "/catalogues" });
   app.register(courseRoutes, { prefix: "/courses" });
-  app.setNotFoundHandler((request) => {
-    throw new NotFoundError({
-      message: `Route '${request.url}' does not exist`,
-    });
-  });
 }
