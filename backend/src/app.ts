@@ -2,13 +2,13 @@ import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import Fastify from "fastify";
+import methodNotAllowed from "fastify-method-not-allowed";
 
 import container from "./container";
 import errorHandler from "./plugin/errorPlugin";
 import rateLimiter from "./plugin/limiterPlugin";
 import requestLogger from "./plugin/loggerPlugin";
 import requestScopePlugin from "./plugin/scopePlugin";
-import methodNotAllowed  from "fastify-method-not-allowed"
 import { registerRoutes } from "./route/route";
 
 export async function buildApp() {
@@ -58,7 +58,7 @@ export async function buildApp() {
   });
 
   app.register(methodNotAllowed);
-  
+
   app.get("/", async (_, reply) => reply.code(200).send({ message: "ok" }));
 
   app.get("/api", async (_, reply) => reply.code(200).send({ message: "ok" }));
