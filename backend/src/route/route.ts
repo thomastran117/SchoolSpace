@@ -7,7 +7,6 @@
  */
 import type { FastifyInstance } from "fastify";
 
-import { NotFoundError } from "../error";
 import { authRoutes } from "./authRoute";
 import { catalogueRoutes } from "./catalogueRoute";
 import { courseRoutes } from "./courseRoute";
