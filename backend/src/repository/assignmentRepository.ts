@@ -1,9 +1,7 @@
 import type { Assignment } from "../models/assignment";
 import { BaseRepository } from "./baseRepository";
 
-class AssignmentRepository
-  extends BaseRepository
-{
+class AssignmentRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }

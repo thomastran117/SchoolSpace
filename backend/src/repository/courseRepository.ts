@@ -10,10 +10,14 @@ class CourseRepository extends BaseRepository {
 
   private static readonly include = { catalogue: true } as const;
 
-  private buildWhereFromFilter(filter: Record<string, unknown>): Prisma.CourseWhereInput {
+  private buildWhereFromFilter(
+    filter: Record<string, unknown>
+  ): Prisma.CourseWhereInput {
     const where: Prisma.CourseWhereInput = {};
-    if (typeof filter.teacherId === "number") where.teacherId = filter.teacherId;
-    if (typeof filter.catalogueId === "number") where.catalogueId = filter.catalogueId;
+    if (typeof filter.teacherId === "number")
+      where.teacherId = filter.teacherId;
+    if (typeof filter.catalogueId === "number")
+      where.catalogueId = filter.catalogueId;
     if (typeof filter.year === "number") where.year = filter.year;
     return where;
   }
@@ -42,7 +46,10 @@ class CourseRepository extends BaseRepository {
     );
   }
 
-  public findByTeacher(teacherId: number, year?: number): Promise<CourseListItem[]> {
+  public findByTeacher(
+    teacherId: number,
+    year?: number
+  ): Promise<CourseListItem[]> {
     return this.executeAsync(
       () =>
         this.prisma.course.findMany({
@@ -95,7 +102,10 @@ class CourseRepository extends BaseRepository {
     );
   }
 
-  public update(id: number, updates: Prisma.CourseUpdateInput): Promise<CourseFull | null> {
+  public update(
+    id: number,
+    updates: Prisma.CourseUpdateInput
+  ): Promise<CourseFull | null> {
     return this.executeAsync(
       async () => {
         try {
@@ -111,14 +121,14 @@ class CourseRepository extends BaseRepository {
       { deadlineMs: 800 }
     );
   }
-  
+
   public delete(id: number): Promise<CourseFull | null> {
     return this.executeAsync(
       async () => {
         try {
           return (await this.prisma.course.delete({
             where: { id },
-          include: courseFullInclude,
+            include: courseFullInclude,
           })) as any;
         } catch {
           return null;

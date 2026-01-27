@@ -1,9 +1,7 @@
 import type { Catalogue, Term } from "../models/catalogue";
 import { BaseRepository } from "./baseRepository";
 
-class CatalogueRepository
-  extends BaseRepository
-{
+class CatalogueRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }

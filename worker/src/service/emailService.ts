@@ -318,7 +318,7 @@ class EmailService {
       html,
     });
   }
-  
+
   public async sendWelcomeEmail(email: string): Promise<void> {
     const html = `
     <!DOCTYPE html>

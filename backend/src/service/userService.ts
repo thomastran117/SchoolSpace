@@ -8,12 +8,12 @@ import {
 } from "../error";
 import type { AuthResponse } from "../models/auth";
 import type { Role, SafeUser } from "../models/user";
+import type { UserRepository } from "../repository";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
 import type { FileService } from "./fileService";
 import type { TokenService } from "./tokenService";
-import type { UserRepository } from "../repository";
 
 class UserService extends BaseService {
   private readonly userRepository: UserRepository;

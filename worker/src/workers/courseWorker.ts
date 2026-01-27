@@ -71,16 +71,11 @@ const PREFETCH = 5;
       try {
         switch (job.type) {
           case "COURSE_DETAIL":
-            logger.info(
-              `[CourseWorker] Warm course detail requested`
-            
-            );
+            logger.info(`[CourseWorker] Warm course detail requested`);
             break;
 
           case "COURSE_LIST":
-            logger.info(
-              `[CourseWorker] Warm course list requested`
-            );
+            logger.info(`[CourseWorker] Warm course list requested`);
             break;
 
           default:
@@ -89,9 +84,7 @@ const PREFETCH = 5;
 
         channel.ack(msg);
       } catch (err) {
-        logger.error(
-          `[CourseWorker] Job failed: ${String(err)}`,
-        );
+        logger.error(`[CourseWorker] Job failed: ${String(err)}`);
 
         if (retryCount >= MAX_RETRIES) {
           channel.sendToQueue(DLQ, msg.content, { persistent: true });

@@ -20,11 +20,11 @@ import {
 } from "../error";
 import type { AuthResponse } from "../models/auth";
 import type { EmailQueue } from "../queue/emailQueue";
+import type { UserRepository } from "../repository";
 import logger from "../utility/logger";
 import type { OAuthService } from "./oauthService";
 import type { TokenService } from "./tokenService";
 import type { WebService } from "./webService";
-import type { UserRepository } from "../repository";
 
 class AuthService {
   private readonly userRepository: UserRepository;

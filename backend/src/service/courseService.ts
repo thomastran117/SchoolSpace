@@ -4,13 +4,13 @@ import crypto from "crypto";
 import { HttpError, InternalServerError, NotFoundError } from "../error";
 import type { Prisma } from "../generated/prisma/client";
 import type { CourseFull, CourseListItem } from "../models/course";
+import type { CourseRepository } from "../repository";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
 import type { CatalogueService } from "./catalogueService";
 import type { FileService } from "./fileService";
 import type { UserService } from "./userService";
-import type { CourseRepository } from "../repository";
 
 const NOT_FOUND = "__NOT_FOUND__";
 
@@ -146,11 +146,8 @@ class CourseService extends BaseService {
       }
 
       try {
-        const { results, total } = await this.courseRepository.findAllWithFilters(
-          filter,
-          page,
-          limit
-        );
+        const { results, total } =
+          await this.courseRepository.findAllWithFilters(filter, page, limit);
 
         const response = {
           data: results,
@@ -220,7 +217,9 @@ class CourseService extends BaseService {
       }
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-      logger.error(`[CourseService] getCourseById failed: ${err?.message ?? err}`);
+      logger.error(
+        `[CourseService] getCourseById failed: ${err?.message ?? err}`
+      );
       throw new InternalServerError({ message: "Internal server error" });
     }
   }
@@ -248,7 +247,7 @@ class CourseService extends BaseService {
         teacherId,
         year,
         imageUrl: publicUrl,
-        section
+        section,
       } as unknown as Prisma.CourseCreateInput);
 
       await this.bumpVersion();
@@ -256,7 +255,9 @@ class CourseService extends BaseService {
       return course;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-      logger.error(`[CourseService] createCourse failed: ${err?.message ?? err}`);
+      logger.error(
+        `[CourseService] createCourse failed: ${err?.message ?? err}`
+      );
       throw new InternalServerError({ message: "Internal server error" });
     }
   }
@@ -289,7 +290,9 @@ class CourseService extends BaseService {
       return updated;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-      logger.error(`[CourseService] updateCourse failed: ${err?.message ?? err}`);
+      logger.error(
+        `[CourseService] updateCourse failed: ${err?.message ?? err}`
+      );
       throw new InternalServerError({ message: "Internal server error" });
     }
   }
@@ -306,7 +309,9 @@ class CourseService extends BaseService {
       return true;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
-      logger.error(`[CourseService] deleteCourse failed: ${err?.message ?? err}`);
+      logger.error(
+        `[CourseService] deleteCourse failed: ${err?.message ?? err}`
+      );
       throw new InternalServerError({ message: "Internal server error" });
     }
   }

@@ -1,9 +1,7 @@
 import type { Enrollment } from "../models/enrollment";
 import { BaseRepository } from "./baseRepository";
 
-class EnrollmentRepository
-  extends BaseRepository
-{
+class EnrollmentRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }
