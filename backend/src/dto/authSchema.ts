@@ -1,35 +1,54 @@
 import { z } from "zod";
 
-const AuthSchema = z.object({
-  email: z.string().email().max(100),
-  password: z.string().min(6).max(128),
-  captcha: z.string(),
-});
+const EmailSchema = z.string().trim().toLowerCase().email().max(100);
 
-const LoginSchema = AuthSchema.extend({
+const PasswordSchema = z.string().min(6).max(128);
+
+const CaptchaSchema = z.string().trim().min(1).max(4000);
+
+const RoleSchema = z.enum(["student", "teacher"]);
+
+const IdTokenSchema = z.string().trim().min(10).max(1500);
+
+const VerifyCodeSchema = z
+  .string()
+  .trim()
+  .length(6, "Code must be exactly 6 characters");
+
+const WithEmail = { email: EmailSchema };
+const WithPassword = { password: PasswordSchema };
+const WithCaptcha = { captcha: CaptchaSchema };
+
+const LoginSchema = z.object({
+  ...WithEmail,
+  ...WithPassword,
+  ...WithCaptcha,
   remember: z.boolean().optional(),
 });
 
-const SignupSchema = AuthSchema.extend({
-  role: z.enum(["student", "teacher"]),
+const SignupSchema = z.object({
+  ...WithEmail,
+  ...WithPassword,
+  ...WithCaptcha,
+  role: RoleSchema,
 });
 
 const VerifySchema = z.object({
-  email: z.string().email().max(100),
-  code: z.string().min(6).max(6),
-  captcha: z.string(),
+  ...WithEmail,
+  ...WithCaptcha,
+  code: VerifyCodeSchema,
 });
 
 const ChangePasswordSchema = z.object({
-  password: z.string().min(6).max(128),
+  ...WithPassword,
 });
 
 const ForgotPasswordSchema = z.object({
-  email: z.string().email().max(100),
+  ...WithEmail,
 });
 
 const MicrosoftSchema = z.object({
-  id_token: z.string().min(10).max(1500),
+  id_token: IdTokenSchema,
 });
 
 const GoogleSchema = MicrosoftSchema;
@@ -47,7 +66,7 @@ type AppleDto = z.infer<typeof AppleSchema>;
 interface AuthResponseDto {
   message: string;
   accessToken: string;
-  role: string;
+  role: z.infer<typeof RoleSchema> | string;
   avatar?: string;
   username?: string;
 }
@@ -61,7 +80,13 @@ export {
   MicrosoftSchema,
   SignupSchema,
   VerifySchema,
+  RoleSchema,
+  EmailSchema,
+  PasswordSchema,
+  CaptchaSchema,
+  IdTokenSchema,
 };
+
 export type {
   AppleDto,
   AuthResponseDto,
