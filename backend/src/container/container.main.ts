@@ -1,3 +1,13 @@
+/**
+ * @file container.main.ts
+ * @description
+ * Creates the blueprint needed to create object, and creates objects when requested.
+ *
+ * @module container
+ * @version 1.0.0
+ * @auth Thomas
+ */
+
 import logger from "../utility/logger";
 import { registerControllerModules } from "./container.controllers";
 import { CoreInitializer } from "./container.core";

@@ -1,10 +1,10 @@
 /**
- * @file authController.ts
+ * @file container.controllers.ts
  * @description
- * Handles authentication API requests and responses
+ * Factory methods to create controller objects
  *
- * @module controller
- * @version 2.0.0
+ * @module container
+ * @version 1.0.0
  * @auth Thomas
  */
 

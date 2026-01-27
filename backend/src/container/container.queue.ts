@@ -1,3 +1,12 @@
+/**
+ * @file container.queues.ts
+ * @description
+ * Factory methods to create queues objects
+ *
+ * @module container
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import * as Queues from "../queue";
 import logger from "../utility/logger";
 import type { Registration } from "./container.types";
