@@ -1,6 +1,6 @@
 import { ConflictError, NotFoundError } from "../error";
-import type { ICatalogueRepository } from "../interface/repository";
 import type { Catalogue, Term } from "../models/catalogue";
+import type { CatalogueRepository } from "../repository";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
 
@@ -8,7 +8,7 @@ const NOT_FOUND = "__NF__";
 
 class CatalogueService extends BaseService {
   private readonly cacheService: CacheService;
-  private readonly catalogueRepository: ICatalogueRepository;
+  private readonly catalogueRepository: CatalogueRepository;
 
   private static readonly CACHE_NAMESPACE = "catalogue:v1";
 
@@ -25,7 +25,7 @@ class CatalogueService extends BaseService {
 
   constructor(dependencies: {
     cacheService: CacheService;
-    catalogueRepository: ICatalogueRepository;
+    catalogueRepository: CatalogueRepository;
   }) {
     super();
     this.cacheService = dependencies.cacheService;

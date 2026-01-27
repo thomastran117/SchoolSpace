@@ -1,10 +1,8 @@
-import type { IEnrollmentRepository } from "../interface/repository";
 import type { Enrollment } from "../models/enrollment";
 import { BaseRepository } from "./baseRepository";
 
 class EnrollmentRepository
   extends BaseRepository
-  implements IEnrollmentRepository
 {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });

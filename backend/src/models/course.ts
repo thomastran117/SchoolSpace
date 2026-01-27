@@ -1,18 +1,32 @@
-type Course = {
-  id: number;
-  catalogueId: number;
-  teacherId: number;
-  imageUrl: string | null;
-  year: number;
-  createdAt: Date;
-  updatedAt: Date;
-  section: string;
-  enrollmentNumber: number;
-  maxEnrollmentNumber: number;
-  assignmentNumber: number;
-  annoucementNumber: number;
-  assistantNumber: number;
-  lectureNumber: number;
-};
+import type { Prisma } from "../generated/prisma/client";
 
-export type { Course };
+export const courseListSelect = {
+  id: true,
+  section: true,
+  catalogueId: true,
+  teacherId: true,
+  imageUrl: true,
+  year: true,
+  enrollmentNumber: true,
+  maxEnrollmentNumber: true,
+
+  catalogue: {
+    select: {
+      courseName: true,
+      description: true,
+      courseCode: true,
+    },
+  },
+} satisfies Prisma.CourseSelect;
+
+export type CourseListItem = Prisma.CourseGetPayload<{
+  select: typeof courseListSelect;
+}>;
+
+export const courseFullInclude = {
+  catalogue: true,
+} satisfies Prisma.CourseInclude;
+
+export type CourseFull = Prisma.CourseGetPayload<{
+  include: typeof courseFullInclude;
+}>;

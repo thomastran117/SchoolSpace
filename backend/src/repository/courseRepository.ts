@@ -1,39 +1,48 @@
-import type { ICourseRepository } from "../interface/repository";
-import type { Course } from "../models/course";
+import type { Prisma } from "../generated/prisma/client";
+import type { CourseFull, CourseListItem } from "../models/course";
+import { courseFullInclude, courseListSelect } from "../models/course";
 import { BaseRepository } from "./baseRepository";
 
-class CourseRepository extends BaseRepository implements ICourseRepository {
+class CourseRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }
 
-  public async findById(id: number): Promise<Course | null> {
+  private static readonly include = { catalogue: true } as const;
+
+  private buildWhereFromFilter(filter: Record<string, unknown>): Prisma.CourseWhereInput {
+    const where: Prisma.CourseWhereInput = {};
+    if (typeof filter.teacherId === "number") where.teacherId = filter.teacherId;
+    if (typeof filter.catalogueId === "number") where.catalogueId = filter.catalogueId;
+    if (typeof filter.year === "number") where.year = filter.year;
+    return where;
+  }
+
+  public findById(id: number): Promise<CourseFull | null> {
     return this.executeAsync(
       () =>
         this.prisma.course.findUnique({
           where: { id },
-          include: { catalogue: true },
+          include: courseFullInclude,
         }),
       { deadlineMs: 800 }
     );
   }
 
-  public async findByIds(ids: number[]): Promise<Course[]> {
-    if (!ids.length) return [];
+  public findByIds(ids: number[]): Promise<CourseListItem[]> {
+    if (!ids.length) return Promise.resolve([]);
 
     return this.executeAsync(
       () =>
         this.prisma.course.findMany({
           where: { id: { in: ids } },
-        }),
+          include: CourseRepository.include,
+        }) as any,
       { deadlineMs: 1200 }
     );
   }
 
-  public async findByTeacher(
-    teacherId: number,
-    year?: number
-  ): Promise<Course[]> {
+  public findByTeacher(teacherId: number, year?: number): Promise<CourseListItem[]> {
     return this.executeAsync(
       () =>
         this.prisma.course.findMany({
@@ -41,31 +50,27 @@ class CourseRepository extends BaseRepository implements ICourseRepository {
             teacherId,
             ...(year !== undefined ? { year } : {}),
           },
-          include: { catalogue: true },
+          select: courseListSelect,
           orderBy: { createdAt: "desc" },
         }),
       { deadlineMs: 800 }
     );
   }
 
-  public async findAllWithFilters(
+  public findAllWithFilters(
     filter: Record<string, unknown>,
     page: number,
     limit: number
-  ): Promise<{ results: Course[]; total: number }> {
+  ): Promise<{ results: CourseListItem[]; total: number }> {
     return this.executeAsync(
       async () => {
         const skip = (page - 1) * limit;
-
-        const where: any = {};
-        if (filter.teacherId) where.teacherId = filter.teacherId;
-        if (filter.catalogueId) where.catalogueId = filter.catalogueId;
-        if (filter.year !== undefined) where.year = filter.year;
+        const where = this.buildWhereFromFilter(filter);
 
         const [results, total] = await Promise.all([
           this.prisma.course.findMany({
             where,
-            include: { catalogue: true },
+            select: courseListSelect,
             orderBy: { createdAt: "desc" },
             skip,
             take: limit,
@@ -79,35 +84,26 @@ class CourseRepository extends BaseRepository implements ICourseRepository {
     );
   }
 
-  public async create(data: {
-    catalogueId: number;
-    teacherId: number;
-    year: number;
-    section: string;
-    imageUrl?: string | undefined;
-  }): Promise<Course> {
+  public create(data: Prisma.CourseCreateInput): Promise<CourseFull> {
     return this.executeAsync(
       () =>
         this.prisma.course.create({
           data,
-          include: { catalogue: true },
-        }),
+          include: courseFullInclude,
+        }) as any,
       { deadlineMs: 1000 }
     );
   }
 
-  public async update(
-    id: number,
-    updates: Partial<Course>
-  ): Promise<Course | null> {
+  public update(id: number, updates: Prisma.CourseUpdateInput): Promise<CourseFull | null> {
     return this.executeAsync(
       async () => {
         try {
-          return await this.prisma.course.update({
+          return (await this.prisma.course.update({
             where: { id },
             data: updates,
-            include: { catalogue: true },
-          });
+            include: courseFullInclude,
+          })) as any;
         } catch {
           return null;
         }
@@ -115,14 +111,15 @@ class CourseRepository extends BaseRepository implements ICourseRepository {
       { deadlineMs: 800 }
     );
   }
-
-  public async delete(id: number): Promise<Course | null> {
+  
+  public delete(id: number): Promise<CourseFull | null> {
     return this.executeAsync(
       async () => {
         try {
-          return await this.prisma.course.delete({
+          return (await this.prisma.course.delete({
             where: { id },
-          });
+          include: courseFullInclude,
+          })) as any;
         } catch {
           return null;
         }
@@ -131,7 +128,7 @@ class CourseRepository extends BaseRepository implements ICourseRepository {
     );
   }
 
-  public async countImages(imageUrl: string): Promise<number> {
+  public countImages(imageUrl: string): Promise<number> {
     return this.executeAsync(
       () => this.prisma.course.count({ where: { imageUrl } }),
       { deadlineMs: 600 }

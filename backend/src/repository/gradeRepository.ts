@@ -1,8 +1,7 @@
-import { IGradeRepository } from "../interface/repository";
 import type { Grade } from "../models/grade";
 import { BaseRepository } from "./baseRepository";
 
-class GradeRepository extends BaseRepository implements IGradeRepository {
+class GradeRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }
