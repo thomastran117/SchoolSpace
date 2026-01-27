@@ -6,6 +6,13 @@ type Course = {
   year: number;
   createdAt: Date;
   updatedAt: Date;
+  section: string;
+  enrollmentNumber: number;
+  maxEnrollmentNumber: number;
+  assignmentNumber: number;
+  annoucementNumber: number;
+  assistantNumber: number;
+  lectureNumber: number;
 };
 
 export type { Course };

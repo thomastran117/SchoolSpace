@@ -32,8 +32,8 @@ cat > "$ENV_FRONTEND" <<'EOF'
 # Server
 ##############################################
 
-VITE_FRONTEND_URL="http://localhost:4090"
-VITE_BACKEND_URL="http://localhost:9090"
+VITE_FRONTEND_URL="http://localhost:3040"
+VITE_BACKEND_URL="http://localhost:8040"
 
 ##############################################
 # OAuth
@@ -63,8 +63,8 @@ ZOD_CONFIGURATION="strip"
 # Server
 ##############################################
 
-FRONTEND_CLIENT="http://localhost:4090"
-PORT=9090
+FRONTEND_CLIENT="http://localhost:3040"
+PORT=8040
 
 ##############################################
 # Databases
@@ -90,7 +90,7 @@ GOOGLE_CAPTCHA_SECRET="google-captcha"
 # CORS Configuration
 ##############################################
 
-CORS_WHITELIST=["http://localhost:4090", "http://127.0.0.1:4090", "http://localhost:5173"]
+CORS_WHITELIST=["http://localhost:3040", "http://127.0.0.1:3040", "http://localhost:5173"]
 
 ##############################################
 # Email (SMTP credentials)
@@ -129,7 +129,7 @@ ENVIRONMENT="development"
 # Server
 ##############################################
 
-FRONTEND_CLIENT="http://localhost:4090"
+FRONTEND_CLIENT="http://localhost:3040"
 
 ##############################################
 # Databases

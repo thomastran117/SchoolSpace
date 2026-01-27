@@ -83,6 +83,7 @@ class CourseRepository extends BaseRepository implements ICourseRepository {
     catalogueId: number;
     teacherId: number;
     year: number;
+    section: string;
     imageUrl?: string | undefined;
   }): Promise<Course> {
     return this.executeAsync(

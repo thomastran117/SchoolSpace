@@ -55,8 +55,8 @@ class PaymentService {
       this.PAYPAL_API,
       this.PAYMENT_CURRENCY,
       amount,
-      "http://localhost:9090/api/payment/success",
-      "http://localhost:9090/api/payment/cancel",
+      "http://localhost:8040/api/payment/success",
+      "http://localhost:8040/api/payment/cancel",
     );
 
     const approveLink =

@@ -79,7 +79,7 @@ Stop the servers with Ctrl^C
 
 ## Accessing the application
 
-The frontend is avaliable at http://localhost:4090 and the backend is at http://localhost:9090. Remember that the server is prefixed with API.
+The frontend is avaliable at http://localhost:3040 and the backend is at http://localhost:8040. Remember that the server is prefixed with API.
 
 I recommend accesing the server through the React frontend as it handles request bodies, JWT access/refresh token management and UI display on your behalf.
 
