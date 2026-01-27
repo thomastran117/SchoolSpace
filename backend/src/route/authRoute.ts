@@ -1,7 +1,13 @@
 /**
- * @file auth-routes.ts
- * @description Authentication routes (login, signup, OAuth, etc.)
+ * @file authRoutes.ts
+ * @description
+ * Routes for authenication and tokens. Does not handle authorization.
+ *
+ * @module route
+ * @version 1.0.0
+ * @author Thomas
  */
+
 import type { FastifyInstance } from "fastify";
 
 import {

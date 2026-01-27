@@ -1,3 +1,13 @@
+/**
+ * @file methodNotAllowedError.ts
+ * @description
+ * Class for the Method Not Allowed error
+ *
+ * @module error
+ * @version 1.0.0
+ * @auth Thomas
+ */
+
 import { HttpError } from "./httpError";
 
 class MethodNotAllowedError extends HttpError {

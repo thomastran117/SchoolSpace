@@ -1,3 +1,13 @@
+/**
+ * @file badRequestError.ts
+ * @description
+ * Class for the Bad Request error
+ *
+ * @module error
+ * @version 1.0.0
+ * @auth Thomas
+ */
+
 import { HttpError } from "./httpError";
 
 class BadRequestError extends HttpError {

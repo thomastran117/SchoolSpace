@@ -7,8 +7,8 @@
  * @version 2.0.0
  * @auth Thomas
  */
-import type { FastifyReply, FastifyRequest } from "fastify";
 
+import type { FastifyReply, FastifyRequest } from "fastify";
 import type {
   AppleDto,
   AuthResponseDto,

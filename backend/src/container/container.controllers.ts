@@ -1,3 +1,13 @@
+/**
+ * @file authController.ts
+ * @description
+ * Handles authentication API requests and responses
+ *
+ * @module controller
+ * @version 2.0.0
+ * @auth Thomas
+ */
+
 import * as Controllers from "../controller";
 import logger from "../utility/logger";
 import type { Registration } from "./container.types";
