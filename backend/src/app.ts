@@ -2,6 +2,7 @@ import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import Fastify from "fastify";
+import methodNotAllowed from "fastify-method-not-allowed";
 
 import container from "./container";
 import errorHandler from "./plugin/errorPlugin";
@@ -15,7 +16,7 @@ export async function buildApp() {
   await container.initialize();
 
   app.register(cors, {
-    origin: ["http://localhost:4090"],
+    origin: ["http://localhost:3040"],
     credentials: true,
   });
 
@@ -55,6 +56,8 @@ export async function buildApp() {
       fileSize: 5 * 1024 * 1024,
     },
   });
+
+  app.register(methodNotAllowed);
 
   app.get("/", async (_, reply) => reply.code(200).send({ message: "ok" }));
 

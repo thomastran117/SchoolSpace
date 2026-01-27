@@ -7,7 +7,6 @@
  */
 import type { FastifyInstance } from "fastify";
 
-import { NotFoundError } from "../error";
 import { authRoutes } from "./authRoute";
 import { catalogueRoutes } from "./catalogueRoute";
 import { courseRoutes } from "./courseRoute";
@@ -20,9 +19,4 @@ export async function registerRoutes(app: FastifyInstance) {
   app.register(fileRoutes, { prefix: "/files" });
   app.register(catalogueRoutes, { prefix: "/catalogues" });
   app.register(courseRoutes, { prefix: "/courses" });
-  app.setNotFoundHandler((request) => {
-    throw new NotFoundError({
-      message: `Route '${request.url}' does not exist`,
-    });
-  });
 }

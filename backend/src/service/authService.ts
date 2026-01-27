@@ -18,16 +18,16 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from "../error";
-import type { IUserRepository } from "../interface/repository";
 import type { AuthResponse } from "../models/auth";
 import type { EmailQueue } from "../queue/emailQueue";
+import type { UserRepository } from "../repository";
 import logger from "../utility/logger";
 import type { OAuthService } from "./oauthService";
 import type { TokenService } from "./tokenService";
 import type { WebService } from "./webService";
 
 class AuthService {
-  private readonly userRepository: IUserRepository;
+  private readonly userRepository: UserRepository;
   private readonly emailQueue: EmailQueue;
   private readonly tokenService: TokenService;
   private readonly oauthService: OAuthService;
@@ -37,7 +37,7 @@ class AuthService {
     "$2b$10$CwTycUXWue0Thq9StjUM0uJ8T8YtAUD3bFIxVYbcEdb87qfEzS1mS";
 
   constructor(dependencies: {
-    userRepository: IUserRepository;
+    userRepository: UserRepository;
     emailQueue: EmailQueue;
     tokenService: TokenService;
     oauthService: OAuthService;

@@ -1,8 +1,7 @@
-import type { IUserRepository } from "../interface/repository";
 import type { Provider, Role, User } from "../models/user";
 import { BaseRepository } from "./baseRepository";
 
-class UserRepository extends BaseRepository implements IUserRepository {
+class UserRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }

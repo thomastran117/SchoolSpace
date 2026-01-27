@@ -1,11 +1,7 @@
-import type { ICatalogueRepository } from "../interface/repository";
 import type { Catalogue, Term } from "../models/catalogue";
 import { BaseRepository } from "./baseRepository";
 
-class CatalogueRepository
-  extends BaseRepository
-  implements ICatalogueRepository
-{
+class CatalogueRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }

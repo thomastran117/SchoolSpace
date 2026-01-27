@@ -1,11 +1,7 @@
-import type { IAssignmentRepository } from "../interface/repository";
 import type { Assignment } from "../models/assignment";
 import { BaseRepository } from "./baseRepository";
 
-class AssignmentRepository
-  extends BaseRepository
-  implements IAssignmentRepository
-{
+class AssignmentRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
   }

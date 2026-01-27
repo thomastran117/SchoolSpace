@@ -4,8 +4,8 @@ import {
   ForbiddenError,
   NotFoundError,
 } from "../error";
-import type { IGradeRepository } from "../interface/repository";
 import type { Grade } from "../models/grade";
+import type { GradeRepository } from "../repository";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
@@ -13,7 +13,7 @@ import type { CourseService } from "./courseService";
 import type { UserService } from "./userService";
 
 class GradeService extends BaseService {
-  private readonly gradeRepository: IGradeRepository;
+  private readonly gradeRepository: GradeRepository;
   private readonly cacheService: CacheService;
   private readonly courseService: CourseService;
   private readonly userService: UserService;
@@ -22,7 +22,7 @@ class GradeService extends BaseService {
   private readonly LIST_TTL = 60;
 
   constructor(dependencies: {
-    gradeRepository: IGradeRepository;
+    gradeRepository: GradeRepository;
     cacheService: CacheService;
     courseService: CourseService;
     userService: UserService;

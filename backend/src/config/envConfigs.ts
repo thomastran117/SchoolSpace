@@ -96,11 +96,11 @@ class EnvConfig {
       "dev-secret"
     );
 
-    this._corsWhitelist = this.opt("CORS_WHITELIST", "http://localhost:4090")!;
+    this._corsWhitelist = this.opt("CORS_WHITELIST", "http://localhost:3040")!;
 
     this._frontendClient = this.opt(
       "FRONTEND_CLIENT",
-      "http://localhost:4090"
+      "http://localhost:3040"
     )!;
 
     this._zodConfiguration = this.opt("ZOD_CONFIGURATION", "passthrough");

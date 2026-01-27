@@ -1,7 +1,7 @@
 import { buildApp } from "./app";
 import logger from "./utility/logger";
 
-const PORT = process.env.PORT || 9090;
+const PORT = process.env.PORT || 8040;
 
 async function start() {
   try {

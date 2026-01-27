@@ -2,26 +2,6 @@ import { InternalServerError, ServiceUnavaliableError } from "../error";
 import logger from "../utility/logger";
 
 abstract class BaseService {
-  protected toSafe(doc: any) {
-    try {
-      return doc;
-    } catch {
-      logger.error("[BaseService] Something went wrong converting _id to id");
-      throw new InternalServerError({ message: "Internal server error" });
-    }
-  }
-
-  protected toSafeArray(docs: any[]) {
-    try {
-      return docs.map((d) => this.toSafe(d));
-    } catch {
-      logger.error(
-        "[BaseService] Something went wrong converting each object's _id to id"
-      );
-      throw new InternalServerError({ message: "Internal server error" });
-    }
-  }
-
   protected ensureDependencies(...deps: string[]) {
     const caller = this.getCallerName();
 

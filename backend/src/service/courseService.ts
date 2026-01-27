@@ -2,8 +2,9 @@ import type { MultipartFile } from "@fastify/multipart";
 import crypto from "crypto";
 
 import { HttpError, InternalServerError, NotFoundError } from "../error";
-import type { ICourseRepository } from "../interface/repository";
-import type { Course } from "../models/course";
+import type { Prisma } from "../generated/prisma/client";
+import type { CourseFull, CourseListItem } from "../models/course";
+import type { CourseRepository } from "../repository";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
@@ -19,7 +20,7 @@ const HOT_WINDOW_SEC = 60;
 
 class CourseService extends BaseService {
   private readonly cacheService: CacheService;
-  private readonly courseRepository: ICourseRepository;
+  private readonly courseRepository: CourseRepository;
   private readonly catalogueService: CatalogueService;
   private readonly fileService: FileService;
   private readonly userService: UserService;
@@ -34,7 +35,7 @@ class CourseService extends BaseService {
   private courseVersion?: number;
 
   constructor(dependencies: {
-    courseRepository: ICourseRepository;
+    courseRepository: CourseRepository;
     cacheService: CacheService;
     userService: UserService;
     catalogueService: CatalogueService;
@@ -104,7 +105,12 @@ class CourseService extends BaseService {
     year?: number,
     page = 1,
     limit = 15
-  ) {
+  ): Promise<{
+    data: CourseListItem[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
     try {
       const filter: Record<string, unknown> = {};
       if (teacherId) filter.teacherId = teacherId;
@@ -121,13 +127,21 @@ class CourseService extends BaseService {
         limit
       );
 
-      const cached = await this.cacheService.get(cacheKey);
+      const cached = await this.cacheService.get<
+        | {
+            data: CourseListItem[];
+            total: number;
+            totalPages: number;
+            currentPage: number;
+          }
+        | undefined
+      >(cacheKey);
       if (cached) return cached;
 
       const hasLock = await this.acquireSoftLock(cacheKey);
       if (!hasLock) {
         await new Promise((r) => setTimeout(r, 50));
-        const retry = await this.cacheService.get(cacheKey);
+        const retry = await this.cacheService.get<typeof cached>(cacheKey);
         if (retry) return retry;
       }
 
@@ -136,7 +150,7 @@ class CourseService extends BaseService {
           await this.courseRepository.findAllWithFilters(filter, page, limit);
 
         const response = {
-          data: this.toSafeArray(results),
+          data: results,
           total,
           totalPages: Math.ceil(total / limit),
           currentPage: page,
@@ -160,15 +174,17 @@ class CourseService extends BaseService {
     }
   }
 
-  public async getCourseById(id: number): Promise<Course> {
+  public async getCourseById(id: number): Promise<CourseFull> {
     try {
       const cacheKey = this.key("id", id);
-      const cached = await this.cacheService.get<Course | typeof NOT_FOUND>(
+
+      const cached = await this.cacheService.get<CourseFull | typeof NOT_FOUND>(
         cacheKey
       );
 
       if (cached === NOT_FOUND)
         throw new NotFoundError({ message: "Course not found" });
+
       if (cached) {
         await this.trackHotCourse(id);
         return cached;
@@ -177,7 +193,7 @@ class CourseService extends BaseService {
       const hasLock = await this.acquireSoftLock(cacheKey);
       if (!hasLock) {
         await new Promise((r) => setTimeout(r, 50));
-        const retry = await this.cacheService.get<Course>(cacheKey);
+        const retry = await this.cacheService.get<CourseFull>(cacheKey);
         if (retry) return retry;
       }
 
@@ -188,15 +204,14 @@ class CourseService extends BaseService {
           throw new NotFoundError({ message: "Course not found" });
         }
 
-        const safe = this.toSafe(course);
         const isHot = await this.trackHotCourse(id);
         await this.cacheService.set(
           cacheKey,
-          safe,
+          course,
           isHot ? this.HOT_DETAIL_TTL : this.DETAIL_TTL
         );
 
-        return safe;
+        return course;
       } finally {
         await this.releaseSoftLock(cacheKey);
       }
@@ -213,8 +228,9 @@ class CourseService extends BaseService {
     catalogueId: number,
     teacherId: number,
     year: number,
+    section: string,
     image: MultipartFile
-  ): Promise<Course> {
+  ): Promise<CourseFull> {
     try {
       await this.userService.getUser(teacherId);
       await this.catalogueService.getCourseTemplateById(catalogueId);
@@ -231,10 +247,12 @@ class CourseService extends BaseService {
         teacherId,
         year,
         imageUrl: publicUrl,
-      });
+        section,
+      } as unknown as Prisma.CourseCreateInput);
 
       await this.bumpVersion();
-      return this.toSafe(course);
+      await this.cacheService.delete(this.key("id", course.id));
+      return course;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
       logger.error(
@@ -246,9 +264,9 @@ class CourseService extends BaseService {
 
   public async updateCourse(
     id: number,
-    updates: Partial<Course>,
+    updates: Prisma.CourseUpdateInput,
     image?: MultipartFile
-  ): Promise<Course> {
+  ): Promise<CourseFull> {
     try {
       const existing = await this.courseRepository.findById(id);
       if (!existing) throw new NotFoundError({ message: "Course not found" });
@@ -260,7 +278,7 @@ class CourseService extends BaseService {
           image.filename,
           "course"
         );
-        updates.imageUrl = publicUrl;
+        (updates as any).imageUrl = publicUrl;
       }
 
       const updated = await this.courseRepository.update(id, updates);
@@ -269,7 +287,7 @@ class CourseService extends BaseService {
       await this.bumpVersion();
       await this.cacheService.delete(this.key("id", id));
 
-      return this.toSafe(updated);
+      return updated;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
       logger.error(
