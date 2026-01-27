@@ -106,6 +106,7 @@ class CourseController extends BaseController {
         req.body.catalogue_id,
         req.user.id,
         req.body.year,
+        req.body.section,
         normalizedFile as any
       );
 
