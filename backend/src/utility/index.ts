@@ -12,4 +12,3 @@ export { CircuitBreaker } from "./circuitBreaker";
 export { HttpError, httpError } from "./httpUtility";
 export { sanitizeProfileImage } from "./imageUtility";
 export type { SanitizedImageResult } from "./imageUtility";
-

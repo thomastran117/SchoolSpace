@@ -7,7 +7,6 @@
  * @version 1.0.0
  * @auth Thomas
  */
-
 import logger from "../utility/logger";
 import { registerControllerModules } from "./container.controllers";
 import { CoreInitializer } from "./container.core";

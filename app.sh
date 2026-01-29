@@ -52,9 +52,6 @@ show_help() {
   echo ""
 }
 
-# ---------------------------------------------
-# Command Router
-# ---------------------------------------------
 case "${COMMAND,,}" in
   docker)
     invoke_script "docker.sh"

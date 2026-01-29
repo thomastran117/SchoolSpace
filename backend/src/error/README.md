@@ -48,7 +48,6 @@ Notice how if the error is known already, i.e passed from service, then it respo
 
 **Important note**: The [error middleware](../plugin/errorPlugin.ts) will convert the application error to a JSON response code for the client. The controller, service or repository does not need to convert it assuming that the error thrown is an instance of `HttpError`.
 
-
 Basic usage of custom errors are like any other ordinary error. Note that its uses JSON objects so positional arguements are avoided.
 
 ```bash

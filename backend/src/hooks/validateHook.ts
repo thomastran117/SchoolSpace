@@ -1,5 +1,15 @@
+/**
+ * @file validateHook.ts
+ * @description
+ * Validates HTTP Body request with Zod
+ *
+ * @module hook
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import type { FastifyRequest } from "fastify";
-import { ZodObject, ZodSchema } from "zod";
+import type { ZodSchema } from "zod";
+import { ZodObject } from "zod";
 
 import env from "../config/envConfigs";
 import { BadRequestError } from "../error";

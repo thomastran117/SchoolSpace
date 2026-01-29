@@ -7,7 +7,6 @@
  * @version 1.0.0
  * @author Thomas
  */
-
 import type { FastifyInstance } from "fastify";
 
 import {

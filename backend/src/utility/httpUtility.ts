@@ -29,4 +29,4 @@ function httpError(
   throw new HttpError(statusCode, message, details);
 }
 
-export { HttpError, httpError }
+export { HttpError, httpError };

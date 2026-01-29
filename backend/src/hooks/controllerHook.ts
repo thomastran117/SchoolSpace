@@ -1,3 +1,12 @@
+/**
+ * @file controllerHook.ts
+ * @description
+ * Provides the controller + service to the calling route
+ *
+ * @module hook
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import type { ControllerInstance, ControllerKey } from "../types/controller";

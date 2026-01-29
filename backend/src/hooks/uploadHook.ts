@@ -1,3 +1,12 @@
+/**
+ * @file uploadHook.ts
+ * @description
+ * Inspects the incoming file and ensures its an image
+ *
+ * @module hook
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import type { MultipartFile } from "@fastify/multipart";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import path from "path";
