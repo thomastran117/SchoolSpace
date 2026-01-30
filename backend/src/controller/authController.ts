@@ -20,7 +20,7 @@ import type {
   SignupDto,
   VerifyDto,
 } from "../dto/authSchema";
-import type { TokenQuery } from "../dto/query";
+import type { TokenQuery } from "../dto/coreSchema";
 import {
   BadRequestError,
   HttpError,
