@@ -1,3 +1,12 @@
+/**
+ * @file grade.ts
+ * @description
+ * Assignment related models
+ *
+ * @module models
+ * @version 1.0.0
+ * @auth Thomas
+ */
 type Grade = {
   name: string;
   id: number;

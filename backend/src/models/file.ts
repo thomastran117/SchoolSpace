@@ -1,3 +1,12 @@
+/**
+ * @file file.ts
+ * @description
+ * File related models
+ *
+ * @module models
+ * @version 1.0.0
+ * @auth Thomas
+ */
 interface UploadResult {
   fileName: string;
   filePath: string;

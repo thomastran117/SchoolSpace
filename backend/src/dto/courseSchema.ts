@@ -1,3 +1,12 @@
+/**
+ * @file courseSchema.ts
+ * @description
+ * Defines the DTOs for the Course controller
+ *
+ * @module dto
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import { z } from "zod";
 
 const CreateCourseSchema = z.object({

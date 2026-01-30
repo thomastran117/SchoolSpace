@@ -1,3 +1,12 @@
+/**
+ * @file course.ts
+ * @description
+ * Course related models
+ *
+ * @module models
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import type { Prisma } from "../generated/prisma/client";
 
 export const courseListSelect = {
