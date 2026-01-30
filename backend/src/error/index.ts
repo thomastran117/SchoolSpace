@@ -1,3 +1,13 @@
+/**
+ * @file index.ts
+ * @description
+ * Namespace for errors
+ *
+ * @module error
+ * @version 1.0.0
+ * @author Thomas
+ */
+
 export { BadGatewayError } from "./badGatewayError";
 export { BadRequestError } from "./badRequestError";
 export { ConflictError } from "./conflictError";

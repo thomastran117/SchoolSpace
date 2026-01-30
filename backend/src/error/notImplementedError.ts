@@ -1,3 +1,12 @@
+/**
+ * @file notImplementedError.ts
+ * @description
+ * Class for the Not Implemented error
+ *
+ * @module error
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import { HttpError } from "./httpError";
 
 class NotImplementedError extends HttpError {

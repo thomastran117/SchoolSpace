@@ -1,3 +1,13 @@
+/**
+ * @file index.ts
+ * @description
+ * Namespace for services
+ *
+ * @module service
+ * @version 1.0.0
+ * @author Thomas
+ */
+
 export { AssignmentService } from "../service/assignmentService";
 export { AuthService } from "../service/authService";
 export { BasicTokenService } from "../service/basicTokenService";

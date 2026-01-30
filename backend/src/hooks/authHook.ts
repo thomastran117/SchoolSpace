@@ -1,13 +1,19 @@
+/**
+ * @file authHook.ts
+ * @description
+ * Auth middleware
+ *
+ * @module hook
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import container from "../container";
 import { UnauthorizedError } from "../error";
 import type { BasicTokenService } from "../service/basicTokenService";
 
-export async function authDependency(
-  request: FastifyRequest,
-  reply: FastifyReply
-) {
+async function authDependency(request: FastifyRequest, reply: FastifyReply) {
   const authHeader = request.headers.authorization;
 
   if (!authHeader?.startsWith("Bearer ")) {
@@ -30,3 +36,5 @@ export async function authDependency(
   request.user = user;
   return user;
 }
+
+export { authDependency };

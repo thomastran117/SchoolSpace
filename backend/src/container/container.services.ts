@@ -1,3 +1,12 @@
+/**
+ * @file container.services.ts
+ * @description
+ * Factory methods to create service objects
+ *
+ * @module container
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import * as Services from "../service";
 import logger from "../utility/logger";
 import type { Registration } from "./container.types";

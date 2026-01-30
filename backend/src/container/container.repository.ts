@@ -1,3 +1,12 @@
+/**
+ * @file container.repositories.ts
+ * @description
+ * Factory methods to create repository objects
+ *
+ * @module container
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import * as Repositories from "../repository";
 import logger from "../utility/logger";
 import type { Registration } from "./container.types";

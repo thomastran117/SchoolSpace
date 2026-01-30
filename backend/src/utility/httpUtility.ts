@@ -9,7 +9,7 @@
  * @auth Thomas
  */
 
-export class HttpError extends Error {
+class HttpError extends Error {
   statusCode: number;
   details?: unknown;
 
@@ -21,10 +21,12 @@ export class HttpError extends Error {
   }
 }
 
-export function httpError(
+function httpError(
   statusCode: number,
   message: string,
   details?: unknown
 ): never {
   throw new HttpError(statusCode, message, details);
 }
+
+export { HttpError, httpError };

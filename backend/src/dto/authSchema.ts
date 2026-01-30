@@ -1,3 +1,12 @@
+/**
+ * @file authSchema.ts
+ * @description
+ * Defines the DTOs for the Auth controller
+ *
+ * @module dto
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import { z } from "zod";
 
 const EmailSchema = z.string().trim().toLowerCase().email().max(100);

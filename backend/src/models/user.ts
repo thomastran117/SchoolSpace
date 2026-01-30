@@ -1,3 +1,12 @@
+/**
+ * @file user.ts
+ * @description
+ * User related models
+ *
+ * @module models
+ * @version 1.0.0
+ * @auth Thomas
+ */
 type Provider = "local" | "google" | "microsoft";
 type Role = "notdefined" | "student" | "teacher" | "assistant" | "admin";
 

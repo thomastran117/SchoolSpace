@@ -1,3 +1,12 @@
+/**
+ * @file container.controllers.ts
+ * @description
+ * Factory methods to create controller objects
+ *
+ * @module container
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import * as Controllers from "../controller";
 import logger from "../utility/logger";
 import type { Registration } from "./container.types";

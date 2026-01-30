@@ -1,3 +1,12 @@
+/**
+ * @file badGatewayError.ts
+ * @description
+ * Class for the Bad Gateway error
+ *
+ * @module error
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import { HttpError } from "./httpError";
 
 class BadGatewayError extends HttpError {

@@ -11,6 +11,7 @@ For a full documentation, refers to the `docs/` folder
 ## Authors
 
 - [@thomastran117](https://www.github.com/thomastran117)
+- [@btran0014](https://www.github.com/@btran0014)
 - [@sanjeeveasparan](https://www.github.com/sanjeeveasparan)
 
 ## Tech Stack
@@ -21,7 +22,7 @@ For a full documentation, refers to the `docs/` folder
 
 **Database:** MySQL, Redis
 
-**Others:** RabbitMQ
+**Others:** RabbitMQ, Azure
 
 ## Demo
 

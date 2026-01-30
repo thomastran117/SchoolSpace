@@ -1,3 +1,12 @@
+/**
+ * @file userSchema.ts
+ * @description
+ * Defines the DTOs for the User controller
+ *
+ * @module dto
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import { z } from "zod";
 
 const RoleSchema = z.object({
