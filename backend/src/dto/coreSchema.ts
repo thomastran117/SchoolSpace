@@ -7,7 +7,6 @@
  * @version 1.0.0
  * @auth Thomas
  */
-
 import { z } from "zod";
 
 const TrimmedString = z.string().transform((s) => s.trim());
@@ -24,12 +23,14 @@ const CoerceBoolean = z.preprocess((v) => {
 }, z.boolean());
 
 const CoerceInt = (opts?: { min?: number; max?: number; default?: number }) =>
-  z.preprocess((v) => {
-    if (v === undefined || v === null || v === "") return opts?.default ?? v;
-    if (typeof v === "number") return v;
-    if (typeof v === "string" && /^\d+$/.test(v.trim())) return Number(v.trim());
-    return v;
-  }, z.number().int())
+  z
+    .preprocess((v) => {
+      if (v === undefined || v === null || v === "") return opts?.default ?? v;
+      if (typeof v === "number") return v;
+      if (typeof v === "string" && /^\d+$/.test(v.trim()))
+        return Number(v.trim());
+      return v;
+    }, z.number().int())
     .refine((n) => (opts?.min !== undefined ? n >= opts.min : true), {
       message: `must be >= ${opts?.min}`,
     })
@@ -45,17 +46,13 @@ const UrlSchema = TrimmedString.pipe(
   z.string().url("invalid url").max(2048, "url too long")
 );
 
-const UuidSchema = TrimmedString.pipe(
-  z.string().uuid("invalid uuid")
-);
+const UuidSchema = TrimmedString.pipe(z.string().uuid("invalid uuid"));
 
 const NameSchema = TrimmedString.pipe(
   z.string().min(1, "name is required").max(80, "name too long")
 );
 
-const NonEmptyStringSchema = TrimmedString.pipe(
-  z.string().min(1, "required")
-);
+const NonEmptyStringSchema = TrimmedString.pipe(z.string().min(1, "required"));
 
 const PositiveIntStringToNumber = z
   .string()
@@ -85,7 +82,9 @@ const OrderBySchema = z.object({
 });
 
 const TokenQuerySchema = z.object({
-  token: TrimmedString.pipe(z.string().min(10, "token is required").max(2000)).optional(),
+  token: TrimmedString.pipe(
+    z.string().min(10, "token is required").max(2000)
+  ).optional(),
 });
 
 const BearerAuthHeaderSchema = z
@@ -98,15 +97,12 @@ const OtpCodeSchema = z
 
 const CaptchaSchema = z.string().min(10).max(5000);
 
-const FileTypeSchema = z.enum(["avatar", "banner", "document", "image", "other"]).or(
-  TrimmedString.pipe(z.string().min(1))
-);
+const FileTypeSchema = z
+  .enum(["avatar", "banner", "document", "image", "other"])
+  .or(TrimmedString.pipe(z.string().min(1)));
 
 const FileNameSchema = TrimmedString.pipe(
-  z.string().regex(
-    /^[a-zA-Z0-9._-]{1,200}$/,
-    "invalid filename"
-  )
+  z.string().regex(/^[a-zA-Z0-9._-]{1,200}$/, "invalid filename")
 );
 
 const FileParamsSchema = z.object({
@@ -114,7 +110,12 @@ const FileParamsSchema = z.object({
   fileName: FileNameSchema.optional(),
 });
 
-const ImageMimeSchema = z.enum(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+const ImageMimeSchema = z.enum([
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+]);
 
 const SearchQuerySchema = z.object({
   q: TrimmedString.pipe(z.string().max(200)).optional(),
@@ -122,7 +123,11 @@ const SearchQuerySchema = z.object({
 const CsvStringArraySchema = z
   .preprocess((v) => {
     if (Array.isArray(v)) return v;
-    if (typeof v === "string") return v.split(",").map((s) => s.trim()).filter(Boolean);
+    if (typeof v === "string")
+      return v
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
     return v;
   }, z.array(z.string()))
   .optional();

@@ -11,8 +11,8 @@
  */
 import type { FastifyInstance } from "fastify";
 
-import { CreateCourseSchema, UpdateCourseSchema } from "../dto/courseSchema";
 import { IdParamSchema } from "../dto/coreSchema";
+import { CreateCourseSchema, UpdateCourseSchema } from "../dto/courseSchema";
 import { authDependency } from "../hooks/authHook";
 import { useController } from "../hooks/controllerHook";
 import { safeUploadImage } from "../hooks/uploadHook";

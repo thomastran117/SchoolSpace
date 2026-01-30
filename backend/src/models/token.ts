@@ -6,8 +6,7 @@
  * @module models
  * @version 1.0.0
  * @auth Thomas
- */interface UserPayload {
-
+ */ interface UserPayload {
   id: number;
   email: string;
   role: string;
