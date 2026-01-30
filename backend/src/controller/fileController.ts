@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import mime from "mime-types";
 
-import type { FileParams } from "../dto/params";
+import type { FileParams } from "../dto/coreSchema";
 import { BadRequestError, HttpError } from "../error/index";
 import { InternalServerError } from "../error/internalServerError";
 import type { FileService } from "../service/fileService";
