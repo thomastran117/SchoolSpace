@@ -1,3 +1,12 @@
+/**
+ * @file contactController.ts
+ * @description
+ * Handles HTTP request and response for Contact model
+ *
+ * @module controller
+ * @version 2.0.0
+ * @auth Thomas
+ */
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { CreateContactDto, UpdateContactDto } from "../dto/contactSchema";
 import type { PaginationQuery } from "../dto/coreSchema";

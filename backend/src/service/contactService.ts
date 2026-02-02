@@ -7,31 +7,46 @@
  * @version 1.0.0
  * @auth Thomas
  */
-import { HttpError, InternalServerError, NotFoundError } from "../error";
+import {
+  HttpError,
+  InternalServerError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../error";
 import type { Status } from "../models/contact";
 import type { ContactRepository } from "../repository/contactRepository";
 import logger from "../utility/logger";
+import type { WebService } from "./webService";
 
 class ContactService {
   private readonly contactRepository: ContactRepository;
+  private readonly webService: WebService;
 
-  constructor(dependencies: { contactRepository: ContactRepository }) {
+  constructor(dependencies: {
+    contactRepository: ContactRepository;
+    webService: WebService;
+  }) {
     this.contactRepository = dependencies.contactRepository;
+    this.webService = dependencies.webService;
   }
 
   public async createContactRequest(
     email: string,
     topic: string,
-    message: string
+    message: string,
+    captcha: string
   ) {
     try {
+      const result = await this.webService.verifyGoogleCaptcha(captcha);
+      if (!result)
+        throw new UnauthorizedError({ message: "Invalid recaptcha" });
+
       const contact = await this.contactRepository.create({
         email,
         topic,
         message,
       });
       return contact;
-      return;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
       logger.error(
