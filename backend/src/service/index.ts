@@ -22,3 +22,4 @@ export { PaymentService } from "../service/paymentService";
 export { TokenService } from "../service/tokenService";
 export { UserService } from "../service/userService";
 export { WebService } from "../service/webService";
+export { ContactService } from "./contactService";

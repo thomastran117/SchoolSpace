@@ -4,10 +4,7 @@
  */
 import type { FastifyInstance } from "fastify";
 
-import {
-  CreateContactSchema,
-  UpdateContactSchema,
-} from "../dto/contactSchema";
+import { CreateContactSchema, UpdateContactSchema } from "../dto/contactSchema";
 import { PaginationQuerySchema } from "../dto/coreSchema";
 import { IdParamSchema } from "../dto/coreSchema";
 import { authDependency } from "../hooks/authHook";
