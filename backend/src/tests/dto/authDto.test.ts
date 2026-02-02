@@ -2,9 +2,10 @@ import {
   LoginSchema,
   MicrosoftSchema,
   SignupSchema,
+  VerifySchema,
 } from "../../dto/authSchema";
 import { validate } from "../../hooks/validateHook";
-import { HttpError } from "../../utility/httpUtility";
+import { HttpError } from "../../error";
 
 describe("Auth DTO Validation", () => {
   describe("Zod Schemas", () => {
@@ -54,6 +55,36 @@ describe("Auth DTO Validation", () => {
     it("accepts valid Microsoft token payload", () => {
       const result = MicrosoftSchema.safeParse({
         id_token: "x".repeat(50),
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it("accepts valid 6-digit verify code", () => {
+      const result = VerifySchema.safeParse({
+        email: "test@test.com",
+        captcha: "captcha",
+        code: "123456",
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects verify code that is not 6 digits", () => {
+      const result = VerifySchema.safeParse({
+        email: "test@test.com",
+        captcha: "captcha",
+        code: "12345",
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects verify code with invalid format", () => {
+      const result = VerifySchema.safeParse({
+        email: "test@test.com",
+        captcha: "captcha",
+        code: "abcdef",
       });
 
       expect(result.success).toBe(true);
@@ -131,6 +162,36 @@ describe("Auth DTO Validation", () => {
       await handler(req);
 
       expect(req.query.id_token).toHaveLength(100);
+    });
+
+    it("passes and assigns validated verify code", async () => {
+      const req: any = {
+        body: {
+          email: "test@test.com",
+          captcha: "captcha",
+          code: "654321",
+        },
+      };
+
+      const handler = validate(VerifySchema, "body");
+
+      await handler(req);
+
+      expect(req.body.code).toBe("654321");
+    });
+
+    it("throws validation error for invalid verify code", async () => {
+      const req: any = {
+        body: {
+          email: "test@test.com",
+          captcha: "captcha",
+          code: "12345",
+        },
+      };
+
+      const handler = validate(VerifySchema, "body");
+
+      await expect(handler(req)).rejects.toBeInstanceOf(HttpError);
     });
   });
 });
