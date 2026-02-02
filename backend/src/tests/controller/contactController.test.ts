@@ -1,7 +1,6 @@
 import { ContactController } from "../../controller/contactController";
 
-// Errors + logger are imported by the controller, so we can mock logger and use real errors.
-import { ForbiddenError, HttpError, InternalServerError, NotFoundError } from "../../error";
+import { ForbiddenError, HttpError, NotFoundError } from "../../error";
 import logger from "../../utility/logger";
 
 jest.mock("../../utility/logger", () => ({
@@ -36,12 +35,6 @@ function makeReq(overrides: Partial<any> = {}) {
   } as any;
 }
 
-/**
- * Robust helper:
- * - avoids relying on constructor identity (which can break under ESM/ts-jest transpilation)
- * - asserts it is an HttpError
- * - then asserts status code/message traits
- */
 async function expectHttpError(
   promise: Promise<any>,
   opts: { statusCode?: number; messageIncludes?: string } = {}
@@ -55,13 +48,11 @@ async function expectHttpError(
     expect(err).toBeInstanceOf(HttpError);
 
     if (opts.statusCode !== undefined) {
-      // support both common shapes: statusCode / status
       const status = err.statusCode ?? err.status;
       expect(status).toBe(opts.statusCode);
     }
 
     if (opts.messageIncludes) {
-      // support both: err.message or err.payload.message etc
       const msg =
         err.message ??
         err?.payload?.message ??

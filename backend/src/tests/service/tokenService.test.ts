@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
 import { TokenService } from "../../service/tokenService";
-import { HttpError } from "../../error";
+import { HttpError, InternalServerError } from "../../error";
 import logger from "../../utility/logger";
 
 jest.mock("jsonwebtoken");
@@ -195,9 +195,7 @@ describe("TokenService (new)", () => {
     });
 
     it("rethrows non-401 HttpError", async () => {
-      // force validateRefreshToken to throw a non-401 HttpError by making cache.get return an HttpError instance.
-      // (simulate unexpected HttpError propagation)
-      const err = new HttpError({ statusCode: 500, message: "boom" } as any);
+      const err = new InternalServerError({ statusCode: 500, message: "boom" } as any);
       mockCache.get.mockRejectedValue(err);
 
       await expect(tokenService.isRefreshTokenValid("uuid-token")).rejects.toBeInstanceOf(HttpError);
