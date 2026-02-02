@@ -8,58 +8,99 @@
  * - Logs connection status and errors.
  *
  * @module resource
- * @version 3.0.0
+ * @version 3.0.1
  * @auth Thomas
  */
 import { Redis } from "ioredis";
-import { URL } from "url";
-
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 
-const baseUrl = new URL(env.redisUrl);
-const redisCacheUrl = baseUrl.toString();
+let healthy = false;
 
-baseUrl.searchParams.set("db", "1");
+const MAX_INIT_ATTEMPTS = 6;
+const MAX_RECONNECT_ATTEMPTS = 6;
 
-let redisHealthy = false;
+const BASE_DELAY_MS = 150;
+const MAX_DELAY_MS = 5_000;
+const JITTER_MS = 150;
 
-const redis = new Redis(redisCacheUrl, {
+const redis = new Redis(env.redisUrl, {
   lazyConnect: true,
-  maxRetriesPerRequest: 2,
-});
+  db: 1,
 
-redis.on("connect", () => {
-  redisHealthy = true;
+  maxRetriesPerRequest: 1,
+
+  retryStrategy: (attempt) => {
+    if (attempt > MAX_RECONNECT_ATTEMPTS) {
+      healthy = false;
+      logger.warn(`[Redis] reconnect limit reached (${MAX_RECONNECT_ATTEMPTS}); stop retrying`);
+      return null;
+    }
+
+    const exp = Math.min(MAX_DELAY_MS, BASE_DELAY_MS * 2 ** (attempt - 1));
+    const jitter = Math.floor(Math.random() * JITTER_MS);
+    const delay = exp + jitter;
+
+    logger.warn(`[Redis] reconnect attempt ${attempt}/${MAX_RECONNECT_ATTEMPTS} in ${delay}ms`);
+    return delay;
+  },
 });
 
 redis.on("ready", () => {
-  redisHealthy = true;
+  healthy = true;
+  logger.info("[Redis] ready");
 });
 
 redis.on("error", (err) => {
-  redisHealthy = false;
+  healthy = false;
   logger.error(`[Redis] error: ${err.message}`);
 });
 
 redis.on("close", () => {
-  redisHealthy = false;
-  logger.warn("[Redis] connection closed");
+  healthy = false;
+  logger.warn("[Redis] closed");
 });
 
-async function initRedis(): Promise<void> {
-  try {
-    await redis.connect();
-    await redis.ping();
-    redisHealthy = true;
-  } catch (err: any) {
-    redisHealthy = false;
-    logger.error(`[Redis] init failed: ${err.message}`);
+function delayMs(attempt: number) {
+  const exp = Math.min(MAX_DELAY_MS, BASE_DELAY_MS * 2 ** (attempt - 1));
+  const jitter = Math.floor(Math.random() * JITTER_MS);
+  return exp + jitter;
+}
+
+export async function initRedis(): Promise<void> {
+  if (healthy) return;
+
+  for (let attempt = 1; attempt <= MAX_INIT_ATTEMPTS; attempt++) {
+    try {
+      await redis.connect();
+      await redis.ping();
+      healthy = true;
+      logger.info("[Redis] init ok");
+      return;
+    } catch (err: any) {
+      healthy = false;
+
+      logger.warn(
+        `[Redis] init attempt ${attempt}/${MAX_INIT_ATTEMPTS} failed: ${err.message}`
+      );
+
+      try {
+        redis.disconnect();
+      } catch {
+        /* ignore */
+      }
+
+      if (attempt < MAX_INIT_ATTEMPTS) {
+        await new Promise((r) => setTimeout(r, delayMs(attempt)));
+      }
+    }
   }
+
+  logger.warn("[Redis] init failed; continuing without redis");
 }
 
-function isRedisHealthy(): boolean {
-  return redisHealthy;
+export function isRedisHealthy(): boolean {
+  return healthy;
 }
 
-export { initRedis, isRedisHealthy, redis };
+export { redis };
