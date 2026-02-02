@@ -129,6 +129,15 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
+    services.set("ContactService", {
+      factory: (scope) =>
+        new Services.ContactService({
+          contactRepository: scope.resolve("ContactRepository"),
+          webService: scope.resolve("WebService"),
+        }),
+      lifetime: "scoped",
+    });
+
     return services;
   } catch (err: any) {
     logger.error(

@@ -16,3 +16,4 @@ export { EnrollmentController } from "./enrollmentController";
 export { FileController } from "./fileController";
 export { GradeController } from "./gradeController";
 export { UserController } from "./userController";
+export { ContactController } from "./contactController";
