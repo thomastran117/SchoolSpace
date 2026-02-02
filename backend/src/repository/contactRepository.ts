@@ -1,4 +1,12 @@
-import type { Grade } from "../models/grade";
+/**
+ * @file contactRepository.ts
+ * @description
+ * Database methods for the contactRequest model
+ *
+ * @module repository
+ * @version 1.0.0
+ * @auth Thomas
+ */
 import type { ContactRequest } from "../models/contact";
 import { BaseRepository } from "./baseRepository";
 
@@ -16,7 +24,7 @@ class ContactRepository extends BaseRepository {
       () =>
         this.prisma.contactRequest.create({
           data: {
-            ...data
+            ...data,
           },
         }),
       { deadlineMs: 1000 }
@@ -50,10 +58,7 @@ class ContactRepository extends BaseRepository {
       limit?: number;
     } = {}
   ) {
-    const {
-      page = 1,
-      limit = 20,
-    } = options;
+    const { page = 1, limit = 20 } = options;
     const skip = (page - 1) * limit;
 
     return this.executeAsync(

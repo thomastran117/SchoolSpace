@@ -1,4 +1,20 @@
-type Status = "CREATED" | "INPROGRESS" | "VIEWED" | "COMPLETED" | "FAILED" | "DELETED" | "ERROR" ;
+/**
+ * @file contact.ts
+ * @description
+ * Contact related models
+ *
+ * @module models
+ * @version 1.0.0
+ * @auth Thomas
+ */
+type Status =
+  | "CREATED"
+  | "INPROGRESS"
+  | "VIEWED"
+  | "COMPLETED"
+  | "FAILED"
+  | "DELETED"
+  | "ERROR";
 
 type ContactRequest = {
   id: number;
