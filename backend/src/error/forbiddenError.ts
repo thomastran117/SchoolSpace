@@ -12,7 +12,7 @@ import { HttpError } from "./httpError";
 class ForbiddenError extends HttpError {
   constructor(params: { message?: string; details?: unknown } = {}) {
     super({
-      statusCode: 409,
+      statusCode: 403,
       message: params.message ?? "Forbidden.",
       details: params.details,
     });
