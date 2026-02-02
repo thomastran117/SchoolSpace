@@ -9,6 +9,7 @@ import type { FastifyInstance } from "fastify";
 
 import { authRoutes } from "./authRoute";
 import { catalogueRoutes } from "./catalogueRoute";
+import { contactRoutes } from "./contactRoute";
 import { courseRoutes } from "./courseRoute";
 import { fileRoutes } from "./fileRoute";
 import { userRoutes } from "./userRoute";
@@ -19,4 +20,5 @@ export async function registerRoutes(app: FastifyInstance) {
   app.register(fileRoutes, { prefix: "/files" });
   app.register(catalogueRoutes, { prefix: "/catalogues" });
   app.register(courseRoutes, { prefix: "/courses" });
+  app.register(contactRoutes, { prefix: "/contacts" });
 }

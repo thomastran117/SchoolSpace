@@ -13,3 +13,4 @@ export { catalogueRoutes } from "./catalogueRoute";
 export { courseRoutes } from "./courseRoute";
 export { fileRoutes } from "./fileRoute";
 export { userRoutes } from "./userRoute";
+export { contactRoutes } from "./contactRoute";
