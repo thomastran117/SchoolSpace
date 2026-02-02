@@ -82,7 +82,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
     controllers.set("ContactController", {
       factory: (scope) =>
         new Controllers.ContactController({
-          contactService: scope.resolve("contactService"),
+          contactService: scope.resolve("ContactService"),
         }),
       lifetime: "scoped",
     });
