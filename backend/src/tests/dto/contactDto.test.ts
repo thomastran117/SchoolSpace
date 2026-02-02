@@ -1,4 +1,7 @@
-import { CreateContactSchema, UpdateContactSchema } from "../../dto/contactSchema";
+import {
+  CreateContactSchema,
+  UpdateContactSchema,
+} from "../../dto/contactSchema";
 
 describe("Contact Zod DTO Schemas", () => {
   describe("CreateContactSchema", () => {
@@ -28,7 +31,9 @@ describe("Contact Zod DTO Schemas", () => {
 
       expect(res.success).toBe(false);
       if (!res.success) {
-        expect(res.error.issues.some((i) => i.path.join(".") === "email")).toBe(true);
+        expect(res.error.issues.some((i) => i.path.join(".") === "email")).toBe(
+          true
+        );
       }
     });
 

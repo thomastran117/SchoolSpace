@@ -1,7 +1,5 @@
 import { ContactController } from "../../controller/contactController";
-
-// Errors + logger are imported by the controller, so we can mock logger and use real errors.
-import { ForbiddenError, HttpError, InternalServerError, NotFoundError } from "../../error";
+import { ForbiddenError, HttpError, NotFoundError } from "../../error";
 import logger from "../../utility/logger";
 
 jest.mock("../../utility/logger", () => ({
@@ -36,12 +34,6 @@ function makeReq(overrides: Partial<any> = {}) {
   } as any;
 }
 
-/**
- * Robust helper:
- * - avoids relying on constructor identity (which can break under ESM/ts-jest transpilation)
- * - asserts it is an HttpError
- * - then asserts status code/message traits
- */
 async function expectHttpError(
   promise: Promise<any>,
   opts: { statusCode?: number; messageIncludes?: string } = {}
@@ -55,13 +47,11 @@ async function expectHttpError(
     expect(err).toBeInstanceOf(HttpError);
 
     if (opts.statusCode !== undefined) {
-      // support both common shapes: statusCode / status
       const status = err.statusCode ?? err.status;
       expect(status).toBe(opts.statusCode);
     }
 
     if (opts.messageIncludes) {
-      // support both: err.message or err.payload.message etc
       const msg =
         err.message ??
         err?.payload?.message ??
@@ -95,16 +85,28 @@ describe("ContactController", () => {
       findAllContactRequests: jest.fn(),
     };
 
-    controller = new ContactController({ contactService: contactService as any });
+    controller = new ContactController({
+      contactService: contactService as any,
+    });
   });
 
   describe("createContactRequest", () => {
     it("returns 200 with created contact request", async () => {
-      const created = { id: 123, email: "a@b.com", topic: "Hello", message: "Hi" };
+      const created = {
+        id: 123,
+        email: "a@b.com",
+        topic: "Hello",
+        message: "Hi",
+      };
       contactService.createContactRequest.mockResolvedValue(created);
 
       const req = makeReq({
-        body: { email: "a@b.com", topic: "Hello", message: "Hi", captcha: "token" },
+        body: {
+          email: "a@b.com",
+          topic: "Hello",
+          message: "Hi",
+          captcha: "token",
+        },
       });
       const reply = makeReply();
 
@@ -124,7 +126,10 @@ describe("ContactController", () => {
     });
 
     it("rethrows HttpError from service (passthrough)", async () => {
-      const err = new ForbiddenError({ statusCode: 403, message: "Nope" } as any);
+      const err = new ForbiddenError({
+        statusCode: 403,
+        message: "Nope",
+      } as any);
       contactService.createContactRequest.mockRejectedValue(err);
 
       const req = makeReq({
@@ -132,24 +137,29 @@ describe("ContactController", () => {
       });
       const reply = makeReply();
 
-      await expect(controller.createContactRequest(req, reply as any)).rejects.toBeInstanceOf(
-        HttpError
-      );
+      await expect(
+        controller.createContactRequest(req, reply as any)
+      ).rejects.toBeInstanceOf(HttpError);
       expect((logger as any).error).not.toHaveBeenCalled();
     });
 
     it("wraps unknown error into HttpError (500) and logs", async () => {
-      contactService.createContactRequest.mockRejectedValue(new Error("DB down"));
+      contactService.createContactRequest.mockRejectedValue(
+        new Error("DB down")
+      );
 
       const req = makeReq({
         body: { email: "a@b.com", topic: "t", message: "m", captcha: "c" },
       });
       const reply = makeReply();
 
-      await expectHttpError(controller.createContactRequest(req, reply as any), {
-        statusCode: 500,
-        messageIncludes: "Internal server error",
-      });
+      await expectHttpError(
+        controller.createContactRequest(req, reply as any),
+        {
+          statusCode: 500,
+          messageIncludes: "Internal server error",
+        }
+      );
 
       expect((logger as any).error).toHaveBeenCalledTimes(1);
       expect((logger as any).error.mock.calls[0][0]).toContain(
@@ -167,10 +177,13 @@ describe("ContactController", () => {
       });
       const reply = makeReply();
 
-      await expectHttpError(controller.updateContactRequest(req, reply as any), {
-        statusCode: 403,
-        messageIncludes: "permission",
-      });
+      await expectHttpError(
+        controller.updateContactRequest(req, reply as any),
+        {
+          statusCode: 403,
+          messageIncludes: "permission",
+        }
+      );
 
       expect(contactService.updateContactRequest).not.toHaveBeenCalled();
     });
@@ -206,15 +219,18 @@ describe("ContactController", () => {
     });
 
     it("rethrows HttpError from service (passthrough)", async () => {
-      const err = new NotFoundError({ statusCode: 404, message: "Not found" } as any);
+      const err = new NotFoundError({
+        statusCode: 404,
+        message: "Not found",
+      } as any);
       contactService.updateContactRequest.mockRejectedValue(err);
 
       const req = makeReq({ params: { id: 10 }, body: { email: "a@b.com" } });
       const reply = makeReply();
 
-      await expect(controller.updateContactRequest(req, reply as any)).rejects.toBeInstanceOf(
-        HttpError
-      );
+      await expect(
+        controller.updateContactRequest(req, reply as any)
+      ).rejects.toBeInstanceOf(HttpError);
       expect((logger as any).error).not.toHaveBeenCalled();
     });
 
@@ -224,10 +240,13 @@ describe("ContactController", () => {
       const req = makeReq({ params: { id: 10 }, body: { email: "a@b.com" } });
       const reply = makeReply();
 
-      await expectHttpError(controller.updateContactRequest(req, reply as any), {
-        statusCode: 500,
-        messageIncludes: "Internal server error",
-      });
+      await expectHttpError(
+        controller.updateContactRequest(req, reply as any),
+        {
+          statusCode: 500,
+          messageIncludes: "Internal server error",
+        }
+      );
 
       expect((logger as any).error).toHaveBeenCalledTimes(1);
       expect((logger as any).error.mock.calls[0][0]).toContain(
@@ -238,13 +257,19 @@ describe("ContactController", () => {
 
   describe("deleteContactRequest", () => {
     it("throws HttpError (403) when user is not admin", async () => {
-      const req = makeReq({ user: { id: 2, role: "teacher" }, params: { id: 55 } });
+      const req = makeReq({
+        user: { id: 2, role: "teacher" },
+        params: { id: 55 },
+      });
       const reply = makeReply();
 
-      await expectHttpError(controller.deleteContactRequest(req, reply as any), {
-        statusCode: 403,
-        messageIncludes: "permission",
-      });
+      await expectHttpError(
+        controller.deleteContactRequest(req, reply as any),
+        {
+          statusCode: 403,
+          messageIncludes: "permission",
+        }
+      );
 
       expect(contactService.deleteContactRequest).not.toHaveBeenCalled();
     });
@@ -270,10 +295,13 @@ describe("ContactController", () => {
       const req = makeReq({ params: { id: 55 } });
       const reply = makeReply();
 
-      await expectHttpError(controller.deleteContactRequest(req, reply as any), {
-        statusCode: 500,
-        messageIncludes: "Internal server error",
-      });
+      await expectHttpError(
+        controller.deleteContactRequest(req, reply as any),
+        {
+          statusCode: 500,
+          messageIncludes: "Internal server error",
+        }
+      );
 
       expect((logger as any).error).toHaveBeenCalledTimes(1);
       expect((logger as any).error.mock.calls[0][0]).toContain(
@@ -284,7 +312,10 @@ describe("ContactController", () => {
 
   describe("getContactRequest", () => {
     it("throws HttpError (403) when user is not admin", async () => {
-      const req = makeReq({ user: { id: 3, role: "student" }, params: { id: 9 } });
+      const req = makeReq({
+        user: { id: 3, role: "student" },
+        params: { id: 9 },
+      });
       const reply = makeReply();
 
       await expectHttpError(controller.getContactRequest(req, reply as any), {
@@ -313,7 +344,9 @@ describe("ContactController", () => {
     });
 
     it("wraps unknown error into HttpError (500) and logs", async () => {
-      contactService.findContactRequestById.mockRejectedValue(new Error("boom"));
+      contactService.findContactRequestById.mockRejectedValue(
+        new Error("boom")
+      );
 
       const req = makeReq({ params: { id: 9 } });
       const reply = makeReply();
@@ -332,7 +365,10 @@ describe("ContactController", () => {
 
   describe("getContactRequests", () => {
     it("throws HttpError (403) when user is not admin", async () => {
-      const req = makeReq({ user: { id: 4, role: "teacher" }, query: { page: "1", limit: "10" } });
+      const req = makeReq({
+        user: { id: 4, role: "teacher" },
+        query: { page: "1", limit: "10" },
+      });
       const reply = makeReply();
 
       await expectHttpError(controller.getContactRequests(req, reply as any), {
@@ -384,7 +420,9 @@ describe("ContactController", () => {
     });
 
     it("wraps unknown error into HttpError (500) and logs", async () => {
-      contactService.findAllContactRequests.mockRejectedValue(new Error("boom"));
+      contactService.findAllContactRequests.mockRejectedValue(
+        new Error("boom")
+      );
 
       const req = makeReq({ query: { page: "1", limit: "15" } });
       const reply = makeReply();
@@ -401,4 +439,3 @@ describe("ContactController", () => {
     });
   });
 });
-
