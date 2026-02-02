@@ -8,6 +8,7 @@
  * @auth Thomas
  */
 import type { FastifyReply, FastifyRequest } from "fastify";
+
 import type { CreateContactDto, UpdateContactDto } from "../dto/contactSchema";
 import type { PaginationQuery } from "../dto/coreSchema";
 import { ForbiddenError, HttpError, InternalServerError } from "../error";
