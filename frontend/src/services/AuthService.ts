@@ -1,4 +1,7 @@
 import PublicApi from "../api/PublicApi";
+import ProtectedApi from "../api/ProtectedApi";
+import { store } from "../stores";
+import { clearCredentials } from "../stores/authSlice";
 
 export interface LoginRequest {
   email: string;
@@ -42,4 +45,13 @@ export async function signup(payload: SignupRequest): Promise<LoginResponse> {
 export async function verify(payload: VerifyRequest): Promise<LoginResponse> {
   const response = await PublicApi.post<LoginResponse>("/auth/verify", payload);
   return response.data;
+}
+export async function logout(): Promise<void> {
+  try {
+    await ProtectedApi.post("/auth/logout");
+  } catch (err) {
+    console.warn("Logout request failed.", err);
+  } finally {
+    store.dispatch(clearCredentials());
+  }
 }

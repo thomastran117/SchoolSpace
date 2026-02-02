@@ -84,6 +84,11 @@ ProtectedApi.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (originalConfig?.url?.includes("/auth/logout")) {
+      store.dispatch(clearCredentials());
+      return Promise.reject(error);
+    }
+
     if (response?.status === 401) {
       const msg = (response.data as any)?.message || "";
 

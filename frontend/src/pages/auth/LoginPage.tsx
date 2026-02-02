@@ -6,6 +6,7 @@ import GoogleRecaptcha, {
 } from "../../components/auth/GoogleRecaptcha";
 import MicrosoftButton from "../../components/auth/MicrosoftButton";
 import GoogleButton from "../../components/auth/GoogleButton";
+import Error from "../../components/shared/Error";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +41,12 @@ export default function Login() {
 
       window.location.href = "/dashboard";
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? "Invalid email or password");
+      const serverError =
+        err?.response?.data?.error ??
+        err?.response?.data?.message ??
+        "Invalid email or password";
+
+      setError(serverError);
     } finally {
       setLoading(false);
     }
@@ -94,6 +100,11 @@ export default function Login() {
                 <div className="h-[2px] flex-1 rounded-full bg-slate-400/70" />
               </div>
 
+              {/* Error */}
+              {error ? (
+                <Error message={error} onDismiss={() => setError(null)} />
+              ) : null}
+
               {/* Form */}
               <form className="space-y-5" onSubmit={handleSubmit}>
                 {/* Email */}
@@ -110,7 +121,10 @@ export default function Login() {
                       type="email"
                       value={email}
                       placeholder="you@school.edu"
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (error) setError(null);
+                      }}
                       required
                       className="
                         w-full rounded-lg
@@ -143,17 +157,20 @@ export default function Login() {
                       type={showPassword ? "text" : "password"}
                       value={password}
                       placeholder="••••••••"
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (error) setError(null);
+                      }}
                       required
                       className="
-        w-full rounded-lg
-        border border-slate-300
-        bg-white/70
-        py-2.5 pl-10 pr-12 text-sm
-        focus:border-purple-500
-        focus:ring-2 focus:ring-purple-500/20
-        outline-none
-      "
+                        w-full rounded-lg
+                        border border-slate-300
+                        bg-white/70
+                        py-2.5 pl-10 pr-12 text-sm
+                        focus:border-purple-500
+                        focus:ring-2 focus:ring-purple-500/20
+                        outline-none
+                      "
                     />
 
                     {/* Toggle visibility */}
@@ -161,11 +178,11 @@ export default function Login() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="
-        absolute right-3 top-1/2 -translate-y-1/2
-        text-slate-400 hover:text-slate-600
-        cursor-pointer
-        focus:outline-none
-      "
+                        absolute right-3 top-1/2 -translate-y-1/2
+                        text-slate-400 hover:text-slate-600
+                        cursor-pointer
+                        focus:outline-none
+                      "
                       aria-label={
                         showPassword ? "Hide password" : "Show password"
                       }
@@ -215,7 +232,7 @@ export default function Login() {
               <p className="mt-7 text-sm text-slate-700">
                 Don’t have an account?{" "}
                 <a
-                  href="/register"
+                  href="/auth/signup"
                   className="text-purple-700 font-medium hover:underline"
                 >
                   Sign up

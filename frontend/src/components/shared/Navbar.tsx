@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import type { RootState } from "../../stores";
 import { Menu, X, LogOut } from "lucide-react";
 import NavLink from "./NavLink";
 import { useProtectedAvatar } from "../../hooks/profile/ProfileAvatar";
+import { logout } from "../../services/AuthService";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { accessToken, username, avatar } = useSelector(
     (state: RootState) => state.auth,
@@ -17,7 +22,6 @@ export default function Navbar() {
   const isAuthenticated = !!accessToken;
   const avatarSrc = useProtectedAvatar(avatar);
 
-  /* Smooth scroll interpolation */
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
@@ -31,12 +35,18 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const handleLogout = async () => {
+    setMenuOpen(false);
+    setOpen(false);
+
+    await logout();
+    navigate("/auth/login");
+  };
   const isLight = scrollProgress > 0.6;
   const navVariant = isLight ? "light" : "dark";
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      {/* Gradient (top state) */}
       <div
         className="absolute inset-0 transition-opacity duration-300"
         style={{ opacity: 1 - scrollProgress }}
@@ -44,7 +54,6 @@ export default function Navbar() {
         <div className="h-full w-full bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600" />
       </div>
 
-      {/* Glass (scrolled state) */}
       <div
         className="absolute inset-0 backdrop-blur-xl transition-opacity duration-300"
         style={{ opacity: scrollProgress }}
@@ -52,7 +61,6 @@ export default function Navbar() {
         <div className="h-full w-full bg-white/85 shadow-[0_1px_0_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.08)]" />
       </div>
 
-      {/* Subtle brand tint */}
       <div
         className="absolute inset-0 pointer-events-none transition-opacity duration-300"
         style={{ opacity: scrollProgress * 0.6 }}
@@ -60,12 +68,10 @@ export default function Navbar() {
         <div className="h-full w-full bg-gradient-to-r from-indigo-500/4 via-purple-500/4 to-fuchsia-500/4" />
       </div>
 
-      {/* Bottom divider */}
       <div className="absolute inset-x-0 bottom-0 h-px bg-slate-200/70" />
 
       <nav className="relative mx-auto max-w-7xl px-6">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
           <div className="flex items-center gap-2">
             <div
               className={`
@@ -90,7 +96,6 @@ export default function Navbar() {
             </span>
           </div>
 
-          {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
             <NavLink href="/" variant={navVariant}>
               Home
@@ -106,11 +111,10 @@ export default function Navbar() {
             </NavLink>
           </div>
 
-          {/* Actions */}
           <div className="hidden md:flex items-center gap-4">
             {!isAuthenticated ? (
               <>
-                <NavLink href="/login" subtle variant={navVariant}>
+                <NavLink href="/auth/login" subtle variant={navVariant}>
                   Login
                 </NavLink>
 
@@ -134,7 +138,6 @@ export default function Navbar() {
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="flex h-10 items-center gap-3"
                 >
-                  {/* Username */}
                   <span
                     className={`
                       hidden sm:block max-w-[140px] truncate text-sm font-medium
@@ -146,7 +149,6 @@ export default function Navbar() {
                     {username}
                   </span>
 
-                  {/* Avatar */}
                   <img
                     src={avatarSrc ?? "/avatar-placeholder.png"}
                     alt="avatar"
@@ -163,7 +165,6 @@ export default function Navbar() {
                   />
                 </button>
 
-                {/* Dropdown */}
                 {menuOpen && (
                   <div className="absolute right-0 mt-3 w-48 rounded-xl bg-white shadow-xl border border-slate-200 overflow-hidden">
                     <div className="px-4 py-3 text-sm text-slate-700">
@@ -177,13 +178,14 @@ export default function Navbar() {
                       >
                         Dashboard
                       </a>
-                      <a
-                        href="/logout"
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                       >
                         <LogOut size={16} />
                         Logout
-                      </a>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -191,7 +193,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Toggle */}
           <button
             className={`md:hidden transition-colors ${isLight ? "text-slate-900" : "text-white"}`}
             onClick={() => setOpen(!open)}
@@ -200,7 +201,6 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {open && (
           <div className="md:hidden mt-4 space-y-4 pb-6">
             <NavLink href="/" variant={navVariant}>

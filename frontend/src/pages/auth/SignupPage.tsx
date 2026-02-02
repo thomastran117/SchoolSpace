@@ -14,6 +14,7 @@ import GoogleRecaptcha, {
 } from "../../components/auth/GoogleRecaptcha";
 import MicrosoftButton from "../../components/auth/MicrosoftButton";
 import GoogleButton from "../../components/auth/GoogleButton";
+import Error from "../../components/shared/Error";
 
 type Role = "student" | "teacher";
 
@@ -53,7 +54,12 @@ export default function Signup() {
 
       setShowVerifyModal(true);
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? "Signup failed");
+      const serverError =
+        err?.response?.data?.error ??
+        err?.response?.data?.message ??
+        "Signup failed";
+
+      setError(serverError);
     } finally {
       setLoading(false);
     }
@@ -126,6 +132,10 @@ export default function Signup() {
                 <div className="h-[2px] flex-1 rounded-full bg-slate-400/70" />
               </div>
 
+              {error ? (
+                <Error message={error} title="Signup failed"onDismiss={() => setError(null)} />
+              ) : null}
+
               {/* Form */}
               <form className="space-y-5" onSubmit={handleSubmit}>
                 {/* Role */}
@@ -175,7 +185,10 @@ export default function Signup() {
                     <input
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (error) setError(null);
+                      }}
                       required
                       placeholder="you@school.edu"
                       className="w-full rounded-lg border border-slate-300 bg-white/70 py-2.5 pl-10 pr-4 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none"
@@ -196,7 +209,10 @@ export default function Signup() {
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (error) setError(null);
+                      }}
                       required
                       placeholder="••••••••"
                       className="w-full rounded-lg border border-slate-300 bg-white/70 py-2.5 pl-10 pr-12 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 outline-none"
