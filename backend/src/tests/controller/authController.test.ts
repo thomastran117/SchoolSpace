@@ -58,7 +58,9 @@ describe("AuthController", () => {
 
     // IMPORTANT: construct controller with the right DI shape
     // Most likely: new AuthController({ authService: mockAuthService })
-    controller = new AuthController({ authService: mockAuthService as any } as any);
+    controller = new AuthController({
+      authService: mockAuthService as any,
+    } as any);
   });
 
   describe("localAuthenticate", () => {
@@ -110,15 +112,25 @@ describe("AuthController", () => {
     });
 
     it("rethrows HttpError from service", async () => {
-      const err = new UnauthorizedError({ statusCode: 401, message: "Invalid credentials" } as any);
+      const err = new UnauthorizedError({
+        statusCode: 401,
+        message: "Invalid credentials",
+      } as any);
       mockAuthService.loginUser.mockRejectedValue(err);
 
       const req = makeReq({
-        body: { email: "x@test.com", password: "bad", remember: false, captcha: "c" },
+        body: {
+          email: "x@test.com",
+          password: "bad",
+          remember: false,
+          captcha: "c",
+        },
       });
       const reply = makeReply();
 
-      await expect(controller.localAuthenticate(req, reply as any)).rejects.toBeInstanceOf(HttpError);
+      await expect(
+        controller.localAuthenticate(req, reply as any)
+      ).rejects.toBeInstanceOf(HttpError);
       expect(logger.error).not.toHaveBeenCalled(); // controller rethrows HttpError directly
     });
   });
@@ -189,7 +201,9 @@ describe("AuthController", () => {
       const req = makeReq({ body: undefined });
       const reply = makeReply();
 
-      await expect(controller.localVerifyEmail(req, reply as any)).rejects.toBeInstanceOf(HttpError);
+      await expect(
+        controller.localVerifyEmail(req, reply as any)
+      ).rejects.toBeInstanceOf(HttpError);
     });
   });
 
@@ -204,7 +218,9 @@ describe("AuthController", () => {
 
       await controller.localForgotPassword(req, reply as any);
 
-      expect(mockAuthService.forgotPassword).toHaveBeenCalledWith("test@test.com");
+      expect(mockAuthService.forgotPassword).toHaveBeenCalledWith(
+        "test@test.com"
+      );
       expect(reply.code).toHaveBeenCalledWith(200);
       expect(reply.send).toHaveBeenCalled();
     });
@@ -215,13 +231,17 @@ describe("AuthController", () => {
       mockAuthService.changePassword.mockResolvedValue(undefined);
 
       const req = makeReq({
-        body: { password: "newpass" }, query: { token: "token"},
+        body: { password: "newpass" },
+        query: { token: "token" },
       });
       const reply = makeReply();
 
       await controller.localChangePassword(req, reply as any);
 
-      expect(mockAuthService.changePassword).toHaveBeenCalledWith("token", "newpass");
+      expect(mockAuthService.changePassword).toHaveBeenCalledWith(
+        "token",
+        "newpass"
+      );
       expect(reply.code).toHaveBeenCalledWith(200);
       expect(reply.send).toHaveBeenCalled();
     });
@@ -310,12 +330,12 @@ describe("AuthController", () => {
       );
       expect(reply.code).toHaveBeenCalledWith(200);
       expect(reply.send).toHaveBeenCalledWith(
-          expect.objectContaining({
-            accessToken: "newA",
-            role: "student",
-            username: "Tom",
-            avatar: "img.png",
-          }),
+        expect.objectContaining({
+          accessToken: "newA",
+          role: "student",
+          username: "Tom",
+          avatar: "img.png",
+        })
       );
     });
   });

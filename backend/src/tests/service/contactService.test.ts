@@ -1,5 +1,5 @@
-import { ContactService } from "../../service/contactService";
 import { ConflictError, HttpError, NotFoundError } from "../../error";
+import { ContactService } from "../../service/contactService";
 import logger from "../../utility/logger";
 
 jest.mock("../../utility/logger", () => ({
@@ -86,7 +86,12 @@ describe("ContactService", () => {
       const created = { id: 1, email: "a@b.com", topic: "t", message: "m" };
       contactRepository.create.mockResolvedValue(created);
 
-      const result = await service.createContactRequest("a@b.com", "t", "m", "cap");
+      const result = await service.createContactRequest(
+        "a@b.com",
+        "t",
+        "m",
+        "cap"
+      );
 
       expect(webService.verifyGoogleCaptcha).toHaveBeenCalledWith("cap");
       expect(contactRepository.create).toHaveBeenCalledWith({
@@ -113,9 +118,9 @@ describe("ContactService", () => {
       const err = new NotFoundError({ statusCode: 400, message: "bad" } as any);
       webService.verifyGoogleCaptcha.mockRejectedValue(err);
 
-      await expect(service.createContactRequest("a@b.com", "t", "m", "cap")).rejects.toBeInstanceOf(
-        HttpError
-      );
+      await expect(
+        service.createContactRequest("a@b.com", "t", "m", "cap")
+      ).rejects.toBeInstanceOf(HttpError);
       expect((logger as any).error).not.toHaveBeenCalled();
     });
 
@@ -123,10 +128,13 @@ describe("ContactService", () => {
       webService.verifyGoogleCaptcha.mockResolvedValue(true);
       contactRepository.create.mockRejectedValue(new Error("DB down"));
 
-      await expectHttpError(service.createContactRequest("a@b.com", "t", "m", "cap"), {
-        statusCode: 500,
-        messageIncludes: "Internal server error",
-      });
+      await expectHttpError(
+        service.createContactRequest("a@b.com", "t", "m", "cap"),
+        {
+          statusCode: 500,
+          messageIncludes: "Internal server error",
+        }
+      );
 
       expect((logger as any).error).toHaveBeenCalledTimes(1);
       expect((logger as any).error.mock.calls[0][0]).toContain(
@@ -150,12 +158,24 @@ describe("ContactService", () => {
 
     it("updates existing contact and returns it", async () => {
       const existing = { id: 10 };
-      const updated = { id: 10, email: "e", topic: "t", message: "m", status: "open" };
+      const updated = {
+        id: 10,
+        email: "e",
+        topic: "t",
+        message: "m",
+        status: "open",
+      };
 
       contactRepository.findById.mockResolvedValue(existing);
       contactRepository.updateById.mockResolvedValue(updated);
 
-      const result = await service.updateContactRequest(10, "e", "t", "m", "open" as any);
+      const result = await service.updateContactRequest(
+        10,
+        "e",
+        "t",
+        "m",
+        "open" as any
+      );
 
       expect(contactRepository.findById).toHaveBeenCalledWith(10);
       expect(contactRepository.updateById).toHaveBeenCalledWith(10, {
@@ -168,12 +188,15 @@ describe("ContactService", () => {
     });
 
     it("rethrows HttpError (passthrough)", async () => {
-      const err = new ConflictError({ statusCode: 409, message: "conflict" } as any);
+      const err = new ConflictError({
+        statusCode: 409,
+        message: "conflict",
+      } as any);
       contactRepository.findById.mockRejectedValue(err);
 
-      await expect(service.updateContactRequest(10, "e", "t", "m")).rejects.toBeInstanceOf(
-        HttpError
-      );
+      await expect(
+        service.updateContactRequest(10, "e", "t", "m")
+      ).rejects.toBeInstanceOf(HttpError);
       expect((logger as any).error).not.toHaveBeenCalled();
     });
 
@@ -304,7 +327,10 @@ describe("ContactService", () => {
 
       const result = await service.findAllContactRequests(2, 10);
 
-      expect(contactRepository.findAll).toHaveBeenCalledWith({ page: 2, limit: 10 });
+      expect(contactRepository.findAll).toHaveBeenCalledWith({
+        page: 2,
+        limit: 10,
+      });
       expect(result).toEqual({
         data: [{ id: 1 }, { id: 2 }],
         total: 21,
@@ -318,7 +344,10 @@ describe("ContactService", () => {
 
       const result = await service.findAllContactRequests();
 
-      expect(contactRepository.findAll).toHaveBeenCalledWith({ page: 1, limit: 15 });
+      expect(contactRepository.findAll).toHaveBeenCalledWith({
+        page: 1,
+        limit: 15,
+      });
       expect(result).toEqual({
         data: [],
         total: 0,

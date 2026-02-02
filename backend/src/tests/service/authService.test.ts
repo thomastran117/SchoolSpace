@@ -2,8 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
-import { TokenService } from "../../service/tokenService";
 import { HttpError, InternalServerError } from "../../error";
+import { TokenService } from "../../service/tokenService";
 import logger from "../../utility/logger";
 
 jest.mock("jsonwebtoken");
@@ -92,7 +92,13 @@ describe("TokenService (new)", () => {
       (jwt.sign as jest.Mock).mockReturnValue("access.jwt");
       mockCache.set.mockResolvedValue(undefined);
 
-      await tokenService.generateTokens(1, "test@test.com", "student", "img.png", true);
+      await tokenService.generateTokens(
+        1,
+        "test@test.com",
+        "student",
+        "img.png",
+        true
+      );
 
       expect(mockCache.set).toHaveBeenCalledWith(
         "refresh:uuid-token",
@@ -129,9 +135,9 @@ describe("TokenService (new)", () => {
         throw new Error("jwt broke");
       });
 
-      await expect(tokenService.generateTokens(1, "u", "r", "a", false)).rejects.toBeInstanceOf(
-        HttpError
-      );
+      await expect(
+        tokenService.generateTokens(1, "u", "r", "a", false)
+      ).rejects.toBeInstanceOf(HttpError);
 
       try {
         await tokenService.generateTokens(1, "u", "r", "a", false);
@@ -156,7 +162,9 @@ describe("TokenService (new)", () => {
     it("throws HttpError 401 when refresh token missing", async () => {
       mockCache.get.mockResolvedValue(null);
 
-      await expect(tokenService.validateRefreshToken("missing")).rejects.toBeInstanceOf(HttpError);
+      await expect(
+        tokenService.validateRefreshToken("missing")
+      ).rejects.toBeInstanceOf(HttpError);
 
       try {
         await tokenService.validateRefreshToken("missing");
@@ -169,7 +177,9 @@ describe("TokenService (new)", () => {
     it("converts unknown cache errors into HttpError 401", async () => {
       mockCache.get.mockRejectedValue(new Error("redis down"));
 
-      await expect(tokenService.validateRefreshToken("uuid-token")).rejects.toBeInstanceOf(HttpError);
+      await expect(
+        tokenService.validateRefreshToken("uuid-token")
+      ).rejects.toBeInstanceOf(HttpError);
 
       try {
         await tokenService.validateRefreshToken("uuid-token");
@@ -185,20 +195,29 @@ describe("TokenService (new)", () => {
     it("returns true if token validates", async () => {
       mockCache.get.mockResolvedValue(TEST_REFRESH_PAYLOAD);
 
-      await expect(tokenService.isRefreshTokenValid("uuid-token")).resolves.toBe(true);
+      await expect(
+        tokenService.isRefreshTokenValid("uuid-token")
+      ).resolves.toBe(true);
     });
 
     it("returns false if token is invalid (401)", async () => {
       mockCache.get.mockResolvedValue(null);
 
-      await expect(tokenService.isRefreshTokenValid("dead")).resolves.toBe(false);
+      await expect(tokenService.isRefreshTokenValid("dead")).resolves.toBe(
+        false
+      );
     });
 
     it("rethrows non-401 HttpError", async () => {
-      const err = new InternalServerError({ statusCode: 500, message: "boom" } as any);
+      const err = new InternalServerError({
+        statusCode: 500,
+        message: "boom",
+      } as any);
       mockCache.get.mockRejectedValue(err);
 
-      await expect(tokenService.isRefreshTokenValid("uuid-token")).rejects.toBeInstanceOf(HttpError);
+      await expect(
+        tokenService.isRefreshTokenValid("uuid-token")
+      ).rejects.toBeInstanceOf(HttpError);
     });
   });
 
@@ -233,7 +252,9 @@ describe("TokenService (new)", () => {
     it("throws HttpError 401 when old refresh is invalid", async () => {
       mockCache.get.mockResolvedValue(null);
 
-      await expect(tokenService.rotateRefreshToken("uuid-old")).rejects.toBeInstanceOf(HttpError);
+      await expect(
+        tokenService.rotateRefreshToken("uuid-old")
+      ).rejects.toBeInstanceOf(HttpError);
 
       try {
         await tokenService.rotateRefreshToken("uuid-old");
@@ -247,7 +268,9 @@ describe("TokenService (new)", () => {
       mockCache.get.mockResolvedValue(TEST_REFRESH_PAYLOAD);
       mockCache.delete.mockRejectedValue(new Error("redis down"));
 
-      await expect(tokenService.rotateRefreshToken("uuid-old")).rejects.toBeInstanceOf(HttpError);
+      await expect(
+        tokenService.rotateRefreshToken("uuid-old")
+      ).rejects.toBeInstanceOf(HttpError);
 
       try {
         await tokenService.rotateRefreshToken("uuid-old");
@@ -287,7 +310,11 @@ describe("TokenService (new)", () => {
         createdAt: Date.now(),
       });
 
-      const res = await tokenService.createEmailCode("test@test.com", "hash123", "student");
+      const res = await tokenService.createEmailCode(
+        "test@test.com",
+        "hash123",
+        "student"
+      );
 
       expect(res).toEqual({ alreadySent: true });
       expect(mockCache.set).not.toHaveBeenCalled();
@@ -301,7 +328,11 @@ describe("TokenService (new)", () => {
       jest.spyOn(Math, "random").mockReturnValue(0); // -> 100000
       (bcrypt.hash as jest.Mock).mockResolvedValue("hashed-code");
 
-      const res = await tokenService.createEmailCode("test@test.com", "hash123", "student");
+      const res = await tokenService.createEmailCode(
+        "test@test.com",
+        "hash123",
+        "student"
+      );
 
       expect(res.alreadySent).toBe(false);
       expect(res.code).toBe("100000");
@@ -331,7 +362,11 @@ describe("TokenService (new)", () => {
       ).rejects.toBeInstanceOf(HttpError);
 
       try {
-        await tokenService.createEmailCode("test@test.com", "hash123", "student");
+        await tokenService.createEmailCode(
+          "test@test.com",
+          "hash123",
+          "student"
+        );
       } catch (err: any) {
         expect(getStatus(err)).toBe(500);
         expect(String(getMessage(err))).toContain("Internal server error");
@@ -344,9 +379,9 @@ describe("TokenService (new)", () => {
     it("throws 400 if verification code expired or missing", async () => {
       mockCache.get.mockResolvedValue(null);
 
-      await expect(tokenService.verifyEmailCode("test@test.com", "123456")).rejects.toBeInstanceOf(
-        HttpError
-      );
+      await expect(
+        tokenService.verifyEmailCode("test@test.com", "123456")
+      ).rejects.toBeInstanceOf(HttpError);
 
       try {
         await tokenService.verifyEmailCode("test@test.com", "123456");
@@ -366,16 +401,20 @@ describe("TokenService (new)", () => {
       });
       mockCache.delete.mockResolvedValue(undefined);
 
-      await expect(tokenService.verifyEmailCode("test@test.com", "123456")).rejects.toBeInstanceOf(
-        HttpError
-      );
+      await expect(
+        tokenService.verifyEmailCode("test@test.com", "123456")
+      ).rejects.toBeInstanceOf(HttpError);
 
       try {
         await tokenService.verifyEmailCode("test@test.com", "123456");
       } catch (err: any) {
         expect(getStatus(err)).toBe(429);
-        expect(String(getMessage(err))).toContain("Too many verification attempts");
-        expect(mockCache.delete).toHaveBeenCalledWith("verify:email:test@test.com");
+        expect(String(getMessage(err))).toContain(
+          "Too many verification attempts"
+        );
+        expect(mockCache.delete).toHaveBeenCalledWith(
+          "verify:email:test@test.com"
+        );
       }
     });
 
@@ -392,9 +431,9 @@ describe("TokenService (new)", () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
       mockCache.set.mockResolvedValue(undefined);
 
-      await expect(tokenService.verifyEmailCode("test@test.com", "000000")).rejects.toBeInstanceOf(
-        HttpError
-      );
+      await expect(
+        tokenService.verifyEmailCode("test@test.com", "000000")
+      ).rejects.toBeInstanceOf(HttpError);
 
       try {
         await tokenService.verifyEmailCode("test@test.com", "000000");
@@ -422,7 +461,10 @@ describe("TokenService (new)", () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       mockCache.delete.mockResolvedValue(undefined);
 
-      const result = await tokenService.verifyEmailCode("test@test.com", "100000");
+      const result = await tokenService.verifyEmailCode(
+        "test@test.com",
+        "100000"
+      );
 
       expect(result).toEqual({
         email: "test@test.com",
@@ -430,15 +472,17 @@ describe("TokenService (new)", () => {
         role: "student",
       });
 
-      expect(mockCache.delete).toHaveBeenCalledWith("verify:email:test@test.com");
+      expect(mockCache.delete).toHaveBeenCalledWith(
+        "verify:email:test@test.com"
+      );
     });
 
     it("wraps unknown errors into HttpError 500", async () => {
       mockCache.get.mockRejectedValue(new Error("redis down"));
 
-      await expect(tokenService.verifyEmailCode("test@test.com", "123456")).rejects.toBeInstanceOf(
-        HttpError
-      );
+      await expect(
+        tokenService.verifyEmailCode("test@test.com", "123456")
+      ).rejects.toBeInstanceOf(HttpError);
 
       try {
         await tokenService.verifyEmailCode("test@test.com", "123456");
