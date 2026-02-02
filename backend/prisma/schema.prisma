@@ -43,7 +43,7 @@ model ContactRequest{
   topic   String
   message String
 
-  status  Status
+  status  Status     @default(CREATED)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
