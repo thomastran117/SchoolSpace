@@ -87,7 +87,6 @@ function registerControllerModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
-
     return controllers;
   } catch (err: any) {
     logger.error(
