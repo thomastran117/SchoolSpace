@@ -5,7 +5,7 @@ import type {
   QueryCatalogueDto,
   UpdateCatalogueDto,
 } from "../dto/catalogueSchema";
-import { HttpError, InternalServerError } from "../error";
+import { ForbiddenError, HttpError, InternalServerError } from "../error";
 import type { UserPayload } from "../models/token";
 import type { CatalogueService } from "../service/catalogueService";
 import logger from "../utility/logger";
@@ -34,7 +34,9 @@ class CatalogueController {
   private ensureAdmin(req: FastifyRequest) {
     const { role } = req.user as UserPayload;
     if (role !== "admin") {
-      httpError(403, "You lack permissions to perform this action.");
+      throw new ForbiddenError({
+        message: "User lacks the permission to perform this action",
+      });
     }
   }
 
@@ -49,7 +51,7 @@ class CatalogueController {
         req.body.course_name,
         req.body.description,
         req.body.course_code,
-        req.body.term,
+        req.body.term as any,
         req.body.available
       );
 
@@ -83,7 +85,7 @@ class CatalogueController {
 
       const result = await this.catalogueService.updateCourseTemplate(
         req.params.id,
-        updates
+        updates as any
       );
 
       return reply.code(200).send({
@@ -154,7 +156,7 @@ class CatalogueController {
       const limit = this.parsePositiveInt(req.query.limit, 15);
 
       const result = await this.catalogueService.getCourseTemplates(
-        req.query.term,
+        req.query.term as any,
         req.query.available,
         req.query.search,
         page,

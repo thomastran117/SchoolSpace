@@ -12,6 +12,7 @@
  * @auth Thomas
  */
 import { Redis } from "ioredis";
+
 import env from "../config/envConfigs";
 import logger from "../utility/logger";
 
@@ -33,7 +34,9 @@ const redis = new Redis(env.redisUrl, {
   retryStrategy: (attempt) => {
     if (attempt > MAX_RECONNECT_ATTEMPTS) {
       healthy = false;
-      logger.warn(`[Redis] reconnect limit reached (${MAX_RECONNECT_ATTEMPTS}); stop retrying`);
+      logger.warn(
+        `[Redis] reconnect limit reached (${MAX_RECONNECT_ATTEMPTS}); stop retrying`
+      );
       return null;
     }
 
@@ -41,7 +44,9 @@ const redis = new Redis(env.redisUrl, {
     const jitter = Math.floor(Math.random() * JITTER_MS);
     const delay = exp + jitter;
 
-    logger.warn(`[Redis] reconnect attempt ${attempt}/${MAX_RECONNECT_ATTEMPTS} in ${delay}ms`);
+    logger.warn(
+      `[Redis] reconnect attempt ${attempt}/${MAX_RECONNECT_ATTEMPTS} in ${delay}ms`
+    );
     return delay;
   },
 });
