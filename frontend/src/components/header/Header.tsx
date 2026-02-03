@@ -23,7 +23,7 @@ export default function Navbar() {
   const [elevated, setElevated] = useState(false);
   const [compactOpen, setCompactOpen] = useState(false);
   const compactRef = useRef<HTMLDivElement | null>(null);
-  
+
   const navigate = useNavigate();
   const { accessToken, username, avatar } = useSelector(
     (state: RootState) => state.auth,
@@ -64,7 +64,8 @@ export default function Navbar() {
       if (resourcesRef.current && !resourcesRef.current.contains(t)) {
         setResourcesOpen(false);
       }
-      if (compactRef.current && !compactRef.current.contains(t)) setCompactOpen(false);
+      if (compactRef.current && !compactRef.current.contains(t))
+        setCompactOpen(false);
     };
 
     document.addEventListener("mousedown", onClick);

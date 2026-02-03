@@ -165,7 +165,10 @@ export default function DesktopHeader({
       </div>
 
       {/* LEFT (compact): collapse links into one dropdown on md..lg */}
-      <div className="hidden md:flex lg:hidden items-center shrink-0" ref={compactRef}>
+      <div
+        className="hidden md:flex lg:hidden items-center shrink-0"
+        ref={compactRef}
+      >
         <button
           type="button"
           onClick={() => setCompactOpen((s) => !s)}
