@@ -9,7 +9,7 @@ export function Eyebrow({
     <div
       className={cn(
         "inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm",
-        className
+        className,
       )}
       {...props}
     />
@@ -24,7 +24,7 @@ export function H1({
     <h1
       className={cn(
         "text-3xl font-semibold tracking-tight text-slate-900 md:text-5xl",
-        className
+        className,
       )}
       {...props}
     />
@@ -39,7 +39,7 @@ export function H2({
     <h2
       className={cn(
         "text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl",
-        className
+        className,
       )}
       {...props}
     />
@@ -51,7 +51,13 @@ export function Lead({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn("text-base leading-relaxed text-slate-600 md:text-lg", className)} {...props} />
+    <p
+      className={cn(
+        "text-base leading-relaxed text-slate-600 md:text-lg",
+        className,
+      )}
+      {...props}
+    />
   );
 }
 
@@ -60,6 +66,9 @@ export function Muted({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn("text-sm leading-relaxed text-slate-600", className)} {...props} />
+    <p
+      className={cn("text-sm leading-relaxed text-slate-600", className)}
+      {...props}
+    />
   );
 }

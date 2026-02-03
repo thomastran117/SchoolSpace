@@ -37,7 +37,10 @@ export function HeroCard({
   eyebrow?: React.ReactNode;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
-  badge?: { text: string; variant?: "neutral" | "info" | "success" | "warning" };
+  badge?: {
+    text: string;
+    variant?: "neutral" | "info" | "success" | "warning";
+  };
   stats?: HeroStat[];
   primaryAction?: HeroCardAction;
   secondaryAction?: HeroCardAction;
@@ -51,7 +54,7 @@ export function HeroCard({
       className={cn(
         "relative overflow-hidden",
         tone === "soft" && "bg-slate-50/60",
-        className
+        className,
       )}
     >
       {/* Subtle highlight */}
@@ -62,20 +65,20 @@ export function HeroCard({
       <div
         className={cn(
           "relative p-6 md:p-8",
-          align === "center" ? "text-center" : "text-left"
+          align === "center" ? "text-center" : "text-left",
         )}
       >
         {/* Top row: eyebrow + badge */}
         <div
           className={cn(
             "flex flex-col gap-3",
-            align === "center" ? "items-center" : "items-start"
+            align === "center" ? "items-center" : "items-start",
           )}
         >
           <div
             className={cn(
               "flex flex-wrap items-center gap-2",
-              align === "center" ? "justify-center" : "justify-start"
+              align === "center" ? "justify-center" : "justify-start",
             )}
           >
             {eyebrow ? (
@@ -106,7 +109,7 @@ export function HeroCard({
             <div
               className={cn(
                 "mt-1 flex flex-col gap-2 sm:flex-row",
-                align === "center" ? "justify-center" : "justify-start"
+                align === "center" ? "justify-center" : "justify-start",
               )}
             >
               {primaryAction ? (
@@ -161,7 +164,7 @@ export function HeroCard({
                 key={String(s.label)}
                 className={cn(
                   "rounded-2xl border border-slate-200 bg-white p-4",
-                  align === "center" && "text-left"
+                  align === "center" && "text-left",
                 )}
               >
                 <div className="text-xs font-medium text-slate-500">

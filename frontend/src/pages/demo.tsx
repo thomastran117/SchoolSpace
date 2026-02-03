@@ -6,7 +6,11 @@ import { Pill } from "@components/common/Pill";
 export default function CoursesHeader() {
   return (
     <HeroCard
-      eyebrow={<><span className="h-2 w-2 rounded-full bg-indigo-600" /> Courses</>}
+      eyebrow={
+        <>
+          <span className="h-2 w-2 rounded-full bg-indigo-600" /> Courses
+        </>
+      }
       title="Browse courses"
       subtitle="Explore offerings, filter by year, and enroll with one click."
       badge={{ text: "Winter 2026", variant: "info" }}

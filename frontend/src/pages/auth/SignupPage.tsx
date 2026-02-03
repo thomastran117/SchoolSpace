@@ -133,7 +133,11 @@ export default function Signup() {
               </div>
 
               {error ? (
-                <Error message={error} title="Signup failed"onDismiss={() => setError(null)} />
+                <Error
+                  message={error}
+                  title="Signup failed"
+                  onDismiss={() => setError(null)}
+                />
               ) : null}
 
               {/* Form */}

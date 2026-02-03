@@ -42,8 +42,18 @@ export default function HomePageThemeA() {
             </Lead>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <Button variant="primary" size="lg" title="Get started" onClick={() => {}} />
-              <Button variant="outline" size="lg" title="Watch demo" onClick={() => {}} />
+              <Button
+                variant="primary"
+                size="lg"
+                title="Get started"
+                onClick={() => {}}
+              />
+              <Button
+                variant="outline"
+                size="lg"
+                title="Watch demo"
+                onClick={() => {}}
+              />
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
@@ -93,14 +103,15 @@ export default function HomePageThemeA() {
                   <div className="text-xs text-slate-500">Next 7 days</div>
                 </div>
                 <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                  {["Club fair • Thu 3:00 PM", "Midterm review • Sat 11:00 AM"].map(
-                    (t) => (
-                      <li key={t} className="flex gap-2">
-                        <span className="mt-2 h-1.5 w-1.5 rounded-full bg-indigo-600" />
-                        <span className="leading-relaxed">{t}</span>
-                      </li>
-                    )
-                  )}
+                  {[
+                    "Club fair • Thu 3:00 PM",
+                    "Midterm review • Sat 11:00 AM",
+                  ].map((t) => (
+                    <li key={t} className="flex gap-2">
+                      <span className="mt-2 h-1.5 w-1.5 rounded-full bg-indigo-600" />
+                      <span className="leading-relaxed">{t}</span>
+                    </li>
+                  ))}
                 </ul>
               </Card>
 
@@ -119,7 +130,12 @@ export default function HomePageThemeA() {
                   COMP 2406 • Assignment 2
                 </div>
               </div>
-              <Button variant="secondary" size="sm" title="Open" onClick={() => {}} />
+              <Button
+                variant="secondary"
+                size="sm"
+                title="Open"
+                onClick={() => {}}
+              />
             </div>
           </Card>
         </div>
@@ -158,7 +174,9 @@ export default function HomePageThemeA() {
             TRUSTED BY MODERN INSTITUTIONS
           </div>
           <div className="mt-8">
-            <LogoCloud names={["University A", "College B", "Institute C", "Academy D"]} />
+            <LogoCloud
+              names={["University A", "College B", "Institute C", "Academy D"]}
+            />
           </div>
         </div>
       </Section>
@@ -209,20 +227,32 @@ export default function HomePageThemeA() {
             title="Starter"
             price="$99"
             description="For small schools and pilot programs"
-            features={["Up to 1,000 students", "Core course management", "Basic analytics"]}
+            features={[
+              "Up to 1,000 students",
+              "Core course management",
+              "Basic analytics",
+            ]}
           />
           <PricingCard
             title="Professional"
             price="$299"
             highlighted
             description="Best for growing institutions"
-            features={["Up to 10,000 students", "Advanced analytics", "Priority support"]}
+            features={[
+              "Up to 10,000 students",
+              "Advanced analytics",
+              "Priority support",
+            ]}
           />
           <PricingCard
             title="Enterprise"
             price="Custom"
             description="For large universities"
-            features={["Unlimited students", "Custom integrations", "Dedicated support"]}
+            features={[
+              "Unlimited students",
+              "Custom integrations",
+              "Dedicated support",
+            ]}
           />
         </div>
       </Section>
@@ -243,11 +273,23 @@ export default function HomePageThemeA() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <Button variant="primary" size="lg" title="Start free trial" onClick={() => {}} />
-                  <Button variant="outline" size="lg" title="Talk to sales" onClick={() => {}} />
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    title="Start free trial"
+                    onClick={() => {}}
+                  />
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    title="Talk to sales"
+                    onClick={() => {}}
+                  />
                 </div>
               </div>
-              <div className="mt-4 text-xs text-slate-500">No credit card required.</div>
+              <div className="mt-4 text-xs text-slate-500">
+                No credit card required.
+              </div>
             </div>
           </div>
         </Card>
@@ -256,7 +298,8 @@ export default function HomePageThemeA() {
       {/* Footer */}
       <footer className="border-t border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-10 text-sm text-slate-600 md:px-6">
-          <span className="font-semibold text-slate-900">SchoolSpace</span> — a modern school portal.
+          <span className="font-semibold text-slate-900">SchoolSpace</span> — a
+          modern school portal.
         </div>
       </footer>
     </div>

@@ -14,7 +14,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="space-y-1.5">
         {label ? (
-          <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
+          <label
+            htmlFor={inputId}
+            className="text-sm font-medium text-slate-700"
+          >
             {label}
           </label>
         ) : null}
@@ -26,8 +29,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "h-11 w-full rounded-xl border bg-white px-3 text-sm text-slate-900 outline-none",
             "border-slate-200 focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-300",
             "placeholder:text-slate-400",
-            error && "border-red-300 focus:ring-red-500/20 focus:border-red-300",
-            className
+            error &&
+              "border-red-300 focus:ring-red-500/20 focus:border-red-300",
+            className,
           )}
           {...props}
         />
@@ -39,7 +43,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ) : null}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

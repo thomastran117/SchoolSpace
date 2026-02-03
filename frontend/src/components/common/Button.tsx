@@ -1,7 +1,12 @@
 import React from "react";
 import { cn } from "./cn";
 
-type ButtonVariant = "primary" | "secondary" | "ghost" | "outline" | "destructive";
+type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "outline"
+  | "destructive";
 type ButtonSize = "sm" | "md" | "lg";
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -25,8 +30,7 @@ const variants: Record<ButtonVariant, string> = {
     "bg-slate-900 text-white shadow-sm hover:bg-slate-800 active:bg-slate-800",
   outline:
     "border border-slate-200 bg-white text-slate-900 hover:bg-slate-50 active:bg-slate-100",
-  ghost:
-    "bg-transparent text-slate-700 hover:bg-slate-100 active:bg-slate-200",
+  ghost: "bg-transparent text-slate-700 hover:bg-slate-100 active:bg-slate-200",
   destructive:
     "bg-red-600 text-white shadow-sm hover:bg-red-700 active:bg-red-700",
 };
@@ -61,7 +65,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       type = "button",
       ...props
     },
-    ref
+    ref,
   ) => {
     const isDisabled = disabled || loading;
 
@@ -73,12 +77,18 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={isDisabled}
         {...props}
       >
-        {loading ? <Spinner /> : leftIcon ? <span className="opacity-90">{leftIcon}</span> : null}
+        {loading ? (
+          <Spinner />
+        ) : leftIcon ? (
+          <span className="opacity-90">{leftIcon}</span>
+        ) : null}
         <span>{children ?? title}</span>
-        {!loading && rightIcon ? <span className="opacity-90">{rightIcon}</span> : null}
+        {!loading && rightIcon ? (
+          <span className="opacity-90">{rightIcon}</span>
+        ) : null}
       </button>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

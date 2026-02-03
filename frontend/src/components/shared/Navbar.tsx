@@ -16,6 +16,7 @@ import {
 import NavLink from "./NavLink";
 import { useProtectedAvatar } from "../../hooks/profile/ProfileAvatar";
 import { logout } from "../../services/AuthService";
+import NavbarSearch from "./NavbarSearch";
 
 type DropdownItem = {
   label: string;
@@ -29,7 +30,6 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [elevated, setElevated] = useState(false);
-  const [q, setQ] = useState("");
 
   const navigate = useNavigate();
   const { accessToken, username, avatar } = useSelector(
@@ -83,16 +83,14 @@ export default function Navbar() {
     navigate("/auth/login");
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const query = q.trim();
-    if (!query) return;
-
+  const handleSearch = (query: string) => {
+    // Later: call backend API here (or dispatch a thunk).
+    // For now, navigate to wherever you want.
     navigate(`/catalogue?search=${encodeURIComponent(query)}`);
 
+    // If mobile menu is open, close it after searching
     setOpen(false);
   };
-
   const resources: DropdownItem[] = useMemo(
     () => [
       {
@@ -276,37 +274,12 @@ export default function Navbar() {
             </div>
 
             {/* Desktop: search */}
-            <form
-              onSubmit={handleSearchSubmit}
-              className="hidden md:flex flex-1 justify-center"
-            >
-              <div
-                className="
-                  relative w-full max-w-[420px]
-                  rounded-2xl bg-white/80
-                  ring-1 ring-slate-200
-                  shadow-sm
-                  focus-within:ring-2 focus-within:ring-indigo-500/30
-                  transition
-                "
-              >
-                <Search
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search courses, schools…"
-                  className="
-                    w-full bg-transparent
-                    pl-9 pr-3 py-2 text-sm
-                    text-slate-700 placeholder:text-slate-400
-                    outline-none
-                  "
-                />
-              </div>
-            </form>
+            <div className="hidden md:flex flex-1 justify-center">
+              <NavbarSearch
+                onSearch={handleSearch}
+                className="w-full max-w-[420px]"
+              />
+            </div>
 
             {/* Desktop actions */}
             <div className="hidden md:flex items-center gap-3 shrink-0">
@@ -352,7 +325,9 @@ export default function Navbar() {
                       >
                         {username}
                       </span>
-                      <span className="text-[12px] text-slate-400">Account</span>
+                      <span className="text-[12px] text-slate-400">
+                        Account
+                      </span>
                     </div>
 
                     <img
@@ -374,7 +349,9 @@ export default function Navbar() {
                       role="menu"
                     >
                       <div className="px-4 py-3">
-                        <div className="text-xs text-slate-500">Signed in as</div>
+                        <div className="text-xs text-slate-500">
+                          Signed in as
+                        </div>
                         <div className="text-sm font-medium text-slate-900 truncate">
                           {username}
                         </div>
@@ -391,7 +368,10 @@ export default function Navbar() {
                           "
                           role="menuitem"
                         >
-                          <LayoutDashboard size={16} className="text-slate-400" />
+                          <LayoutDashboard
+                            size={16}
+                            className="text-slate-400"
+                          />
                           Dashboard
                         </a>
 
@@ -445,31 +425,9 @@ export default function Navbar() {
                 "
               >
                 {/* Mobile search */}
-                <form onSubmit={handleSearchSubmit} className="p-3">
-                  <div
-                    className="
-                      relative rounded-2xl bg-white
-                      ring-1 ring-slate-200
-                      focus-within:ring-2 focus-within:ring-indigo-500/30
-                    "
-                  >
-                    <Search
-                      size={16}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
-                    <input
-                      value={q}
-                      onChange={(e) => setQ(e.target.value)}
-                      placeholder="Search courses, schools…"
-                      className="
-                        w-full bg-transparent
-                        pl-9 pr-3 py-2 text-sm
-                        text-slate-700 placeholder:text-slate-400
-                        outline-none
-                      "
-                    />
-                  </div>
-                </form>
+                <div className="p-3">
+                  <NavbarSearch onSearch={handleSearch} />
+                </div>
 
                 <div className="h-px bg-slate-100" />
 

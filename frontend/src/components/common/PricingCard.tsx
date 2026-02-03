@@ -24,7 +24,7 @@ export function PricingCard({
         "relative p-7",
         highlighted
           ? "border-indigo-300 ring-1 ring-indigo-200 shadow-md"
-          : "border-slate-200"
+          : "border-slate-200",
       )}
     >
       {highlighted ? (

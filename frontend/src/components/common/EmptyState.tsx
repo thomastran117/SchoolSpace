@@ -16,7 +16,12 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm", className)}>
+    <div
+      className={cn(
+        "rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm",
+        className,
+      )}
+    >
       <div className="mx-auto mb-3 h-10 w-10 rounded-2xl bg-indigo-50 ring-1 ring-indigo-100" />
       <div className="text-base font-semibold text-slate-900">{title}</div>
       {description ? (
