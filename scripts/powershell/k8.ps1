@@ -22,7 +22,8 @@ foreach ($cmd in @("docker", "kubectl")) {
 
 Success "All dependencies found"
 
-$root = Resolve-Path (Join-Path (Split-Path $MyInvocation.MyCommand.Path) "../..")
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$root = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
 
 $frontendPath = Join-Path $root "frontend"
 $backendPath  = Join-Path $root "backend"

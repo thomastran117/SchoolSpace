@@ -2,9 +2,12 @@ param (
     [switch]$Force
 )
 
-$backendPath = Join-Path $PSScriptRoot "..\..\backend"
-$workerPath = Join-Path $PSScriptRoot "..\..\backend"
-$frontendPath = Join-Path $PSScriptRoot "..\..\frontend"
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$repoRoot = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
+
+$backendPath = Join-Path $repoRoot "backend"
+$workerPath = Join-Path $repoRoot "backend"
+$frontendPath = Join-Path $repoRoot "frontend"
 $envFilePathBackend = Join-Path $backendPath ".env"
 $envFilePathFrontend = Join-Path $frontendPath ".env"
 $envFilePathWorker = Join-Path $workerPath ".env"

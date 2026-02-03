@@ -57,6 +57,8 @@ function Show-Help {
     Write-Command "env"     "Generate a new .env file"
     Write-Command "setup"   "Install local dependencies"
     Write-Command "format"  "Run code formatting scripts"
+    Write-Command "port"    "Frees port 3040 and 8040"
+    Write-Command "migrate" "Runs prisma database migration"
     Write-Command "--help"  "Show this help message"
 
     Write-Header "Examples"
@@ -74,6 +76,8 @@ switch ($Command.ToLower()) {
     "env"    { Invoke-Script "env.ps1" }
     "setup"  { Invoke-Script "setup.ps1" }
     "format" { Invoke-Script "format.ps1" }
+    "port" { Invoke-Script "clear-port.ps1" }
+    "migrate" { Invoke-Script "migrate.ps1" }
     "--help" { Show-Help }
     default {
         Write-Host "`nUnknown command: $Command`n" -ForegroundColor Red
