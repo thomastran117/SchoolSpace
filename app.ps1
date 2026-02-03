@@ -59,6 +59,7 @@ function Show-Help {
     Write-Command "format"  "Run code formatting scripts"
     Write-Command "port"    "Frees port 3040 and 8040"
     Write-Command "migrate" "Runs prisma database migration"
+    Write-Command "test"    "Runs all test"
     Write-Command "--help"  "Show this help message"
 
     Write-Header "Examples"
@@ -78,6 +79,7 @@ switch ($Command.ToLower()) {
     "format" { Invoke-Script "format.ps1" }
     "port" { Invoke-Script "clear-port.ps1" }
     "migrate" { Invoke-Script "migrate.ps1" }
+    "test" { Invoke-Script "test.ps1" }
     "--help" { Show-Help }
     default {
         Write-Host "`nUnknown command: $Command`n" -ForegroundColor Red
