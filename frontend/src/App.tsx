@@ -1,19 +1,19 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
-import Navbar from "./components/shared/Navbar";
-import Footer from "./components/shared/Footer";
-import HomePage from "./pages/main/HomePage";
-import LoginPage from "./pages/auth/LoginPage";
-import SignupPage from "./pages/auth/SignupPage";
-import MicrosoftCallbackPage from "./pages/auth/MicrosoftCallbackPage";
-import GoogleCallbackPage from "./pages/auth/GoogleCallbackPage";
-import SessionManager from "./components/auth/SessionManager";
+import Header from "@components/header/Header";
+import Footer from "@components/footer/Footer";
+import HomePage from "@pages/main/HomePage";
+import LoginPage from "@pages/auth/LoginPage";
+import SignupPage from "@pages/auth/SignupPage";
+import MicrosoftCallbackPage from "@pages/auth/MicrosoftCallbackPage";
+import GoogleCallbackPage from "@pages/auth/GoogleCallbackPage";
+import SessionManager from "@components/auth/SessionManager";
 
 function App() {
   return (
     <Router>
       <SessionManager>
-        <Navbar />
+        <Header />
         <div className="min-h-screen overflow-y-auto overflow-x-hidden">
           <Routes>
             <Route path="/" element={<HomePage />} />
