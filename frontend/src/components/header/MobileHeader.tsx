@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import type { ReactNode } from "react";
+import { NavLink as RouterLink } from "react-router-dom";
 import { Menu, X, LogOut } from "lucide-react";
 
 import NavLink from "./NavLink";
@@ -6,11 +9,11 @@ import HeaderSearch from "./HeaderSearch";
 type DropdownItem = {
   label: string;
   href: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   desc?: string;
 };
 
-type MobileNavbarProps = {
+type MobileHeaderProps = {
   navVariant: "campus";
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -34,7 +37,19 @@ export default function MobileHeader({
   resources,
   onSearch,
   onLogout,
-}: MobileNavbarProps) {
+}: MobileHeaderProps) {
+  // Optional: prevent background scroll when mobile menu is open
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  const close = () => setOpen(false);
+
   return (
     <>
       {/* Mobile toggle */}
@@ -47,7 +62,9 @@ export default function MobileHeader({
           transition
         "
         onClick={() => setOpen((s) => !s)}
-        aria-label="Open menu"
+        aria-label={open ? "Close menu" : "Open menu"}
+        aria-expanded={open}
+        aria-controls="mobile-nav-panel"
       >
         {open ? (
           <X size={20} className="text-slate-700" />
@@ -56,69 +73,93 @@ export default function MobileHeader({
         )}
       </button>
 
+      {/* Overlay (tap to close) */}
+      {open && (
+        <button
+          type="button"
+          aria-label="Close menu overlay"
+          onClick={close}
+          className="md:hidden fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-[2px]"
+        />
+      )}
+
       {/* Mobile panel */}
       {open && (
-        <div className="md:hidden pb-6">
+        <div className="md:hidden fixed left-0 right-0 top-[calc(64px+2px)] z-50 px-6 pb-6">
           <div
+            id="mobile-nav-panel"
             className="
-              mt-3 rounded-2xl bg-white
+              rounded-2xl bg-white
               shadow-[0_12px_30px_rgba(15,23,42,0.10)]
               ring-1 ring-slate-200 overflow-hidden
             "
+            role="dialog"
+            aria-modal="true"
           >
             {/* Mobile search */}
             <div className="p-3">
-              <HeaderSearch onSearch={(q) => onSearch(q)} />
+              <HeaderSearch
+                onSearch={(q) => {
+                  onSearch(q);
+                  close();
+                }}
+              />
             </div>
 
             <div className="h-px bg-slate-100" />
 
             {/* Mobile links */}
             <div className="p-2">
-              <NavLink href="/" variant={navVariant}>
-                Home
-              </NavLink>
-              <NavLink href="/catalogue" variant={navVariant}>
-                Courses
-              </NavLink>
-              <NavLink href="/schools" variant={navVariant}>
-                Schools
-              </NavLink>
+              <div onClick={close}>
+                <NavLink href="/" variant={navVariant}>
+                  Home
+                </NavLink>
+                <NavLink href="/catalogue" variant={navVariant}>
+                  Courses
+                </NavLink>
+                <NavLink href="/schools" variant={navVariant}>
+                  Schools
+                </NavLink>
+              </div>
 
-              {/* Mobile resources section */}
+              {/* Resources */}
               <div className="mt-2">
                 <div className="px-3 py-2 text-xs font-semibold text-slate-500">
                   Resources
                 </div>
 
-                {resources.map((item) => (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className="
-                      flex items-start gap-3 rounded-xl px-3 py-2
-                      hover:bg-slate-50 transition
-                    "
-                  >
-                    <div className="mt-0.5">{item.icon}</div>
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-slate-800">
-                        {item.label}
-                      </div>
-                      {item.desc ? (
-                        <div className="text-xs text-slate-500 truncate">
-                          {item.desc}
+                <div className="space-y-1">
+                  {resources.map((item) => (
+                    <RouterLink
+                      key={item.href}
+                      to={item.href}
+                      onClick={close}
+                      className="
+                        flex items-start gap-3 rounded-xl px-3 py-2
+                        hover:bg-slate-50 transition
+                      "
+                    >
+                      <div className="mt-0.5">{item.icon}</div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-slate-800">
+                          {item.label}
                         </div>
-                      ) : null}
-                    </div>
-                  </a>
-                ))}
+                        {item.desc ? (
+                          <div className="text-xs text-slate-500 truncate">
+                            {item.desc}
+                          </div>
+                        ) : null}
+                      </div>
+                    </RouterLink>
+                  ))}
+                </div>
               </div>
 
-              <NavLink href="/about" variant={navVariant}>
-                About
-              </NavLink>
+              <div onClick={close}>
+                <NavLink href="/about" variant={navVariant}>
+                  About
+                </NavLink>
+              </div>
             </div>
 
             <div className="h-px bg-slate-100" />
@@ -127,8 +168,9 @@ export default function MobileHeader({
             <div className="p-3">
               {!isAuthenticated ? (
                 <div className="flex gap-3">
-                  <a
-                    href="/auth/login"
+                  <RouterLink
+                    to="/auth/login"
+                    onClick={close}
                     className="
                       flex-1 text-center rounded-xl px-4 py-2 text-sm font-medium
                       text-slate-700 hover:bg-slate-50 ring-1 ring-slate-200
@@ -136,9 +178,11 @@ export default function MobileHeader({
                     "
                   >
                     Login
-                  </a>
-                  <a
-                    href="/register"
+                  </RouterLink>
+
+                  <RouterLink
+                    to="/register"
+                    onClick={close}
                     className="
                       flex-1 text-center rounded-xl px-4 py-2 text-sm font-medium
                       bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm
@@ -146,7 +190,7 @@ export default function MobileHeader({
                     "
                   >
                     Get Started
-                  </a>
+                  </RouterLink>
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
@@ -155,26 +199,33 @@ export default function MobileHeader({
                     alt="avatar"
                     className="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200"
                   />
+
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-medium text-slate-900 truncate">
                       {username}
                     </div>
-                    <a
-                      href="/dashboard"
+
+                    <RouterLink
+                      to="/dashboard"
+                      onClick={close}
                       className="text-sm text-indigo-600 hover:text-indigo-500"
-                      onClick={() => setOpen(false)}
                     >
                       Go to dashboard
-                    </a>
+                    </RouterLink>
                   </div>
+
                   <button
                     type="button"
-                    onClick={onLogout}
+                    onClick={() => {
+                      onLogout();
+                      close();
+                    }}
                     className="
                       inline-flex items-center gap-2 rounded-xl
                       px-3 py-2 text-sm text-red-600 hover:bg-red-50
                       transition
                     "
+                    aria-label="Logout"
                   >
                     <LogOut size={16} />
                   </button>

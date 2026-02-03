@@ -21,7 +21,9 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const [elevated, setElevated] = useState(false);
-
+  const [compactOpen, setCompactOpen] = useState(false);
+  const compactRef = useRef<HTMLDivElement | null>(null);
+  
   const navigate = useNavigate();
   const { accessToken, username, avatar } = useSelector(
     (state: RootState) => state.auth,
@@ -42,6 +44,7 @@ export default function Navbar() {
         setOpen(false);
         setMenuOpen(false);
         setResourcesOpen(false);
+        setCompactOpen(false);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -61,6 +64,7 @@ export default function Navbar() {
       if (resourcesRef.current && !resourcesRef.current.contains(t)) {
         setResourcesOpen(false);
       }
+      if (compactRef.current && !compactRef.current.contains(t)) setCompactOpen(false);
     };
 
     document.addEventListener("mousedown", onClick);
@@ -153,7 +157,6 @@ export default function Navbar() {
             </a>
 
             <DesktopNavbar
-              brandBadge={brandBadge}
               navVariant={navVariant}
               isAuthenticated={isAuthenticated}
               username={username ?? null}
@@ -163,6 +166,9 @@ export default function Navbar() {
               setResourcesOpen={setResourcesOpen}
               menuOpen={menuOpen}
               setMenuOpen={setMenuOpen}
+              compactOpen={compactOpen}
+              setCompactOpen={setCompactOpen}
+              compactRef={compactRef}
               resourcesRef={resourcesRef}
               avatarMenuRef={avatarMenuRef}
               onSearch={handleSearch}

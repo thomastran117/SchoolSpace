@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+import { NavLink as RouterLink } from "react-router-dom";
 import { LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 import NavLink from "./NavLink";
 import HeaderSearch from "./HeaderSearch";
@@ -5,32 +7,38 @@ import HeaderSearch from "./HeaderSearch";
 type DropdownItem = {
   label: string;
   href: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   desc?: string;
 };
 
 type DesktopNavbarProps = {
-  brandBadge: React.ReactNode;
   navVariant: "campus";
   isAuthenticated: boolean;
   username: string | null;
   avatarSrc: string | null;
   resources: DropdownItem[];
 
+  // Existing dropdown state for Resources
   resourcesOpen: boolean;
   setResourcesOpen: React.Dispatch<React.SetStateAction<boolean>>;
+
+  // Avatar menu
   menuOpen: boolean;
   setMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
   resourcesRef: React.RefObject<HTMLDivElement | null>;
   avatarMenuRef: React.RefObject<HTMLDivElement | null>;
 
+  // NEW: collapsed menu state (for md..lg)
+  compactOpen: boolean;
+  setCompactOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  compactRef: React.RefObject<HTMLDivElement | null>;
+
   onSearch: (q: string) => void;
   onLogout: () => void;
 };
 
-export default function DesktopNavbar({
-  brandBadge,
+export default function DesktopHeader({
   navVariant,
   isAuthenticated,
   username,
@@ -42,13 +50,16 @@ export default function DesktopNavbar({
   setMenuOpen,
   resourcesRef,
   avatarMenuRef,
+  compactOpen,
+  setCompactOpen,
+  compactRef,
   onSearch,
   onLogout,
 }: DesktopNavbarProps) {
   return (
     <>
-      {/* Desktop: links + dropdown */}
-      <div className="hidden md:flex items-center gap-1">
+      {/* LEFT: full nav links (only on large screens) */}
+      <div className="hidden lg:flex items-center gap-1 shrink-0">
         <NavLink href="/" variant={navVariant}>
           Home
         </NavLink>
@@ -59,7 +70,7 @@ export default function DesktopNavbar({
           Schools
         </NavLink>
 
-        {/* Dropdown */}
+        {/* Resources dropdown (large screens) */}
         <div className="relative" ref={resourcesRef}>
           <button
             type="button"
@@ -105,9 +116,9 @@ export default function DesktopNavbar({
 
               <div className="p-2">
                 {resources.map((item) => (
-                  <a
+                  <RouterLink
                     key={item.href}
-                    href={item.href}
+                    to={item.href}
                     onClick={() => setResourcesOpen(false)}
                     className="
                       flex gap-3 rounded-xl px-3 py-2
@@ -126,15 +137,15 @@ export default function DesktopNavbar({
                         </div>
                       ) : null}
                     </div>
-                  </a>
+                  </RouterLink>
                 ))}
               </div>
 
               <div className="h-px bg-slate-100" />
 
               <div className="p-2">
-                <a
-                  href="/about"
+                <RouterLink
+                  to="/about"
                   onClick={() => setResourcesOpen(false)}
                   className="
                     block rounded-xl px-3 py-2 text-sm
@@ -142,7 +153,7 @@ export default function DesktopNavbar({
                   "
                 >
                   About SchoolSpace
-                </a>
+                </RouterLink>
               </div>
             </div>
           )}
@@ -153,33 +164,140 @@ export default function DesktopNavbar({
         </NavLink>
       </div>
 
-      {/* Desktop: search */}
-      <div className="hidden md:flex flex-1 justify-center">
-        <HeaderSearch onSearch={onSearch} className="w-full max-w-[420px]" />
+      {/* LEFT (compact): collapse links into one dropdown on md..lg */}
+      <div className="hidden md:flex lg:hidden items-center shrink-0" ref={compactRef}>
+        <button
+          type="button"
+          onClick={() => setCompactOpen((s) => !s)}
+          className="
+            inline-flex items-center gap-2
+            rounded-xl px-3 py-2 text-sm font-medium
+            text-slate-700 hover:text-slate-900 hover:bg-slate-100
+            ring-1 ring-transparent hover:ring-slate-200
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40
+            transition
+          "
+          aria-haspopup="menu"
+          aria-expanded={compactOpen}
+        >
+          Menu
+          <ChevronDown
+            size={16}
+            className={[
+              "text-slate-400 transition-transform",
+              compactOpen ? "rotate-180" : "",
+            ].join(" ")}
+          />
+        </button>
+
+        {compactOpen && (
+          <div
+            className="
+              absolute mt-2 w-72 overflow-hidden rounded-2xl
+              bg-white shadow-xl ring-1 ring-slate-200
+            "
+            style={{ top: "100%" }}
+            role="menu"
+          >
+            <div className="p-2">
+              {/* Primary nav */}
+              <div className="px-2 py-2 text-xs font-semibold text-slate-500">
+                Navigation
+              </div>
+
+              <div className="space-y-1">
+                <RouterLink
+                  to="/"
+                  onClick={() => setCompactOpen(false)}
+                  className="block rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  Home
+                </RouterLink>
+                <RouterLink
+                  to="/catalogue"
+                  onClick={() => setCompactOpen(false)}
+                  className="block rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  Courses
+                </RouterLink>
+                <RouterLink
+                  to="/schools"
+                  onClick={() => setCompactOpen(false)}
+                  className="block rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  Schools
+                </RouterLink>
+                <RouterLink
+                  to="/about"
+                  onClick={() => setCompactOpen(false)}
+                  className="block rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                >
+                  About
+                </RouterLink>
+              </div>
+
+              <div className="my-2 h-px bg-slate-100" />
+
+              {/* Resources */}
+              <div className="px-2 py-2 text-xs font-semibold text-slate-500">
+                Resources
+              </div>
+
+              <div className="space-y-1">
+                {resources.map((item) => (
+                  <RouterLink
+                    key={item.href}
+                    to={item.href}
+                    onClick={() => setCompactOpen(false)}
+                    className="flex items-start gap-3 rounded-xl px-3 py-2 hover:bg-slate-50"
+                  >
+                    <div className="mt-0.5">{item.icon}</div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-slate-800">
+                        {item.label}
+                      </div>
+                      {item.desc ? (
+                        <div className="text-xs text-slate-500 truncate">
+                          {item.desc}
+                        </div>
+                      ) : null}
+                    </div>
+                  </RouterLink>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Desktop actions */}
+      {/* CENTER: search (must shrink nicely) */}
+      <div className="hidden md:flex flex-1 justify-center min-w-0">
+        <HeaderSearch
+          onSearch={onSearch}
+          className="w-full max-w-[420px] min-w-0"
+        />
+      </div>
+
+      {/* RIGHT: actions */}
       <div className="hidden md:flex items-center gap-3 shrink-0">
         {!isAuthenticated ? (
           <>
             <NavLink href="/auth/login" subtle variant={navVariant}>
               Login
             </NavLink>
-
-            <a
-              href="/register"
+            <RouterLink
+              to="/register"
               className="
                 inline-flex items-center justify-center
                 rounded-xl px-4 py-2 text-sm font-medium
                 bg-indigo-600 text-white
-                hover:bg-indigo-500
-                shadow-sm
+                hover:bg-indigo-500 shadow-sm
                 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:ring-offset-2
                 transition
               "
             >
               Get Started
-            </a>
+            </RouterLink>
           </>
         ) : (
           <div className="relative" ref={avatarMenuRef}>
@@ -208,10 +326,7 @@ export default function DesktopNavbar({
               <img
                 src={avatarSrc ?? "/avatar-placeholder.png"}
                 alt="avatar"
-                className="
-                  h-9 w-9 rounded-full object-cover
-                  ring-1 ring-slate-200 shadow-sm
-                "
+                className="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200 shadow-sm"
               />
             </button>
 
@@ -233,8 +348,8 @@ export default function DesktopNavbar({
                 <div className="h-px bg-slate-100" />
 
                 <div className="p-2">
-                  <a
-                    href="/dashboard"
+                  <RouterLink
+                    to="/dashboard"
                     className="
                       flex items-center gap-2 rounded-xl px-3 py-2 text-sm
                       text-slate-700 hover:bg-slate-50 transition
@@ -243,7 +358,7 @@ export default function DesktopNavbar({
                   >
                     <LayoutDashboard size={16} className="text-slate-400" />
                     Dashboard
-                  </a>
+                  </RouterLink>
 
                   <button
                     type="button"
