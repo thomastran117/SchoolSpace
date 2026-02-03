@@ -8,8 +8,8 @@ try {
   throw "Node.js (and npm) are not installed or not on PATH."
 }
 
-
-$ROOT      = Resolve-Path (Join-Path $PSScriptRoot "../..")
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$ROOT = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
 $FRONTEND  = Join-Path $ROOT "frontend"
 $BACKEND   = Join-Path $ROOT "backend"
 $WORKER   = Join-Path $ROOT "worker"

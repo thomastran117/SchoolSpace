@@ -1,14 +1,14 @@
 $ErrorActionPreference = "Stop"
 
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repoRoot  = Join-Path $scriptDir "../.."
-Set-Location $repoRoot
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+
+$repoRoot = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
 
 Write-Host "Building and starting containers (detached)..."
-docker compose up -d --build
+docker compose -f (Join-Path $repoRoot "docker-compose.yml") --project-directory $repoRoot up -d --build
 
 Write-Host "Switching to attached mode..."
-docker compose up
+docker compose -f (Join-Path $repoRoot "docker-compose.yml") --project-directory $repoRoot up
 
 Write-Host ""
 Write-Host "All services are now running."
