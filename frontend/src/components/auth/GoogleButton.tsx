@@ -30,23 +30,30 @@ const GoogleButton: React.FC<GoogleButtonProps> = ({ disabled = false }) => {
       onClick={handleGoogleOAuth}
       disabled={disabled}
       className={`
-        flex items-center justify-center gap-2
-        h-11 w-full
-        rounded-lg
-        border border-purple-300/60
-        bg-white/70
-        text-sm font-medium text-slate-800
-        backdrop-blur-sm
-        transition
-        ${
-          disabled
-            ? "cursor-not-allowed opacity-60"
-            : "cursor-pointer hover:bg-purple-50 hover:border-purple-400 hover:shadow-md"
-        }
-      `}
+      group flex items-center justify-center gap-3
+      h-11 w-full
+      rounded-xl
+      bg-white
+      border border-slate-200
+      text-sm font-medium text-slate-700
+      shadow-sm
+      transition
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2
+      ${
+        disabled
+          ? "cursor-not-allowed opacity-60"
+          : "cursor-pointer hover:bg-slate-50 hover:border-slate-300"
+      }
+    `}
     >
       {/* Google icon */}
-      <svg width="18" height="18" viewBox="0 0 48 48">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 48 48"
+        aria-hidden="true"
+        className="shrink-0"
+      >
         <path
           fill="#EA4335"
           d="M24 9.5c3.94 0 7.06 1.64 9.18 3.01l6.85-6.85C36.41 2.69 30.67 0 24 0 14.64 0 6.54 5.39 2.44 13.22l7.98 6.2C12.14 13.14 17.58 9.5 24 9.5z"
@@ -65,7 +72,7 @@ const GoogleButton: React.FC<GoogleButtonProps> = ({ disabled = false }) => {
         />
       </svg>
 
-      <span>Google</span>
+      <span className="leading-none">Google</span>
     </button>
   );
 };

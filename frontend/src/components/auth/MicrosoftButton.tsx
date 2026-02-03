@@ -46,22 +46,23 @@ const MicrosoftButton: React.FC<MicrosoftButtonProps> = ({
     <button
       type="button"
       onClick={handleMicrosoftOAuth}
-      disabled={isDisabled}
+      disabled={disabled}
       className={`
-        flex items-center justify-center gap-2
-        h-11 w-full
-        rounded-lg
-        border border-purple-300/60
-        bg-white/70
-        text-sm font-medium text-slate-800
-        backdrop-blur-sm
-        transition
-        ${
-          isDisabled
-            ? "cursor-not-allowed opacity-60"
-            : "cursor-pointer hover:bg-purple-50 hover:border-purple-400 hover:shadow-md"
-        }
-      `}
+      group flex items-center justify-center gap-3
+      h-11 w-full
+      rounded-xl
+      bg-white
+      border border-slate-200
+      text-sm font-medium text-slate-700
+      shadow-sm
+      transition
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 focus-visible:ring-offset-2
+      ${
+        disabled
+          ? "cursor-not-allowed opacity-60"
+          : "cursor-pointer hover:bg-slate-50 hover:border-slate-300"
+      }
+    `}
     >
       {/* Microsoft icon */}
       <svg width="18" height="18" viewBox="0 0 23 23">
