@@ -18,7 +18,9 @@
       "@services/*": ["src/services/*"],
       "@routes/*": ["src/routes/*"],
       "@stores/*": ["src/stores/*"],
-      "@api/*": ["src/api/*"]
+      "@api/*": ["src/api/*"],
+      "@icon/*": ["src/components/icon/*"],
+      "@style/*": ["src/style/*"]
     },
     "ignoreDeprecations": "6.0",
 
