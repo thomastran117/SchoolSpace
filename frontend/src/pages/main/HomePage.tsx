@@ -294,14 +294,6 @@ export default function HomePageThemeA() {
           </div>
         </Card>
       </Section>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-200">
-        <div className="mx-auto max-w-6xl px-4 py-10 text-sm text-slate-600 md:px-6">
-          <span className="font-semibold text-slate-900">SchoolSpace</span> — a
-          modern school portal.
-        </div>
-      </footer>
     </div>
   );
 }
