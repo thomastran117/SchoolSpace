@@ -10,7 +10,7 @@ type ButtonVariant =
 type ButtonSize = "sm" | "md" | "lg";
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  title?: string; // convenience if you prefer title instead of children
+  title?: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
