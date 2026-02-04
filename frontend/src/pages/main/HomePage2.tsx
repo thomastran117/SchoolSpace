@@ -200,7 +200,7 @@ function GradientDivider({ flip }: { flip?: boolean }) {
     <div
       className={cx(
         "pointer-events-none relative -mt-10 h-20 w-full",
-        flip && "rotate-180"
+        flip && "rotate-180",
       )}
       aria-hidden="true"
     >
@@ -238,7 +238,7 @@ function Card({
       className={cx(
         "rounded-2xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur",
         "transition hover:shadow-md hover:border-slate-200",
-        className
+        className,
       )}
     >
       {children}
@@ -254,7 +254,7 @@ export default function Home() {
       { label: "Pricing", href: "#pricing" },
       { label: "Testimonials", href: "#testimonials" },
     ],
-    []
+    [],
   );
 
   const stats: Stat[] = useMemo(
@@ -264,7 +264,7 @@ export default function Home() {
       { label: "Avg. setup time", value: "2 days" },
       { label: "Uptime", value: "99.9%" },
     ],
-    []
+    [],
   );
 
   const features: Feature[] = useMemo(
@@ -300,7 +300,7 @@ export default function Home() {
         icon: <Icon name="users" className="text-purple-600" />,
       },
     ],
-    []
+    [],
   );
 
   const testimonials: Testimonial[] = useMemo(
@@ -324,7 +324,7 @@ export default function Home() {
         role: "Student Leader",
       },
     ],
-    []
+    [],
   );
 
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
@@ -376,7 +376,10 @@ export default function Home() {
 
               <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {stats.map((s) => (
-                  <div key={s.label} className="rounded-2xl border border-slate-200/70 bg-white/70 p-3 shadow-sm">
+                  <div
+                    key={s.label}
+                    className="rounded-2xl border border-slate-200/70 bg-white/70 p-3 shadow-sm"
+                  >
                     <div className="text-sm font-semibold">{s.value}</div>
                     <div className="mt-0.5 text-[11px] text-slate-500">
                       {s.label}
@@ -444,8 +447,12 @@ export default function Home() {
                             <Icon name="calendar" />
                           </div>
                           <div>
-                            <div className="text-sm font-semibold">{e.name}</div>
-                            <div className="text-xs text-slate-500">{e.meta}</div>
+                            <div className="text-sm font-semibold">
+                              {e.name}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {e.meta}
+                            </div>
                           </div>
                         </div>
                         <button className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100">
@@ -470,8 +477,8 @@ export default function Home() {
                 Designed for clarity
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
-                A light, professional UI that stays out of the way—so students and
-                staff can focus on what matters.
+                A light, professional UI that stays out of the way—so students
+                and staff can focus on what matters.
               </p>
             </div>
             <a
@@ -513,8 +520,8 @@ export default function Home() {
                 Launch in days, not months
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Start with a clean baseline and customize as you grow. SchoolSpace
-                is built to stay simple while scaling smoothly.
+                Start with a clean baseline and customize as you grow.
+                SchoolSpace is built to stay simple while scaling smoothly.
               </p>
 
               <div className="mt-6 grid gap-3">
@@ -544,7 +551,9 @@ export default function Home() {
                     </div>
                     <div>
                       <div className="text-sm font-semibold">{s.title}</div>
-                      <div className="mt-1 text-sm text-slate-600">{s.desc}</div>
+                      <div className="mt-1 text-sm text-slate-600">
+                        {s.desc}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -609,7 +618,7 @@ export default function Home() {
                   "rounded-xl px-3 py-2 text-sm font-semibold",
                   billing === "monthly"
                     ? "bg-slate-900 text-white"
-                    : "text-slate-700 hover:bg-slate-50"
+                    : "text-slate-700 hover:bg-slate-50",
                 )}
               >
                 Monthly
@@ -621,7 +630,7 @@ export default function Home() {
                   "rounded-xl px-3 py-2 text-sm font-semibold",
                   billing === "yearly"
                     ? "bg-slate-900 text-white"
-                    : "text-slate-700 hover:bg-slate-50"
+                    : "text-slate-700 hover:bg-slate-50",
                 )}
               >
                 Yearly
@@ -667,7 +676,7 @@ export default function Home() {
                 key={p.name}
                 className={cx(
                   "p-6",
-                  p.highlight && "border-purple-200/80 shadow-md"
+                  p.highlight && "border-purple-200/80 shadow-md",
                 )}
               >
                 {p.highlight && (
@@ -678,7 +687,9 @@ export default function Home() {
                 <div className="text-sm font-semibold">{p.name}</div>
                 <div className="mt-2 flex items-end gap-2">
                   <div className="text-3xl font-semibold">${p.price}</div>
-                  <div className="pb-1 text-sm text-slate-500">{priceSuffix}</div>
+                  <div className="pb-1 text-sm text-slate-500">
+                    {priceSuffix}
+                  </div>
                 </div>
                 <p className="mt-2 text-sm text-slate-600">{p.desc}</p>
 
@@ -699,7 +710,7 @@ export default function Home() {
                     "mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm",
                     p.highlight
                       ? "bg-purple-600 text-white hover:bg-purple-700"
-                      : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                      : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50",
                   )}
                 >
                   Choose {p.name}
@@ -717,7 +728,8 @@ export default function Home() {
             Trusted by real teams
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
-            Calm UI, clear workflows, and features that fit how schools actually operate.
+            Calm UI, clear workflows, and features that fit how schools actually
+            operate.
           </p>
 
           <div className="mt-8 grid gap-4 lg:grid-cols-3">

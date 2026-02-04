@@ -135,7 +135,9 @@ function Shell({
   className?: string;
 }) {
   return (
-    <div className={cx("mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8", className)}>
+    <div
+      className={cx("mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8", className)}
+    >
       {children}
     </div>
   );
@@ -153,7 +155,7 @@ function Card({
       className={cx(
         "rounded-2xl border border-slate-200/70 bg-white/85 shadow-sm backdrop-blur",
         "transition hover:shadow-md",
-        className
+        className,
       )}
     >
       {children}
@@ -163,14 +165,17 @@ function Card({
 
 function SoftBand({ tone = "teal" }: { tone?: "teal" | "emerald" }) {
   return (
-    <div className="pointer-events-none relative h-24 w-full" aria-hidden="true">
+    <div
+      className="pointer-events-none relative h-24 w-full"
+      aria-hidden="true"
+    >
       <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50 to-white" />
       <div
         className={cx(
           "absolute inset-0 opacity-70",
           tone === "teal"
             ? "bg-[radial-gradient(circle_at_50%_120%,rgba(13,148,136,0.20),transparent_58%)]"
-            : "bg-[radial-gradient(circle_at_50%_120%,rgba(16,185,129,0.18),transparent_58%)]"
+            : "bg-[radial-gradient(circle_at_50%_120%,rgba(16,185,129,0.18),transparent_58%)]",
         )}
       />
       <div className="absolute left-0 right-0 top-0 mx-auto h-px w-[92%] bg-gradient-to-r from-transparent via-slate-200/70 to-transparent" />
@@ -186,7 +191,7 @@ export default function HomeAlt() {
       { label: "Pricing", href: "#pricing" },
       { label: "FAQ", href: "#faq" },
     ],
-    []
+    [],
   );
 
   const metrics: Metric[] = useMemo(
@@ -196,7 +201,7 @@ export default function HomeAlt() {
       { label: "Setup time", value: "48h", hint: "Typical" },
       { label: "Reliability", value: "99.9%", hint: "Uptime" },
     ],
-    []
+    [],
   );
 
   const steps: Step[] = useMemo(
@@ -214,7 +219,7 @@ export default function HomeAlt() {
         desc: "Daily workflows are clean: fewer clicks, clearer ownership, better follow-through.",
       },
     ],
-    []
+    [],
   );
 
   const features: Feature[] = useMemo(
@@ -250,7 +255,7 @@ export default function HomeAlt() {
         desc: "Understand what students use most and improve the experience continuously.",
       },
     ],
-    []
+    [],
   );
 
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
@@ -275,7 +280,9 @@ export default function HomeAlt() {
             </div>
             <div className="leading-tight">
               <div className="text-sm font-semibold">SchoolSpace</div>
-              <div className="text-[11px] text-slate-500">Calm campus operations</div>
+              <div className="text-[11px] text-slate-500">
+                Calm campus operations
+              </div>
             </div>
           </a>
 
@@ -324,8 +331,9 @@ export default function HomeAlt() {
               </h1>
 
               <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600">
-                SchoolSpace organizes announcements, courses, clubs, events, and support
-                into a clean workflow that students and staff actually enjoy using.
+                SchoolSpace organizes announcements, courses, clubs, events, and
+                support into a clean workflow that students and staff actually
+                enjoy using.
               </p>
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -352,7 +360,11 @@ export default function HomeAlt() {
                   >
                     <div className="text-lg font-semibold">{m.value}</div>
                     <div className="mt-1 text-xs text-slate-500">{m.label}</div>
-                    {m.hint && <div className="mt-1 text-xs text-slate-400">{m.hint}</div>}
+                    {m.hint && (
+                      <div className="mt-1 text-xs text-slate-400">
+                        {m.hint}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -363,7 +375,12 @@ export default function HomeAlt() {
                   Trusted by teams at
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {["Northview HS", "Cedar Ridge", "Ottawa West", "Maple District"].map((x) => (
+                  {[
+                    "Northview HS",
+                    "Cedar Ridge",
+                    "Ottawa West",
+                    "Maple District",
+                  ].map((x) => (
                     <div
                       key={x}
                       className="rounded-xl border border-slate-200/70 bg-white/70 px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm"
@@ -388,10 +405,26 @@ export default function HomeAlt() {
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     {[
-                      { label: "Announcements", value: "3 new", icon: "spark" as const },
-                      { label: "Support inbox", value: "5 open", icon: "chat" as const },
-                      { label: "Events", value: "2 upcoming", icon: "bolt" as const },
-                      { label: "Engagement", value: "+12%", icon: "chart" as const },
+                      {
+                        label: "Announcements",
+                        value: "3 new",
+                        icon: "spark" as const,
+                      },
+                      {
+                        label: "Support inbox",
+                        value: "5 open",
+                        icon: "chat" as const,
+                      },
+                      {
+                        label: "Events",
+                        value: "2 upcoming",
+                        icon: "bolt" as const,
+                      },
+                      {
+                        label: "Engagement",
+                        value: "+12%",
+                        icon: "chart" as const,
+                      },
                     ].map((k) => (
                       <div
                         key={k.label}
@@ -401,8 +434,12 @@ export default function HomeAlt() {
                           <MiniIcon name={k.icon} className="h-4 w-4" />
                         </div>
                         <div className="min-w-0">
-                          <div className="text-xs text-slate-500">{k.label}</div>
-                          <div className="truncate text-sm font-semibold">{k.value}</div>
+                          <div className="text-xs text-slate-500">
+                            {k.label}
+                          </div>
+                          <div className="truncate text-sm font-semibold">
+                            {k.value}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -417,7 +454,9 @@ export default function HomeAlt() {
                       </div>
                       <div>
                         <div className="text-sm font-semibold">Courses</div>
-                        <div className="text-xs text-slate-500">What matters today</div>
+                        <div className="text-xs text-slate-500">
+                          What matters today
+                        </div>
                       </div>
                     </div>
 
@@ -432,10 +471,16 @@ export default function HomeAlt() {
                           className="flex items-center justify-between rounded-xl border border-slate-200/70 bg-slate-50 px-3 py-2"
                         >
                           <div>
-                            <div className="text-sm font-semibold">{c.name}</div>
-                            <div className="text-xs text-slate-500">{c.meta}</div>
+                            <div className="text-sm font-semibold">
+                              {c.name}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {c.meta}
+                            </div>
                           </div>
-                          <span className="text-xs font-semibold text-teal-700">View</span>
+                          <span className="text-xs font-semibold text-teal-700">
+                            View
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -447,8 +492,12 @@ export default function HomeAlt() {
                         <MiniIcon name="shield" />
                       </div>
                       <div>
-                        <div className="text-sm font-semibold">Roles & access</div>
-                        <div className="text-xs text-slate-500">Simple permission model</div>
+                        <div className="text-sm font-semibold">
+                          Roles & access
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          Simple permission model
+                        </div>
                       </div>
                     </div>
 
@@ -485,8 +534,8 @@ export default function HomeAlt() {
                   A quick product tour
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                  Built around real daily workflows: communicate clearly, keep students engaged,
-                  and make follow-ups easy.
+                  Built around real daily workflows: communicate clearly, keep
+                  students engaged, and make follow-ups easy.
                 </p>
 
                 <div className="mt-6 space-y-3">
@@ -501,7 +550,9 @@ export default function HomeAlt() {
                         </div>
                         <div>
                           <div className="text-sm font-semibold">{s.title}</div>
-                          <div className="mt-1 text-sm text-slate-600">{s.desc}</div>
+                          <div className="mt-1 text-sm text-slate-600">
+                            {s.desc}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -573,12 +624,14 @@ export default function HomeAlt() {
                                 i.tone === "emerald" &&
                                   "bg-emerald-50 text-emerald-800 border border-emerald-200/60",
                                 i.tone === "sky" &&
-                                  "bg-sky-50 text-sky-800 border border-sky-200/60"
+                                  "bg-sky-50 text-sky-800 border border-sky-200/60",
                               )}
                             >
                               {i.type}
                             </span>
-                            <span className="text-xs text-slate-500">{i.meta}</span>
+                            <span className="text-xs text-slate-500">
+                              {i.meta}
+                            </span>
                           </div>
                           <div className="mt-2 truncate text-sm font-semibold">
                             {i.title}
@@ -606,10 +659,12 @@ export default function HomeAlt() {
           <Shell>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Benefits</h2>
+                <h2 className="text-2xl font-semibold tracking-tight">
+                  Benefits
+                </h2>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
-                  A professional, light UI with a softer teal/emerald identity—clean, modern,
-                  and easy to extend across pages.
+                  A professional, light UI with a softer teal/emerald
+                  identity—clean, modern, and easy to extend across pages.
                 </p>
               </div>
 
@@ -639,7 +694,7 @@ export default function HomeAlt() {
                   className={cx(
                     "p-6",
                     idx === 1 && "border-teal-200/70",
-                    idx === 3 && "border-emerald-200/70"
+                    idx === 3 && "border-emerald-200/70",
                   )}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -650,7 +705,9 @@ export default function HomeAlt() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{f.desc}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                    {f.desc}
+                  </p>
 
                   <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-teal-700">
                     <span className="h-1.5 w-1.5 rounded-full bg-teal-600" />
@@ -664,10 +721,17 @@ export default function HomeAlt() {
             <div className="mt-10 rounded-3xl border border-slate-200/70 bg-white/80 p-6 shadow-sm">
               <div className="grid gap-4 sm:grid-cols-4">
                 {metrics.map((m) => (
-                  <div key={m.label} className="rounded-2xl border border-slate-200/70 bg-white p-4">
+                  <div
+                    key={m.label}
+                    className="rounded-2xl border border-slate-200/70 bg-white p-4"
+                  >
                     <div className="text-lg font-semibold">{m.value}</div>
                     <div className="mt-1 text-xs text-slate-500">{m.label}</div>
-                    {m.hint && <div className="mt-1 text-xs text-slate-400">{m.hint}</div>}
+                    {m.hint && (
+                      <div className="mt-1 text-xs text-slate-400">
+                        {m.hint}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -682,7 +746,9 @@ export default function HomeAlt() {
           <Shell>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight">Pricing</h2>
+                <h2 className="text-2xl font-semibold tracking-tight">
+                  Pricing
+                </h2>
                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
                   Straightforward tiers—no surprises.
                 </p>
@@ -696,7 +762,7 @@ export default function HomeAlt() {
                     "rounded-xl px-3 py-2 text-sm font-semibold",
                     billing === "monthly"
                       ? "bg-slate-900 text-white"
-                      : "text-slate-700 hover:bg-slate-50"
+                      : "text-slate-700 hover:bg-slate-50",
                   )}
                 >
                   Monthly
@@ -708,7 +774,7 @@ export default function HomeAlt() {
                     "rounded-xl px-3 py-2 text-sm font-semibold",
                     billing === "yearly"
                       ? "bg-slate-900 text-white"
-                      : "text-slate-700 hover:bg-slate-50"
+                      : "text-slate-700 hover:bg-slate-50",
                   )}
                 >
                   Yearly
@@ -729,14 +795,24 @@ export default function HomeAlt() {
                   name: "School",
                   price: price(74),
                   desc: "For most schools.",
-                  points: ["Everything in Starter", "Support inbox", "Analytics", "Advanced permissions"],
+                  points: [
+                    "Everything in Starter",
+                    "Support inbox",
+                    "Analytics",
+                    "Advanced permissions",
+                  ],
                   highlight: true,
                 },
                 {
                   name: "District",
                   price: price(139),
                   desc: "For multi-campus.",
-                  points: ["Everything in School", "Multi-campus", "SSO options", "Priority support"],
+                  points: [
+                    "Everything in School",
+                    "Multi-campus",
+                    "SSO options",
+                    "Priority support",
+                  ],
                   highlight: false,
                 },
               ].map((p) => (
@@ -744,7 +820,7 @@ export default function HomeAlt() {
                   key={p.name}
                   className={cx(
                     "p-6",
-                    p.highlight && "border-teal-200/80 shadow-md"
+                    p.highlight && "border-teal-200/80 shadow-md",
                   )}
                 >
                   {p.highlight && (
@@ -776,7 +852,7 @@ export default function HomeAlt() {
                       "mt-6 inline-flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm",
                       p.highlight
                         ? "bg-teal-600 text-white hover:bg-teal-700"
-                        : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                        : "border border-slate-200 bg-white text-slate-800 hover:bg-slate-50",
                     )}
                   >
                     Choose {p.name}
@@ -814,7 +890,9 @@ export default function HomeAlt() {
               ].map((x) => (
                 <Card key={x.q} className="p-6">
                   <div className="text-sm font-semibold">{x.q}</div>
-                  <div className="mt-2 text-sm leading-relaxed text-slate-600">{x.a}</div>
+                  <div className="mt-2 text-sm leading-relaxed text-slate-600">
+                    {x.a}
+                  </div>
                 </Card>
               ))}
             </div>
@@ -822,7 +900,9 @@ export default function HomeAlt() {
             <Card className="mt-10 p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <div className="text-lg font-semibold">Try SchoolSpace today</div>
+                  <div className="text-lg font-semibold">
+                    Try SchoolSpace today
+                  </div>
                   <div className="mt-1 text-sm text-slate-600">
                     Light UI, smooth workflows, and a calmer campus experience.
                   </div>
@@ -855,7 +935,9 @@ export default function HomeAlt() {
               </div>
               <div>
                 <div className="text-sm font-semibold">SchoolSpace</div>
-                <div className="text-xs text-slate-500">Calm campus operations.</div>
+                <div className="text-xs text-slate-500">
+                  Calm campus operations.
+                </div>
               </div>
             </div>
 
