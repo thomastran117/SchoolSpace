@@ -1,4 +1,3 @@
-// src/ui/HeroCard.tsx
 import React from "react";
 import { cn } from "./cn";
 import { Card } from "./Card";
