@@ -63,7 +63,10 @@ export function Breadcrumb({
           const sep = separator ?? <DefaultSeparator />;
 
           return (
-            <li key={`${idx}-${String(item.label)}`} className="flex items-center">
+            <li
+              key={`${idx}-${String(item.label)}`}
+              className="flex items-center"
+            >
               <Crumb item={item} />
 
               {!isLast ? (
@@ -76,9 +79,7 @@ export function Breadcrumb({
               ) : null}
 
               {/* If ellipsis is used, make it non-interactive and screen-reader friendly */}
-              {isEllipsis ? (
-                <span className="sr-only">Collapsed</span>
-              ) : null}
+              {isEllipsis ? <span className="sr-only">Collapsed</span> : null}
             </li>
           );
         })}
