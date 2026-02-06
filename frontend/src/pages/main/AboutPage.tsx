@@ -1,19 +1,19 @@
-import { Section } from "@components/common/Section";
-import { Card } from "@components/common/Card";
-import { HeroCard } from "@components/common/HeroCard";
-import { FeatureCard } from "@components/common/FeatureCard";
-import { StatCard } from "@components/common/StatCard";
-import { LogoCloud } from "@components/common/LogoCloud";
-import { Pill } from "@components/common/Pill";
-import { Breadcrumb } from "@components/common/BreadCrumb";
-import { Button } from "@components/common/Button";
-import { H2, Lead, Muted } from "@components/common/Text";
-import Icon from "@components/common/Icon";
+import { Section } from "@common/Section";
+import { Card } from "@common/Card";
+import { HeroCard } from "@common/HeroCard";
+import { FeatureCard } from "@common/FeatureCard";
+import { StatCard } from "@common/StatCard";
+import { LogoCloud } from "@common/LogoCloud";
+import { Pill } from "@common/Pill";
+import { Breadcrumb } from "@common/BreadCrumb";
+import { Button } from "@common/Button";
+import { H2, Lead, Muted } from "@common/Text";
+import Icon from "@common/Icon";
 import BookIcon from "@icon/BookIcon";
 import ShieldIcon from "@icon/ShieldIcon";
 import SparkIcon from "@icon/SparkIcon";
 import PeopleIcon from "@icon/PeopleIcon";
-import TimelineItem from "@/components/common/Timeline";
+import TimelineItem from "@common/Timeline";
 
 export default function AboutPage() {
   return (

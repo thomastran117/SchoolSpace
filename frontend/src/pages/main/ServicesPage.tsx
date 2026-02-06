@@ -1,18 +1,18 @@
 import React, { useMemo } from "react";
 
-import { Section } from "@components/common/Section";
-import { Card } from "@components/common/Card";
-import { HeroCard } from "@components/common/HeroCard";
-import { FeatureCard } from "@components/common/FeatureCard";
-import { Pill } from "@components/common/Pill";
-import { Breadcrumb } from "@components/common/BreadCrumb";
-import { Button } from "@components/common/Button";
-import { H2, Lead, Muted } from "@components/common/Text";
-import CheckRow from "@/components/common/CheckRow";
+import { Section } from "@common/Section";
+import { Card } from "@common/Card";
+import { HeroCard } from "@common/HeroCard";
+import { FeatureCard } from "@common/FeatureCard";
+import { Pill } from "@common/Pill";
+import { Breadcrumb } from "@common/BreadCrumb";
+import { Button } from "@common/Button";
+import { H2, Lead, Muted } from "@common/Text";
+import CheckRow from "@common/CheckRow";
 import ServiceTierCard from "@/components/main/ServiceTierCard";
 import FAQItem from "@/components/main/FAQItem";
 import SimpleIcon from "@/components/main/SimpleIcon";
-import IconShell from "@/components/common/IconShell";
+import IconShell from "@common/IconShell";
 
 export default function ServicesPage() {
   const serviceCards = useMemo(

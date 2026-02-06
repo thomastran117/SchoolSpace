@@ -1,7 +1,7 @@
 import React from "react";
-import { HeroCard } from "@components/common/HeroCard";
-import { Input } from "@components/common/Input";
-import { Pill } from "@components/common/Pill";
+import { HeroCard } from "@common/HeroCard";
+import { Input } from "@common/Input";
+import { Pill } from "@common/Pill";
 
 export default function CoursesHeader() {
   return (

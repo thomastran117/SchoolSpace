@@ -1,6 +1,6 @@
-import Divider from "@components/common/Divider";
-import { Muted } from "@components/common/Text";
-import { Pill } from "@components/common/Pill";
+import Divider from "@common/Divider";
+import { Muted } from "@common/Text";
+import { Pill } from "@common/Pill";
 
 export default function TermBlock({
   id,
