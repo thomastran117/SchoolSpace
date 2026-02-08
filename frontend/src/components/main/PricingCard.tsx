@@ -1,7 +1,7 @@
 import React from "react";
-import { Card } from "./Card";
-import { cn } from "./cn";
-import { Button } from "./Button";
+import { Card } from "@common/Card";
+import { cn } from "@common/cn";
+import { Button } from "@common/Button";
 
 export function PricingCard({
   title,

@@ -3,7 +3,7 @@ import React, { useMemo } from "react";
 import { Section } from "@common/Section";
 import { Card } from "@common/Card";
 import { HeroCard } from "@common/HeroCard";
-import { FeatureCard } from "@common/FeatureCard";
+import { FeatureCard } from "@components/main/FeatureCard";
 import { Pill } from "@common/Pill";
 import { Breadcrumb } from "@common/BreadCrumb";
 import { Button } from "@common/Button";

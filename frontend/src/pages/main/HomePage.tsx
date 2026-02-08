@@ -3,10 +3,10 @@ import { Button } from "@common/Button";
 import { Section } from "@common/Section";
 import { Eyebrow, H1, H2, Lead, Muted } from "@common/Text";
 import { Pill } from "@common/Pill";
-import { FeatureCard } from "@common/FeatureCard";
-import { StatCard } from "@common/StatCard";
-import { TestimonialCard } from "@common/TestimonialCard";
-import { PricingCard } from "@common/PricingCard";
+import { FeatureCard } from "@components/main/FeatureCard";
+import { StatCard } from "@components/main/StatCard";
+import { TestimonialCard } from "@components/main/TestimonialCard";
+import { PricingCard } from "@components/main/PricingCard";
 import { LogoCloud } from "@common/LogoCloud";
 import { Card } from "@common/Card";
 

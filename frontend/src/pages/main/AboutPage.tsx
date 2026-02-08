@@ -1,8 +1,8 @@
 import { Section } from "@common/Section";
 import { Card } from "@common/Card";
 import { HeroCard } from "@common/HeroCard";
-import { FeatureCard } from "@common/FeatureCard";
-import { StatCard } from "@common/StatCard";
+import { FeatureCard } from "@components/main/FeatureCard";
+import { StatCard } from "@components/main/StatCard";
 import { LogoCloud } from "@common/LogoCloud";
 import { Pill } from "@common/Pill";
 import { Breadcrumb } from "@common/BreadCrumb";
