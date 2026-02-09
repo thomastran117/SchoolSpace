@@ -19,6 +19,8 @@ type CommonProps = {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
 
+  onClick?: React.MouseEventHandler<any>;
+
   scrollToRef?: React.RefObject<AnyRefEl | null>;
   scrollOptions?: ScrollIntoViewOptions;
   focusRef?: React.RefObject<AnyRefEl | null>;
@@ -36,7 +38,6 @@ type ButtonModeProps = CommonProps &
 type LinkModeProps = CommonProps &
   Omit<LinkProps, "to" | "className" | "children"> & {
     href: LinkProps["to"];
-    onClick?: React.MouseEventHandler<HTMLAnchorElement>;
   };
 
 export type ButtonProps = ButtonModeProps | LinkModeProps;

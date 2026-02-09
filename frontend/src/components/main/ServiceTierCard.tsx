@@ -61,7 +61,6 @@ export default function ServiceTierCard({
           <CheckRow key={f}>{f}</CheckRow>
         ))}
       </div>
-
       <div className="mt-6 flex flex-col gap-2 sm:flex-row">
         <Button
           href={cta.href}
