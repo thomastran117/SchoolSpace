@@ -48,6 +48,14 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "transient",
     });
 
+    services.set("CodeService", {
+      factory: (scope) =>
+        new Services.CodeService({
+          cacheService: scope.resolve("CacheService"),
+        }),
+      lifetime: "transient",
+    });
+
     services.set("PaymentService", {
       factory: (scope) =>
         new Services.PaymentService({
