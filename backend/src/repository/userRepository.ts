@@ -113,9 +113,9 @@ class UserRepository extends BaseRepository {
             email,
             ...(search && {
               OR: [
-                { email: { contains: search, mode: "insensitive" } },
-                { username: { contains: search, mode: "insensitive" } },
-                { name: { contains: search, mode: "insensitive" } },
+                { email: { contains: search } },
+                { username: { contains: search } },
+                { name: { contains: search } },
               ],
             }),
           },
