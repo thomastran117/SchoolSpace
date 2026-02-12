@@ -1,5 +1,4 @@
 export default function SectionLink({
-  id,
   title,
   active,
   onClick,

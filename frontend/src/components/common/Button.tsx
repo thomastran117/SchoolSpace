@@ -1,4 +1,5 @@
 import React from "react";
+import { Link, type LinkProps } from "react-router-dom";
 import { cn } from "./cn";
 
 type ButtonVariant =
@@ -8,15 +9,38 @@ type ButtonVariant =
   | "outline"
   | "destructive";
 type ButtonSize = "sm" | "md" | "lg";
+type AnyRefEl = HTMLElement;
 
-export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+type CommonProps = {
   title?: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+
+  onClick?: React.MouseEventHandler<any>;
+
+  scrollToRef?: React.RefObject<AnyRefEl | null>;
+  scrollOptions?: ScrollIntoViewOptions;
+  focusRef?: React.RefObject<AnyRefEl | null>;
+  focusAfterScroll?: boolean;
+
+  className?: string;
+  children?: React.ReactNode;
 };
+
+type ButtonModeProps = CommonProps &
+  React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+  };
+
+type LinkModeProps = CommonProps &
+  Omit<LinkProps, "to" | "className" | "children"> & {
+    href: LinkProps["to"];
+  };
+
+export type ButtonProps = ButtonModeProps | LinkModeProps;
 
 const base =
   "inline-flex items-center justify-center gap-2 rounded-xl font-semibold " +
@@ -51,8 +75,8 @@ function Spinner() {
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
+  (props, ref) => {
+    const {
       className,
       children,
       title,
@@ -61,21 +85,110 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       loading = false,
       leftIcon,
       rightIcon,
-      disabled,
+      scrollToRef,
+      scrollOptions,
+      focusRef,
+      focusAfterScroll = false,
+    } = props;
+
+    const classes = cn(base, variants[variant], sizes[size], className);
+    const isDisabled =
+      ("disabled" in props ? !!props.disabled : false) || loading;
+
+    const runExtras = () => {
+      const scrollTarget = scrollToRef?.current ?? null;
+      const focusTarget = focusRef?.current ?? null;
+
+      if (scrollTarget) {
+        scrollTarget.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+          inline: "nearest",
+          ...(scrollOptions ?? {}),
+        });
+
+        if (focusAfterScroll && focusTarget) {
+          window.setTimeout(() => focusTarget.focus?.(), 0);
+        }
+        return;
+      }
+
+      if (focusTarget) focusTarget.focus?.();
+    };
+
+    if ("href" in props && props.href) {
+      const {
+        href,
+        onClick,
+        replace,
+        state,
+        preventScrollReset,
+        relative,
+        viewTransition,
+      } = props;
+
+      const handleLinkClick: React.MouseEventHandler<HTMLAnchorElement> = (
+        e,
+      ) => {
+        if (isDisabled) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+        onClick?.(e);
+        if (e.defaultPrevented) return;
+        runExtras();
+      };
+
+      return (
+        <Link
+          to={href}
+          replace={replace}
+          state={state}
+          preventScrollReset={preventScrollReset}
+          relative={relative}
+          viewTransition={viewTransition}
+          className={classes}
+          aria-disabled={isDisabled || undefined}
+          onClick={handleLinkClick}
+        >
+          {loading ? (
+            <Spinner />
+          ) : leftIcon ? (
+            <span className="opacity-90">{leftIcon}</span>
+          ) : null}
+          <span>{children ?? title}</span>
+          {!loading && rightIcon ? (
+            <span className="opacity-90">{rightIcon}</span>
+          ) : null}
+        </Link>
+      );
+    }
+
+    const {
+      onClick,
       type = "button",
-      ...props
-    },
-    ref,
-  ) => {
-    const isDisabled = disabled || loading;
+      disabled,
+      ...rest
+    } = props as ButtonModeProps;
+
+    const handleButtonClick: React.MouseEventHandler<HTMLButtonElement> = (
+      e,
+    ) => {
+      if (isDisabled) return;
+      onClick?.(e);
+      if (e.defaultPrevented) return;
+      runExtras();
+    };
 
     return (
       <button
         ref={ref}
         type={type}
-        className={cn(base, variants[variant], sizes[size], className)}
+        className={classes}
         disabled={isDisabled}
-        {...props}
+        onClick={handleButtonClick}
+        {...rest}
       >
         {loading ? (
           <Spinner />

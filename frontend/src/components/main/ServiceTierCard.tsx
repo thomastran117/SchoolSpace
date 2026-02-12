@@ -1,9 +1,9 @@
-import { Button } from "@components/common/Button";
-import { Card } from "@components/common/Card";
-import CheckRow from "@components/common/CheckRow";
-import Divider from "@components/common/Divider";
-import { Muted } from "@components/common/Text";
-import { Pill } from "@components/common/Pill";
+import { Button } from "@common/Button";
+import { Card } from "@common/Card";
+import CheckRow from "@common/CheckRow";
+import Divider from "@common/Divider";
+import { Muted } from "@common/Text";
+import { Pill } from "@common/Pill";
 
 export default function ServiceTierCard({
   name,
@@ -61,7 +61,6 @@ export default function ServiceTierCard({
           <CheckRow key={f}>{f}</CheckRow>
         ))}
       </div>
-
       <div className="mt-6 flex flex-col gap-2 sm:flex-row">
         <Button
           href={cta.href}

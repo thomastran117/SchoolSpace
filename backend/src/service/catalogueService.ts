@@ -81,7 +81,7 @@ class CatalogueService extends BaseService {
     });
 
     await this.bumpCatalogueVersion();
-    return this.toSafe(course);
+    return course;
   }
 
   public async getCourseTemplates(
@@ -120,7 +120,7 @@ class CatalogueService extends BaseService {
         await this.catalogueRepository.findAllWithFilters(filter, page, limit);
 
       return {
-        data: this.toSafeArray(results),
+        data: results,
         total,
         totalPages: Math.ceil(total / limit),
         currentPage: page,
@@ -149,7 +149,7 @@ class CatalogueService extends BaseService {
       throw new NotFoundError({ message: "Course template not found" });
     }
 
-    const safe = this.toSafe(course);
+    const safe = course;
     await this.cacheService.set(cacheKey, safe, CatalogueService.DETAIL_TTL);
 
     return safe;
@@ -166,7 +166,7 @@ class CatalogueService extends BaseService {
     await this.cacheService.delete(this.key("id", id));
     await this.bumpCatalogueVersion();
 
-    return this.toSafe(course);
+    return course;
   }
 
   public async deleteCourseTemplate(id: number): Promise<boolean> {

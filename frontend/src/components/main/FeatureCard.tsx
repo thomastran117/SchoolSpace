@@ -1,6 +1,6 @@
 import React from "react";
-import { Card } from "./Card";
-import { cn } from "./cn";
+import { Card } from "@common/Card";
+import { cn } from "@common/cn";
 
 export function FeatureCard({
   icon,

@@ -122,7 +122,7 @@ class GradeService extends BaseService {
     const grade = await this.gradeRepository.findById(id);
     if (!grade) throw new NotFoundError({ message: "Grade not found" });
 
-    return this.toSafe(grade);
+    return grade;
   }
 
   public async getGradesForCourse(courseId: number, page = 1, limit = 50) {
@@ -135,7 +135,7 @@ class GradeService extends BaseService {
     });
 
     return {
-      data: this.toSafeArray(results),
+      data: results,
       total,
       page,
       totalPages: Math.ceil(total / limit),
@@ -157,7 +157,7 @@ class GradeService extends BaseService {
       userId
     );
 
-    const safe = this.toSafeArray(results);
+    const safe = results;
     await this.cacheService.set(cacheKey, safe, this.LIST_TTL);
     return safe;
   }
@@ -197,7 +197,7 @@ class GradeService extends BaseService {
       this.cacheService.delete(this.finalKey(input.courseId, input.userId)),
     ]);
 
-    return this.toSafe(grade);
+    return grade;
   }
 
   public async deleteGrade(id: number): Promise<boolean> {

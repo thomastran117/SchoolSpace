@@ -1,18 +1,18 @@
 import { useMemo, useState } from "react";
 
-import { Section } from "@components/common/Section";
-import { Card } from "@components/common/Card";
-import { HeroCard } from "@components/common/HeroCard";
-import { Pill } from "@components/common/Pill";
-import { Breadcrumb } from "@components/common/BreadCrumb";
-import { Button } from "@components/common/Button";
-import { H2, Lead, Muted } from "@components/common/Text";
-import SectionLink from "@/components/common/SectionLink";
-import InlineCode from "@/components/common/InlineCode";
-import Divider from "@/components/common/Divider";
+import { Section } from "@common/Section";
+import { Card } from "@common/Card";
+import { HeroCard } from "@common/HeroCard";
+import { Pill } from "@common/Pill";
+import { Breadcrumb } from "@common/BreadCrumb";
+import { Button } from "@common/Button";
+import { H2, Lead, Muted } from "@common/Text";
+import SectionLink from "@common/SectionLink";
+import InlineCode from "@common/InlineCode";
+import Divider from "@common/Divider";
 import PolicyBlock from "@/components/main/PolicyBlock";
 import DataTable from "@/components/main/DataTable";
-import Bullets from "@/components/common/Bullets";
+import Bullets from "@common/Bullets";
 
 export default function PrivacyPage() {
   const effectiveDate = "February 3, 2026";
