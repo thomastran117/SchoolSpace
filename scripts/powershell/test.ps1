@@ -35,7 +35,7 @@ function Invoke-Step {
   try {
     & $Command
     $exit = $LASTEXITCODE
-    if ($null -eq $exit) { $exit = 0 } # some commands don't set it; treat as success
+    if ($null -eq $exit) { $exit = 0 }
   } finally {
     Pop-Location
   }
@@ -48,7 +48,6 @@ function Invoke-Step {
   }
 }
 
-# ---- Resolve paths regardless of caller CWD ----
 $scriptDir = Resolve-ScriptDir
 $repoRoot  = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
 
@@ -58,7 +57,6 @@ $playwrightPath = Join-Path $repoRoot $PlaywrightDir
 if (-not (Test-Path $backendPath))    { throw "Backend directory not found: $backendPath" }
 if (-not (Test-Path $playwrightPath)) { throw "Playwright directory not found: $playwrightPath" }
 
-# ---- Prereqs ----
 Assert-Command "node"
 Assert-Command "npm"
 Assert-Command "npx"

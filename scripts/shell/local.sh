@@ -1,28 +1,18 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-# ---------------------------------------------
-# Fail fast
-# ---------------------------------------------
-set -e
-
-# ---------------------------------------------
-# Colors
-# ---------------------------------------------
-GREEN="\033[32m"
-CYAN="\033[36m"
-YELLOW="\033[33m"
-DARKYELLOW="\033[33m"
-GRAY="\033[90m"
-RESET="\033[0m"
+info()    { printf "\033[36m%s\033[0m\n" "$*"; }
+success() { printf "\033[32m%s\033[0m\n" "$*"; }
+warn()    { printf "\033[33m%s\033[0m\n" "$*"; }
+fail()    { printf "\033[31m%s\033[0m\n" "$*"; exit 1; }
 
 if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
-  echo "Node.js (and npm) are not installed or not on PATH." >&2
-  exit 1
+  fail "Node.js (and npm) are not installed or not on PATH."
 fi
 
 NODE_VERSION="$(node -v)"
 NPM_VERSION="$(npm -v)"
-echo -e "${GREEN}Node: $NODE_VERSION  npm: $NPM_VERSION${RESET}"
+success "Node: $NODE_VERSION  npm: $NPM_VERSION"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -32,55 +22,58 @@ BACKEND_PATH="$ROOT_DIR/backend"
 WORKER_PATH="$ROOT_DIR/worker"
 
 assert_package() {
-  if [[ ! -f "$1/package.json" ]]; then
-    echo "package.json not found in $1" >&2
-    exit 1
-  fi
+  local p="$1"
+  [[ -f "$p/package.json" ]] || fail "package.json not found in $p"
 }
 
 assert_package "$FRONTEND_PATH"
 assert_package "$BACKEND_PATH"
 assert_package "$WORKER_PATH"
 
-echo -e "${CYAN}Starting frontend in $FRONTEND_PATH${RESET}"
-(
-  cd "$FRONTEND_PATH"
-  npm run dev
-) &
-FE_PID=$!
+PIDS=()
 
-echo -e "${CYAN}Starting backend...${RESET}"
-(
-  cd "$BACKEND_PATH"
-  npm run dev
-) &
-BE_PID=$!
+start_bg() {
+  local name="$1"
+  shift
 
-echo -e "${CYAN}Starting workers...${RESET}"
-(
-  cd "$WORKER_PATH"
-  npx tsx src/workers/emailWorker.ts
-) &
-WK_PID=$!
+  info "Starting $name..."
+  (
+    exec "$@"
+  ) &
+  local pid=$!
+  PIDS+=("$pid")
+  success "$name started (PID $pid)"
+}
 
 cleanup() {
-  echo -e "\n${YELLOW}Stopping all services...${RESET}"
+  echo
+  warn "Stopping all services..."
 
-  for PID in $FE_PID $BE_PID $WK_PID; do
-    if kill -0 "$PID" 2>/dev/null; then
-      kill "$PID" 2>/dev/null || true
-      echo -e "${DARKYELLOW}Killed PID $PID${RESET}"
-    else
-      echo -e "${GRAY}Note: could not kill PID $PID${RESET}"
+  for pid in "${PIDS[@]:-}"; do
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -TERM "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
     fi
   done
 
-  echo -e "${GREEN}All services stopped. Done.${RESET}"
+  sleep 1 || true
+  for pid in "${PIDS[@]:-}"; do
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -KILL "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
+    fi
+  done
+
+  success "All services stopped. Done."
 }
 
 trap cleanup INT TERM EXIT
 
-echo -e "\n${GREEN}All services running. Press Ctrl+C to stop everything...${RESET}"
-while true; do
-  sleep 2
-done
+info "Starting frontend in $FRONTEND_PATH"
+start_bg "frontend" bash -lc "cd '$FRONTEND_PATH' && npm run dev"
+
+start_bg "backend" bash -lc "cd '$BACKEND_PATH' && npm run dev"
+
+start_bg "email worker" bash -lc "cd '$WORKER_PATH' && npx tsx src/workers/emailWorker.ts"
+
+echo
+success "All services running. Press Ctrl+C to stop everything..."
+while true; do sleep 2; done
