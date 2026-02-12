@@ -22,7 +22,6 @@
       "@icon/*": ["src/components/icon/*"],
       "@style/*": ["src/style/*"]
     },
-    "ignoreDeprecations": "6.0",
 
     /* Bundler mode */
     "moduleResolution": "bundler",
