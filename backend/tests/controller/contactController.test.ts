@@ -1,8 +1,8 @@
-import { ContactController } from "../../controller/contactController";
-import { ForbiddenError, HttpError, NotFoundError } from "../../error";
-import logger from "../../utility/logger";
+import { ContactController } from "../../src/controller/contactController";
+import { ForbiddenError, HttpError, NotFoundError } from "../../src/error";
+import logger from "../../src/utility/logger";
 
-jest.mock("../../utility/logger", () => ({
+jest.mock("../../src/utility/logger", () => ({
   __esModule: true,
   default: {
     error: jest.fn(),
