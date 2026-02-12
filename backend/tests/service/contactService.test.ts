@@ -1,8 +1,8 @@
-import { ConflictError, HttpError, NotFoundError } from "../../error";
-import { ContactService } from "../../service/contactService";
-import logger from "../../utility/logger";
+import { ConflictError, HttpError, NotFoundError } from "../../src/error";
+import { ContactService } from "../../src/service/contactService";
+import logger from "../../src/utility/logger";
 
-jest.mock("../../utility/logger", () => ({
+jest.mock("../../src/utility/logger", () => ({
   __esModule: true,
   default: {
     error: jest.fn(),

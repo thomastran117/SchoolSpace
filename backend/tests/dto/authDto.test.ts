@@ -3,9 +3,9 @@ import {
   MicrosoftSchema,
   SignupSchema,
   VerifySchema,
-} from "../../dto/authSchema";
-import { HttpError } from "../../error";
-import { validate } from "../../hooks/validateHook";
+} from "../../src/dto/authSchema";
+import { HttpError } from "../../src/error";
+import { validate } from "../../src/hooks/validateHook";
 
 describe("Auth DTO Validation", () => {
   describe("Zod Schemas", () => {
