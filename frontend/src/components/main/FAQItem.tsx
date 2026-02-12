@@ -1,6 +1,6 @@
-import Divider from "@components/common/Divider";
+import Divider from "@common/Divider";
 import { useState } from "react";
-import { Muted } from "@components/common/Text";
+import { Muted } from "@common/Text";
 
 export default function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);

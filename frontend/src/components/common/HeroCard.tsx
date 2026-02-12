@@ -116,13 +116,11 @@ export function HeroCard({
                   variant={primaryAction.variant ?? "primary"}
                   size={primaryAction.size ?? "md"}
                   onClick={primaryAction.onClick}
-                  // @ts-expect-error - expected
                   href={primaryAction.href}
                   leftIcon={primaryAction.leftIcon}
                   rightIcon={primaryAction.rightIcon}
                   loading={primaryAction.loading}
                   disabled={primaryAction.disabled}
-                  type={primaryAction.type}
                 >
                   {primaryAction.label}
                 </Button>
@@ -133,13 +131,11 @@ export function HeroCard({
                   variant={secondaryAction.variant ?? "outline"}
                   size={secondaryAction.size ?? "md"}
                   onClick={secondaryAction.onClick}
-                  // @ts-expect-error - expected
                   href={secondaryAction.href}
                   leftIcon={secondaryAction.leftIcon}
                   rightIcon={secondaryAction.rightIcon}
                   loading={secondaryAction.loading}
                   disabled={secondaryAction.disabled}
-                  type={secondaryAction.type}
                 >
                   {secondaryAction.label}
                 </Button>

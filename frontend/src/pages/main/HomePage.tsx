@@ -1,14 +1,13 @@
-import React from "react";
-import { Button } from "@components/common/Button";
-import { Section } from "@components/common/Section";
-import { Eyebrow, H1, H2, Lead, Muted } from "@components/common/Text";
-import { Pill } from "@components/common/Pill";
-import { FeatureCard } from "@components/common/FeatureCard";
-import { StatCard } from "@components/common/StatCard";
-import { TestimonialCard } from "@components/common/TestimonialCard";
-import { PricingCard } from "@components/common/PricingCard";
-import { LogoCloud } from "@components/common/LogoCloud";
-import { Card } from "@components/common/Card";
+import { Button } from "@common/Button";
+import { Section } from "@common/Section";
+import { Eyebrow, H1, H2, Lead, Muted } from "@common/Text";
+import { Pill } from "@common/Pill";
+import { FeatureCard } from "@components/main/FeatureCard";
+import { StatCard } from "@components/main/StatCard";
+import { TestimonialCard } from "@components/main/TestimonialCard";
+import { PricingCard } from "@components/main/PricingCard";
+import { LogoCloud } from "@common/LogoCloud";
+import { Card } from "@common/Card";
 
 export default function HomePageThemeA() {
   return (

@@ -53,6 +53,7 @@ export default function Signup() {
       });
 
       setShowVerifyModal(true);
+      console.log(data);
     } catch (err: any) {
       const serverError =
         err?.response?.data?.error ??
@@ -81,6 +82,8 @@ export default function Signup() {
         code: verificationCode,
         captcha: token,
       });
+
+      console.log(data);
     } catch (err: any) {
       setVerifyError(err?.response?.data?.message ?? "Invalid code");
     } finally {

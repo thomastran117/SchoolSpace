@@ -1,6 +1,6 @@
-import { Pill } from "@components/common/Pill";
-import { Muted } from "@components/common/Text";
-import Divider from "@components/common/Divider";
+import { Pill } from "@common/Pill";
+import { Muted } from "@common/Text";
+import Divider from "@common/Divider";
 
 export default function PolicyBlock({
   id,

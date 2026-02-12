@@ -116,15 +116,6 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
-    services.set("EnrollmentService", {
-      factory: (scope) =>
-        new Services.EnrollmentService({
-          userService: scope.resolve("UserService"),
-          courseService: scope.resolve("CourseService"),
-        }),
-      lifetime: "scoped",
-    });
-
     services.set("AuthService", {
       factory: (scope) =>
         new Services.AuthService({
