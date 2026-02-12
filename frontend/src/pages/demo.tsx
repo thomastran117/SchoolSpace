@@ -1,4 +1,3 @@
-import React from "react";
 import { HeroCard } from "@common/HeroCard";
 import { Input } from "@common/Input";
 import { Pill } from "@common/Pill";

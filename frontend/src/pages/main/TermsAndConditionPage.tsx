@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Section } from "@common/Section";
 import { Card } from "@common/Card";

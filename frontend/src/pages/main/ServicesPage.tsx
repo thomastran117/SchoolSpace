@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 
 import { Section } from "@common/Section";
 import { Card } from "@common/Card";

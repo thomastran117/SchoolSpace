@@ -1,4 +1,3 @@
-import React from "react";
 import { Button } from "@common/Button";
 import { Section } from "@common/Section";
 import { Eyebrow, H1, H2, Lead, Muted } from "@common/Text";

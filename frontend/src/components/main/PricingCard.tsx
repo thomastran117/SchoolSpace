@@ -1,4 +1,3 @@
-import React from "react";
 import { Card } from "@common/Card";
 import { cn } from "@common/cn";
 import { Button } from "@common/Button";
