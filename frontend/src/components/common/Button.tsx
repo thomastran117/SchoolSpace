@@ -92,7 +92,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     } = props;
 
     const classes = cn(base, variants[variant], sizes[size], className);
-    const isDisabled = ("disabled" in props ? !!props.disabled : false) || loading;
+    const isDisabled =
+      ("disabled" in props ? !!props.disabled : false) || loading;
 
     const runExtras = () => {
       const scrollTarget = scrollToRef?.current ?? null;
@@ -116,9 +117,19 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     if ("href" in props && props.href) {
-      const { href, onClick, replace, state, preventScrollReset, relative, viewTransition } = props;
+      const {
+        href,
+        onClick,
+        replace,
+        state,
+        preventScrollReset,
+        relative,
+        viewTransition,
+      } = props;
 
-      const handleLinkClick: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
+      const handleLinkClick: React.MouseEventHandler<HTMLAnchorElement> = (
+        e,
+      ) => {
         if (isDisabled) {
           e.preventDefault();
           e.stopPropagation();
@@ -161,7 +172,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       ...rest
     } = props as ButtonModeProps;
 
-    const handleButtonClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    const handleButtonClick: React.MouseEventHandler<HTMLButtonElement> = (
+      e,
+    ) => {
       if (isDisabled) return;
       onClick?.(e);
       if (e.defaultPrevented) return;
