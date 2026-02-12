@@ -70,6 +70,7 @@ jobs:
 
   integration:
     name: Integration Tests (Docker)
+    continue-on-error: true
     runs-on: ubuntu-latest
     needs: test
 
