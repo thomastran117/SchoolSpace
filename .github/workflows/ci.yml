@@ -9,9 +9,6 @@ on:
 env:
   NODE_VERSION: 20
 
-# -----------------------------------------
-# FORMAT CHECK (Parallel, Fast)
-# -----------------------------------------
 jobs:
   format:
     name: Format Check (${{ matrix.app }})
@@ -59,7 +56,7 @@ jobs:
       - name: Make scripts executable
         run: |
           chmod +x ./app.sh
-          chmod -R +x ./scripts
+          chmod -R +x ./scripts/shell/
 
       - name: Install backend dependencies
         working-directory: backend
@@ -82,7 +79,7 @@ jobs:
       - name: Make scripts executable
         run: |
           chmod +x ./app.sh
-          chmod -R +x ./scripts
+          chmod -R +x ./scripts/shell/
 
       - uses: docker/setup-buildx-action@v3
 
@@ -91,6 +88,17 @@ jobs:
 
       - name: Build & start containers
         run: ./app.sh docker
+
+      - name: Prisma generate + migrate
+        run: |
+          set -e
+          echo "Running prisma generate..."
+          docker compose exec -T backend npx prisma generate
+
+          echo "Applying prisma migrations..."
+          docker compose exec -T backend npx prisma migrate deploy
+
+          echo "Prisma generate + migrate complete."
 
       - name: Wait for backend health
         run: |
@@ -115,3 +123,4 @@ jobs:
       - name: Stop containers
         if: always()
         run: docker compose down -v
+  
