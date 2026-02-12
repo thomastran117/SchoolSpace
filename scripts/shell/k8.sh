@@ -81,7 +81,7 @@ PF_BACKEND_LOG="${TMPDIR:-/tmp}/schoolspace-pf-backend.log"
 kubectl port-forward -n "$NAMESPACE" svc/frontend "${FRONTEND_PORT}:3040" >"$PF_FRONTEND_LOG" 2>&1 &
 PF_FRONTEND_PID=$!
 
-kubectl port-forward -n "$NAMESPACE" svc/backend  "${BACKEND_PORT}:8090"  >"$PF_BACKEND_LOG"  2>&1 &
+kubectl port-forward -n "$NAMESPACE" svc/backend  "${BACKEND_PORT}:8040"  >"$PF_BACKEND_LOG"  2>&1 &
 PF_BACKEND_PID=$!
 
 cleanup() {

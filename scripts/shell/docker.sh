@@ -19,5 +19,5 @@ docker compose \
 
 echo
 echo "All services are now running."
-echo "Frontend: http://localhost:3090"
-echo "Backend : http://localhost:8090"
+echo "Frontend: http://localhost:3040"
+echo "Backend : http://localhost:8040"

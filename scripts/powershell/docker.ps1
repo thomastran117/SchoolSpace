@@ -12,5 +12,5 @@ docker compose -f (Join-Path $repoRoot "docker-compose.yml") --project-directory
 
 Write-Host ""
 Write-Host "All services are now running."
-Write-Host "Frontend: http://localhost:3090"
-Write-Host "Backend : http://localhost:8090"
+Write-Host "Frontend: http://localhost:3040"
+Write-Host "Backend : http://localhost:8040"

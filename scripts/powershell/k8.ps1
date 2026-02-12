@@ -63,7 +63,7 @@ Start-Process powershell -NoNewWindow -ArgumentList @(
 Start-Process powershell -NoNewWindow -ArgumentList @(
   "-NoProfile",
   "-Command",
-  "kubectl port-forward -n $Namespace svc/backend $BackendPort`:8090 > `$null 2>&1"
+  "kubectl port-forward -n $Namespace svc/backend $BackendPort`:8040 > `$null 2>&1"
 )
 
 Write-Host ""
