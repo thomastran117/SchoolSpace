@@ -17,11 +17,83 @@ class CourseController extends BaseController {
   constructor(dependencies: { courseService: CourseService }) {
     super();
     this.courseService = dependencies.courseService;
-    this.getCourses = this.getCourses.bind(this);
-    this.getCourse = this.getCourse.bind(this);
-    this.createCourse = this.createCourse.bind(this);
-    this.updateCourse = this.updateCourse.bind(this);
-    this.deleteCourse = this.deleteCourse.bind(this);
+  }
+
+  public unenrollStudent(
+    req: FastifyRequest<{ Params: { id: number } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      console.log("hello");
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseController] unenrollStudent failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public enrollStudent(
+    req: FastifyRequest<{ Params: { id: number } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      console.log("hello");
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseController] enrollStudent failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public generateEnrollCode(
+    req: FastifyRequest<{ Params: { id: number } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      console.log("hello");
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseController] generateEnrollCode failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public removeEnrollCode(
+    req: FastifyRequest<{ Params: { id: number; code: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      console.log("hello");
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseController] removeEnrollCode failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public enrollWithCode(req: FastifyRequest, reply: FastifyReply) {
+    try {
+      console.log("hello");
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseController] enrollWithCode failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
   }
 
   public async getCourses(
