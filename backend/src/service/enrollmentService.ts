@@ -1,18 +1,22 @@
 import { HttpError, InternalServerError } from "../error";
 import logger from "../utility/logger";
+import type { CodeService } from "./codeService";
 import type { CourseService } from "./courseService";
 import type { UserService } from "./userService";
 
 class EnrollmentService {
   private readonly userService: UserService;
   private readonly courseService: CourseService;
+  private readonly codeService: CodeService;
 
   constructor(dependencies: {
     userService: UserService;
     courseService: CourseService;
+    codeService: CodeService;
   }) {
     this.userService = dependencies.userService;
     this.courseService = dependencies.courseService;
+    this.codeService = dependencies.codeService;
   }
 
   public async enrollCourse(courseId: number, userId: number) {

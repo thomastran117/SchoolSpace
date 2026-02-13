@@ -1,7 +1,7 @@
 import {
   CreateContactSchema,
   UpdateContactSchema,
-} from "../../dto/contactSchema";
+} from "../../src/dto/contactSchema";
 
 describe("Contact Zod DTO Schemas", () => {
   describe("CreateContactSchema", () => {
