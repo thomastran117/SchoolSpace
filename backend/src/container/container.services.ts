@@ -137,6 +137,16 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
+    services.set("EnrollmentService", {
+      factory: (scope) =>
+        new Services.EnrollmentService({
+          codeService: scope.resolve("CodeService"),
+          userService: scope.resolve("UserService"),
+          courseService: scope.resolve("CourseService"),
+        }),
+      lifetime: "scoped",
+    });
+
     return services;
   } catch (err: any) {
     logger.error(

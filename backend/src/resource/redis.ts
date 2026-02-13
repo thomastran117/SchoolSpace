@@ -53,17 +53,14 @@ const redis = new Redis(env.redisUrl, {
 
 redis.on("ready", () => {
   healthy = true;
-  logger.info("[Redis] ready");
 });
 
 redis.on("error", (err) => {
   healthy = false;
-  logger.error(`[Redis] error: ${err.message}`);
 });
 
 redis.on("close", () => {
   healthy = false;
-  logger.warn("[Redis] closed");
 });
 
 function delayMs(attempt: number) {
@@ -80,7 +77,7 @@ export async function initRedis(): Promise<void> {
       await redis.connect();
       await redis.ping();
       healthy = true;
-      logger.info("[Redis] init ok");
+      logger.info("Redis connection successful");
       return;
     } catch (err: any) {
       healthy = false;
@@ -101,7 +98,7 @@ export async function initRedis(): Promise<void> {
     }
   }
 
-  logger.warn("[Redis] init failed; continuing without redis");
+  logger.warn("Redis connection failed; continuing without redis");
 }
 
 export function isRedisHealthy(): boolean {
