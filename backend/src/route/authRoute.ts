@@ -100,6 +100,7 @@ async function authRoutes(app: FastifyInstance) {
    */
   app.get(
     "/refresh",
+    { onRequest: app.csrfProtection }, 
     useController("AuthController", (c) => c.refreshAccessToken)
   );
 
@@ -108,7 +109,13 @@ async function authRoutes(app: FastifyInstance) {
    */
   app.post(
     "/logout",
+    { onRequest: app.csrfProtection }, 
     useController("AuthController", (c) => c.logoutRefreshToken)
+  );
+
+  app.get(
+    "/csrf",
+    useController("AuthController", (c) => c.getCsrfToken)
   );
 }
 

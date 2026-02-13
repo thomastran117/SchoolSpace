@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import Fastify from "fastify";
 import methodNotAllowed from "fastify-method-not-allowed";
+import csrfProtection from "@fastify/csrf-protection";
 
 import container from "./container";
 import errorHandler from "./plugin/errorPlugin";
@@ -49,7 +50,16 @@ export async function buildApp() {
   app.register(errorHandler);
   app.register(requestLogger);
   app.register(requestScopePlugin);
-  app.register(cookie);
+  app.register(cookie, { secret: process.env.COOKIE_SECRET! || "secret", hook: "onRequest" });
+  app.register(csrfProtection, {
+    cookieOpts: {
+      signed: true,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    },
+  });
 
   app.register(multipart, {
     limits: {
