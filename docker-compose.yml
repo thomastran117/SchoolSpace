@@ -19,7 +19,7 @@ services:
     image: school-backend
     environment:
       DATABASE_URL: mysql://root:root@mysql:3306/appdb
-      DATABASE_HOST: localhost
+      DATABASE_HOST: mysql
       DATABASE_PORT: 3306
       DATABASE_PASSWORD: root
       DATABASE_NAME: appdb
