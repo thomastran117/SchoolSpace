@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc && tsc-alias",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "test": "jest --passWithNoTests --runInBand",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
