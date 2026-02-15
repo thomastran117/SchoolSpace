@@ -1,5 +1,5 @@
 import { RepositoryError } from "../error/repositoryError";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 import prisma from "../resource/prisma";
 import { CircuitBreaker } from "../utility/circuitBreaker";
 import logger from "../utility/logger";

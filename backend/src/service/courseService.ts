@@ -2,7 +2,7 @@ import type { MultipartFile } from "@fastify/multipart";
 import crypto from "crypto";
 
 import { HttpError, InternalServerError, NotFoundError } from "../error";
-import type { Prisma } from "../generated/prisma/client";
+import type { Prisma } from "@prisma/client";
 import type { CourseFull, CourseListItem } from "../models/course";
 import type { CourseRepository } from "../repository";
 import logger from "../utility/logger";

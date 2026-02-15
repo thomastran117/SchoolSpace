@@ -14,7 +14,7 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
 import env from "../config/envConfigs";
-import { PrismaClient } from "../generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 const adapter = new PrismaMariaDb({
   host: env.databaseHost,

@@ -1,4 +1,4 @@
-import type { Prisma } from "../generated/prisma/client";
+import type { Prisma } from "@prisma/client";
 import type { CourseFull, CourseListItem } from "../models/course";
 import { courseFullInclude, courseListSelect } from "../models/course";
 import { BaseRepository } from "./baseRepository";

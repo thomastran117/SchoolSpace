@@ -7,7 +7,7 @@
  * @version 1.0.0
  * @auth Thomas
  */
-import type { Prisma } from "../generated/prisma/client";
+import type { Prisma } from "@prisma/client";
 
 export const courseListSelect = {
   id: true,
