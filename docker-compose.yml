@@ -3,7 +3,7 @@ services:
     container_name: school-frontend
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     ports:
       - "3040:80"
     depends_on:
@@ -15,7 +15,7 @@ services:
     container_name: school-backend
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     image: school-backend
     environment:
       DATABASE_URL: mysql://root:root@mysql:3306/appdb
@@ -38,28 +38,6 @@ services:
         condition: service_started
       rabbitmq:
         condition: service_healthy
-    networks:
-      - school-network
-
-  worker:
-    image: school-backend
-    container_name: school-worker
-    command: node dist/workers/emailWorker.js
-    environment:
-      DATABASE_URL: mysql://root:root@mysql:3306/appdb
-      DATABASE_HOST: localhost
-      DATABASE_PORT: 3306
-      DATABASE_PASSWORD: root
-      DATABASE_NAME: appdb
-      DATABASE_USER: root
-      REDIS_URL: redis:6379
-      RABBITMQ_URL: amqp://appuser:apppass@rabbitmq:5672
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    restart: unless-stopped
     networks:
       - school-network
 
@@ -100,8 +78,8 @@ services:
     container_name: school-rabbit
     restart: always
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5673:5672"
+      - "15673:15672"
     environment:
       RABBITMQ_DEFAULT_USER: appuser
       RABBITMQ_DEFAULT_PASS: apppass
