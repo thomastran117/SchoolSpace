@@ -384,7 +384,7 @@ class AuthController {
     }
   }
 
-  public async getCsrfToken(req: FastifyRequest, reply: FastifyReply){
+  public async getCsrfToken(req: FastifyRequest, reply: FastifyReply) {
     try {
       const token = await reply.generateCsrf();
       return reply.send({ csrfToken: token });

@@ -25,7 +25,7 @@ const SessionManager: React.FC<SessionManagerProps> = ({ children }) => {
 
     const initSession = async () => {
       try {
-        const res = await PublicApi.get<RefreshResponse>("/auth/refresh");
+        const res = await PublicApi.post<RefreshResponse>("/auth/refresh");
         if (cancelled) return;
 
         const { accessToken, username, avatar, role } = res.data;
