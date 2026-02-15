@@ -101,7 +101,6 @@ jobs:
           elapsed=0
 
           while true; do
-            # If the container exited, fail fast with logs
             if ! docker compose ps --status running | grep -q backend; then
               echo "Backend is not running."
               docker compose ps

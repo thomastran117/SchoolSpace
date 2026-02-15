@@ -24,7 +24,7 @@ services:
       DATABASE_PASSWORD: root
       DATABASE_NAME: appdb
       DATABASE_USER: root
-      REDIS_URL: redis:6379
+      REDIS_URL: redis://redis:6379
       RABBITMQ_URL: amqp://appuser:apppass@rabbitmq:5672
       JWT_SECRET_KEY: amazing_secret_key_yup_yes_abcdef123
       JWT_SECRET_KEY_REFRESH: amazing_secret_key_yup_yes_abcdef123
