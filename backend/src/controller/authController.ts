@@ -383,6 +383,23 @@ class AuthController {
       throw new InternalServerError({ message: "Internal server error" });
     }
   }
+
+  public async getCsrfToken(req: FastifyRequest, reply: FastifyReply) {
+    try {
+      const token = await reply.generateCsrf();
+      return reply.send({ csrfToken: token });
+    } catch (err: any) {
+      if (err instanceof HttpError) {
+        throw err;
+      }
+
+      logger.error(
+        `[AuthController] getCsrfToken failed: ${err?.message ?? err}`
+      );
+
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
 }
 
 export { AuthController };

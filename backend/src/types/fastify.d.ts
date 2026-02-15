@@ -1,3 +1,4 @@
+import "@fastify/csrf-protection";
 import "fastify";
 
 import type { UserPayload } from "../../models/token";

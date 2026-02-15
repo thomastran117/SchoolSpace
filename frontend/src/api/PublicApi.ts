@@ -1,6 +1,7 @@
 import type { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 import axios from "axios";
 import environment from "../configuration/Environment";
+import { ensureCsrfToken } from "./Crsf";
 
 const BASE_URL: string = environment.backend_url;
 
@@ -11,6 +12,30 @@ const PublicApi: AxiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+PublicApi.interceptors.request.use(
+  async (config) => {
+    const method = (config.method ?? "get").toLowerCase();
+
+    const isUnsafe = ["post", "put", "patch", "delete"].includes(method);
+
+    const url = config.url ?? "";
+    const needsCsrf =
+      isUnsafe ||
+      url.includes("/auth/login") ||
+      url.includes("/auth/logout");
+
+    if (needsCsrf) {
+      const token = await ensureCsrfToken();
+
+      config.headers = config.headers ?? {};
+      config.headers["X-CSRF-Token"] = token;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
 
 PublicApi.interceptors.response.use(
   (response: AxiosResponse) => response,

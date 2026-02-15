@@ -19,6 +19,7 @@ import {
   SignupSchema,
   VerifySchema,
 } from "../dto/authSchema";
+import { assertAllowedOrigin } from "../hooks/allowedOriginsHook";
 import { useController } from "../hooks/controllerHook";
 import { validate } from "../hooks/validateHook";
 
@@ -96,10 +97,11 @@ async function authRoutes(app: FastifyInstance) {
   );
 
   /**
-   * @route GET /auth/refresh
+   * @route POST /auth/refresh
    */
-  app.get(
+  app.post(
     "/refresh",
+    { onRequest: app.csrfProtection },
     useController("AuthController", (c) => c.refreshAccessToken)
   );
 
@@ -108,7 +110,13 @@ async function authRoutes(app: FastifyInstance) {
    */
   app.post(
     "/logout",
+    { onRequest: app.csrfProtection },
     useController("AuthController", (c) => c.logoutRefreshToken)
+  );
+
+  app.get(
+    "/csrf",
+    useController("AuthController", (c) => c.getCsrfToken)
   );
 }
 

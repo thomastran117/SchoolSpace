@@ -7,6 +7,7 @@ import axios from "axios";
 import { store } from "../stores";
 import { setCredentials, clearCredentials } from "../stores/authSlice";
 import environment from "../configuration/Environment";
+import { ensureCsrfToken } from "./Crsf";
 
 const BASE_URL: string = environment.backend_url;
 
@@ -23,7 +24,7 @@ let refreshPromise: Promise<string> | null = null;
 
 async function refreshToken(): Promise<string> {
   try {
-    const refreshResp = await ProtectedApi.get("/auth/refresh");
+    const refreshResp = await ProtectedApi.post("/auth/refresh");
     const { accessToken, username, role, avatar } = refreshResp.data;
 
     store.dispatch(
@@ -130,6 +131,34 @@ ProtectedApi.interceptors.response.use(
 
     return Promise.reject(error);
   },
+);
+
+ProtectedApi.interceptors.request.use(
+  async (config: RetryAxiosRequestConfig) => {
+    const state = store.getState();
+    const token = state.auth.accessToken;
+
+    config.headers = config.headers ?? {};
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    const method = (config.method ?? "get").toLowerCase();
+    const isUnsafe = ["post", "put", "patch", "delete"].includes(method);
+
+    const url = config.url ?? "";
+    const needsCsrf =
+      isUnsafe || url.includes("/auth/refresh") || url.includes("/auth/logout");
+
+    if (needsCsrf) {
+      const csrf = await ensureCsrfToken();
+      config.headers["X-CSRF-Token"] = csrf;
+    }
+
+    return config;
+  },
+  (error: AxiosError) => Promise.reject(error),
 );
 
 export default ProtectedApi;
