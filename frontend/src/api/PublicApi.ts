@@ -21,9 +21,7 @@ PublicApi.interceptors.request.use(
 
     const url = config.url ?? "";
     const needsCsrf =
-      isUnsafe ||
-      url.includes("/auth/login") ||
-      url.includes("/auth/logout");
+      isUnsafe || url.includes("/auth/login") || url.includes("/auth/logout");
 
     if (needsCsrf) {
       const token = await ensureCsrfToken();

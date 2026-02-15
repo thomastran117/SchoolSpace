@@ -44,7 +44,10 @@ export async function ensureCsrfToken(): Promise<string> {
           throw new Error("Unable to contact server (CSRF timeout).");
         }
 
-        console.error("[CSRF] Fetch failed:", err.response?.data ?? err.message);
+        console.error(
+          "[CSRF] Fetch failed:",
+          err.response?.data ?? err.message,
+        );
         throw err;
       })
       .finally(() => {
