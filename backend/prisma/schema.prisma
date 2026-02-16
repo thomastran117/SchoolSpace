@@ -222,7 +222,7 @@ model UserReport {
   offenderUserId Int @map("offender_user_id")
 
   reportTopic Topic @default(UNDEFINED)
-  reportDescription String?
+  reportDescription String? @map("report_description_text") @db.Text
 
   reportStatus Status @default(CREATED)
 

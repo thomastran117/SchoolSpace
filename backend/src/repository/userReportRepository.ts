@@ -1,32 +1,24 @@
 import type { Status, Topic, UserReport } from "../models/userReport";
 import { BaseRepository } from "./baseRepository";
 
-/**
- * TO DO:
- * Get a report by ID
- * Get a report by multiple IDs
- * Get all (with a filter)
- */
-
 class UserReportRepository extends BaseRepository {
   constructor() {
-    super({ maxRetries: 3, baseDelay: 150 }); // try 3 times, 150^#try delay each time
+    super({ maxRetries: 3, baseDelay: 150 });
   }
 
   public async create(data: {
-    //async function called create with param data
+
     victimUserId: number;
     offenderUserId: number;
     reportTopic: Topic;
     reportDescription?: string | null;
     reportStatus: Status;
   }): Promise<UserReport> {
-    //promise is UserReport type
     return this.executeAsync(
       async () => {
         return await this.prisma.userReport.create({ data });
       },
-      { deadlineMs: 1000 } //run this and get the UserReport type promise within 1000ms. don't wait for me.
+      { deadlineMs: 1000 } 
     );
   }
 
