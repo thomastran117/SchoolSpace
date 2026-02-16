@@ -54,7 +54,6 @@ function registerRepositoryModules(): Map<string, Registration<any>> {
       factory: () => new Repositories.UserReportRepository(),
       lifetime: "singleton",
     });
-    
 
     return repositories;
   } catch (err: any) {
