@@ -1,22 +1,15 @@
 import crypto from "crypto";
 import { env } from "process";
 
-import { InternalServerError } from "../error";
+import {
+  InternalServerError,
+  TooManyRequestError,
+  UnauthorizedError,
+} from "../error";
 import type { CacheService } from "../service/cacheService";
 import logger from "../utility/logger";
 
 type CodeRecord = { courseId: number };
-
-type GenerateResult =
-  | { alreadySent: true; expiresInSec: number }
-  | { alreadySent: false; code: string; expiresInSec: number };
-
-type RedeemByCodeResult =
-  | { ok: true; courseId: number }
-  | {
-      ok: false;
-      reason: "invalid_or_expired" | "already_used" | "too_many_attempts";
-    };
 
 const HMAC_SECRET = env.codeSecret;
 
@@ -33,13 +26,13 @@ class CodeService {
 
   public async generateEnrollmentCode(
     courseId: number
-  ): Promise<GenerateResult> {
+  ): Promise<string | null> {
     try {
       const cooldownKey = this.cooldownKey(courseId);
       const onCooldown = await this.cache.exists(cooldownKey);
 
       if (onCooldown) {
-        return { alreadySent: true, expiresInSec: this.CODE_TTL_SEC };
+        return null;
       }
 
       const code = this.generateHumanCode(12);
@@ -50,7 +43,7 @@ class CodeService {
 
       await this.cache.set(cooldownKey, 1, this.COOLDOWN_TTL_SEC);
 
-      return { alreadySent: false, code, expiresInSec: this.CODE_TTL_SEC };
+      return code;
     } catch (err: any) {
       logger.error(
         `[CodeService] generateEnrollmentCode failed: ${err?.message ?? err}`
@@ -62,7 +55,7 @@ class CodeService {
   public async redeemEnrollmentCodeByCode(params: {
     userId: number;
     code: string;
-  }): Promise<RedeemByCodeResult> {
+  }): Promise<number> {
     const { userId, code } = params;
 
     try {
@@ -76,10 +69,11 @@ class CodeService {
         this.CODE_TTL_SEC
       );
       if (attempts > this.MAX_ATTEMPTS)
-        return { ok: false, reason: "too_many_attempts" };
+        throw new TooManyRequestError({ message: "Too many attempts" });
 
       const record = await this.cache.get<CodeRecord>(this.codeKey(token));
-      if (!record?.courseId) return { ok: false, reason: "invalid_or_expired" };
+      if (!record?.courseId)
+        throw new UnauthorizedError({ message: "Invalid code" });
 
       const ttl =
         (await this.cache.ttl(this.codeKey(token))) ?? this.CODE_TTL_SEC;
@@ -90,9 +84,9 @@ class CodeService {
         1,
         Math.max(1, ttl)
       );
-      if (!marked) return { ok: false, reason: "already_used" };
+      if (!marked) throw new UnauthorizedError({ message: "Invalid code" });
 
-      return { ok: true, courseId: record.courseId };
+      return record.courseId;
     } catch (err: any) {
       logger.error(
         `[CodeService] redeemEnrollmentCodeByCode failed: ${err?.message ?? err}`
