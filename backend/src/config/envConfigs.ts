@@ -152,6 +152,29 @@ class EnvConfig {
     return !v ? def : v;
   }
 
+  public validate(): void {
+    const errors: string[] = [];
+
+    const require = (cond: any, msg: string) => {
+      if (!cond) errors.push(msg);
+    };
+
+    require(this._databaseUrl, "DATABASE_URL is required");
+    require(this._redisUrl, "REDIS_URL is required");
+    require(this._rabbitMQUrl, "RABBITMQ_URL is required");
+
+    require(this._jwtSecretAccess !==
+      "dev-secret", "JWT_SECRET_ACCESS must be set");
+
+    if (errors.length > 0) {
+      logger.error("[EnvConfig] Invalid environment configuration:");
+      errors.forEach((e) => logger.error(" - " + e));
+      throw new Error("Environment validation failed. Server will not start.");
+    }
+
+    logger.info("[EnvConfig] Environment validation passed");
+  }
+
   get nodeEnv(): EnvMode {
     return this._nodeEnv;
   }
