@@ -70,18 +70,46 @@ class UserReportRepository extends BaseRepository {
   public async getAllByFilter(filters: {
     reportTopic?: Topic;
     reportStatus?: Status;
-  }): Promise<UserReport[]> {
-    const { reportTopic, reportStatus } = filters;
+    page?: number;
+    limit?: number;
+  } = {}
+){
+    const { reportTopic, reportStatus, page = 1, limit = 20 } = filters;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (reportTopic) where.reportTopic = reportTopic;
+    if (reportStatus) where.reportStatus = reportStatus;
+
     return this.executeAsync(
       async () => {
-        return await this.prisma.userReport.findMany({
-          where: {
-            reportTopic,
-            reportStatus,
-          },
-        });
+        const [results, total] = await Promise.all([
+          this.prisma.userReport.findMany({
+            where,
+            orderBy: {createdAt: "desc"},
+            skip,
+            take: limit,
+        }),
+        this.prisma.userReport.count({where}),
+      ]);
+      return {results, total};
       },
       { deadlineMs: 1000 }
+    );
+  }
+
+  public async updateStatus(
+    id: number,
+    reportStatus: Status
+  ): Promise<UserReport>{
+    return this.executeAsync(
+      async ()=> {
+        return await this.prisma.userReport.update({
+          where: {id},
+          data: {reportStatus},
+        });
+      },
+      {deadlineMs: 1000 }
     );
   }
 }
