@@ -140,9 +140,8 @@ function registerServiceModules(): Map<string, Registration<any>> {
     services.set("EnrollmentService", {
       factory: (scope) =>
         new Services.EnrollmentService({
+          enrollmentRepository: scope.resolve("EnrollmentRepository"),
           codeService: scope.resolve("CodeService"),
-          userService: scope.resolve("UserService"),
-          courseService: scope.resolve("CourseService"),
         }),
       lifetime: "scoped",
     });
