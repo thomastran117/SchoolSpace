@@ -7,7 +7,6 @@ class UserReportRepository extends BaseRepository {
   }
 
   public async create(data: {
-
     victimUserId: number;
     offenderUserId: number;
     reportTopic: Topic;
@@ -18,7 +17,7 @@ class UserReportRepository extends BaseRepository {
       async () => {
         return await this.prisma.userReport.create({ data });
       },
-      { deadlineMs: 1000 } 
+      { deadlineMs: 1000 }
     );
   }
 
@@ -67,13 +66,14 @@ class UserReportRepository extends BaseRepository {
     );
   }
 
-  public async getAllByFilter(filters: {
-    reportTopic?: Topic;
-    reportStatus?: Status;
-    page?: number;
-    limit?: number;
-  } = {}
-){
+  public async getAllByFilter(
+    filters: {
+      reportTopic?: Topic;
+      reportStatus?: Status;
+      page?: number;
+      limit?: number;
+    } = {}
+  ) {
     const { reportTopic, reportStatus, page = 1, limit = 20 } = filters;
     const skip = (page - 1) * limit;
 
@@ -86,13 +86,13 @@ class UserReportRepository extends BaseRepository {
         const [results, total] = await Promise.all([
           this.prisma.userReport.findMany({
             where,
-            orderBy: {createdAt: "desc"},
+            orderBy: { createdAt: "desc" },
             skip,
             take: limit,
-        }),
-        this.prisma.userReport.count({where}),
-      ]);
-      return {results, total};
+          }),
+          this.prisma.userReport.count({ where }),
+        ]);
+        return { results, total };
       },
       { deadlineMs: 1000 }
     );
@@ -101,15 +101,15 @@ class UserReportRepository extends BaseRepository {
   public async updateStatus(
     id: number,
     reportStatus: Status
-  ): Promise<UserReport>{
+  ): Promise<UserReport> {
     return this.executeAsync(
-      async ()=> {
+      async () => {
         return await this.prisma.userReport.update({
-          where: {id},
-          data: {reportStatus},
+          where: { id },
+          data: { reportStatus },
         });
       },
-      {deadlineMs: 1000 }
+      { deadlineMs: 1000 }
     );
   }
 }
