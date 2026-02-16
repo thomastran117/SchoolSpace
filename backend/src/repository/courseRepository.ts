@@ -4,6 +4,13 @@ import type { CourseFull, CourseListItem } from "../models/course";
 import { courseFullInclude, courseListSelect } from "../models/course";
 import { BaseRepository } from "./baseRepository";
 
+export type CourseCounterField =
+  | "enrollmentNumber"
+  | "assignmentNumber"
+  | "annoucementNumber"
+  | "assistantNumber"
+  | "lectureNumber";
+
 class CourseRepository extends BaseRepository {
   constructor() {
     super({ maxRetries: 3, baseDelay: 150 });
@@ -143,6 +150,108 @@ class CourseRepository extends BaseRepository {
     return this.executeAsync(
       () => this.prisma.course.count({ where: { imageUrl } }),
       { deadlineMs: 600 }
+    );
+  }
+
+  public incrementCounter(
+    courseId: number,
+    field: CourseCounterField,
+    amount: number = 1
+  ): Promise<CourseFull | null> {
+    return this.executeAsync(
+      async () => {
+        try {
+          return (await this.prisma.course.update({
+            where: { id: courseId },
+            data: {
+              [field]: { increment: amount },
+            } as any,
+            include: courseFullInclude,
+          })) as any;
+        } catch {
+          return null;
+        }
+      },
+      { deadlineMs: 600 }
+    );
+  }
+
+  public incrementCounters(
+    courseId: number,
+    increments: Partial<Record<CourseCounterField, number>>
+  ): Promise<CourseFull | null> {
+    return this.executeAsync(
+      async () => {
+        try {
+          const data: any = {};
+
+          for (const [field, value] of Object.entries(increments)) {
+            if (value && value !== 0) {
+              data[field] = { increment: value };
+            }
+          }
+
+          return (await this.prisma.course.update({
+            where: { id: courseId },
+            data,
+            include: courseFullInclude,
+          })) as any;
+        } catch {
+          return null;
+        }
+      },
+      { deadlineMs: 700 }
+    );
+  }
+
+  public decrementCounter(
+    courseId: number,
+    field: CourseCounterField,
+    amount: number = 1
+  ): Promise<CourseFull | null> {
+    return this.executeAsync(
+      async () => {
+        try {
+          return (await this.prisma.course.update({
+            where: { id: courseId },
+            data: {
+              [field]: { decrement: amount },
+            } as any,
+            include: courseFullInclude,
+          })) as any;
+        } catch {
+          return null;
+        }
+      },
+      { deadlineMs: 600 }
+    );
+  }
+
+  public decrementCounters(
+    courseId: number,
+    decrements: Partial<Record<CourseCounterField, number>>
+  ): Promise<CourseFull | null> {
+    return this.executeAsync(
+      async () => {
+        try {
+          const data: any = {};
+
+          for (const [field, value] of Object.entries(decrements)) {
+            if (value && value !== 0) {
+              data[field] = { decrement: value };
+            }
+          }
+
+          return (await this.prisma.course.update({
+            where: { id: courseId },
+            data,
+            include: courseFullInclude,
+          })) as any;
+        } catch {
+          return null;
+        }
+      },
+      { deadlineMs: 700 }
     );
   }
 }
