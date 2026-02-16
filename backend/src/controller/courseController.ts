@@ -1,11 +1,13 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 
 import type {
+  CodeCourseDto,
   CreateCourseDto,
+  EnrollCourseDto,
   QueryCourseDto,
   UpdateCourseDto,
 } from "../dto/courseSchema";
-import { HttpError, InternalServerError } from "../error";
+import { HttpError, InternalServerError, NotImplementedError } from "../error";
 import type { CourseService } from "../service/courseService";
 import { sanitizeProfileImage } from "../utility/imageUtility";
 import logger from "../utility/logger";
@@ -19,91 +21,12 @@ class CourseController extends BaseController {
     this.courseService = dependencies.courseService;
   }
 
-  public unenrollStudent(
-    req: FastifyRequest<{ Params: { id: number } }>,
-    reply: FastifyReply
-  ) {
-    try {
-      console.log("hello");
-    } catch (err: any) {
-      if (err instanceof HttpError) throw err;
-
-      logger.error(
-        `[CourseController] unenrollStudent failed: ${err?.message ?? err}`
-      );
-      throw new InternalServerError({ message: "Internal server error" });
-    }
-  }
-
-  public enrollStudent(
-    req: FastifyRequest<{ Params: { id: number } }>,
-    reply: FastifyReply
-  ) {
-    try {
-      console.log("hello");
-    } catch (err: any) {
-      if (err instanceof HttpError) throw err;
-
-      logger.error(
-        `[CourseController] enrollStudent failed: ${err?.message ?? err}`
-      );
-      throw new InternalServerError({ message: "Internal server error" });
-    }
-  }
-
-  public generateEnrollCode(
-    req: FastifyRequest<{ Params: { id: number } }>,
-    reply: FastifyReply
-  ) {
-    try {
-      console.log("hello");
-    } catch (err: any) {
-      if (err instanceof HttpError) throw err;
-
-      logger.error(
-        `[CourseController] generateEnrollCode failed: ${err?.message ?? err}`
-      );
-      throw new InternalServerError({ message: "Internal server error" });
-    }
-  }
-
-  public removeEnrollCode(
-    req: FastifyRequest<{ Params: { id: number; code: string } }>,
-    reply: FastifyReply
-  ) {
-    try {
-      console.log("hello");
-    } catch (err: any) {
-      if (err instanceof HttpError) throw err;
-
-      logger.error(
-        `[CourseController] removeEnrollCode failed: ${err?.message ?? err}`
-      );
-      throw new InternalServerError({ message: "Internal server error" });
-    }
-  }
-
-  public enrollWithCode(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      console.log("hello");
-    } catch (err: any) {
-      if (err instanceof HttpError) throw err;
-
-      logger.error(
-        `[CourseController] enrollWithCode failed: ${err?.message ?? err}`
-      );
-      throw new InternalServerError({ message: "Internal server error" });
-    }
-  }
-
   public async getCourses(
     req: FastifyRequest<{ Querystring: QueryCourseDto }>,
     reply: FastifyReply
   ) {
     try {
-      const teacherId = req.query.teacherId
-        ? this.parseInt(req.query.teacherId)
-        : undefined;
+      const teacherId = req.query.teacherId;
 
       const year = req.query.year ? this.parseInt(req.query.year) : undefined;
 
@@ -246,6 +169,119 @@ class CourseController extends BaseController {
 
       logger.error(
         `[CourseController] deleteCourse failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async unenrollStudent(
+    req: FastifyRequest<{ Params: { id: number }; Body: EnrollCourseDto }>,
+    reply: FastifyReply
+  ) {
+    try {
+      this.ensureTeacher(req);
+
+      const result = await this.courseService.unenrollCourse(
+        req.params.id,
+        req.body.userId
+      );
+      return reply.code(200).send({
+        message: "User enrolled in course successfully.",
+        result,
+      });
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseController] unenrollStudent failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async enrollStudent(
+    req: FastifyRequest<{ Params: { id: number }; Body: EnrollCourseDto }>,
+    reply: FastifyReply
+  ) {
+    try {
+      this.ensureTeacher(req);
+      const result = await this.courseService.enrollCourse(
+        req.params.id,
+        req.body.userId
+      );
+      return reply.code(200).send({
+        message: "User enrolled in course successfully.",
+        result,
+      });
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseController] enrollStudent failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async generateEnrollCode(
+    req: FastifyRequest<{ Params: { id: number } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      this.ensureTeacher(req);
+
+      const result = await this.courseService.createEnrollmentCode(
+        req.params.id,
+        req.user.id
+      );
+      return reply.code(200).send({
+        message: "Enrollment code created successfully.",
+        code: result,
+      });
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseController] generateEnrollCode failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async removeEnrollCode(
+    req: FastifyRequest<{ Params: { id: number; code: string } }>,
+    reply: FastifyReply
+  ) {
+    try {
+      throw new NotImplementedError();
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseController] removeEnrollCode failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async enrollWithCode(
+    req: FastifyRequest<{ Params: { id: number }; Body: CodeCourseDto }>,
+    reply: FastifyReply
+  ) {
+    try {
+      const result = await this.courseService.enrollCourseUsingCode(
+        req.body.code,
+        req.params.id
+      );
+      return reply.code(200).send({
+        message: "Course enrolled successfully.",
+        result,
+      });
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[CourseController] enrollWithCode failed: ${err?.message ?? err}`
       );
       throw new InternalServerError({ message: "Internal server error" });
     }

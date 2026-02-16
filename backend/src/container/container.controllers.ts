@@ -63,14 +63,6 @@ function registerControllerModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
-    controllers.set("EnrollmentController", {
-      factory: (scope) =>
-        new Controllers.EnrollmentController({
-          enrollmentService: scope.resolve("EnrollmentService"),
-        }),
-      lifetime: "scoped",
-    });
-
     controllers.set("GradeController", {
       factory: (scope) =>
         new Controllers.GradeController({

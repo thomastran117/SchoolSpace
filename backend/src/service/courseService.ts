@@ -2,7 +2,12 @@ import type { MultipartFile } from "@fastify/multipart";
 import type { Prisma } from "@prisma/client";
 import crypto from "crypto";
 
-import { HttpError, InternalServerError, NotFoundError } from "../error";
+import {
+  ForbiddenError,
+  HttpError,
+  InternalServerError,
+  NotFoundError,
+} from "../error";
 import type { CourseFull, CourseListItem } from "../models/course";
 import type { CourseRepository } from "../repository";
 import logger from "../utility/logger";
@@ -406,9 +411,10 @@ class CourseService extends BaseService {
     }
   }
 
-  public async createEnrollmentCode(courseId: number) {
+  public async createEnrollmentCode(courseId: number, teacherId: number) {
     try {
-      await this.getCourseById(courseId);
+      const course = await this.getCourseById(courseId);
+      if (course.teacherId !== teacherId) throw new ForbiddenError();
       const code =
         await this.enrollmentService.generateEnrollmentCode(courseId);
       return code;
