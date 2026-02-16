@@ -67,6 +67,20 @@ class EnrollmentService {
     }
   }
 
+  public async unenrollCourseById(id: number) {
+    try {
+      await this.enrollmentRepository.unenrollById(id);
+      return true;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[EnrollmentService] unenrollCourseById failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
   public async enrollCourseWithCode(code: string, userId: number) {
     try {
       const courseId = await this.codeService.redeemEnrollmentCodeByCode(code);
