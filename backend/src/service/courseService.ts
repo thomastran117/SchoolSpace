@@ -333,6 +333,11 @@ class CourseService extends BaseService {
         courseId,
         userId
       );
+      await this.courseRepository.incrementCounter(
+        courseId,
+        "enrollmentNumber"
+      );
+
       return enrollment;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
@@ -346,9 +351,11 @@ class CourseService extends BaseService {
   public async enrollCourseUsingCode(code: string, userId: number) {
     try {
       await this.userService.getUser(userId);
-      const enrollment = await this.enrollmentService.enrollCourseWithCode(
-        code,
-        userId
+      const { enrollment, courseId } =
+        await this.enrollmentService.enrollCourseWithCode(code, userId);
+      await this.courseRepository.incrementCounter(
+        courseId,
+        "enrollmentNumber"
       );
       return enrollment;
     } catch (err: any) {
@@ -373,6 +380,25 @@ class CourseService extends BaseService {
       );
       throw new InternalServerError({ message: "Internal server error" });
     }
+  }
+
+  public async isUserEnrolledInCourse(courseId: number, userId: number){
+    try {
+      await Promise.all([
+        this.getCourseById(courseId),
+        this.userService.getUser(userId),
+      ]);
+
+      const enrollment = await this.enrollmentService.isEnrolled(courseId, userId);
+      if (!enrollment) throw new NotFoundError({message: "User is not enrolled in this course"});
+      return true;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(
+        `[CourseService] isUserEnrolledInCourse failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    } 
   }
 }
 

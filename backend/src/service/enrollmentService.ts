@@ -74,7 +74,7 @@ class EnrollmentService {
         userId,
         courseId
       );
-      return enrollment;
+      return { enrollment, courseId };
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
