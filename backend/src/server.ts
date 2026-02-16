@@ -1,10 +1,12 @@
 import { buildApp } from "./app";
+import env from "./config/envConfigs";
 import logger from "./utility/logger";
 
 const PORT = process.env.PORT || 8040;
 
 async function start() {
   try {
+    env.validate();
     const app = await buildApp();
     await app.listen({ port: Number(PORT), host: "0.0.0.0" });
     logger.info(`Server running on port ${PORT}`);
