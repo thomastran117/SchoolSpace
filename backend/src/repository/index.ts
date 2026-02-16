@@ -15,3 +15,4 @@ export { EnrollmentRepository } from "./enrollmentRepository";
 export { GradeRepository } from "./gradeRepository";
 export { UserRepository } from "./userRepository";
 export { ContactRepository } from "./contactRepository";
+export {UserReportRepository} from "./userReportRepository";

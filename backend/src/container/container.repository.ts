@@ -50,6 +50,12 @@ function registerRepositoryModules(): Map<string, Registration<any>> {
       lifetime: "singleton",
     });
 
+    repositories.set("UserReportRepository", {
+      factory: () => new Repositories.UserReportRepository(),
+      lifetime: "singleton",
+    });
+    
+
     return repositories;
   } catch (err: any) {
     logger.error(
