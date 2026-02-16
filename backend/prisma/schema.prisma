@@ -36,6 +36,16 @@ enum Status {
   ERROR
 }
 
+enum Topic {
+  UNDEFINED
+  HATE_SPEECH_HARASSMENT_OR_BULLYING
+  VIOLENT_THREATS
+  SPAM
+  INNAPPROPRIATE_CONTENT
+  FRAUD_OR_IMPERSONATION
+  OTHER
+}
+
 model ContactRequest{
   id Int @id @default(autoincrement())
   email   String
@@ -75,6 +85,9 @@ model User {
   courses     Course[]
   enrollments Enrollment[]
   grades      Grade[]
+  victims UserReport[] @relation(name:"victim")
+  offenders UserReport[] @relation(name: "offender")
+  
 
   @@unique([microsoftId, msIssuer, msTenantId])
   @@index([role])
@@ -200,4 +213,25 @@ model Grade {
   @@index([assignmentId])
   @@index([testId])
   @@index([quizId])
+}
+
+model UserReport {
+  id Int @id @default(autoincrement())
+
+  victimUserId Int @map("victim_user_id")
+  offenderUserId Int @map("offender_user_id")
+
+  reportTopic Topic @default(UNDEFINED)
+  reportDescription String?
+
+  reportStatus Status @default(CREATED)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  victimUser User @relation(name:"victim", fields: [victimUserId], references: [id], onDelete: Cascade)
+  offenderUser User @relation(name:"offender", fields: [offenderUserId], references: [id], onDelete: Cascade)
+
+  @@index([reportTopic])
+  @@index([reportStatus])
 }
