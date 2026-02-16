@@ -49,6 +49,7 @@ class EnvConfig {
   private readonly _zodConfiguration?: string;
 
   private readonly _jwtSecretAccess: string;
+  private readonly _codeSecret: string;
 
   private readonly _googleClientId?: string;
   private readonly _googleCaptchaSecret?: string;
@@ -95,6 +96,7 @@ class EnvConfig {
       "JWT_SECRET_ACCESS",
       "dev-secret"
     );
+    this._codeSecret = this.reqWithDefault("CODE_SECRET", "dev-secret");
 
     this._corsWhitelist = this.opt("CORS_WHITELIST", "http://localhost:3040")!;
 
@@ -192,6 +194,10 @@ class EnvConfig {
 
   get jwtSecretAccess(): string {
     return this._jwtSecretAccess;
+  }
+
+  get codeSecret(): string {
+    return this._codeSecret;
   }
 
   get corsWhitelist(): string {

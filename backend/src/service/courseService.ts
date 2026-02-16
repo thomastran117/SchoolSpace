@@ -2,13 +2,19 @@ import type { MultipartFile } from "@fastify/multipart";
 import type { Prisma } from "@prisma/client";
 import crypto from "crypto";
 
-import { HttpError, InternalServerError, NotFoundError } from "../error";
+import {
+  ForbiddenError,
+  HttpError,
+  InternalServerError,
+  NotFoundError,
+} from "../error";
 import type { CourseFull, CourseListItem } from "../models/course";
 import type { CourseRepository } from "../repository";
 import logger from "../utility/logger";
 import { BaseService } from "./baseService";
 import type { CacheService } from "./cacheService";
 import type { CatalogueService } from "./catalogueService";
+import type { EnrollmentService } from "./enrollmentService";
 import type { FileService } from "./fileService";
 import type { UserService } from "./userService";
 
@@ -24,6 +30,7 @@ class CourseService extends BaseService {
   private readonly catalogueService: CatalogueService;
   private readonly fileService: FileService;
   private readonly userService: UserService;
+  private readonly enrollmentService: EnrollmentService;
 
   private readonly LIST_TTL = 300;
   private readonly DETAIL_TTL = 600;
@@ -40,6 +47,7 @@ class CourseService extends BaseService {
     userService: UserService;
     catalogueService: CatalogueService;
     fileService: FileService;
+    enrollmentService: EnrollmentService;
   }) {
     super();
     this.cacheService = dependencies.cacheService;
@@ -47,6 +55,7 @@ class CourseService extends BaseService {
     this.catalogueService = dependencies.catalogueService;
     this.fileService = dependencies.fileService;
     this.userService = dependencies.userService;
+    this.enrollmentService = dependencies.enrollmentService;
   }
 
   private key(...parts: (string | number | boolean)[]): string {
@@ -232,8 +241,10 @@ class CourseService extends BaseService {
     image: MultipartFile
   ): Promise<CourseFull> {
     try {
-      await this.userService.getUser(teacherId);
-      await this.catalogueService.getCourseTemplateById(catalogueId);
+      await Promise.all([
+        this.userService.getUser(teacherId),
+        this.catalogueService.getCourseTemplateById(catalogueId),
+      ]);
 
       const buffer = await image.toBuffer();
       const { publicUrl } = await this.fileService.uploadFile(
@@ -311,6 +322,131 @@ class CourseService extends BaseService {
       if (err instanceof HttpError) throw err;
       logger.error(
         `[CourseService] deleteCourse failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async enrollCourse(courseId: number, userId: number) {
+    try {
+      await Promise.all([
+        this.getCourseById(courseId),
+        this.userService.getUser(userId),
+      ]);
+
+      const enrollment = await this.enrollmentService.enrollCourse(
+        courseId,
+        userId
+      );
+      await this.courseRepository.incrementCounter(
+        courseId,
+        "enrollmentNumber"
+      );
+
+      return enrollment;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(
+        `[CourseService] enrollCourse failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async unenrollCourse(courseId: number, userId: number) {
+    try {
+      await Promise.all([
+        this.getCourseById(courseId),
+        this.userService.getUser(userId),
+      ]);
+
+      const enrollment = await this.enrollmentService.unenrollCourse(
+        courseId,
+        userId
+      );
+      await this.courseRepository.decrementCounter(
+        courseId,
+        "enrollmentNumber"
+      );
+
+      return enrollment;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(
+        `[CourseService] enrollCourse failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async enrollCourseUsingCode(code: string, userId: number) {
+    try {
+      await this.userService.getUser(userId);
+      const { enrollment, courseId } =
+        await this.enrollmentService.enrollCourseWithCode(code, userId);
+      await this.courseRepository.incrementCounter(
+        courseId,
+        "enrollmentNumber"
+      );
+      return enrollment;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(
+        `[CourseService] enrollCourseUsingCode failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async unenrollCourseUsingId(id: number) {
+    try {
+      await this.enrollmentService.unenrollCourseById(id);
+      return;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(
+        `[CourseService] unenrollCourseUsingId failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async createEnrollmentCode(courseId: number, teacherId: number) {
+    try {
+      const course = await this.getCourseById(courseId);
+      if (course.teacherId !== teacherId) throw new ForbiddenError();
+      const code =
+        await this.enrollmentService.generateEnrollmentCode(courseId);
+      return code;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(
+        `[CourseService] createEnrollmentCode failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
+  public async isUserEnrolledInCourse(courseId: number, userId: number) {
+    try {
+      await Promise.all([
+        this.getCourseById(courseId),
+        this.userService.getUser(userId),
+      ]);
+
+      const enrollment = await this.enrollmentService.isEnrolled(
+        courseId,
+        userId
+      );
+      if (!enrollment)
+        throw new NotFoundError({
+          message: "User is not enrolled in this course",
+        });
+      return true;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+      logger.error(
+        `[CourseService] isUserEnrolledInCourse failed: ${err?.message ?? err}`
       );
       throw new InternalServerError({ message: "Internal server error" });
     }

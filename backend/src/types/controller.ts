@@ -3,7 +3,6 @@ import { AuthController } from "../controller/authController";
 import { CatalogueController } from "../controller/catalogueController";
 import { ContactController } from "../controller/contactController";
 import { CourseController } from "../controller/courseController";
-import { EnrollmentController } from "../controller/enrollmentController";
 import { FileController } from "../controller/fileController";
 import { GradeController } from "../controller/gradeController";
 import { UserController } from "../controller/userController";
@@ -14,7 +13,6 @@ export const ControllerTypes = {
   GradeController,
   FileController,
   CourseController,
-  EnrollmentController,
   CatalogueController,
   AssignmentController,
   ContactController,

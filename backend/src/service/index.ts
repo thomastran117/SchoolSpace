@@ -13,6 +13,7 @@ export { AuthService } from "../service/authService";
 export { BasicTokenService } from "../service/basicTokenService";
 export { CacheService } from "../service/cacheService";
 export { CatalogueService } from "../service/catalogueService";
+export { CodeService } from "../service/codeService";
 export { CourseService } from "../service/courseService";
 export { EnrollmentService } from "../service/enrollmentService";
 export { FileService } from "../service/fileService";

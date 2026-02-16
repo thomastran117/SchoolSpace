@@ -12,7 +12,12 @@
 import type { FastifyInstance } from "fastify";
 
 import { IdParamSchema } from "../dto/coreSchema";
-import { CreateCourseSchema, UpdateCourseSchema } from "../dto/courseSchema";
+import {
+  CodeCourseSchema,
+  CreateCourseSchema,
+  EnrollCourseSchema,
+  UpdateCourseSchema,
+} from "../dto/courseSchema";
 import { authDependency } from "../hooks/authHook";
 import { useController } from "../hooks/controllerHook";
 import { safeUploadImage } from "../hooks/uploadHook";
@@ -33,12 +38,54 @@ async function courseRoutes(app: FastifyInstance) {
   );
 
   app.delete(
+    "/enroll/:id",
+    {
+      preHandler: authDependency,
+      preValidation: [
+        validate(IdParamSchema, "params"),
+        validate(EnrollCourseSchema, "body"),
+      ],
+    },
+    useController("CourseController", (c) => c.unenrollStudent)
+  );
+
+  app.delete(
     "/:id",
     {
       preHandler: authDependency,
       preValidation: validate(IdParamSchema, "params"),
     },
     useController("CourseController", (c) => c.deleteCourse)
+  );
+
+  app.post(
+    "/code/:id",
+    {
+      preHandler: [authDependency],
+      preValidation: [validate(IdParamSchema, "params")],
+    },
+    useController("CourseController", (c) => c.generateEnrollCode)
+  );
+
+  app.post(
+    "/enroll",
+    {
+      preHandler: [authDependency],
+      preValidation: [validate(CodeCourseSchema, "body")],
+    },
+    useController("CourseController", (c) => c.enrollWithCode)
+  );
+
+  app.post(
+    "/:id",
+    {
+      preHandler: [authDependency],
+      preValidation: [
+        validate(IdParamSchema, "params"),
+        validate(EnrollCourseSchema, "body"),
+      ],
+    },
+    useController("CourseController", (c) => c.enrollStudent)
   );
 
   app.post(

@@ -48,6 +48,14 @@ function registerServiceModules(): Map<string, Registration<any>> {
       lifetime: "transient",
     });
 
+    services.set("CodeService", {
+      factory: (scope) =>
+        new Services.CodeService({
+          cacheService: scope.resolve("CacheService"),
+        }),
+      lifetime: "transient",
+    });
+
     services.set("PaymentService", {
       factory: (scope) =>
         new Services.PaymentService({
@@ -100,6 +108,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
       factory: (scope) =>
         new Services.CourseService({
           courseRepository: scope.resolve("CourseRepository"),
+          enrollmentService: scope.resolve("EnrollmentService"),
           cacheService: scope.resolve("CacheService"),
           userService: scope.resolve("UserService"),
           catalogueService: scope.resolve("CatalogueService"),
@@ -125,6 +134,15 @@ function registerServiceModules(): Map<string, Registration<any>> {
         new Services.ContactService({
           contactRepository: scope.resolve("ContactRepository"),
           webService: scope.resolve("WebService"),
+        }),
+      lifetime: "scoped",
+    });
+
+    services.set("EnrollmentService", {
+      factory: (scope) =>
+        new Services.EnrollmentService({
+          enrollmentRepository: scope.resolve("EnrollmentRepository"),
+          codeService: scope.resolve("CodeService"),
         }),
       lifetime: "scoped",
     });

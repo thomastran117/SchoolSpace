@@ -1,27 +1,48 @@
-import { HttpError, InternalServerError } from "../error";
+import { HttpError, InternalServerError, NotImplementedError } from "../error";
+import type { EnrollmentRepository } from "../repository";
 import logger from "../utility/logger";
 import type { CodeService } from "./codeService";
-import type { CourseService } from "./courseService";
-import type { UserService } from "./userService";
 
 class EnrollmentService {
-  private readonly userService: UserService;
-  private readonly courseService: CourseService;
+  private readonly enrollmentRepository: EnrollmentRepository;
   private readonly codeService: CodeService;
 
   constructor(dependencies: {
-    userService: UserService;
-    courseService: CourseService;
     codeService: CodeService;
+    enrollmentRepository: EnrollmentRepository;
   }) {
-    this.userService = dependencies.userService;
-    this.courseService = dependencies.courseService;
     this.codeService = dependencies.codeService;
+    this.enrollmentRepository = dependencies.enrollmentRepository;
+  }
+
+  public async isEnrolled(courseId: number, userId: number) {
+    try {
+      const enrollment = await this.enrollmentRepository.findByUserAndCourse(
+        userId,
+        courseId
+      );
+      if (enrollment) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[EnrollmentService] isEnrolled failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
   }
 
   public async enrollCourse(courseId: number, userId: number) {
     try {
-      console.log("hello");
+      const enrollment = await this.enrollmentRepository.enroll(
+        userId,
+        courseId
+      );
+      return enrollment;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
@@ -34,7 +55,8 @@ class EnrollmentService {
 
   public async unenrollCourse(courseId: number, userId: number) {
     try {
-      console.log("hello");
+      await this.enrollmentRepository.unenrollByUserAndCourse(courseId, userId);
+      return true;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
@@ -45,9 +67,28 @@ class EnrollmentService {
     }
   }
 
+  public async unenrollCourseById(id: number) {
+    try {
+      await this.enrollmentRepository.unenrollById(id);
+      return true;
+    } catch (err: any) {
+      if (err instanceof HttpError) throw err;
+
+      logger.error(
+        `[EnrollmentService] unenrollCourseById failed: ${err?.message ?? err}`
+      );
+      throw new InternalServerError({ message: "Internal server error" });
+    }
+  }
+
   public async enrollCourseWithCode(code: string, userId: number) {
     try {
-      console.log("hello");
+      const courseId = await this.codeService.redeemEnrollmentCodeByCode(code);
+      const enrollment = await this.enrollmentRepository.enroll(
+        userId,
+        courseId
+      );
+      return { enrollment, courseId };
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
@@ -60,7 +101,8 @@ class EnrollmentService {
 
   public async generateEnrollmentCode(courseId: number) {
     try {
-      console.log("hello");
+      const code = await this.codeService.generateEnrollmentCode(courseId);
+      return code;
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
@@ -73,7 +115,9 @@ class EnrollmentService {
 
   public async deleteEnrollmentCode(code: string) {
     try {
-      console.log("hello");
+      throw new NotImplementedError({
+        message: "Functionality is not implemented yet.",
+      });
     } catch (err: any) {
       if (err instanceof HttpError) throw err;
 
