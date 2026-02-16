@@ -108,6 +108,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
       factory: (scope) =>
         new Services.CourseService({
           courseRepository: scope.resolve("CourseRepository"),
+          enrollmentService: scope.resolve("EnrollmentService"),
           cacheService: scope.resolve("CacheService"),
           userService: scope.resolve("UserService"),
           catalogueService: scope.resolve("CatalogueService"),
