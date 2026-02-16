@@ -14,3 +14,4 @@ export { courseRoutes } from "./courseRoute";
 export { fileRoutes } from "./fileRoute";
 export { userRoutes } from "./userRoute";
 export { contactRoutes } from "./contactRoute";
+export { healthRoutes } from "./healthRoute";

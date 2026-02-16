@@ -79,6 +79,11 @@ function registerControllerModules(): Map<string, Registration<any>> {
       lifetime: "scoped",
     });
 
+    controllers.set("HealthController", {
+      factory: (scope) => new Controllers.HealthController(),
+      lifetime: "scoped",
+    });
+
     return controllers;
   } catch (err: any) {
     logger.error(

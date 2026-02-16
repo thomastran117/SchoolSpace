@@ -5,6 +5,7 @@ import { ContactController } from "../controller/contactController";
 import { CourseController } from "../controller/courseController";
 import { FileController } from "../controller/fileController";
 import { GradeController } from "../controller/gradeController";
+import { HealthController } from "../controller/healthController";
 import { UserController } from "../controller/userController";
 
 export const ControllerTypes = {
@@ -16,6 +17,7 @@ export const ControllerTypes = {
   CatalogueController,
   AssignmentController,
   ContactController,
+  HealthController,
 };
 
 export type ControllerKey = keyof typeof ControllerTypes;

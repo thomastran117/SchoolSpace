@@ -10,6 +10,7 @@ import errorHandler from "./plugin/errorPlugin";
 import rateLimiter from "./plugin/limiterPlugin";
 import requestLogger from "./plugin/loggerPlugin";
 import requestScopePlugin from "./plugin/scopePlugin";
+import { healthRoutes } from "./route/healthRoute";
 import { registerRoutes } from "./route/route";
 
 export async function buildApp() {
@@ -73,18 +74,7 @@ export async function buildApp() {
 
   app.register(methodNotAllowed);
 
-  app.get("/", async (_, reply) => reply.code(200).send({ message: "ok" }));
-
-  app.get("/api", async (_, reply) => reply.code(200).send({ message: "ok" }));
-
-  app.get("/ping", async (_, reply) =>
-    reply.code(200).send({ message: "ping" })
-  );
-
-  app.get("/health", async (_, reply) =>
-    reply.code(200).send({ message: "ok" })
-  );
-
+  app.register(healthRoutes);
   app.register(registerRoutes, { prefix: "/api" });
 
   return app;
