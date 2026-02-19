@@ -7,13 +7,13 @@
  * @version 1.0.0
  * @auth Thomas
  */
-import logger from "../utility/logger";
-import { registerControllerModules } from "./container.controllers";
-import { CoreInitializer } from "./container.core";
-import { registerQueueModules } from "./container.queue";
-import { registerRepositoryModules } from "./container.repository";
-import { registerServiceModules } from "./container.services";
-import type { Registration } from "./container.types";
+import { registerControllerModules } from "@container/container.controllers";
+import { CoreInitializer } from "@container/container.core";
+import { registerQueueModules } from "@container/container.queue";
+import { registerRepositoryModules } from "@container/container.repository";
+import { registerServiceModules } from "@container/container.services";
+import type { Registration } from "@container/container.types";
+import logger from "@utility/logger";
 
 class Container {
   private static _instance: Container;

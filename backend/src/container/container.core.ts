@@ -7,9 +7,9 @@
  * @version 1.0.0
  * @auth Thomas
  */
-import { initPrisma } from "../resource/prisma";
-import { initRedis } from "../resource/redis";
-import logger from "../utility/logger";
+import { initPrisma } from "@resource/prisma";
+import { initRedis } from "@resource/redis";
+import logger from "@utility/logger";
 
 class CoreInitializer {
   private initialized = false;
