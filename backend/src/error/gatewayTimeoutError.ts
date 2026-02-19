@@ -7,7 +7,7 @@
  * @version 1.0.0
  * @auth Thomas
  */
-import { HttpError } from "./httpError";
+import { HttpError } from "@error/httpError";
 
 class GatewayTimeoutError extends HttpError {
   constructor(params: { message?: string; details?: unknown } = {}) {
