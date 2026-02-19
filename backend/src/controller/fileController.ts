@@ -1,11 +1,11 @@
+import type { FileParams } from "@dto/coreSchema";
+import { BadRequestError } from "@error/badRequestError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import type { FileService } from "@service/fileService";
+import logger from "@utility/logger";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import mime from "mime-types";
-
-import type { FileParams } from "../dto/coreSchema";
-import { BadRequestError, HttpError } from "../error/index";
-import { InternalServerError } from "../error/internalServerError";
-import type { FileService } from "../service/fileService";
-import logger from "../utility/logger";
 
 class FileController {
   private readonly fileService: FileService;

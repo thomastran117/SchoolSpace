@@ -7,14 +7,15 @@
  * @version 2.0.0
  * @auth Thomas
  */
+import type { CreateContactDto, UpdateContactDto } from "@dto/contactSchema";
+import type { PaginationQuery } from "@dto/coreSchema";
+import { ForbiddenError } from "@error/forbiddenError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import type { UserPayload } from "@models/token";
+import type { ContactService } from "@service/contactService";
+import logger from "@utility/logger";
 import type { FastifyReply, FastifyRequest } from "fastify";
-
-import type { CreateContactDto, UpdateContactDto } from "../dto/contactSchema";
-import type { PaginationQuery } from "../dto/coreSchema";
-import { ForbiddenError, HttpError, InternalServerError } from "../error";
-import type { UserPayload } from "../models/token";
-import type { ContactService } from "../service/contactService";
-import logger from "../utility/logger";
 
 class ContactController {
   private readonly contactService: ContactService;

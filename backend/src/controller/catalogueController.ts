@@ -1,14 +1,15 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
-
 import type {
   CreateCatalogueDto,
   QueryCatalogueDto,
   UpdateCatalogueDto,
-} from "../dto/catalogueSchema";
-import { ForbiddenError, HttpError, InternalServerError } from "../error";
-import type { UserPayload } from "../models/token";
-import type { CatalogueService } from "../service/catalogueService";
-import logger from "../utility/logger";
+} from "@dto/catalogueSchema";
+import { ForbiddenError } from "@error/forbiddenError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import type { UserPayload } from "@models/token";
+import type { CatalogueService } from "@service/catalogueService";
+import logger from "@utility/logger";
+import type { FastifyReply, FastifyRequest } from "fastify";
 
 class CatalogueController {
   private readonly catalogueService: CatalogueService;

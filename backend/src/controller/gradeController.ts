@@ -1,4 +1,4 @@
-import type { GradeService } from "../service/gradeService";
+import type { GradeService } from "@service/gradeService";
 
 class GradeController {
   private readonly gradeService: GradeService;

@@ -1,4 +1,4 @@
-import type { AssignmentService } from "../service/assignmentService";
+import type { AssignmentService } from "@service/assignmentService";
 
 class AssignmentController {
   private readonly assignmentService: AssignmentService;

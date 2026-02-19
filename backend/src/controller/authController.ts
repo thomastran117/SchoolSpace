@@ -7,8 +7,6 @@
  * @version 2.0.0
  * @auth Thomas
  */
-import type { FastifyReply, FastifyRequest } from "fastify";
-
 import type {
   AppleDto,
   AuthResponseDto,
@@ -19,16 +17,15 @@ import type {
   MicrosoftDto,
   SignupDto,
   VerifyDto,
-} from "../dto/authSchema";
-import type { TokenQuery } from "../dto/coreSchema";
-import {
-  BadRequestError,
-  HttpError,
-  InternalServerError,
-  UnauthorizedError,
-} from "../error";
-import type { AuthService } from "../service/authService";
-import logger from "../utility/logger";
+} from "@dto/authSchema";
+import type { TokenQuery } from "@dto/coreSchema";
+import { BadRequestError } from "@error/badRequestError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { UnauthorizedError } from "@error/unauthorizedError";
+import type { AuthService } from "@service/authService";
+import logger from "@utility/logger";
+import type { FastifyReply, FastifyRequest } from "fastify";
 
 class AuthController {
   private readonly authService: AuthService;
