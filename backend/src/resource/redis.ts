@@ -11,10 +11,9 @@
  * @version 3.0.1
  * @auth Thomas
  */
+import env from "@config/envConfigs";
+import logger from "@utility/logger";
 import { Redis } from "ioredis";
-
-import env from "../config/envConfigs";
-import logger from "../utility/logger";
 
 let healthy = false;
 
