@@ -1,7 +1,6 @@
-import fp from "fastify-plugin";
-
 import { HttpError } from "@error/httpError";
 import logger from "@utility/logger";
+import fp from "fastify-plugin";
 
 type AnyErr = {
   code?: string;
