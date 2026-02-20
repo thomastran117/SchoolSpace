@@ -1,5 +1,5 @@
-import type { Grade } from "../models/grade";
-import { BaseRepository } from "./baseRepository";
+import type { Grade } from "@models/grade";
+import { BaseRepository } from "@repository/baseRepository";
 
 class GradeRepository extends BaseRepository {
   constructor() {

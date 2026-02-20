@@ -1,5 +1,5 @@
-import type { Catalogue, Term } from "../models/catalogue";
-import { BaseRepository } from "./baseRepository";
+import type { Catalogue, Term } from "@models/catalogue";
+import { BaseRepository } from "@repository/baseRepository";
 
 class CatalogueRepository extends BaseRepository {
   constructor() {

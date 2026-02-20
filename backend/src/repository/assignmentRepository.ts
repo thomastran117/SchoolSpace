@@ -1,5 +1,5 @@
-import type { Assignment } from "../models/assignment";
-import { BaseRepository } from "./baseRepository";
+import type { Assignment } from "@models/assignment";
+import { BaseRepository } from "@repository/baseRepository";
 
 class AssignmentRepository extends BaseRepository {
   constructor() {

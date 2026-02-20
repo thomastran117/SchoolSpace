@@ -7,8 +7,8 @@
  * @version 1.0.0
  * @auth Thomas
  */
-import type { ContactRequest } from "../models/contact";
-import { BaseRepository } from "./baseRepository";
+import type { ContactRequest } from "@models/contact";
+import { BaseRepository } from "@repository/baseRepository";
 
 class ContactRepository extends BaseRepository {
   constructor() {
