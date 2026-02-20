@@ -1,16 +1,14 @@
-import {
-  BadRequestError,
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-} from "../error";
-import type { Grade } from "../models/grade";
-import type { GradeRepository } from "../repository";
-import logger from "../utility/logger";
-import { BaseService } from "./baseService";
-import type { CacheService } from "./cacheService";
-import type { CourseService } from "./courseService";
-import type { UserService } from "./userService";
+import { BadRequestError } from "@error/badRequestError";
+import { ConflictError } from "@error/conflictError";
+import { ForbiddenError } from "@error/forbiddenError";
+import { NotFoundError } from "@error/notFoundError";
+import type { Grade } from "@models/grade";
+import type { GradeRepository } from "@repository/gradeRepository";
+import { BaseService } from "@service/baseService";
+import type { CacheService } from "@service/cacheService";
+import type { CourseService } from "@service/courseService";
+import type { UserService } from "@service/userService";
+import logger from "@utility/logger";
 
 class GradeService extends BaseService {
   private readonly gradeRepository: GradeRepository;

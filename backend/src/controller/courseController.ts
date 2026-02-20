@@ -1,17 +1,18 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
-
+import { BaseController } from "@controller/baseController";
 import type {
   CodeCourseDto,
   CreateCourseDto,
   EnrollCourseDto,
   QueryCourseDto,
   UpdateCourseDto,
-} from "../dto/courseSchema";
-import { HttpError, InternalServerError, NotImplementedError } from "../error";
-import type { CourseService } from "../service/courseService";
-import { sanitizeProfileImage } from "../utility/imageUtility";
-import logger from "../utility/logger";
-import { BaseController } from "./baseController";
+} from "@dto/courseSchema";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { NotImplementedError } from "@error/notImplementedError";
+import type { CourseService } from "@service/courseService";
+import { sanitizeProfileImage } from "@utility/imageUtility";
+import logger from "@utility/logger";
+import type { FastifyReply, FastifyRequest } from "fastify";
 
 class CourseController extends BaseController {
   private readonly courseService: CourseService;

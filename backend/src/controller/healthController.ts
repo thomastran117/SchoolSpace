@@ -1,7 +1,7 @@
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import logger from "@utility/logger";
 import type { FastifyReply, FastifyRequest } from "fastify";
-
-import { HttpError, InternalServerError } from "../error";
-import logger from "../utility/logger";
 
 class HealthController {
   public async index(req: FastifyRequest, reply: FastifyReply) {

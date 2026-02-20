@@ -1,5 +1,5 @@
-import { InternalServerError, ServiceUnavaliableError } from "../error";
-import logger from "../utility/logger";
+import { ServiceUnavaliableError } from "@error/serviceUnavaliableError";
+import logger from "@utility/logger";
 
 abstract class BaseService {
   protected ensureDependencies(...deps: string[]) {

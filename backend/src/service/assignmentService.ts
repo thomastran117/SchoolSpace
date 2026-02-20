@@ -1,5 +1,5 @@
-import type { CacheService } from "./cacheService";
-import type { FileService } from "./fileService";
+import type { CacheService } from "@service/cacheService";
+import type { FileService } from "@service/fileService";
 
 class AssignmentService {
   private readonly cacheService: CacheService;

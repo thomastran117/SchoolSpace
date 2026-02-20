@@ -11,9 +11,8 @@
  * @version 3.0.0
  * @auth Thomas
  */
+import logger from "@utility/logger";
 import dotenv from "dotenv";
-
-import logger from "../utility/logger";
 
 dotenv.config();
 

@@ -1,7 +1,6 @@
+import { ForbiddenError } from "@error/forbiddenError";
+import type { UserPayload } from "@models/token";
 import type { FastifyRequest } from "fastify";
-
-import { ForbiddenError } from "../error";
-import type { UserPayload } from "../models/token";
 
 abstract class BaseController {
   protected parsePositiveInt(

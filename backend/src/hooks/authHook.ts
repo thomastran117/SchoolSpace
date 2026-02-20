@@ -7,11 +7,10 @@
  * @version 1.0.0
  * @auth Thomas
  */
+import container from "@container/index";
+import { UnauthorizedError } from "@error/unauthorizedError";
+import type { BasicTokenService } from "@service/basicTokenService";
 import type { FastifyReply, FastifyRequest } from "fastify";
-
-import container from "../container";
-import { UnauthorizedError } from "../error";
-import type { BasicTokenService } from "../service/basicTokenService";
 
 async function authDependency(request: FastifyRequest, reply: FastifyReply) {
   const authHeader = request.headers.authorization;

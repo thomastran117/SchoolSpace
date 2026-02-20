@@ -1,13 +1,10 @@
+import { InternalServerError } from "@error/internalServerError";
+import { TooManyRequestError } from "@error/tooManyRequestError";
+import { UnauthorizedError } from "@error/unauthorizedError";
+import type { CacheService } from "@service/cacheService";
+import logger from "@utility/logger";
 import crypto from "crypto";
 import { env } from "process";
-
-import {
-  InternalServerError,
-  TooManyRequestError,
-  UnauthorizedError,
-} from "../error";
-import type { CacheService } from "../service/cacheService";
-import logger from "../utility/logger";
 
 type CodeRecord = { courseId: number };
 

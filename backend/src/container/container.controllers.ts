@@ -7,9 +7,17 @@
  * @version 1.0.0
  * @auth Thomas
  */
-import * as Controllers from "../controller";
-import logger from "../utility/logger";
-import type { Registration } from "./container.types";
+import type { Registration } from "@container/container.types";
+import { AssignmentController } from "@controller/assignmentController";
+import { AuthController } from "@controller/authController";
+import { CatalogueController } from "@controller/catalogueController";
+import { ContactController } from "@controller/contactController";
+import { CourseController } from "@controller/courseController";
+import { FileController } from "@controller/fileController";
+import { GradeController } from "@controller/gradeController";
+import { HealthController } from "@controller/healthController";
+import { UserController } from "@controller/userController";
+import logger from "@utility/logger";
 
 function registerControllerModules(): Map<string, Registration<any>> {
   try {
@@ -17,7 +25,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("AuthController", {
       factory: (scope) =>
-        new Controllers.AuthController({
+        new AuthController({
           authService: scope.resolve("AuthService"),
         }),
       lifetime: "scoped",
@@ -25,7 +33,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("FileController", {
       factory: (scope) =>
-        new Controllers.FileController({
+        new FileController({
           fileService: scope.resolve("FileService"),
         }),
       lifetime: "scoped",
@@ -33,7 +41,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("UserController", {
       factory: (scope) =>
-        new Controllers.UserController({
+        new UserController({
           userService: scope.resolve("UserService"),
         }),
       lifetime: "scoped",
@@ -41,7 +49,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("CatalogueController", {
       factory: (scope) =>
-        new Controllers.CatalogueController({
+        new CatalogueController({
           catalogueService: scope.resolve("CatalogueService"),
         }),
       lifetime: "scoped",
@@ -49,7 +57,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("CourseController", {
       factory: (scope) =>
-        new Controllers.CourseController({
+        new CourseController({
           courseService: scope.resolve("CourseService"),
         }),
       lifetime: "scoped",
@@ -57,7 +65,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("AssignmentController", {
       factory: (scope) =>
-        new Controllers.AssignmentController({
+        new AssignmentController({
           assignmentService: scope.resolve("AssignmentService"),
         }),
       lifetime: "scoped",
@@ -65,7 +73,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("GradeController", {
       factory: (scope) =>
-        new Controllers.GradeController({
+        new GradeController({
           gradeService: scope.resolve("GradeService"),
         }),
       lifetime: "scoped",
@@ -73,14 +81,14 @@ function registerControllerModules(): Map<string, Registration<any>> {
 
     controllers.set("ContactController", {
       factory: (scope) =>
-        new Controllers.ContactController({
+        new ContactController({
           contactService: scope.resolve("ContactService"),
         }),
       lifetime: "scoped",
     });
 
     controllers.set("HealthController", {
-      factory: (scope) => new Controllers.HealthController(),
+      factory: (scope) => new HealthController(),
       lifetime: "scoped",
     });
 

@@ -7,12 +7,11 @@
  * @version 1.0.0
  * @auth Thomas
  */
+import env from "@config/envConfigs";
+import { BadRequestError } from "@error/badRequestError";
 import type { FastifyRequest } from "fastify";
 import type { ZodSchema } from "zod";
 import { ZodObject } from "zod";
-
-import env from "../config/envConfigs";
-import { BadRequestError } from "../error";
 
 const VALIDATION_MODE = env.zodConfiguration ?? "strict";
 type ValidationSource = "body" | "params" | "query";

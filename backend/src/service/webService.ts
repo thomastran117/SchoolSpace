@@ -12,12 +12,12 @@
  * @version 2.0.1
  * @auth Thomas
  */
+import env from "@config/envConfigs";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import logger from "@utility/logger";
 import type { AxiosRequestConfig } from "axios";
 import axios from "axios";
-
-import env from "../config/envConfigs";
-import { HttpError, InternalServerError } from "../error";
-import logger from "../utility/logger";
 
 const { googleCaptcha: GOOGLE_CAPTCHA_SECRET } = env;
 

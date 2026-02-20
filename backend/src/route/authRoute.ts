@@ -7,8 +7,6 @@
  * @version 1.0.0
  * @author Thomas
  */
-import type { FastifyInstance } from "fastify";
-
 import {
   AppleSchema,
   ChangePasswordSchema,
@@ -18,10 +16,10 @@ import {
   MicrosoftSchema,
   SignupSchema,
   VerifySchema,
-} from "../dto/authSchema";
-import { assertAllowedOrigin } from "../hooks/allowedOriginsHook";
-import { useController } from "../hooks/controllerHook";
-import { validate } from "../hooks/validateHook";
+} from "@dto/authSchema";
+import { useController } from "@hooks/controllerHook";
+import { validate } from "@hooks/validateHook";
+import type { FastifyInstance } from "fastify";
 
 async function authRoutes(app: FastifyInstance) {
   /**

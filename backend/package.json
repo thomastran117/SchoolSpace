@@ -4,7 +4,7 @@
   "private": true,
   "main": "dist/server.js",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch -r tsconfig-paths/register src/server.ts",
     "build": "tsc && tsc-alias",
     "start": "node dist/src/server.js",
     "test": "jest --passWithNoTests --runInBand",
@@ -44,6 +44,7 @@
     "sanitize-filename": "^1.6.3",
     "sanitize-html": "^2.17.0",
     "sharp": "^0.34.4",
+    "tsconfig-paths": "^4.2.0",
     "uuid": "^8.3.2",
     "zod": "^4.1.13"
   },

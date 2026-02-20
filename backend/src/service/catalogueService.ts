@@ -1,8 +1,9 @@
-import { ConflictError, NotFoundError } from "../error";
-import type { Catalogue, Term } from "../models/catalogue";
-import type { CatalogueRepository } from "../repository";
-import { BaseService } from "./baseService";
-import type { CacheService } from "./cacheService";
+import { ConflictError } from "@error/conflictError";
+import { NotFoundError } from "@error/notFoundError";
+import type { Catalogue, Term } from "@models/catalogue";
+import type { CatalogueRepository } from "@repository/catalogueRepository";
+import { BaseService } from "@service/baseService";
+import type { CacheService } from "@service/cacheService";
 
 const NOT_FOUND = "__NF__";
 

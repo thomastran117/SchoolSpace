@@ -7,46 +7,52 @@
  * @version 1.0.0
  * @auth Thomas
  */
-import * as Repositories from "../repository";
-import logger from "../utility/logger";
-import type { Registration } from "./container.types";
+import type { Registration } from "@container/container.types";
+import { AssignmentRepository } from "@repository/assignmentRepository";
+import { CatalogueRepository } from "@repository/catalogueRepository";
+import { ContactRepository } from "@repository/contactRepository";
+import { CourseRepository } from "@repository/courseRepository";
+import { EnrollmentRepository } from "@repository/enrollmentRepository";
+import { GradeRepository } from "@repository/gradeRepository";
+import { UserRepository } from "@repository/userRepository";
+import logger from "@utility/logger";
 
 function registerRepositoryModules(): Map<string, Registration<any>> {
   try {
     const repositories = new Map<string, Registration<any>>();
 
     repositories.set("UserRepository", {
-      factory: () => new Repositories.UserRepository(),
+      factory: () => new UserRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("CourseRepository", {
-      factory: () => new Repositories.CourseRepository(),
+      factory: () => new CourseRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("CatalogueRepository", {
-      factory: () => new Repositories.CatalogueRepository(),
+      factory: () => new CatalogueRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("EnrollmentRepository", {
-      factory: () => new Repositories.EnrollmentRepository(),
+      factory: () => new EnrollmentRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("AssignmentRepository", {
-      factory: () => new Repositories.AssignmentRepository(),
+      factory: () => new AssignmentRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("GradeRepository", {
-      factory: () => new Repositories.GradeRepository(),
+      factory: () => new GradeRepository(),
       lifetime: "singleton",
     });
 
     repositories.set("ContactRepository", {
-      factory: () => new Repositories.ContactRepository(),
+      factory: () => new ContactRepository(),
       lifetime: "singleton",
     });
 

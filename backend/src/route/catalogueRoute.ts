@@ -2,17 +2,16 @@
  * @file catalogueRoutes.ts
  * @description Routes for managing course catalogue templates
  */
-import type { FastifyInstance } from "fastify";
-
 import {
   CreateCatalogueSchema,
   QueryCatalogueSchema,
   UpdateCatalogueSchema,
-} from "../dto/catalogueSchema";
-import { IdParamSchema } from "../dto/coreSchema";
-import { authDependency } from "../hooks/authHook";
-import { useController } from "../hooks/controllerHook";
-import { validate } from "../hooks/validateHook";
+} from "@dto/catalogueSchema";
+import { IdParamSchema } from "@dto/coreSchema";
+import { authDependency } from "@hooks/authHook";
+import { useController } from "@hooks/controllerHook";
+import { validate } from "@hooks/validateHook";
+import type { FastifyInstance } from "fastify";
 
 async function catalogueRoutes(app: FastifyInstance) {
   app.get(

@@ -1,5 +1,5 @@
-import type { Provider, Role, User } from "../models/user";
-import { BaseRepository } from "./baseRepository";
+import type { Provider, Role, User } from "@models/user";
+import { BaseRepository } from "@repository/baseRepository";
 
 class UserRepository extends BaseRepository {
   constructor() {

@@ -1,9 +1,8 @@
-import { PrismaClient } from "@prisma/client";
-
-import { RepositoryError } from "../error/repositoryError";
-import prisma from "../resource/prisma";
-import { CircuitBreaker } from "../utility/circuitBreaker";
-import logger from "../utility/logger";
+import { RepositoryError } from "@error/repositoryError";
+import type { PrismaClient } from "@prisma/client";
+import prisma from "@resource/prisma";
+import { CircuitBreaker } from "@utility/circuitBreaker";
+import logger from "@utility/logger";
 
 /**
  * BaseRepository

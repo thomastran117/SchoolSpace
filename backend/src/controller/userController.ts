@@ -1,17 +1,14 @@
+import type { RoleUpdateDto, UserUpdateDto } from "@dto/userSchema";
+import { BadRequestError } from "@error/badRequestError";
+import { ConflictError } from "@error/conflictError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { UnauthorizedError } from "@error/unauthorizedError";
+import type { UserPayload } from "@models/token";
+import type { UserService } from "@service/userService";
+import { sanitizeProfileImage } from "@utility/imageUtility";
+import logger from "@utility/logger";
 import type { FastifyReply, FastifyRequest } from "fastify";
-
-import type { RoleUpdateDto, UserUpdateDto } from "../dto/userSchema";
-import {
-  BadRequestError,
-  ConflictError,
-  HttpError,
-  InternalServerError,
-  UnauthorizedError,
-} from "../error";
-import type { UserPayload } from "../models/token";
-import type { UserService } from "../service/userService";
-import { sanitizeProfileImage } from "../utility/imageUtility";
-import logger from "../utility/logger";
 
 class UserController {
   private readonly userService: UserService;

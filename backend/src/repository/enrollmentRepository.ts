@@ -1,5 +1,5 @@
-import type { Enrollment } from "../models/enrollment";
-import { BaseRepository } from "./baseRepository";
+import type { Enrollment } from "@models/enrollment";
+import { BaseRepository } from "@repository/baseRepository";
 
 class EnrollmentRepository extends BaseRepository {
   constructor() {

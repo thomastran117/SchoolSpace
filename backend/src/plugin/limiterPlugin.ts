@@ -1,9 +1,9 @@
 import fp from "fastify-plugin";
 
-import container from "../container";
-import { TooManyRequestError } from "../error";
-import type { BasicTokenService } from "../service/basicTokenService";
-import type { CacheService } from "../service/cacheService";
+import container from "@container/index";
+import { TooManyRequestError } from "@error/tooManyRequestError";
+import type { BasicTokenService } from "@service/basicTokenService";
+import type { CacheService } from "@service/cacheService";
 
 type RateLimitMode = "window" | "bucket";
 

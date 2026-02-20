@@ -1,19 +1,16 @@
+import { ConflictError } from "@error/conflictError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { NotFoundError } from "@error/notFoundError";
 import type { MultipartFile } from "@fastify/multipart";
-
-import {
-  ConflictError,
-  HttpError,
-  InternalServerError,
-  NotFoundError,
-} from "../error";
-import type { AuthResponse } from "../models/auth";
-import type { Role, SafeUser } from "../models/user";
-import type { UserRepository } from "../repository";
-import logger from "../utility/logger";
-import { BaseService } from "./baseService";
-import type { CacheService } from "./cacheService";
-import type { FileService } from "./fileService";
-import type { TokenService } from "./tokenService";
+import type { AuthResponse } from "@models/auth";
+import type { Role, SafeUser } from "@models/user";
+import type { UserRepository } from "@repository/userRepository";
+import { BaseService } from "@service/baseService";
+import type { CacheService } from "@service/cacheService";
+import type { FileService } from "@service/fileService";
+import type { TokenService } from "@service/tokenService";
+import logger from "@utility/logger";
 
 class UserService extends BaseService {
   private readonly userRepository: UserRepository;

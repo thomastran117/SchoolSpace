@@ -7,13 +7,12 @@
  * @version 1.0.0
  * @auth Thomas
  */
+import { BadRequestError } from "@error/badRequestError";
 import type { MultipartFile } from "@fastify/multipart";
+import logger from "@utility/logger";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import path from "path";
 import sanitize from "sanitize-filename";
-
-import { BadRequestError } from "../error";
-import logger from "../utility/logger";
 
 type ImageUploadOptions = {
   maxSize?: number;

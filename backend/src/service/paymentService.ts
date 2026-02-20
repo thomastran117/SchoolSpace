@@ -8,9 +8,9 @@
  * @version 2.0.0
  * @auth Thomas
  */
-import env from "../config/envConfigs";
-import logger from "../utility/logger";
-import type { WebService } from "./webService";
+import env from "@config/envConfigs";
+import type { WebService } from "@service/webService";
+import logger from "@utility/logger";
 
 const { paypalClient, paypalSecret, paypalApi, paypalCurrency } = env;
 

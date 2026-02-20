@@ -1,8 +1,7 @@
+import type { CourseFull, CourseListItem } from "@models/course";
+import { courseFullInclude, courseListSelect } from "@models/course";
 import type { Prisma } from "@prisma/client";
-
-import type { CourseFull, CourseListItem } from "../models/course";
-import { courseFullInclude, courseListSelect } from "../models/course";
-import { BaseRepository } from "./baseRepository";
+import { BaseRepository } from "@repository/baseRepository";
 
 export type CourseCounterField =
   | "enrollmentNumber"

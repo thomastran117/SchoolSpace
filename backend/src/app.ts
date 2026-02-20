@@ -1,17 +1,16 @@
+import container from "@container/index";
 import cookie from "@fastify/cookie";
 import cors from "@fastify/cors";
 import csrfProtection from "@fastify/csrf-protection";
 import multipart from "@fastify/multipart";
+import errorHandler from "@plugin/errorPlugin";
+import rateLimiter from "@plugin/limiterPlugin";
+import requestLogger from "@plugin/loggerPlugin";
+import requestScopePlugin from "@plugin/scopePlugin";
+import { healthRoutes } from "@route/healthRoute";
+import { registerRoutes } from "@route/route";
 import Fastify from "fastify";
 import methodNotAllowed from "fastify-method-not-allowed";
-
-import container from "./container";
-import errorHandler from "./plugin/errorPlugin";
-import rateLimiter from "./plugin/limiterPlugin";
-import requestLogger from "./plugin/loggerPlugin";
-import requestScopePlugin from "./plugin/scopePlugin";
-import { healthRoutes } from "./route/healthRoute";
-import { registerRoutes } from "./route/route";
 
 export async function buildApp() {
   const app = Fastify({});

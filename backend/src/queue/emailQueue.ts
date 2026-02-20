@@ -1,7 +1,7 @@
-import amqp, { Channel } from "amqplib";
-
-import env from "../config/envConfigs";
-import logger from "../utility/logger";
+import env from "@config/envConfigs";
+import logger from "@utility/logger";
+import type { Channel } from "amqplib";
+import amqp from "amqplib";
 
 const QUEUE = "email.send";
 

@@ -1,7 +1,7 @@
 import fp from "fastify-plugin";
 
-import container from "../container";
-import logger from "../utility/logger";
+import container from "@container/index";
+import logger from "@utility/logger";
 
 export default fp(async function requestScopePlugin(app) {
   app.addHook("onRequest", async (request, reply) => {

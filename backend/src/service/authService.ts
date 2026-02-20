@@ -9,22 +9,19 @@
  * @auth Thomas
  */
 // Imports
+import { ConflictError } from "@error/conflictError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { NotFoundError } from "@error/notFoundError";
+import { UnauthorizedError } from "@error/unauthorizedError";
+import type { AuthResponse } from "@models/auth";
+import type { EmailQueue } from "@queue/emailQueue";
+import type { UserRepository } from "@repository/userRepository";
+import type { OAuthService } from "@service/oauthService";
+import type { TokenService } from "@service/tokenService";
+import type { WebService } from "@service/webService";
+import logger from "@utility/logger";
 import bcrypt from "bcrypt";
-
-import {
-  ConflictError,
-  HttpError,
-  InternalServerError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../error";
-import type { AuthResponse } from "../models/auth";
-import type { EmailQueue } from "../queue/emailQueue";
-import type { UserRepository } from "../repository";
-import logger from "../utility/logger";
-import type { OAuthService } from "./oauthService";
-import type { TokenService } from "./tokenService";
-import type { WebService } from "./webService";
 
 class AuthService {
   private readonly userRepository: UserRepository;
