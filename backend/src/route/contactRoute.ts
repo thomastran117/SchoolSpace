@@ -2,14 +2,13 @@
  * @file contactRoutes.ts
  * @description Routes for managing contacts
  */
+import { CreateContactSchema, UpdateContactSchema } from "@dto/contactSchema";
+import { PaginationQuerySchema } from "@dto/coreSchema";
+import { IdParamSchema } from "@dto/coreSchema";
+import { authDependency } from "@hooks/authHook";
+import { useController } from "@hooks/controllerHook";
+import { validate } from "@hooks/validateHook";
 import type { FastifyInstance } from "fastify";
-
-import { CreateContactSchema, UpdateContactSchema } from "../dto/contactSchema";
-import { PaginationQuerySchema } from "../dto/coreSchema";
-import { IdParamSchema } from "../dto/coreSchema";
-import { authDependency } from "../hooks/authHook";
-import { useController } from "../hooks/controllerHook";
-import { validate } from "../hooks/validateHook";
 
 async function contactRoutes(app: FastifyInstance) {
   app.get(

@@ -9,14 +9,13 @@
 /**
  * Imports
  */
+import { IdParamSchema } from "@dto/coreSchema";
+import { RoleSchema, UserSchema } from "@dto/userSchema";
+import { authDependency } from "@hooks/authHook";
+import { useController } from "@hooks/controllerHook";
+import { safeUploadAvatar } from "@hooks/uploadHook";
+import { validate } from "@hooks/validateHook";
 import type { FastifyInstance } from "fastify";
-
-import { IdParamSchema } from "../dto/coreSchema";
-import { RoleSchema, UserSchema } from "../dto/userSchema";
-import { authDependency } from "../hooks/authHook";
-import { useController } from "../hooks/controllerHook";
-import { safeUploadAvatar } from "../hooks/uploadHook";
-import { validate } from "../hooks/validateHook";
 
 async function userRoutes(app: FastifyInstance) {
   app.get(

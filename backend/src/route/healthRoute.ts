@@ -1,6 +1,5 @@
+import { useController } from "@hooks/controllerHook";
 import type { FastifyInstance } from "fastify";
-
-import { useController } from "../hooks/controllerHook";
 
 async function healthRoutes(app: FastifyInstance) {
   app.get(

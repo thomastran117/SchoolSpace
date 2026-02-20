@@ -9,19 +9,18 @@
 /**
  * Imports
  */
-import type { FastifyInstance } from "fastify";
-
-import { IdParamSchema } from "../dto/coreSchema";
+import { IdParamSchema } from "@dto/coreSchema";
 import {
   CodeCourseSchema,
   CreateCourseSchema,
   EnrollCourseSchema,
   UpdateCourseSchema,
-} from "../dto/courseSchema";
-import { authDependency } from "../hooks/authHook";
-import { useController } from "../hooks/controllerHook";
-import { safeUploadImage } from "../hooks/uploadHook";
-import { validate } from "../hooks/validateHook";
+} from "@dto/courseSchema";
+import { authDependency } from "@hooks/authHook";
+import { useController } from "@hooks/controllerHook";
+import { safeUploadImage } from "@hooks/uploadHook";
+import { validate } from "@hooks/validateHook";
+import type { FastifyInstance } from "fastify";
 
 async function courseRoutes(app: FastifyInstance) {
   app.get(
