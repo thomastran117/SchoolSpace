@@ -1,15 +1,12 @@
+import { BadRequestError } from "@error/badRequestError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { NotFoundError } from "@error/notFoundError";
+import type { GetFileResult, UploadResult } from "@models/file";
+import logger from "@utility/logger";
 import crypto from "crypto";
 import fs from "fs/promises";
 import path from "path";
-
-import {
-  BadRequestError,
-  HttpError,
-  InternalServerError,
-  NotFoundError,
-} from "../error";
-import type { GetFileResult, UploadResult } from "../models/file";
-import logger from "../utility/logger";
 
 const UPLOADS_DIR = path.resolve(__dirname, "../../../uploads");
 

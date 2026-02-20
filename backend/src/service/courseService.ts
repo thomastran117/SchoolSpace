@@ -1,22 +1,19 @@
+import { ForbiddenError } from "@error/forbiddenError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { NotFoundError } from "@error/notFoundError";
 import type { MultipartFile } from "@fastify/multipart";
+import type { CourseFull, CourseListItem } from "@models/course";
 import type { Prisma } from "@prisma/client";
+import type { CourseRepository } from "@repository/courseRepository";
+import { BaseService } from "@service/baseService";
+import type { CacheService } from "@service/cacheService";
+import type { CatalogueService } from "@service/catalogueService";
+import type { EnrollmentService } from "@service/enrollmentService";
+import type { FileService } from "@service/fileService";
+import type { UserService } from "@service/userService";
+import logger from "@utility/logger";
 import crypto from "crypto";
-
-import {
-  ForbiddenError,
-  HttpError,
-  InternalServerError,
-  NotFoundError,
-} from "../error";
-import type { CourseFull, CourseListItem } from "../models/course";
-import type { CourseRepository } from "../repository";
-import logger from "../utility/logger";
-import { BaseService } from "./baseService";
-import type { CacheService } from "./cacheService";
-import type { CatalogueService } from "./catalogueService";
-import type { EnrollmentService } from "./enrollmentService";
-import type { FileService } from "./fileService";
-import type { UserService } from "./userService";
 
 const NOT_FOUND = "__NOT_FOUND__";
 

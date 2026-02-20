@@ -10,21 +10,18 @@
  * @version 2.0.0
  * @auth Thomas
  */
+import env from "@config/envConfigs";
+import { BadRequestError } from "@error/badRequestError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { TooManyRequestError } from "@error/tooManyRequestError";
+import { UnauthorizedError } from "@error/unauthorizedError";
+import { BasicTokenService } from "@service/basicTokenService";
+import type { CacheService } from "@service/cacheService";
+import logger from "@utility/logger";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
-
-import env from "../config/envConfigs";
-import {
-  BadRequestError,
-  HttpError,
-  InternalServerError,
-  TooManyRequestError,
-  UnauthorizedError,
-} from "../error";
-import type { CacheService } from "../service/cacheService";
-import logger from "../utility/logger";
-import { BasicTokenService } from "./basicTokenService";
 
 const { jwtSecretAccess: JWT_SECRET_ACCESS } = env;
 

@@ -8,23 +8,20 @@
  * @version 2.1.0
  * @auth Thomas
  */
+import env from "@config/envConfigs";
+import { BadRequestError } from "@error/badRequestError";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { NotImplementedError } from "@error/notImplementedError";
+import { ServiceUnavaliableError } from "@error/serviceUnavaliableError";
+import { UnauthorizedError } from "@error/unauthorizedError";
+import logger from "@utility/logger";
 import type { TokenPayload } from "google-auth-library";
 import { OAuth2Client } from "google-auth-library";
 import type { JwtHeader, JwtPayload } from "jsonwebtoken";
 import jwt from "jsonwebtoken";
 import type { JwksClient } from "jwks-rsa";
 import jwksClient from "jwks-rsa";
-
-import env from "../config/envConfigs";
-import {
-  BadRequestError,
-  HttpError,
-  InternalServerError,
-  NotImplementedError,
-  ServiceUnavaliableError,
-  UnauthorizedError,
-} from "../error";
-import logger from "../utility/logger";
 
 interface GoogleUserInfo {
   email?: string;

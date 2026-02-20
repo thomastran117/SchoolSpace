@@ -1,8 +1,9 @@
+import env from "@config/envConfigs";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { UnauthorizedError } from "@error/unauthorizedError";
+import logger from "@utility/logger";
 import jwt from "jsonwebtoken";
-
-import env from "../config/envConfigs";
-import { HttpError, InternalServerError, UnauthorizedError } from "../error";
-import logger from "../utility/logger";
 
 const { jwtSecretAccess: JWT_SECRET_ACCESS } = env;
 

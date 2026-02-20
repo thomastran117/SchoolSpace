@@ -1,7 +1,9 @@
-import { HttpError, InternalServerError, NotImplementedError } from "../error";
-import type { EnrollmentRepository } from "../repository";
-import logger from "../utility/logger";
-import type { CodeService } from "./codeService";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { NotImplementedError } from "@error/notImplementedError";
+import type { EnrollmentRepository } from "@repository/enrollmentRepository";
+import type { CodeService } from "@service/codeService";
+import logger from "@utility/logger";
 
 class EnrollmentService {
   private readonly enrollmentRepository: EnrollmentRepository;

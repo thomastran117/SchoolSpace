@@ -7,16 +7,14 @@
  * @version 1.0.0
  * @auth Thomas
  */
-import {
-  HttpError,
-  InternalServerError,
-  NotFoundError,
-  UnauthorizedError,
-} from "../error";
-import type { Status } from "../models/contact";
-import type { ContactRepository } from "../repository/contactRepository";
-import logger from "../utility/logger";
-import type { WebService } from "./webService";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { NotFoundError } from "@error/notFoundError";
+import { UnauthorizedError } from "@error/unauthorizedError";
+import type { Status } from "@models/contact";
+import type { ContactRepository } from "@repository/contactRepository";
+import type { WebService } from "@service/webService";
+import logger from "@utility/logger";
 
 class ContactService {
   private readonly contactRepository: ContactRepository;

@@ -1,5 +1,5 @@
-import { isRedisHealthy, redis } from "../resource/redis";
-import logger from "../utility/logger";
+import { isRedisHealthy, redis } from "@resource/redis";
+import logger from "@utility/logger";
 
 class CacheCircuitBreaker {
   private failures = 0;
