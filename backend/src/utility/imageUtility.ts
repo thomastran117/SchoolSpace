@@ -12,11 +12,10 @@
  * @version 1.0.0
  * @auth Thomas
  */
+import { BadRequestError } from "@error/badRequestError";
 import type { MultipartFile } from "@fastify/multipart";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
-
-import { BadRequestError } from "../error";
 
 const MAX_WIDTH = 2048;
 const MAX_HEIGHT = 2048;

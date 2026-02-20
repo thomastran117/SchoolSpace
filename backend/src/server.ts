@@ -1,6 +1,6 @@
-import { buildApp } from "./app";
-import env from "./config/envConfigs";
-import logger from "./utility/logger";
+import { buildApp } from "@/app";
+import env from "@config/envConfigs";
+import logger from "@utility/logger";
 
 const PORT = process.env.PORT || 8040;
 
