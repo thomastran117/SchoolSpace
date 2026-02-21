@@ -94,10 +94,46 @@ class Container {
     }
   }
 
+  private detectCircularDependencies(): void {
+    const state = new Map<string, 0 | 1 | 2>();
+
+    const visit = (key: string, path: string[]): void => {
+      const current = state.get(key) ?? 0;
+
+      if (current === 1) {
+        const cycle = [...path, key].join(" → ");
+        throw new Error(`Circular dependency detected: ${cycle}`);
+      }
+
+      if (current === 2) return;
+
+      state.set(key, 1);
+
+      const reg = this.services.get(key);
+      if (reg?.deps) {
+        for (const dep of reg.deps) {
+          if (!this.services.has(dep)) {
+            throw new Error(
+              `Service '${key}' depends on unregistered service '${dep}'`
+            );
+          }
+          visit(dep, [...path, key]);
+        }
+      }
+
+      state.set(key, 2);
+    };
+
+    for (const key of this.services.keys()) {
+      if ((state.get(key) ?? 0) === 0) visit(key, []);
+    }
+  }
+
   async initialize(): Promise<void> {
     if (this.initialized) return;
     this.initialized = true;
 
+    this.detectCircularDependencies();
     await this.coreInitializer.initialize();
 
     for (const [key, reg] of this.services) {

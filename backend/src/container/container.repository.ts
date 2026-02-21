@@ -24,36 +24,43 @@ function registerRepositoryModules(): Map<string, Registration<any>> {
     repositories.set("UserRepository", {
       factory: () => new UserRepository(),
       lifetime: "singleton",
+      deps: [],
     });
 
     repositories.set("CourseRepository", {
       factory: () => new CourseRepository(),
       lifetime: "singleton",
+      deps: [],
     });
 
     repositories.set("CatalogueRepository", {
       factory: () => new CatalogueRepository(),
       lifetime: "singleton",
+      deps: [],
     });
 
     repositories.set("EnrollmentRepository", {
       factory: () => new EnrollmentRepository(),
       lifetime: "singleton",
+      deps: [],
     });
 
     repositories.set("AssignmentRepository", {
       factory: () => new AssignmentRepository(),
       lifetime: "singleton",
+      deps: [],
     });
 
     repositories.set("GradeRepository", {
       factory: () => new GradeRepository(),
       lifetime: "singleton",
+      deps: [],
     });
 
     repositories.set("ContactRepository", {
       factory: () => new ContactRepository(),
       lifetime: "singleton",
+      deps: [],
     });
 
     return repositories;

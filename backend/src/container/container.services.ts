@@ -33,26 +33,31 @@ function registerServiceModules(): Map<string, Registration<any>> {
     services.set("CacheService", {
       factory: () => new CacheService(),
       lifetime: "singleton",
+      deps: [],
     });
 
     services.set("FileService", {
       factory: () => new FileService(),
       lifetime: "singleton",
+      deps: [],
     });
 
     services.set("BasicTokenService", {
       factory: () => new BasicTokenService(),
       lifetime: "singleton",
+      deps: [],
     });
 
     services.set("WebService", {
       factory: () => new WebService(),
       lifetime: "transient",
+      deps: [],
     });
 
     services.set("OAuthService", {
       factory: () => new OAuthService(),
       lifetime: "transient",
+      deps: [],
     });
 
     services.set("TokenService", {
@@ -61,6 +66,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           cacheService: scope.resolve("CacheService"),
         }),
       lifetime: "transient",
+      deps: [],
     });
 
     services.set("CodeService", {
@@ -69,6 +75,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           cacheService: scope.resolve("CacheService"),
         }),
       lifetime: "transient",
+      deps: ["CacheService"],
     });
 
     services.set("PaymentService", {
@@ -77,6 +84,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           webService: scope.resolve("WebService"),
         }),
       lifetime: "scoped",
+      deps: ["WebService"],
     });
 
     services.set("CatalogueService", {
@@ -86,6 +94,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           catalogueRepository: scope.resolve("CatalogueRepository"),
         }),
       lifetime: "scoped",
+      deps: ["CacheService", "CatalogueRepository"],
     });
 
     services.set("GradeService", {
@@ -97,6 +106,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           userService: scope.resolve("UserService"),
         }),
       lifetime: "scoped",
+      deps: ["GradeRepository", "CacheService"],
     });
 
     services.set("UserService", {
@@ -108,6 +118,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           fileService: scope.resolveOptional("FileService"),
         }),
       lifetime: "scoped",
+      deps: ["UserRepository", "CacheService", "TokenService", "FileService"],
     });
 
     services.set("AssignmentService", {
@@ -117,6 +128,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           fileService: scope.resolve("FileService"),
         }),
       lifetime: "scoped",
+      deps: ["FileService", "CacheService"],
     });
 
     services.set("CourseService", {
@@ -130,6 +142,14 @@ function registerServiceModules(): Map<string, Registration<any>> {
           fileService: scope.resolve("FileService"),
         }),
       lifetime: "scoped",
+      deps: [
+        "CourseRepository",
+        "CacheService",
+        "UserService",
+        "FileService",
+        "EnrollmentService",
+        "CatalogueService",
+      ],
     });
 
     services.set("AuthService", {
@@ -142,6 +162,13 @@ function registerServiceModules(): Map<string, Registration<any>> {
           webService: scope.resolve("WebService"),
         }),
       lifetime: "scoped",
+      deps: [
+        "UserRepository",
+        "EmailQueue",
+        "TokenService",
+        "OAuthService",
+        "WebService",
+      ],
     });
 
     services.set("ContactService", {
@@ -151,6 +178,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           webService: scope.resolve("WebService"),
         }),
       lifetime: "scoped",
+      deps: ["ContactRepository", "WebService"],
     });
 
     services.set("EnrollmentService", {
@@ -160,6 +188,7 @@ function registerServiceModules(): Map<string, Registration<any>> {
           codeService: scope.resolve("CodeService"),
         }),
       lifetime: "scoped",
+      deps: ["EnrollmentRepository", "CodeService"],
     });
 
     return services;
