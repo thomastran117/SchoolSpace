@@ -7,6 +7,7 @@
  * @version 1.0.0
  * @auth Thomas
  */
+import UserReportService from "@/service/userReportService";
 import type { Registration } from "@container/container.types";
 import { AssignmentService } from "@service/assignmentService";
 import { AuthService } from "@service/authService";
@@ -189,6 +190,23 @@ function registerServiceModules(): Map<string, Registration<any>> {
         }),
       lifetime: "scoped",
       deps: ["EnrollmentRepository", "CodeService"],
+    });
+
+    services.set("EnrollmentService", {
+      factory: (scope) =>
+        new UserReportService({
+          userReportRepository: scope.resolve("UserReportRepository"),
+          cacheService: scope.resolve("CodeService"),
+          webService: scope.resolve("WebService"),
+          userService: scope.resolve("UserService"),
+        }),
+      lifetime: "scoped",
+      deps: [
+        "UserReportRepository",
+        "WebService",
+        "UserService",
+        "CodeService",
+      ],
     });
 
     return services;

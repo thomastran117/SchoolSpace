@@ -14,6 +14,7 @@ import { ContactRepository } from "@repository/contactRepository";
 import { CourseRepository } from "@repository/courseRepository";
 import { EnrollmentRepository } from "@repository/enrollmentRepository";
 import { GradeRepository } from "@repository/gradeRepository";
+import { UserReportRepository } from "@repository/userReportRepository";
 import { UserRepository } from "@repository/userRepository";
 import logger from "@utility/logger";
 
@@ -59,6 +60,12 @@ function registerRepositoryModules(): Map<string, Registration<any>> {
 
     repositories.set("ContactRepository", {
       factory: () => new ContactRepository(),
+      lifetime: "singleton",
+      deps: [],
+    });
+
+    repositories.set("UserReportRepository", {
+      factory: () => new UserReportRepository(),
       lifetime: "singleton",
       deps: [],
     });
