@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch -r tsconfig-paths/register src/app/server.ts",
     "build": "tsc && tsc-alias",
-    "start": "node dist/src/app/server.js",
+    "start": "node dist/app/server.js",
     "test": "jest --passWithNoTests --runInBand",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
