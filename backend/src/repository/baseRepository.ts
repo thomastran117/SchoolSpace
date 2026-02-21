@@ -219,3 +219,4 @@ abstract class BaseRepository {
 }
 
 export { BaseRepository };
+export default BaseRepository;

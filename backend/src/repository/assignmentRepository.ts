@@ -149,3 +149,4 @@ class AssignmentRepository extends BaseRepository {
 }
 
 export { AssignmentRepository };
+export default AssignmentRepository;

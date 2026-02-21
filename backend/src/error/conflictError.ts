@@ -20,3 +20,4 @@ class ConflictError extends HttpError {
 }
 
 export { ConflictError };
+export default ConflictError;

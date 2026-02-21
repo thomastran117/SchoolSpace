@@ -20,3 +20,4 @@ class BadRequestError extends HttpError {
 }
 
 export { BadRequestError };
+export default BadRequestError;

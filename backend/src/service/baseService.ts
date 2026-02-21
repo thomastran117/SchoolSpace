@@ -30,3 +30,4 @@ abstract class BaseService {
 }
 
 export { BaseService };
+export default BaseService;

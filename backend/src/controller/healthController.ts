@@ -38,3 +38,4 @@ class HealthController {
 }
 
 export { HealthController };
+export default HealthController;

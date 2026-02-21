@@ -20,3 +20,4 @@ class ForbiddenError extends HttpError {
 }
 
 export { ForbiddenError };
+export default ForbiddenError;

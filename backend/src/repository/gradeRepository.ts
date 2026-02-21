@@ -274,3 +274,4 @@ class GradeRepository extends BaseRepository {
 }
 
 export { GradeRepository };
+export default GradeRepository;

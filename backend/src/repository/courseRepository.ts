@@ -256,3 +256,4 @@ class CourseRepository extends BaseRepository {
 }
 
 export { CourseRepository };
+export default CourseRepository;

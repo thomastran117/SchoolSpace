@@ -19,3 +19,4 @@ class RepositoryError extends Error {
 }
 
 export { RepositoryError };
+export default RepositoryError;

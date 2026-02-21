@@ -180,3 +180,4 @@ class CatalogueController {
 }
 
 export { CatalogueController };
+export default CatalogueController;

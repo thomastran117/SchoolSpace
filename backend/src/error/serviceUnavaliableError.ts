@@ -20,3 +20,4 @@ class ServiceUnavaliableError extends HttpError {
 }
 
 export { ServiceUnavaliableError };
+export default ServiceUnavaliableError;

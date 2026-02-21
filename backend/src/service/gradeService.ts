@@ -208,3 +208,4 @@ class GradeService extends BaseService {
 }
 
 export { GradeService };
+export default GradeService;

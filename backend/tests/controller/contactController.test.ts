@@ -1,5 +1,7 @@
 import { ContactController } from "../../src/controller/contactController";
-import { ForbiddenError, HttpError, NotFoundError } from "../../src/error";
+import { ForbiddenError } from "../../src/error/forbiddenError";
+import { HttpError } from "../../src/error/httpError";
+import { NotFoundError } from "../../src/error/notFoundError";
 import logger from "../../src/utility/logger";
 
 jest.mock("../../src/utility/logger", () => ({

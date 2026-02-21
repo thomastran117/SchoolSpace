@@ -20,3 +20,4 @@ class NotFoundError extends HttpError {
 }
 
 export { NotFoundError };
+export default NotFoundError;

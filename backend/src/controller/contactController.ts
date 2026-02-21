@@ -191,3 +191,4 @@ class ContactController {
 }
 
 export { ContactController };
+export default ContactController;

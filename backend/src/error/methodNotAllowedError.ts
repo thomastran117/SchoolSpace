@@ -20,3 +20,4 @@ class MethodNotAllowedError extends HttpError {
 }
 
 export { MethodNotAllowedError };
+export default MethodNotAllowedError;

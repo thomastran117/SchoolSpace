@@ -400,3 +400,4 @@ class AuthController {
 }
 
 export { AuthController };
+export default AuthController;

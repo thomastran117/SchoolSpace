@@ -132,3 +132,4 @@ class EnrollmentService {
 }
 
 export { EnrollmentService };
+export default EnrollmentService;

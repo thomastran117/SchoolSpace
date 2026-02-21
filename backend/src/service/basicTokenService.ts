@@ -64,3 +64,4 @@ class BasicTokenService {
 }
 
 export { BasicTokenService };
+export default BasicTokenService;

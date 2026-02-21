@@ -45,3 +45,4 @@ abstract class BaseController {
 }
 
 export { BaseController };
+export default BaseController;

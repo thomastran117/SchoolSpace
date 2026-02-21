@@ -275,3 +275,4 @@ class OAuthService {
 }
 
 export { OAuthService };
+export default OAuthService;

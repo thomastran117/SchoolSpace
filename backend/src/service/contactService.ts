@@ -150,3 +150,4 @@ class ContactService {
 }
 
 export { ContactService };
+export default ContactService;

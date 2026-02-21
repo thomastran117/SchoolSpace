@@ -230,3 +230,4 @@ class WebService {
 }
 
 export { WebService };
+export default WebService;

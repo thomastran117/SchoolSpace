@@ -20,3 +20,4 @@ class UnprocessableEntityError extends HttpError {
 }
 
 export { UnprocessableEntityError };
+export default UnprocessableEntityError;

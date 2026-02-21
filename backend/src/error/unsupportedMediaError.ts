@@ -20,3 +20,4 @@ class UnsupportedMediaError extends HttpError {
 }
 
 export { UnsupportedMediaError };
+export default UnsupportedMediaError;

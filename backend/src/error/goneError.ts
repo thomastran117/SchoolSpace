@@ -20,3 +20,4 @@ class GoneError extends HttpError {
 }
 
 export { GoneError };
+export default GoneError;
