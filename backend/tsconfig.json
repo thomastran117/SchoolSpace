@@ -12,22 +12,22 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@config/*": ["src/config/*"],
-      "@hooks/*": ["src/hooks/*"],
-      "@container/*": ["src/container/*"],
-      "@service/*": ["src/service/*"],
-      "@controller/*": ["src/controller/*"],
-      "@error/*": ["src/error/*"],
-      "@mapper/*": ["src/mapper/*"],
-      "@dto/*": ["src/dto/*"],
-      "@models/*": ["src/models/*"],
-      "@plugin/*": ["src/plugin/*"],
-      "@queue/*": ["src/queue/*"],
-      "@resource/*": ["src/resource/*"],
-      "@repository/*": ["src/repository/*"],
-      "@utility/*": ["src/utility/*"],
-      "@route/*": ["src/route/*"]
+      "@/*": ["src/app/*"],
+      "@config/*": ["src/app/config/*"],
+      "@hooks/*": ["src/app/hooks/*"],
+      "@container/*": ["src/app/container/*"],
+      "@service/*": ["src/app/service/*"],
+      "@controller/*": ["src/app/controller/*"],
+      "@error/*": ["src/app/error/*"],
+      "@mapper/*": ["src/app/mapper/*"],
+      "@dto/*": ["src/app/dto/*"],
+      "@models/*": ["src/app/models/*"],
+      "@plugin/*": ["src/app/plugin/*"],
+      "@queue/*": ["src/app/queue/*"],
+      "@resource/*": ["src/app/resource/*"],
+      "@repository/*": ["src/app/repository/*"],
+      "@utility/*": ["src/app/utility/*"],
+      "@route/*": ["src/app/route/*"]
     },
 
     "strict": true,
@@ -41,6 +41,6 @@
     "skipLibCheck": true,
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "prisma.config.ts", "prisma"]
 }
