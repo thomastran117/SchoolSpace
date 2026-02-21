@@ -1,11 +1,10 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
-
 import { HttpError } from "@error/httpError";
 import { InternalServerError } from "@error/internalServerError";
 import { TokenService } from "@service/tokenService";
 import logger from "@utility/logger";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 
 jest.mock("jsonwebtoken");
 jest.mock("uuid");

@@ -10,7 +10,10 @@ const config: Config = {
     prefix: "<rootDir>/",
   }),
   moduleFileExtensions: ["ts", "js", "json"],
-  testMatch: ["<rootDir>/src/tests/**/*.test.ts", "<rootDir>/src/tests/**/*.spec.ts"],
+  testMatch: [
+    "<rootDir>/src/tests/**/*.test.ts",
+    "<rootDir>/src/tests/**/*.spec.ts",
+  ],
 };
 
 export default config;
