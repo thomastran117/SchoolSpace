@@ -2,23 +2,23 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
-import { HttpError } from "../../src/error/httpError";
-import { InternalServerError } from "../../src/error/internalServerError";
-import { TokenService } from "../../src/service/tokenService";
-import logger from "../../src/utility/logger";
+import { HttpError } from "@error/httpError";
+import { InternalServerError } from "@error/internalServerError";
+import { TokenService } from "@service/tokenService";
+import logger from "@utility/logger";
 
 jest.mock("jsonwebtoken");
 jest.mock("uuid");
 jest.mock("bcrypt");
 
-jest.mock("../../src/config/envConfigs", () => ({
+jest.mock("@config/envConfigs", () => ({
   __esModule: true,
   default: {
     jwtSecretAccess: "test-secret",
   },
 }));
 
-jest.mock("../../src/utility/logger", () => ({
+jest.mock("@utility/logger", () => ({
   __esModule: true,
   default: {
     error: jest.fn(),

@@ -1,9 +1,9 @@
-import { AuthController } from "../../src/controller/authController";
-import { HttpError } from "../../src/error/httpError";
-import { UnauthorizedError } from "../../src/error/unauthorizedError";
-import logger from "../../src/utility/logger";
+import { AuthController } from "@controller/authController";
+import { HttpError } from "@error/httpError";
+import { UnauthorizedError } from "@error/unauthorizedError";
+import logger from "@utility/logger";
 
-jest.mock("../../src/utility/logger", () => ({
+jest.mock("@utility/logger", () => ({
   __esModule: true,
   default: {
     error: jest.fn(),
