@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "dist",
+    "prisma.config.ts", "prisma",
+    "src/tests",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

@@ -42,5 +42,4 @@
     "types": ["node", "jest"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "prisma.config.ts", "prisma"]
 }
