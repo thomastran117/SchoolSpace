@@ -19,11 +19,13 @@ function registerQueueModules(): Map<string, Registration<any>> {
     queues.set("EmailQueue", {
       factory: () => new EmailQueue(),
       lifetime: "singleton",
+      deps: [],
     });
 
     queues.set("CourseQueue", {
       factory: () => new CourseQueue(),
       lifetime: "singleton",
+      deps: [],
     });
 
     return queues;

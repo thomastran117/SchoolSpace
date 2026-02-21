@@ -29,6 +29,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
           authService: scope.resolve("AuthService"),
         }),
       lifetime: "scoped",
+      deps: ["AuthService"],
     });
 
     controllers.set("FileController", {
@@ -37,6 +38,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
           fileService: scope.resolve("FileService"),
         }),
       lifetime: "scoped",
+      deps: ["FileService"],
     });
 
     controllers.set("UserController", {
@@ -45,6 +47,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
           userService: scope.resolve("UserService"),
         }),
       lifetime: "scoped",
+      deps: ["UserService"],
     });
 
     controllers.set("CatalogueController", {
@@ -53,6 +56,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
           catalogueService: scope.resolve("CatalogueService"),
         }),
       lifetime: "scoped",
+      deps: ["CatalogueService"],
     });
 
     controllers.set("CourseController", {
@@ -61,6 +65,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
           courseService: scope.resolve("CourseService"),
         }),
       lifetime: "scoped",
+      deps: ["CourseService"],
     });
 
     controllers.set("AssignmentController", {
@@ -69,6 +74,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
           assignmentService: scope.resolve("AssignmentService"),
         }),
       lifetime: "scoped",
+      deps: ["AssignmentService"],
     });
 
     controllers.set("GradeController", {
@@ -77,6 +83,7 @@ function registerControllerModules(): Map<string, Registration<any>> {
           gradeService: scope.resolve("GradeService"),
         }),
       lifetime: "scoped",
+      deps: ["GradeService"],
     });
 
     controllers.set("ContactController", {
@@ -85,11 +92,13 @@ function registerControllerModules(): Map<string, Registration<any>> {
           contactService: scope.resolve("ContactService"),
         }),
       lifetime: "scoped",
+      deps: ["ContactService"],
     });
 
     controllers.set("HealthController", {
       factory: (scope) => new HealthController(),
       lifetime: "scoped",
+      deps: [],
     });
 
     return controllers;

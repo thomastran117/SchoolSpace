@@ -14,4 +14,5 @@ export interface Registration<T> {
   factory: (...deps: any[]) => T | Promise<T>;
   lifetime: Lifetime;
   instance?: T;
+  deps?: string[];
 }
