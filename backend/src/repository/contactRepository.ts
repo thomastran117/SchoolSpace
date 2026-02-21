@@ -109,3 +109,4 @@ class ContactRepository extends BaseRepository {
 }
 
 export { ContactRepository };
+export default ContactRepository;

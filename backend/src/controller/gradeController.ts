@@ -9,3 +9,4 @@ class GradeController {
 }
 
 export { GradeController };
+export default GradeController;

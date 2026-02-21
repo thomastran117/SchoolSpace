@@ -124,3 +124,4 @@ class CodeService {
 }
 
 export { CodeService };
+export default CodeService;

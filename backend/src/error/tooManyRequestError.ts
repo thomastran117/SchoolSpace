@@ -20,3 +20,4 @@ class TooManyRequestError extends HttpError {
 }
 
 export { TooManyRequestError };
+export default TooManyRequestError;

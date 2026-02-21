@@ -9,3 +9,4 @@ class AssignmentController {
 }
 
 export { AssignmentController };
+export default AssignmentController;

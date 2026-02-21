@@ -278,3 +278,4 @@ class TokenService extends BasicTokenService {
 }
 
 export { TokenService };
+export default TokenService;

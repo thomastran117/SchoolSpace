@@ -20,3 +20,4 @@ class PayloadTooLargeError extends HttpError {
 }
 
 export { PayloadTooLargeError };
+export default PayloadTooLargeError;

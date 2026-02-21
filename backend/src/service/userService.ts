@@ -268,3 +268,4 @@ class UserService extends BaseService {
 }
 
 export { UserService };
+export default UserService;

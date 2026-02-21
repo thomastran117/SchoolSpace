@@ -240,3 +240,4 @@ class EnrollmentRepository extends BaseRepository {
 }
 
 export { EnrollmentRepository };
+export default EnrollmentRepository;

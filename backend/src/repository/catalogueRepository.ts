@@ -114,3 +114,4 @@ class CatalogueRepository extends BaseRepository {
 }
 
 export { CatalogueRepository };
+export default CatalogueRepository;

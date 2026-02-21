@@ -285,3 +285,4 @@ class CacheService {
 }
 
 export { CacheService };
+export default CacheService;

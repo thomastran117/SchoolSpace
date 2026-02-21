@@ -39,3 +39,4 @@ class AssignmentService {
 }
 
 export { AssignmentService };
+export default AssignmentService;

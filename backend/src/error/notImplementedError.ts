@@ -20,3 +20,4 @@ class NotImplementedError extends HttpError {
 }
 
 export { NotImplementedError };
+export default NotImplementedError;

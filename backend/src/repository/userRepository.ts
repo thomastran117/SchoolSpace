@@ -184,3 +184,4 @@ class UserRepository extends BaseRepository {
 }
 
 export { UserRepository };
+export default UserRepository;

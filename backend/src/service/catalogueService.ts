@@ -181,3 +181,4 @@ class CatalogueService extends BaseService {
 }
 
 export { CatalogueService };
+export default CatalogueService;

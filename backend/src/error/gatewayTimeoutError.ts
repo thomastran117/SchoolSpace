@@ -20,3 +20,4 @@ class GatewayTimeoutError extends HttpError {
 }
 
 export { GatewayTimeoutError };
+export default GatewayTimeoutError;

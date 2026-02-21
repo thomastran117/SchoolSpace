@@ -105,3 +105,4 @@ class FileController {
 }
 
 export { FileController };
+export default FileController;

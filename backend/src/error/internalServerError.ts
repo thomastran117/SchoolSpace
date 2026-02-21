@@ -20,3 +20,4 @@ class InternalServerError extends HttpError {
 }
 
 export { InternalServerError };
+export default InternalServerError;

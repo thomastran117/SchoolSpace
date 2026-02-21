@@ -20,3 +20,4 @@ class UnauthorizedError extends HttpError {
 }
 
 export { UnauthorizedError };
+export default UnauthorizedError;

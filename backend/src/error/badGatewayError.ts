@@ -20,3 +20,4 @@ class BadGatewayError extends HttpError {
 }
 
 export { BadGatewayError };
+export default BadGatewayError;

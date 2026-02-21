@@ -451,3 +451,4 @@ class CourseService extends BaseService {
 }
 
 export { CourseService };
+export default CourseService;

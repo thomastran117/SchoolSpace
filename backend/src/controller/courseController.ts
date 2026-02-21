@@ -290,3 +290,4 @@ class CourseController extends BaseController {
 }
 
 export { CourseController };
+export default CourseController;
