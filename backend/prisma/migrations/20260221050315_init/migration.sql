@@ -142,6 +142,22 @@ CREATE TABLE `Grade` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `UserReport` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `victim_user_id` INTEGER NOT NULL,
+    `offender_user_id` INTEGER NOT NULL,
+    `reportTopic` ENUM('UNDEFINED', 'HATE_SPEECH_HARASSMENT_OR_BULLYING', 'VIOLENT_THREATS', 'SPAM', 'INNAPPROPRIATE_CONTENT', 'FRAUD_OR_IMPERSONATION', 'OTHER') NOT NULL DEFAULT 'UNDEFINED',
+    `report_description_text` TEXT NULL,
+    `reportStatus` ENUM('CREATED', 'INPROGRESS', 'VIEWED', 'COMPLETED', 'FAILED', 'DELETED', 'ERROR') NOT NULL DEFAULT 'CREATED',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    INDEX `UserReport_reportTopic_idx`(`reportTopic`),
+    INDEX `UserReport_reportStatus_idx`(`reportStatus`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Course` ADD CONSTRAINT `Course_catalogue_id_fkey` FOREIGN KEY (`catalogue_id`) REFERENCES `Catalogue`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -165,3 +181,9 @@ ALTER TABLE `Grade` ADD CONSTRAINT `Grade_user_id_fkey` FOREIGN KEY (`user_id`) 
 
 -- AddForeignKey
 ALTER TABLE `Grade` ADD CONSTRAINT `Grade_assignment_id_fkey` FOREIGN KEY (`assignment_id`) REFERENCES `Assignment`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `UserReport` ADD CONSTRAINT `UserReport_victim_user_id_fkey` FOREIGN KEY (`victim_user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `UserReport` ADD CONSTRAINT `UserReport_offender_user_id_fkey` FOREIGN KEY (`offender_user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
