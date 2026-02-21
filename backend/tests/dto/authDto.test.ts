@@ -4,7 +4,7 @@ import {
   SignupSchema,
   VerifySchema,
 } from "../../src/dto/authSchema";
-import { HttpError } from "../../src/error";
+import { HttpError } from "../../src/error/httpError";
 import { validate } from "../../src/hooks/validateHook";
 
 describe("Auth DTO Validation", () => {

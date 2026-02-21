@@ -1,5 +1,6 @@
 import { AuthController } from "../../src/controller/authController";
-import { HttpError, UnauthorizedError } from "../../src/error";
+import { HttpError } from "../../src/error/httpError";
+import { UnauthorizedError } from "../../src/error/unauthorizedError";
 import logger from "../../src/utility/logger";
 
 jest.mock("../../src/utility/logger", () => ({

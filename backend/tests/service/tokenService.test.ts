@@ -2,7 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
-import { HttpError, InternalServerError } from "../../src/error";
+import { HttpError } from "../../src/error/httpError";
+import { InternalServerError } from "../../src/error/internalServerError";
 import { TokenService } from "../../src/service/tokenService";
 import logger from "../../src/utility/logger";
 

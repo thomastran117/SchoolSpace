@@ -38,7 +38,7 @@
     "emitDecoratorMetadata": true,
 
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist", "prisma.config.ts", "prisma"]

@@ -1,4 +1,6 @@
-import { ConflictError, HttpError, NotFoundError } from "../../src/error";
+import { ConflictError } from "../../src/error/conflictError";
+import { HttpError } from "../../src/error/httpError";
+import { NotFoundError } from "../../src/error/notFoundError";
 import { ContactService } from "../../src/service/contactService";
 import logger from "../../src/utility/logger";
 
