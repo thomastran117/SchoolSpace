@@ -25,7 +25,7 @@ SchoolSpace is split across multiple repositories:
 
 | Repository | Description |
 |---|---|
-| [SchoolSpace-Server](https://github.com/bluex117/SchoolSpace) | Deployments and scripts |
+| [SchoolSpace](https://github.com/bluex117/SchoolSpace) | Deployments and scripts |
 | [SchoolSpace-Server](https://github.com/bluex117/SchoolSpace-Server) | .NET 9 REST API and backend services |
 | [SchoolSpace-Web](https://github.com/bluex117/SchoolSpace-Web) | React web client |
 | [SchoolSpace-Mobile](https://github.com/bluex117/SchoolSpace-Mobile) | React Native mobile app |
