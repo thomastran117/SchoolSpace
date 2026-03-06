@@ -33,9 +33,7 @@ SchoolSpace is split across multiple repositories:
 
 ## 🚀 Getting Started
 
-Setting up SchoolSpace involves configuring multiple repositories. Please refer to the full setup guide for detailed instructions:
-
-➡️ **[Setup Guide](/docs/SETUP.md)**
+Setting up SchoolSpace involves configuring multiple repositories. You must configure the server, and one of the clients (web or mobile). Please refer to their repostory to set it up properly.
 
 ---
 
