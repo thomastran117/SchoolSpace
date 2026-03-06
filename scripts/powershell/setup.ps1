@@ -10,9 +10,8 @@ try {
 
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $ROOT = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
-$FRONTEND  = Join-Path $ROOT "frontend"
-$BACKEND   = Join-Path $ROOT "backend"
-$WORKER   = Join-Path $ROOT "worker"
+$FRONTEND  = Join-Path $ROOT "SchoolSpace-Web"
+$BACKEND   = Join-Path $ROOT "SchoolSpace-Server"
 
 if (Test-Path (Join-Path $FRONTEND "package.json")) {
     Write-Host "Installing frontend dependencies..." -ForegroundColor Cyan
@@ -24,14 +23,7 @@ if (Test-Path (Join-Path $FRONTEND "package.json")) {
 if (Test-Path (Join-Path $BACKEND "package.json")) {
     Write-Host "Installing backend dependencies..." -ForegroundColor Cyan
     Push-Location $BACKEND
-    npm install
-    Pop-Location
-}
-
-if (Test-Path (Join-Path $WORKER "package.json")) {
-    Write-Host "Installing worker dependencies..." -ForegroundColor Cyan
-    Push-Location $WORKER
-    npm install
+    dotnet restore
     Pop-Location
 }
 

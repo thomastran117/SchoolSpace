@@ -11,9 +11,8 @@ try {
 
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $RootDir = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
-$FrontendPath = Resolve-Path (Join-Path $RootDir "frontend")
-$BackendPath  = Resolve-Path (Join-Path $RootDir "backend")
-$WorkerPath  = Resolve-Path (Join-Path $RootDir "worker")
+$FrontendPath = Resolve-Path (Join-Path $RootDir "SchoolSpace-Web")
+$BackendPath  = Resolve-Path (Join-Path $RootDir "SchoolSpace-Server")
 function Assert-Package([string]$Path) {
   if (-not (Test-Path (Join-Path $Path "package.json"))) {
     throw "package.json not found in $Path"
@@ -21,7 +20,6 @@ function Assert-Package([string]$Path) {
 }
 Assert-Package $FrontendPath
 Assert-Package $BackendPath
-Assert-Package $WorkerPath
 
 Write-Host ("Starting frontend in {0}" -f $FrontendPath) -ForegroundColor Cyan
 $frontendCmd = 'npm run dev'
@@ -33,13 +31,7 @@ $feProc = Start-Process -FilePath $env:ComSpec `
 
 Write-Host ("Starting backend...") -ForegroundColor Cyan
 $beProc = Start-Process -FilePath "powershell.exe" `
-  -ArgumentList "-NoExit", "-Command", "cd '$BackendPath'; npm run dev" `
-  -PassThru
-
-Write-Host ("Starting email worker...") -ForegroundColor Cyan
-$workerCmd = "cd '$WorkerPath'; npx tsx src/workers/emailWorker.ts"
-$wkProc = Start-Process -FilePath "powershell.exe" `
-  -ArgumentList "-NoExit", "-Command", $workerCmd `
+  -ArgumentList "-NoExit", "-Command", "cd '$BackendPath'; dotnet run" `
   -PassThru
 
 Write-Host "`nAll services running. Press Ctrl+C or close this window to stop everything..." -ForegroundColor Green

@@ -25,16 +25,14 @@ Success "All dependencies found"
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $root = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
 
-$frontendPath = Join-Path $root "frontend"
-$backendPath  = Join-Path $root "backend"
-$workerPath   = Join-Path $root "worker"
+$frontendPath = Join-Path $root "SchoolSpace-Web"
+$backendPath  = Join-Path $root "SchoolSpace-Server"
 $manifest     = Join-Path $root "schoolspace.yml"
 
 Info "Building Docker images..."
 
 docker build -t school-frontend:latest $frontendPath | Out-Null
 docker build -t school-backend:latest  $backendPath  | Out-Null
-docker build -t school-worker:latest   $workerPath   | Out-Null
 
 Success "Docker images built"
 
@@ -45,7 +43,6 @@ Success "Manifests applied"
 Info "Waiting for deployments..."
 kubectl rollout status deployment/frontend -n $Namespace --timeout=120s | Out-Null
 kubectl rollout status deployment/backend  -n $Namespace --timeout=120s | Out-Null
-kubectl rollout status deployment/worker   -n $Namespace --timeout=120s | Out-Null
 
 Success "All deployments ready"
 

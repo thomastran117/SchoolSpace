@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
-  [string]$BackendDir    = "backend",
-  [string]$PlaywrightDir = "playwright",
+  [string]$BackendDir    = "SchoolSpace-Server",
+  [string]$PlaywrightDir = "scripts/playwright",
   [switch]$ContinueOnFail
 )
 

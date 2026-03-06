@@ -4,7 +4,7 @@ param(
   [string]$Name,
 
   [Parameter(Mandatory = $false)]
-  [string]$BackendDir = "backend"
+  [string]$BackendDir = "SchoolSpace-Server"
 )
 
 $ErrorActionPreference = "Stop"

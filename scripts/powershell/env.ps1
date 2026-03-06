@@ -5,12 +5,10 @@ param (
 $scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $repoRoot = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
 
-$backendPath = Join-Path $repoRoot "backend"
-$workerPath = Join-Path $repoRoot "backend"
-$frontendPath = Join-Path $repoRoot "frontend"
+$backendPath = Join-Path $repoRoot "SchoolSpace-Server"
+$frontendPath = Join-Path $repoRoot "SchoolSpace-Web"
 $envFilePathBackend = Join-Path $backendPath ".env"
 $envFilePathFrontend = Join-Path $frontendPath ".env"
-$envFilePathWorker = Join-Path $workerPath ".env"
 
 $envContent_frontend = @'
 ##############################################
@@ -101,44 +99,6 @@ PAYMENT_CURRENCY="CAD"
 
 '@
 
-
-$envContent_worker = @'
-##############################################
-# Configuration
-##############################################
-
-ENVIRONMENT="development"
-
-##############################################
-# Server
-##############################################
-
-FRONTEND_CLIENT="http://localhost:3040"
-
-##############################################
-# Databases
-##############################################
-
-REDIS_URL="redis://127.0.0.1:6379"
-RABBITMQ_URL="amqp://guest:guest@localhost:5672"
-
-##############################################
-# Email (SMTP credentials)
-##############################################
-
-EMAIL_USER=""
-EMAIL_PASS=""
-
-##############################################
-# Paypal
-##############################################
-PAYPAL_CLIENT_ID="paypal-clientid"
-PAYPAL_SECRET_KEY="secret-key"
-PAYPAL_API="https://api-m.sandbox.paypal.com"
-PAYMENT_CURRENCY="CAD"
-
-'@
-
 if (-Not (Test-Path $backendPath)) {
     Write-Error "Backend folder not found at $backendPath"
     exit 1
@@ -149,11 +109,6 @@ if (-Not (Test-Path $frontendPath)) {
     exit 1
 }
 
-if (-Not (Test-Path $workerPath)) {
-    Write-Error "Worker folder not found at $workerPath"
-    exit 1
-}
-
 Set-Content -Path $envFilePathBackend -Value $envContent_backend -Encoding UTF8
 
 Write-Host ".env file has been created at $envFilePathBackend"
@@ -161,7 +116,3 @@ Write-Host ".env file has been created at $envFilePathBackend"
 Set-Content -Path $envFilePathFrontend -Value $envContent_frontend -Encoding UTF8
 
 Write-Host ".env file has been created at $envFilePathFrontend"
-
-Set-Content -Path $envFilePathWorker -Value $envContent_worker -Encoding UTF8
-
-Write-Host ".env file has been created at $envFilePathWorker"

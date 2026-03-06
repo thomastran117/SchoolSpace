@@ -24,9 +24,8 @@ invoke_format() {
   popd > /dev/null
 }
 
-invoke_format "../../backend"
-invoke_format "../../frontend"
-invoke_format "../../worker"
+invoke_format "../../SchoolSpace-Server"
+invoke_format "../../SchoolSpace-Web"
 
 echo ""
 echo -e "${CYAN}All formatting complete.${RESET}"

@@ -38,9 +38,8 @@ done
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-FRONTEND_PATH="$ROOT/frontend"
-BACKEND_PATH="$ROOT/backend"
-WORKER_PATH="$ROOT/worker"
+FRONTEND_PATH="$ROOT/SchoolSpace-Web"
+BACKEND_PATH="$ROOT/SchoolSpace-Server"
 MANIFEST="$ROOT/schoolspace.yml"
 
 info "Checking dependencies..."
@@ -51,13 +50,11 @@ success "All dependencies found"
 
 [[ -d "$FRONTEND_PATH" ]] || fail "Frontend folder not found at $FRONTEND_PATH"
 [[ -d "$BACKEND_PATH"  ]] || fail "Backend folder not found at $BACKEND_PATH"
-[[ -d "$WORKER_PATH"   ]] || fail "Worker folder not found at $WORKER_PATH"
 [[ -f "$MANIFEST"      ]] || fail "Manifest not found at $MANIFEST"
 
 info "Building Docker images..."
 docker build -t school-frontend:latest "$FRONTEND_PATH" >/dev/null
 docker build -t school-backend:latest  "$BACKEND_PATH"  >/dev/null
-docker build -t school-worker:latest   "$WORKER_PATH"   >/dev/null
 success "Docker images built"
 
 info "Applying Kubernetes manifests..."
@@ -67,7 +64,6 @@ success "Manifests applied"
 info "Waiting for deployments..."
 kubectl rollout status deployment/frontend -n "$NAMESPACE" --timeout=120s >/dev/null
 kubectl rollout status deployment/backend  -n "$NAMESPACE" --timeout=120s >/dev/null
-kubectl rollout status deployment/worker   -n "$NAMESPACE" --timeout=120s >/dev/null
 success "All deployments ready"
 
 info "Current pod status:"

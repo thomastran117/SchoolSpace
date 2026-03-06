@@ -17,9 +17,8 @@ success "Node: $NODE_VERSION  npm: $NPM_VERSION"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-FRONTEND_PATH="$ROOT_DIR/frontend"
-BACKEND_PATH="$ROOT_DIR/backend"
-WORKER_PATH="$ROOT_DIR/worker"
+FRONTEND_PATH="$ROOT_DIR/SchoolSpace-Web"
+BACKEND_PATH="$ROOT_DIR/SchoolSpace-Server"
 
 assert_package() {
   local p="$1"
@@ -28,7 +27,6 @@ assert_package() {
 
 assert_package "$FRONTEND_PATH"
 assert_package "$BACKEND_PATH"
-assert_package "$WORKER_PATH"
 
 PIDS=()
 
@@ -71,8 +69,6 @@ info "Starting frontend in $FRONTEND_PATH"
 start_bg "frontend" bash -lc "cd '$FRONTEND_PATH' && npm run dev"
 
 start_bg "backend" bash -lc "cd '$BACKEND_PATH' && npm run dev"
-
-start_bg "email worker" bash -lc "cd '$WORKER_PATH' && npx tsx src/workers/emailWorker.ts"
 
 echo
 success "All services running. Press Ctrl+C to stop everything..."

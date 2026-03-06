@@ -15,20 +15,17 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-BACKEND_PATH="$REPO_ROOT/backend"
-WORKER_PATH="$REPO_ROOT/backend"
-FRONTEND_PATH="$REPO_ROOT/frontend"
+BACKEND_PATH="$REPO_ROOT/SchoolSpace-Server"
+FRONTEND_PATH="$REPO_ROOT/SchoolSpace-Web"
 
 ENV_BACKEND="$BACKEND_PATH/.env"
 ENV_FRONTEND="$FRONTEND_PATH/.env"
-ENV_WORKER="$WORKER_PATH/.env"
 
 # ----------------------------------------
 # Validate directories
 # ----------------------------------------
 [[ -d "$BACKEND_PATH" ]] || { echo "Backend folder not found at $BACKEND_PATH"; exit 1; }
 [[ -d "$FRONTEND_PATH" ]] || { echo "Frontend folder not found at $FRONTEND_PATH"; exit 1; }
-[[ -d "$WORKER_PATH" ]] || { echo "Worker folder not found at $WORKER_PATH"; exit 1; }
 
 # ----------------------------------------
 # Prevent overwrite unless --force
@@ -139,50 +136,10 @@ PAYMENT_CURRENCY="CAD"
 '
 
 # ----------------------------------------
-# Worker .env
-# ----------------------------------------
-ENV_CONTENT_WORKER='##############################################
-# Configuration
-##############################################
-
-ENVIRONMENT="development"
-
-##############################################
-# Server
-##############################################
-
-FRONTEND_CLIENT="http://localhost:3040"
-
-##############################################
-# Databases
-##############################################
-
-REDIS_URL="redis://127.0.0.1:6379"
-RABBITMQ_URL="amqp://guest:guest@localhost:5672"
-
-##############################################
-# Email
-##############################################
-
-EMAIL_USER=""
-EMAIL_PASS=""
-
-##############################################
-# Paypal
-##############################################
-
-PAYPAL_CLIENT_ID="paypal-clientid"
-PAYPAL_SECRET_KEY="secret-key"
-PAYPAL_API="https://api-m.sandbox.paypal.com"
-PAYMENT_CURRENCY="CAD"
-'
-
-# ----------------------------------------
 # Write files
 # ----------------------------------------
 write_env "$ENV_BACKEND" "$ENV_CONTENT_BACKEND"
 write_env "$ENV_FRONTEND" "$ENV_CONTENT_FRONTEND"
-write_env "$ENV_WORKER" "$ENV_CONTENT_WORKER"
 
 echo
 echo "Environment setup complete."

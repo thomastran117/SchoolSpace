@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BACKEND_DIR="backend"
+BACKEND_DIR="SchoolSpace-Server"
 PLAYWRIGHT_DIR="playwright"
 CONTINUE_ON_FAIL=false
 
@@ -55,7 +55,7 @@ while [[ $# -gt 0 ]]; do
 Usage: $(basename "$0") [options]
 
 Options:
-  --backend-dir DIR        Backend directory (default: backend)
+  --backend-dir DIR        Backend directory (default: SchoolSpace-Server)
   --playwright-dir DIR     Playwright directory (default: playwright)
   --continue-on-fail       Run all steps even if one fails (local mode)
   -h, --help               Show help
@@ -63,7 +63,7 @@ Options:
 Examples:
   $(basename "$0")
   $(basename "$0") --continue-on-fail
-  $(basename "$0") --backend-dir backend --playwright-dir playwright
+  $(basename "$0") --backend-dir SchoolSpace-Server --playwright-dir playwright
 EOF
       exit 0
       ;;

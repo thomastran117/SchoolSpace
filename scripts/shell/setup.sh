@@ -21,8 +21,8 @@ echo -e "${GREEN}Node: $NODE_VERSION  npm: $NPM_VERSION${RESET}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-FRONTEND="$ROOT/frontend"
-BACKEND="$ROOT/backend"
+FRONTEND="$ROOT/SchoolSpace-Web"
+BACKEND="$ROOT/SchoolSpace-Server"
 
 install_deps() {
   local name="$1"
@@ -36,8 +36,7 @@ install_deps() {
   fi
 }
 
-install_deps "frontend" "$FRONTEND"
-install_deps "backend"  "$BACKEND"
-install_deps "worker"   "$WORKER"
+install_deps "SchoolSpace-Web" "$FRONTEND"
+install_deps "SchoolSpace-Server"  "$BACKEND"
 
 echo -e "${GREEN}=== Setup complete ===${RESET}"
