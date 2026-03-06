@@ -1,0 +1,167 @@
+param (
+    [switch]$Force
+)
+
+$scriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
+$repoRoot = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
+
+$backendPath = Join-Path $repoRoot "backend"
+$workerPath = Join-Path $repoRoot "backend"
+$frontendPath = Join-Path $repoRoot "frontend"
+$envFilePathBackend = Join-Path $backendPath ".env"
+$envFilePathFrontend = Join-Path $frontendPath ".env"
+$envFilePathWorker = Join-Path $workerPath ".env"
+
+$envContent_frontend = @'
+##############################################
+# Server
+##############################################
+
+VITE_FRONTEND_URL="http://localhost:3040"
+VITE_BACKEND_URL="http://localhost:8040"
+
+##############################################
+# OAuth
+##############################################
+
+VITE_MSAL_CLIENT_ID="ms_client"
+VITE_MSAL_AUTHORITY="https://login.microsoftonline.com/common"
+VITE_GOOGLE_CLIENT_ID="google_client"
+
+##############################################
+# Recaptcha
+##############################################
+VITE_GOOGLE_RECAPTCHA="captcha"
+'@
+
+$envContent_backend = @'
+##############################################
+# Configuration
+##############################################
+
+ENVIRONMENT="development"
+ZOD_CONFIGURATION="strip"
+
+##############################################
+# Server
+##############################################
+
+FRONTEND_CLIENT="http://localhost:3040"
+PORT=8040
+
+##############################################
+# Databases
+##############################################
+
+DATABASE_URL="mysql://root:password123@localhost:3306/schoolspace"
+DATABASE_HOST="localhost"
+DATABASE_PORT=3306
+DATABASE_PASSWORD="password123"
+DATABASE_NAME="schoolspace"
+DATABASE_USER="root"
+REDIS_URL="redis://127.0.0.1:6379"
+RABBITMQ_URL="amqp://guest:guest@localhost:5672"
+
+##############################################
+# Security
+##############################################
+
+JWT_SECRET_ACCESS="access-jwt-token"
+GOOGLE_CAPTCHA_SECRET="google-captcha"
+
+
+##############################################
+# CORS Configuration
+##############################################
+
+CORS_WHITELIST=["http://localhost:3040", "http://127.0.0.1:3040", "http://localhost:5173"]
+
+##############################################
+# Email (SMTP credentials)
+##############################################
+
+EMAIL_USER=""
+EMAIL_PASS=""
+
+##############################################
+# OAuth
+##############################################
+
+GOOGLE_CLIENT_ID=""
+MS_TENANT_ID=""
+MS_CLIENT_ID=""
+
+##############################################
+# Paypal
+##############################################
+PAYPAL_CLIENT_ID="paypal-clientid"
+PAYPAL_SECRET_KEY="secret-key"
+PAYPAL_API="https://api-m.sandbox.paypal.com"
+PAYMENT_CURRENCY="CAD"
+
+'@
+
+
+$envContent_worker = @'
+##############################################
+# Configuration
+##############################################
+
+ENVIRONMENT="development"
+
+##############################################
+# Server
+##############################################
+
+FRONTEND_CLIENT="http://localhost:3040"
+
+##############################################
+# Databases
+##############################################
+
+REDIS_URL="redis://127.0.0.1:6379"
+RABBITMQ_URL="amqp://guest:guest@localhost:5672"
+
+##############################################
+# Email (SMTP credentials)
+##############################################
+
+EMAIL_USER=""
+EMAIL_PASS=""
+
+##############################################
+# Paypal
+##############################################
+PAYPAL_CLIENT_ID="paypal-clientid"
+PAYPAL_SECRET_KEY="secret-key"
+PAYPAL_API="https://api-m.sandbox.paypal.com"
+PAYMENT_CURRENCY="CAD"
+
+'@
+
+if (-Not (Test-Path $backendPath)) {
+    Write-Error "Backend folder not found at $backendPath"
+    exit 1
+}
+
+if (-Not (Test-Path $frontendPath)) {
+    Write-Error "Frontend folder not found at $frontendPath"
+    exit 1
+}
+
+if (-Not (Test-Path $workerPath)) {
+    Write-Error "Worker folder not found at $workerPath"
+    exit 1
+}
+
+Set-Content -Path $envFilePathBackend -Value $envContent_backend -Encoding UTF8
+
+Write-Host ".env file has been created at $envFilePathBackend"
+
+Set-Content -Path $envFilePathFrontend -Value $envContent_frontend -Encoding UTF8
+
+Write-Host ".env file has been created at $envFilePathFrontend"
+
+Set-Content -Path $envFilePathWorker -Value $envContent_worker -Encoding UTF8
+
+Write-Host ".env file has been created at $envFilePathWorker"

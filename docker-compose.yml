@@ -1,0 +1,93 @@
+services:
+  frontend:
+    container_name: school-frontend
+    build:
+      context: ./SchoolSpace-Web
+      dockerfile: dockerfile
+    ports:
+      - "3040:80"
+    depends_on:
+      - backend
+    networks:
+      - school-network
+
+  backend:
+    container_name: school-backend
+    build:
+      context: ./SchoolSpace-Server
+      dockerfile: dockerfile
+    image: school-backend
+    environment:
+      DATABASE_URL: mysql://root:root@mysql:3306/appdb
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://appuser:apppass@rabbitmq:5672
+      JWT_SECRET_ACCESS: amazing_secret_key_yup_yes_abcdef123
+    ports:
+      - "8040:8040"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - school-network
+
+  mysql:
+    image: mysql:8.4
+    container_name: school-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: appdb
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - school-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: school-redis
+    restart: always
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - school-network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: school-rabbit
+    restart: always
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: appuser
+      RABBITMQ_DEFAULT_PASS: apppass
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - school-network
+
+networks:
+  school-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
