@@ -9,7 +9,6 @@ SchoolSpace is a SaaS platform that provides students and teachers with a collab
 
 ---
 
-
 ## ✨ Features
 
 - 📚 **Course Management** — Enroll in courses, manage lectures and assignments
@@ -20,31 +19,39 @@ SchoolSpace is a SaaS platform that provides students and teachers with a collab
 
 ---
 
+## 🗂️ Repositories
+
+SchoolSpace is split across multiple repositories:
+
+| Repository | Description |
+|---|---|
+| [SchoolSpace-Server](https://github.com/bluex117/SchoolSpace) | Deployments and scripts |
+| [SchoolSpace-Server](https://github.com/bluex117/SchoolSpace-Server) | .NET 9 REST API and backend services |
+| [SchoolSpace-Web](https://github.com/bluex117/SchoolSpace-Web) | React web client |
+| [SchoolSpace-Mobile](https://github.com/bluex117/SchoolSpace-Mobile) | React Native mobile app |
+---
+
 ## 🚀 Getting Started
 
-For full documentation, refer to the [docs](/docs) folder.
+Setting up SchoolSpace involves configuring multiple repositories. Please refer to the full setup guide for detailed instructions:
 
-To set up a local development environment:
-```bash
-git clone https://github.com/thomastran117/SchoolSpace.git
-cd SchoolSpace
-
-see docs/SETUP.md
-```
-
-➡️ See the full [Setup Guide](/docs/SETUP.md) for detailed instructions.
+➡️ **[Setup Guide](/docs/SETUP.md)**
 
 ---
 
 ## 🛠️ Tech Stack
 
-**Client:**
+**Web Client** ([SchoolSpace-Web](https://github.com/thomastran117/SchoolSpace-Web)):
 - [React](https://react.dev/) — UI framework
 - [Redux](https://redux.js.org/) — Global state management
 - [TypeScript](https://www.typescriptlang.org/) — Type safety across the codebase
 - [TailwindCSS](https://tailwindcss.com/) — Utility-first styling
 
-**Server:**
+**Mobile Client** ([SchoolSpace-Mobile](https://github.com/thomastran117/SchoolSpace-Mobile)):
+- [React Native](https://reactnative.dev/) — Cross-platform mobile framework
+- [TypeScript](https://www.typescriptlang.org/) — Type safety across the codebase
+
+**Server** ([SchoolSpace-Server](https://github.com/thomastran117/SchoolSpace-Server)):
 - [.NET 9](https://dotnet.microsoft.com/) (C#) — ASP.NET Core REST API
 - [Entity Framework Core](https://learn.microsoft.com/en-us/ef/core/) — ORM and migrations for MySQL
 
@@ -58,9 +65,9 @@ see docs/SETUP.md
 
 ## Contributing
 
-Contributions are welcome! Please open an issue first to discuss any changes you'd like to make, then submit a pull request.
+Contributions are welcome! Please open an issue in the relevant repository first to discuss any changes you'd like to make, then submit a pull request.
 
-1. Fork the repository
+1. Fork the relevant repository
 2. Create a feature branch (`git checkout -b feature/your-feature`)
 3. Commit your changes (`git commit -m 'Add your feature'`)
 4. Push to the branch (`git push origin feature/your-feature`)
@@ -80,4 +87,3 @@ Contributions are welcome! Please open an issue first to discuss any changes you
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
-
