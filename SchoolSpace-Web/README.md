@@ -4,9 +4,9 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![React](https://img.shields.io/badge/React-18-61DAFB.svg)
 
-The web client for [SchoolSpace](https://github.com/thomastran117/SchoolSpace), built with React and TypeScript. Provides students and teachers with a full-featured browser experience for managing courses, assignments, grades, discussions, and more.
+The web client for [SchoolSpace](https://github.com/bluex117/SchoolSpace), built with React and TypeScript. Provides students and teachers with a full-featured browser experience for managing courses, assignments, grades, discussions, and more.
 
-> 📖 **Full Docs:** [Documentation](https://github.com/thomastran117/SchoolSpace/docs) | 🌐 **Main Repo:** [SchoolSpace](https://github.com/thomastran117/SchoolSpace)
+> 📖 **Full Docs:** [Documentation](https://github.com/bluex117/SchoolSpace/docs) | 🌐 **Main Repo:** [SchoolSpace](https://github.com/bluex117/SchoolSpace)
 
 ---
 
@@ -14,9 +14,9 @@ The web client for [SchoolSpace](https://github.com/thomastran117/SchoolSpace), 
 
 | Repository | Description |
 |---|---|
-| [SchoolSpace](https://github.com/thomastran117/SchoolSpace) | Main repository and documentation |
-| [SchoolSpace-Server](https://github.com/thomastran117/SchoolSpace-Server) | .NET 9 REST API and backend services |
-| [SchoolSpace-Mobile](https://github.com/thomastran117/SchoolSpace-Mobile) | React Native mobile app |
+| [SchoolSpace](https://github.com/bluex117/SchoolSpace) | Main repository and documentation |
+| [SchoolSpace-Server](https://github.com/bluex117/SchoolSpace-Server) | .NET 9 REST API and backend services |
+| [SchoolSpace-Mobile](https://github.com/bluex117/SchoolSpace-Mobile) | React Native mobile app |
 
 ---
 
@@ -52,7 +52,6 @@ Contributions are welcome! Please open an issue first to discuss any changes you
 - [@thomastran117](https://github.com/thomastran117)
 - [@bluex117](https://github.com/bluex117)
 - [@btran0014](https://github.com/btran0014)
-- [@sanjeeveasparan](https://github.com/sanjeeveasparan)
 
 ---
 

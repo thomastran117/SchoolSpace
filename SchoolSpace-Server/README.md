@@ -4,9 +4,9 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
 ![.NET](https://img.shields.io/badge/.NET-9-512BD4.svg)
 
-The backend REST API for [SchoolSpace](https://github.com/thomastran117/SchoolSpace), built with ASP.NET Core. Handles all business logic, authentication, data persistence, and async task processing for the platform.
+The backend REST API for [SchoolSpace](https://github.com/bluex117/SchoolSpace), built with ASP.NET Core. Handles all business logic, authentication, data persistence, and async task processing for the platform.
 
-> 📖 **Full Docs:** [Documentation](https://github.com/thomastran117/SchoolSpace/docs) | 🌐 **Main Repo:** [SchoolSpace](https://github.com/thomastran117/SchoolSpace)
+> 📖 **Full Docs:** [Documentation](https://github.com/bluex117/SchoolSpace/docs) | 🌐 **Main Repo:** [SchoolSpace](https://github.com/bluex117/SchoolSpace)
 
 ---
 
@@ -14,9 +14,9 @@ The backend REST API for [SchoolSpace](https://github.com/thomastran117/SchoolSp
 
 | Repository | Description |
 |---|---|
-| [SchoolSpace](https://github.com/thomastran117/SchoolSpace) | Main repository and documentation |
-| [SchoolSpace-Web](https://github.com/thomastran117/SchoolSpace-Web) | React web client |
-| [SchoolSpace-Mobile](https://github.com/thomastran117/SchoolSpace-Mobile) | React Native mobile app |
+| [SchoolSpace](https://github.com/bluex117/SchoolSpace) | Main repository and documentation |
+| [SchoolSpace-Web](https://github.com/bluex117/SchoolSpace-Web) | React web client |
+| [SchoolSpace-Mobile](https://github.com/bluex117/SchoolSpace-Mobile) | React Native mobile app |
 
 ---
 
@@ -54,7 +54,6 @@ Contributions are welcome! Please open an issue first to discuss any changes you
 - [@thomastran117](https://github.com/thomastran117)
 - [@bluex117](https://github.com/bluex117)
 - [@btran0014](https://github.com/btran0014)
-- [@sanjeeveasparan](https://github.com/sanjeeveasparan)
 
 ---
 

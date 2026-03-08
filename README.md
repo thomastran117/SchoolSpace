@@ -78,7 +78,6 @@ Contributions are welcome! Please open an issue in the relevant repository first
 - [@thomastran117](https://github.com/thomastran117)
 - [@bluex117](https://github.com/bluex117)
 - [@btran0014](https://github.com/btran0014)
-- [@sanjeeveasparan](https://github.com/sanjeeveasparan)
 
 ---
 
