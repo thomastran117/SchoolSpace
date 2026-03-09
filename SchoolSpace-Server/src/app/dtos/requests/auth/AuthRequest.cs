@@ -14,7 +14,10 @@ namespace backend.app.dtos.request.auth
         [StringLength(30)]
         public required string Password { get; set; }
 
-        [Required] public required string Captcha { get; set; }
+        [Required]
+        [ValidCaptchaToken]
+        public required string Captcha { get; set; }
+        
         public bool RememberMe { get; set; } = false;
 
     }
