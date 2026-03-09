@@ -33,6 +33,7 @@ namespace backend.app.configurations.application
             services.AddRepositoryWithProxy<ISchoolRepository, SchoolRepository>();
             services.AddRepositoryWithProxy<ICourseRepository, CourseRepository>();
             services.AddRepositoryWithProxy<IEnrollmentRepository, EnrollmentRepository>();
+            services.AddRepositoryWithProxy<IAnnouncementRepository, AnnouncementRepository>();
 
             services.AddScoped<IContactService, ContactService>();
             services.AddScoped<IReportService, ReportService>();

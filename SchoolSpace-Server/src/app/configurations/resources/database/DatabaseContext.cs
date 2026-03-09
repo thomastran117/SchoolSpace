@@ -10,6 +10,7 @@ namespace backend.app.configurations.resources.database
         public DbSet<Contact> Contacts { get; set; } = null!;
         public DbSet<Course> Courses { get; set; } = null!;
         public DbSet<Enrollment> Enrollments { get; set; } = null!;
+        public DbSet<Announcement> Announcements { get; set; } = null!;
         public DbSet<Report> Reports { get; set; } = null!;
 
         public AppDatabaseContext(DbContextOptions<AppDatabaseContext> options)
