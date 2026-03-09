@@ -30,6 +30,7 @@ namespace backend.app.models.core
         public School? School { get; set; }
         public ICollection<Course> TaughtCourses { get; set; } = [];
         public ICollection<Enrollment> Enrollments { get; set; } = [];
+        public ICollection<Submission> Submissions { get; set; } = [];
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

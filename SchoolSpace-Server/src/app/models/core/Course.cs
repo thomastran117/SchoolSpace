@@ -19,6 +19,7 @@ namespace backend.app.models.core
         public School School { get; set; } = null!;
         public ICollection<Enrollment> Enrollments { get; set; } = [];
         public ICollection<Announcement> Announcements { get; set; } = [];
+        public ICollection<Assignment> Assignments { get; set; } = [];
         public CourseStatus Status { get; set; } = CourseStatus.Active;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

@@ -34,6 +34,8 @@ namespace backend.app.configurations.application
             services.AddRepositoryWithProxy<ICourseRepository, CourseRepository>();
             services.AddRepositoryWithProxy<IEnrollmentRepository, EnrollmentRepository>();
             services.AddRepositoryWithProxy<IAnnouncementRepository, AnnouncementRepository>();
+            services.AddRepositoryWithProxy<IAssignmentRepository, AssignmentRepository>();
+            services.AddRepositoryWithProxy<ISubmissionRepository, SubmissionRepository>();
 
             services.AddScoped<IContactService, ContactService>();
             services.AddScoped<IReportService, ReportService>();

@@ -11,6 +11,8 @@ namespace backend.app.configurations.resources.database
         public DbSet<Course> Courses { get; set; } = null!;
         public DbSet<Enrollment> Enrollments { get; set; } = null!;
         public DbSet<Announcement> Announcements { get; set; } = null!;
+        public DbSet<Assignment> Assignments { get; set; } = null!;
+        public DbSet<Submission> Submissions { get; set; } = null!;
         public DbSet<Report> Reports { get; set; } = null!;
 
         public AppDatabaseContext(DbContextOptions<AppDatabaseContext> options)
