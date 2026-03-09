@@ -5,8 +5,8 @@ namespace backend.app.services.interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResult?> LoginAsync(string email, string password, bool rememberMe = false);
-        Task<AuthResult?> SignupAsync(SignupRequest request);
+        Task<AuthResult?> LoginAsync(string email, string password, string captcha, bool rememberMe = false);
+        Task<AuthResult?> SignupAsync(string email, string password, string role, string captcha);
         Task<bool> VerifyAsync(string verificationToken);
         Task<bool> ForgotPasswordAsync(string email);
         Task<bool> ChangePasswordAsync(string verificationToken, string newPassword);
