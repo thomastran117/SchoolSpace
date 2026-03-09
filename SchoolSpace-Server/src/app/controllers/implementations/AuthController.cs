@@ -2,6 +2,7 @@ using backend.app.configurations.security;
 using backend.app.dtos.general;
 using backend.app.dtos.request.auth;
 using backend.app.dtos.responses.auth;
+using backend.app.errors.app;
 using backend.app.errors.http;
 using backend.app.services.interfaces;
 using backend.app.utilities.implementation;
@@ -18,17 +19,20 @@ namespace backend.app.implementations.Controllers
         private const string RefreshTokenCookieName = "refreshToken";
 
         private readonly IAuthService _authService;
+        private readonly ILoginSecurityService _loginSecurity;
         private readonly IAntiforgery _antiforgery;
         private readonly ICustomLogger _logger;
         private readonly ClientRequestInfo _clientInfo;
 
         public AuthController(
             IAuthService authService,
+            ILoginSecurityService loginSecurity,
             IAntiforgery antiforgery,
             ICustomLogger logger,
             ClientRequestInfo clientInfo)
         {
             _authService = authService;
+            _loginSecurity = loginSecurity;
             _antiforgery = antiforgery;
             _logger = logger;
             _clientInfo = clientInfo;
@@ -39,7 +43,26 @@ namespace backend.app.implementations.Controllers
         {
             try
             {
-                var result = await _authService.LoginAsync(request.Email, request.Password, request.RememberMe);
+                await _loginSecurity.EnsureAccountNotLockedAsync(request.Email);
+
+                AuthResult? result;
+                try
+                {
+                    result = await _authService.LoginAsync(request.Email, request.Password, request.RememberMe);
+                }
+                catch (InvalidCredentialsException)
+                {
+                    await _loginSecurity.RecordFailedAttemptAsync(request.Email, _clientInfo.IpAddress);
+                    throw;
+                }
+
+                await _loginSecurity.RecordSuccessfulLoginAsync(
+                    result!.UserId,
+                    request.Email,
+                    _clientInfo.IpAddress,
+                    _clientInfo.ClientName,
+                    _clientInfo.DeviceType);
+
                 return BuildAuthResponse(result);
             }
             catch (Exception e)
@@ -120,6 +143,27 @@ namespace backend.app.implementations.Controllers
                     return HandleError.Resolve(e);
 
                 _logger.Error($"[AuthController] ChangePassword failed: {e}");
+                return HandleError.Resolve(e);
+            }
+        }
+
+        [HttpPost("unlock")]
+        public async Task<IActionResult> UnlockAccount([FromQuery] string token, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var success = await _loginSecurity.UnlockAccountAsync(token);
+                if (!success)
+                    return BadRequest(new { message = "Invalid or expired unlock token." });
+
+                return Ok(new { message = "Account unlocked successfully." });
+            }
+            catch (Exception e)
+            {
+                if (e is AppException)
+                    return HandleError.Resolve(e);
+
+                _logger.Error($"[AuthController] UnlockAccount failed: {e}");
                 return HandleError.Resolve(e);
             }
         }

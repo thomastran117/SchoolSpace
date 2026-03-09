@@ -21,6 +21,7 @@ namespace backend.app.configurations.environment
         private static readonly string? _paypalClientId;
         private static readonly string? _paypalSecretId;
         private static readonly string? _paypalApi;
+        private static readonly int _smtpPort;
         private static readonly string _appEnvironment;
         private static readonly string _logLevel;
 
@@ -53,6 +54,7 @@ namespace backend.app.configurations.environment
             _email = GetOptional("EMAIL_USER");
             _password = GetOptional("EMAIL_PASSWORD");
             _smtpServer = GetOptional("SMTP_SERVER");
+            _smtpPort = int.TryParse(GetOptional("SMTP_PORT"), out var smtpPort) ? smtpPort : 587;
 
             _microsoftClientId = GetOptional("MS_CLIENT_ID");
             _microsoftTenantId = GetOptional("MS_TENANT_ID");
@@ -113,6 +115,7 @@ namespace backend.app.configurations.environment
         public static string? Email => _email;
         public static string? Password => _password;
         public static string? SmtpServer => _smtpServer;
+        public static int SmtpPort => _smtpPort;
         public static string? MicrosoftClientId => _microsoftClientId;
         public static string? GoogleClientId => _googleClientId;
         public static string? MicrosoftTenantId => _microsoftTenantId;

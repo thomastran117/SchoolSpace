@@ -23,6 +23,8 @@ namespace backend.app.configurations.application
             services.AddTransient<IOAuthService, OAuthService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<ILoginSecurityService, LoginSecurityService>();
             services.AddScoped<IUserService, UserService>();
 
             services.AddSingleton<IRepositoryResiliencePolicy, RepositoryResiliencePolicy>();
