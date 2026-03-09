@@ -76,7 +76,6 @@ namespace backend.app.repositories.implementations
             existing.TeacherNumber = school.TeacherNumber;
             existing.CoursesNumber = school.CoursesNumber;
             existing.Status = school.Status;
-            existing.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return existing;
@@ -89,7 +88,6 @@ namespace backend.app.repositories.implementations
                 return false;
 
             school.Status = SchoolStatus.SoftDelete;
-            school.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return true;
@@ -106,11 +104,9 @@ namespace backend.app.repositories.implementations
                 .Where(s => idList.Contains(s.Id))
                 .ToListAsync();
 
-            var now = DateTime.UtcNow;
             foreach (var school in schools)
             {
                 school.Status = SchoolStatus.SoftDelete;
-                school.UpdatedAt = now;
             }
 
             await _context.SaveChangesAsync();

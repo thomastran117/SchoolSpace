@@ -14,7 +14,7 @@ namespace backend.app.models.core
         SoftDelete,
     }
 
-    public class User
+    public class User : ITimestamped
     {
         public int Id { get; set; }
         public required string Email { get; set; }
@@ -28,7 +28,8 @@ namespace backend.app.models.core
         public string? MicrosoftId { get; set; }
         public string? GoogleId{ get; set; }
         public School? School { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public ICollection<Course> Courses { get; set; } = [];
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

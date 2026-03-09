@@ -8,14 +8,14 @@ namespace backend.app.models.core
         Dismissed
     }
 
-    public class Report
+    public class Report : ITimestamped
     {
         public int Id { get; set; }
         public int ReporterId { get; set; }
         public int ReportedUserId { get; set; }
         public required string Reason { get; set; }
         public ReportStatus Status { get; set; } = ReportStatus.Pending;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }
