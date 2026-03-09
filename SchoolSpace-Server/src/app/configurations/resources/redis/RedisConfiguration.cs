@@ -2,6 +2,7 @@ using backend.app.configurations.environment;
 using backend.app.services.implementations;
 using backend.app.utilities.implementation;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
 using StackExchange.Redis;
@@ -48,7 +49,9 @@ namespace backend.app.configurations.resources.redis
                         await db.PingAsync();
 
                         var resource = new RedisResource(mux);
-                        state.SwitchToRedis(new CacheService(resource));
+                        var logger = services.BuildServiceProvider()
+                            .GetRequiredService<ILogger<CacheService>>();
+                        state.SwitchToRedis(new CacheService(resource, logger));
 
                         services.AddSingleton<IConnectionMultiplexer>(mux);
                         services.AddSingleton(resource);

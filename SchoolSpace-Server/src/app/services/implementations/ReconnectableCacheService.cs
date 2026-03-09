@@ -110,5 +110,57 @@ namespace backend.app.services.implementations
             Func<Task<string>> factory,
             TimeSpan expiry
         ) => Inner.GetOrSetAsync(key, factory, expiry);
+
+        public Task<bool> SetManyAsync(IEnumerable<KeyValuePair<string, string>> entries, TimeSpan? expiry = null) =>
+            Inner.SetManyAsync(entries, expiry);
+
+        public Task<string?> KeyEncodingAsync(string key) => Inner.KeyEncodingAsync(key);
+
+        public IAsyncEnumerable<string> KeyScanAsync(string pattern = "*", int pageSize = 250) =>
+            Inner.KeyScanAsync(pattern, pageSize);
+
+        public Task<bool> HashExistsAsync(string key, string field) => Inner.HashExistsAsync(key, field);
+
+        public Task<long> HashLengthAsync(string key) => Inner.HashLengthAsync(key);
+
+        public Task<long> HashIncrementAsync(string key, string field, long value = 1) =>
+            Inner.HashIncrementAsync(key, field, value);
+
+        public Task<bool> SetContainsAsync(string key, string value) => Inner.SetContainsAsync(key, value);
+
+        public Task<long> SetLengthAsync(string key) => Inner.SetLengthAsync(key);
+
+        public Task<bool> SortedSetAddAsync(string key, string member, double score) =>
+            Inner.SortedSetAddAsync(key, member, score);
+
+        public Task<bool> SortedSetRemoveAsync(string key, string member) =>
+            Inner.SortedSetRemoveAsync(key, member);
+
+        public Task<double?> SortedSetScoreAsync(string key, string member) =>
+            Inner.SortedSetScoreAsync(key, member);
+
+        public Task<double> SortedSetIncrementAsync(string key, string member, double delta) =>
+            Inner.SortedSetIncrementAsync(key, member, delta);
+
+        public Task<SortedSetEntry[]> SortedSetRangeByScoreWithScoresAsync(
+            string key,
+            double start = double.NegativeInfinity,
+            double stop = double.PositiveInfinity,
+            long skip = 0,
+            long take = -1) =>
+            Inner.SortedSetRangeByScoreWithScoresAsync(key, start, stop, skip, take);
+
+        public Task<long?> SortedSetRankAsync(string key, string member, Order order = Order.Ascending) =>
+            Inner.SortedSetRankAsync(key, member, order);
+
+        public Task<long> SortedSetLengthAsync(string key) => Inner.SortedSetLengthAsync(key);
+
+        public Task<long> SortedSetRemoveRangeByScoreAsync(string key, double start, double stop) =>
+            Inner.SortedSetRemoveRangeByScoreAsync(key, start, stop);
+
+        public Task<string[]> ListRangeAsync(string key, long start = 0, long stop = -1) =>
+            Inner.ListRangeAsync(key, start, stop);
+
+        public Task<long> ListLengthAsync(string key) => Inner.ListLengthAsync(key);
     }
 }

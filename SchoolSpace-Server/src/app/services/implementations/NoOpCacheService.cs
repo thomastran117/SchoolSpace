@@ -107,5 +107,55 @@ namespace backend.app.services.implementations
         {
             return await factory().ConfigureAwait(false);
         }
+
+        public Task<bool> SetManyAsync(IEnumerable<KeyValuePair<string, string>> entries, TimeSpan? expiry = null) =>
+            Task.FromResult(false);
+
+        public Task<string?> KeyEncodingAsync(string key) => Task.FromResult<string?>(null);
+
+        public async IAsyncEnumerable<string> KeyScanAsync(string pattern = "*", int pageSize = 250)
+        {
+            await Task.CompletedTask;
+            yield break;
+        }
+
+        public Task<bool> HashExistsAsync(string key, string field) => Task.FromResult(false);
+
+        public Task<long> HashLengthAsync(string key) => Task.FromResult(0L);
+
+        public Task<long> HashIncrementAsync(string key, string field, long value = 1) => Task.FromResult(0L);
+
+        public Task<bool> SetContainsAsync(string key, string value) => Task.FromResult(false);
+
+        public Task<long> SetLengthAsync(string key) => Task.FromResult(0L);
+
+        public Task<bool> SortedSetAddAsync(string key, string member, double score) => Task.FromResult(false);
+
+        public Task<bool> SortedSetRemoveAsync(string key, string member) => Task.FromResult(false);
+
+        public Task<double?> SortedSetScoreAsync(string key, string member) => Task.FromResult<double?>(null);
+
+        public Task<double> SortedSetIncrementAsync(string key, string member, double delta) => Task.FromResult(0.0);
+
+        public Task<SortedSetEntry[]> SortedSetRangeByScoreWithScoresAsync(
+            string key,
+            double start = double.NegativeInfinity,
+            double stop = double.PositiveInfinity,
+            long skip = 0,
+            long take = -1) =>
+            Task.FromResult(Array.Empty<SortedSetEntry>());
+
+        public Task<long?> SortedSetRankAsync(string key, string member, Order order = Order.Ascending) =>
+            Task.FromResult<long?>(null);
+
+        public Task<long> SortedSetLengthAsync(string key) => Task.FromResult(0L);
+
+        public Task<long> SortedSetRemoveRangeByScoreAsync(string key, double start, double stop) =>
+            Task.FromResult(0L);
+
+        public Task<string[]> ListRangeAsync(string key, long start = 0, long stop = -1) =>
+            Task.FromResult(Array.Empty<string>());
+
+        public Task<long> ListLengthAsync(string key) => Task.FromResult(0L);
     }
 }
