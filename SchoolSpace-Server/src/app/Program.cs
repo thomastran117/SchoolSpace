@@ -94,8 +94,6 @@ app.UseAuthorization();
 
 app.UseClientRequestInspection();
 
-app.UseStaticFiles();
-
 app.MapControllers();
 
 app.UseJsonNotFound();
