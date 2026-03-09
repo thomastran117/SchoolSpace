@@ -2,6 +2,7 @@ using backend.app.configurations.environment;
 using backend.app.services.implementations;
 using backend.app.utilities.implementation;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace backend.app.configurations.resources.redis
@@ -46,7 +47,8 @@ namespace backend.app.configurations.resources.redis
                     await db.PingAsync().ConfigureAwait(false);
 
                     var resource = new RedisResource(mux);
-                    var redisCache = new CacheService(resource);
+                    var cacheLogger = _services.GetRequiredService<ILogger<CacheService>>();
+                    var redisCache = new CacheService(resource, cacheLogger);
 
                     var state = _services.GetRequiredService<RedisReconnectState>();
                     state.SwitchToRedis(redisCache);
