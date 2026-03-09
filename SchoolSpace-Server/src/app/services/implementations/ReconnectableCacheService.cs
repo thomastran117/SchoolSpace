@@ -1,4 +1,4 @@
-using backend.app.configurations.resources;
+using backend.app.configurations.resources.redis;
 using backend.app.services.interfaces;
 
 using StackExchange.Redis;
