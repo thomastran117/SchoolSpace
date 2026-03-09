@@ -25,6 +25,8 @@ namespace backend.app.configurations.resources.database
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(s => new { s.UserId, s.AssignmentId });
+
+            builder.HasQueryFilter(s => s.User.Status != UserStatus.SoftDelete);
         }
     }
 }

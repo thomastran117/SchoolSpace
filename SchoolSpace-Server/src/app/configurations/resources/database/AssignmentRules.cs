@@ -17,6 +17,8 @@ namespace backend.app.configurations.resources.database
                 .WithMany(c => c.Assignments)
                 .HasForeignKey(a => a.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasQueryFilter(a => a.Course.Status != CourseStatus.SoftDelete);
         }
     }
 }
