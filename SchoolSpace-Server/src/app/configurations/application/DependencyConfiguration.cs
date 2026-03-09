@@ -7,6 +7,7 @@ using backend.app.repositories.resilience;
 using backend.app.services.implementations;
 using backend.app.services.interfaces;
 using backend.app.utilities.implementation;
+using backend.app.utilities.implementations;
 using backend.app.utilities.interfaces;
 using backend.main.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -61,6 +62,7 @@ namespace backend.app.configurations.application
             services.AddScoped<IReportService, ReportService>();
 
             services.AddSingleton<ICustomLogger, FileLogger>();
+            services.AddSingleton<IRandomTokenGenerator, RandomTokenGenerator>();
 
             return services;
         }
