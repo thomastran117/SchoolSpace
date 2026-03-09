@@ -1,7 +1,8 @@
 using backend.app.utilities.implementation;
 using backend.app.utilities.interfaces;
 using backend.app.configurations.security;
-using backend.app.configurations.resources;
+using backend.app.configurations.resources.database;
+using backend.app.configurations.resources.redis;
 using backend.app.configurations.application;
 
 using Serilog;
