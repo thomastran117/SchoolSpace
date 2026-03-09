@@ -9,36 +9,40 @@ namespace backend.app.configurations.security
             IConfiguration config
         )
         {
-            var origins = config.GetSection("Cors:Origins").Get<string[]>() ?? Array.Empty<string>();
+            var origins =
+                config.GetSection("Cors:Origins").Get<string[]>() ?? Array.Empty<string>();
 
             services.AddCors(options =>
             {
-                options.AddPolicy(DefaultPolicyName, builder =>
-                {
-                    if (origins.Length == 0)
+                options.AddPolicy(
+                    DefaultPolicyName,
+                    builder =>
                     {
-                        builder
-                            .WithOrigins("http://localhost:3040")
-                            .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials();
-                    }
-                    else
-                    {
-                        builder
-                            .WithOrigins(origins)
-                            .AllowAnyHeader()
-                            .AllowAnyMethod()
-                            .AllowCredentials();
-                    }
+                        if (origins.Length == 0)
+                        {
+                            builder
+                                .WithOrigins("http://localhost:3040")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowCredentials();
+                        }
+                        else
+                        {
+                            builder
+                                .WithOrigins(origins)
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowCredentials();
+                        }
 
-                    builder.WithExposedHeaders(
-                        "X-Request-Id",
-                        "X-RateLimit-Limit",
-                        "X-RateLimit-Remaining",
-                        "X-RateLimit-Reset"
-                    );
-                });
+                        builder.WithExposedHeaders(
+                            "X-Request-Id",
+                            "X-RateLimit-Limit",
+                            "X-RateLimit-Remaining",
+                            "X-RateLimit-Reset"
+                        );
+                    }
+                );
             });
 
             return services;

@@ -1,11 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
-
 using backend.app.configurations.environment;
 using backend.app.errors.http;
 using backend.app.http;
 using backend.app.models.other;
 using backend.app.services.interfaces;
-
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -43,22 +41,21 @@ namespace backend.app.services.implementations
                 ValidIssuers = new[] { "https://accounts.google.com", "accounts.google.com" },
                 IssuerSigningKeys = oidcConfig.SigningKeys,
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(2)
+                ClockSkew = TimeSpan.FromMinutes(2),
             };
 
             var handler = new JwtSecurityTokenHandler { MapInboundClaims = false };
             var principal = handler.ValidateToken(googleToken, validationParams, out _);
 
             var email =
-                principal.Claims.FirstOrDefault(c => c.Type == "email")?.Value ??
-                throw new UnauthorizedException("Missing Google email claim");
+                principal.Claims.FirstOrDefault(c => c.Type == "email")?.Value
+                ?? throw new UnauthorizedException("Missing Google email claim");
 
-            var name =
-                principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? email;
+            var name = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? email;
 
             var sub =
-                principal.Claims.FirstOrDefault(c => c.Type == "sub")?.Value ??
-                throw new UnauthorizedException("Missing Google sub claim");
+                principal.Claims.FirstOrDefault(c => c.Type == "sub")?.Value
+                ?? throw new UnauthorizedException("Missing Google sub claim");
 
             return new OAuthUser(sub, email, name, "google");
         }

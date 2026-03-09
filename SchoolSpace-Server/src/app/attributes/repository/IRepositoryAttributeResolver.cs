@@ -7,6 +7,10 @@ namespace backend.app.attributes.repository
     /// Use this to avoid ambiguity when attributes appear at multiple levels.
     public interface IRepositoryAttributeResolver
     {
-        RepositoryMethodBehavior GetBehavior(MethodInfo interfaceMethod, MethodInfo implementationMethod, Type implementationType);
+        RepositoryMethodBehavior GetBehavior(
+            MethodInfo interfaceMethod,
+            MethodInfo implementationMethod,
+            Type implementationType
+        );
     }
 }

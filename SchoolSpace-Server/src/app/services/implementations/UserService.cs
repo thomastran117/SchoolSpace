@@ -29,7 +29,12 @@ namespace backend.app.services.implementations
             return users.Select(MapToResponse);
         }
 
-        public async Task<UserResponse?> UpdateUserAsync(int id, string? name, string? username, string? phone)
+        public async Task<UserResponse?> UpdateUserAsync(
+            int id,
+            string? name,
+            string? username,
+            string? phone
+        )
         {
             var user = await _userRepository.GetUserAsync(id);
             if (user is null)
@@ -49,7 +54,7 @@ namespace backend.app.services.implementations
                 MicrosoftId = user.MicrosoftId,
                 GoogleId = user.GoogleId,
                 CreatedAt = user.CreatedAt,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
             };
 
             var result = await _userRepository.UpdatePartialAsync(updated);
@@ -84,7 +89,7 @@ namespace backend.app.services.implementations
                 MicrosoftId = user.MicrosoftId,
                 GoogleId = user.GoogleId,
                 CreatedAt = user.CreatedAt,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
             };
 
             var result = await _userRepository.UpdatePartialAsync(updated);
@@ -104,7 +109,7 @@ namespace backend.app.services.implementations
                 AvatarUrl = user.AvatarUrl,
                 Phone = user.Phone,
                 CreatedAt = user.CreatedAt,
-                UpdatedAt = user.UpdatedAt
+                UpdatedAt = user.UpdatedAt,
             };
         }
     }

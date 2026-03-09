@@ -62,14 +62,23 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update(
+            int id,
+            [FromBody] UpdateUserRequest request,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
                 if (!CanModifyUser(id))
                     return Forbid();
 
-                var user = await _userService.UpdateUserAsync(id, request.Name, request.Username, request.Phone);
+                var user = await _userService.UpdateUserAsync(
+                    id,
+                    request.Name,
+                    request.Username,
+                    request.Phone
+                );
                 return Ok(user);
             }
             catch (Exception e)
@@ -104,7 +113,11 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPatch("{id:int}/avatar")]
-        public async Task<IActionResult> UpdateAvatar(int id, [FromBody] UpdateUserAvatarRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateAvatar(
+            int id,
+            [FromBody] UpdateUserAvatarRequest request,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -127,7 +140,8 @@ namespace backend.app.implementations.Controllers
         private bool CanModifyUser(int targetUserId)
         {
             var payload = User.GetUserPayload();
-            return payload.Id == targetUserId || string.Equals(payload.Role, "Admin", StringComparison.OrdinalIgnoreCase);
+            return payload.Id == targetUserId
+                || string.Equals(payload.Role, "Admin", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

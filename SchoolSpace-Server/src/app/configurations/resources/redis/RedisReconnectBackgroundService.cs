@@ -1,9 +1,7 @@
 using backend.app.configurations.environment;
 using backend.app.services.implementations;
 using backend.app.utilities.implementation;
-
 using Microsoft.Extensions.Hosting;
-
 using StackExchange.Redis;
 
 namespace backend.app.configurations.resources.redis
@@ -40,8 +38,9 @@ namespace backend.app.configurations.resources.redis
 
                 try
                 {
-                    var mux = await ConnectionMultiplexer.ConnectAsync(
-                        EnvironmentSetting.RedisConnection).ConfigureAwait(false);
+                    var mux = await ConnectionMultiplexer
+                        .ConnectAsync(EnvironmentSetting.RedisConnection)
+                        .ConfigureAwait(false);
 
                     var db = mux.GetDatabase();
                     await db.PingAsync().ConfigureAwait(false);
@@ -55,7 +54,9 @@ namespace backend.app.configurations.resources.redis
                     _health.IsAvailable = true;
                     _health.Failure = null;
 
-                    Logger.Info("Redis reconnection succeeded. Cache switched from in-memory to Redis.");
+                    Logger.Info(
+                        "Redis reconnection succeeded. Cache switched from in-memory to Redis."
+                    );
                     return;
                 }
                 catch (Exception ex)
@@ -63,7 +64,8 @@ namespace backend.app.configurations.resources.redis
                     _health.Failure = ex;
                     Logger.Warn(
                         ex,
-                        $"Redis reconnect attempt failed. Will retry in {RetryIntervalSeconds}s.");
+                        $"Redis reconnect attempt failed. Will retry in {RetryIntervalSeconds}s."
+                    );
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(RetryIntervalSeconds), stoppingToken)

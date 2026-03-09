@@ -25,12 +25,19 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateReportRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create(
+            [FromBody] CreateReportRequest request,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
                 var payload = User.GetUserPayload();
-                var report = await _reportService.CreateAsync(request.ReportedUserId, request.Reason, payload.Id);
+                var report = await _reportService.CreateAsync(
+                    request.ReportedUserId,
+                    request.Reason,
+                    payload.Id
+                );
                 return CreatedAtAction(nameof(GetById), new { id = report.Id }, report);
             }
             catch (Exception e)
@@ -83,7 +90,11 @@ namespace backend.app.implementations.Controllers
 
         [HttpPut("{id:int}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateReportRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update(
+            int id,
+            [FromBody] UpdateReportRequest request,
+            CancellationToken cancellationToken
+        )
         {
             try
             {

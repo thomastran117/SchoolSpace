@@ -1,10 +1,7 @@
 using System.Data.Common;
-
 using backend.app.errors.app;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
 using Polly;
 using Polly.CircuitBreaker;
 using Polly.Timeout;
@@ -37,8 +34,10 @@ namespace backend.app.repositories.resilience
                             ex,
                             "Repository retry attempt {Attempt} after {DelayMs}ms for transient failure",
                             attempt,
-                            delay.TotalMilliseconds);
-                    });
+                            delay.TotalMilliseconds
+                        );
+                    }
+                );
 
             _circuitBreaker = Policy
                 .Handle<Exception>(IsTransient)
@@ -49,36 +48,37 @@ namespace backend.app.repositories.resilience
                     {
                         _logger?.LogWarning(
                             ex,
-                            "Repository circuit breaker opened; database considered unavailable");
+                            "Repository circuit breaker opened; database considered unavailable"
+                        );
                     },
                     onReset: () =>
                     {
                         _logger?.LogInformation(
-                            "Repository circuit breaker reset; database available again");
-                    });
+                            "Repository circuit breaker reset; database available again"
+                        );
+                    }
+                );
 
-            var timeoutPolicy = Policy
-                .TimeoutAsync(
-                    TimeSpan.FromSeconds(3),
-                    TimeoutStrategy.Optimistic);
+            var timeoutPolicy = Policy.TimeoutAsync(
+                TimeSpan.FromSeconds(3),
+                TimeoutStrategy.Optimistic
+            );
 
-            _policy = Policy.WrapAsync(
-                _circuitBreaker,
-                retryPolicy,
-                timeoutPolicy);
+            _policy = Policy.WrapAsync(_circuitBreaker, retryPolicy, timeoutPolicy);
         }
 
         public bool IsDatabaseHealthy => _circuitBreaker.CircuitState == CircuitState.Closed;
 
-        public async Task<T> ExecuteAsync<T>(Func<CancellationToken, Task<T>> action, string operationName, CancellationToken ct = default)
+        public async Task<T> ExecuteAsync<T>(
+            Func<CancellationToken, Task<T>> action,
+            string operationName,
+            CancellationToken ct = default
+        )
         {
             var context = new Context(operationName);
             try
             {
-                return await _policy.ExecuteAsync(
-                    (_, token) => action(token),
-                    context,
-                    ct);
+                return await _policy.ExecuteAsync((_, token) => action(token), context, ct);
             }
             catch (TimeoutRejectedException)
             {
@@ -94,15 +94,16 @@ namespace backend.app.repositories.resilience
             }
         }
 
-        public async Task ExecuteAsync(Func<CancellationToken, Task> action, string operationName, CancellationToken ct = default)
+        public async Task ExecuteAsync(
+            Func<CancellationToken, Task> action,
+            string operationName,
+            CancellationToken ct = default
+        )
         {
             var context = new Context(operationName);
             try
             {
-                await _policy.ExecuteAsync(
-                    (_, token) => action(token),
-                    context,
-                    ct);
+                await _policy.ExecuteAsync((_, token) => action(token), context, ct);
             }
             catch (TimeoutRejectedException)
             {

@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.app.configurations.security
-{    public static class RateLimiterConfiguration
+{
+    public static class RateLimiterConfiguration
     {
         private const int PermitLimit = 100;
         private static readonly TimeSpan Window = TimeSpan.FromMinutes(1);
@@ -20,37 +21,48 @@ namespace backend.app.configurations.security
                 {
                     context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                     context.HttpContext.Response.ContentType = "application/json";
-                    await context.HttpContext.Response.WriteAsJsonAsync(new
-                    {
-                        status = 429,
-                        error = "Too Many Requests",
-                        message = "Rate limit exceeded. Please try again later."
-                    }, cancellationToken);
+                    await context.HttpContext.Response.WriteAsJsonAsync(
+                        new
+                        {
+                            status = 429,
+                            error = "Too Many Requests",
+                            message = "Rate limit exceeded. Please try again later.",
+                        },
+                        cancellationToken
+                    );
                 };
 
-                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
-                {
-                    try
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(
+                    context =>
                     {
-                        string partitionKey = GetPartitionKey(context);
-                        return RateLimitPartition.GetFixedWindowLimiter(partitionKey, _ => new FixedWindowRateLimiterOptions
+                        try
                         {
-                            PermitLimit = PermitLimit,
-                            Window = Window,
-                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                            QueueLimit = 0
-                        });
-                    }
-                    catch
-                    {
-                        return RateLimitPartition.GetFixedWindowLimiter("fail-closed", _ => new FixedWindowRateLimiterOptions
+                            string partitionKey = GetPartitionKey(context);
+                            return RateLimitPartition.GetFixedWindowLimiter(
+                                partitionKey,
+                                _ => new FixedWindowRateLimiterOptions
+                                {
+                                    PermitLimit = PermitLimit,
+                                    Window = Window,
+                                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                                    QueueLimit = 0,
+                                }
+                            );
+                        }
+                        catch
                         {
-                            PermitLimit = 0,
-                            Window = TimeSpan.FromMinutes(1),
-                            QueueLimit = 0
-                        });
+                            return RateLimitPartition.GetFixedWindowLimiter(
+                                "fail-closed",
+                                _ => new FixedWindowRateLimiterOptions
+                                {
+                                    PermitLimit = 0,
+                                    Window = TimeSpan.FromMinutes(1),
+                                    QueueLimit = 0,
+                                }
+                            );
+                        }
                     }
-                });
+                );
             });
 
             return services;

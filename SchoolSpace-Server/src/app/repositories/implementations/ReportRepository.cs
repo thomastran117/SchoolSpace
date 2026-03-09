@@ -1,7 +1,6 @@
 using backend.app.configurations.resources.database;
 using backend.app.models.core;
 using backend.app.repositories.interfaces;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.app.repositories.implementations
@@ -24,15 +23,13 @@ namespace backend.app.repositories.implementations
 
         public async Task<Report?> GetByIdAsync(int id)
         {
-            return await _context.Reports
-                .AsNoTracking()
-                .FirstOrDefaultAsync(r => r.Id == id);
+            return await _context.Reports.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
         }
 
         public async Task<IEnumerable<Report>> GetAllAsync()
         {
-            return await _context.Reports
-                .AsNoTracking()
+            return await _context
+                .Reports.AsNoTracking()
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
         }

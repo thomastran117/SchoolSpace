@@ -6,37 +6,24 @@ namespace backend.app.implementations.Controllers
     [Route("health")]
     public sealed class HealthController : ControllerBase
     {
-        public HealthController()
-        {
-        }
+        public HealthController() { }
 
         [HttpGet("")]
         public IActionResult Index()
         {
-            return Ok(new
-            {
-                message = "healthy",
-                timestamp = DateTime.UtcNow
-            });
+            return Ok(new { message = "healthy", timestamp = DateTime.UtcNow });
         }
 
         [HttpGet("live")]
         public IActionResult Liveness()
         {
-            return Ok(new
-            {
-                message = "healthy",
-                timestamp = DateTime.UtcNow
-            });
+            return Ok(new { message = "healthy", timestamp = DateTime.UtcNow });
         }
 
         [HttpGet("ping")]
         public IActionResult Ping()
         {
-            return Ok(new
-            {
-                message = "pong",
-            });
+            return Ok(new { message = "pong" });
         }
     }
 }

@@ -1,6 +1,5 @@
 using backend.app.dtos.responses.general;
 using backend.app.errors.http;
-
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.app.utilities.implementation
@@ -12,13 +11,11 @@ namespace backend.app.utilities.implementation
             if (ex is AppException appEx)
                 return HandleAppException(appEx);
 
-            MessageResponse response = new MessageResponse(
-                "An unexpected error occurred."
-            );
+            MessageResponse response = new MessageResponse("An unexpected error occurred.");
 
             return new ObjectResult(response)
             {
-                StatusCode = StatusCodes.Status500InternalServerError
+                StatusCode = StatusCodes.Status500InternalServerError,
             };
         }
 
@@ -26,10 +23,7 @@ namespace backend.app.utilities.implementation
         {
             var response = new MessageResponse(ex.Message, ex.Details);
 
-            return new ObjectResult(response)
-            {
-                StatusCode = ex.StatusCode
-            };
+            return new ObjectResult(response) { StatusCode = ex.StatusCode };
         }
     }
 }

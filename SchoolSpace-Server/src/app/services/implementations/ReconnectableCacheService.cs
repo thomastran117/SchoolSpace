@@ -1,6 +1,5 @@
 using backend.app.configurations.resources.redis;
 using backend.app.services.interfaces;
-
 using StackExchange.Redis;
 
 namespace backend.app.services.implementations
@@ -23,8 +22,7 @@ namespace backend.app.services.implementations
         public Task<bool> SetValueAsync(string key, string value, TimeSpan? expiry = null) =>
             Inner.SetValueAsync(key, value, expiry);
 
-        public Task<string?> GetValueAsync(string key) =>
-            Inner.GetValueAsync(key);
+        public Task<string?> GetValueAsync(string key) => Inner.GetValueAsync(key);
 
         public Task<long> IncrementAsync(string key, long value = 1) =>
             Inner.IncrementAsync(key, value);
@@ -44,14 +42,12 @@ namespace backend.app.services.implementations
         public Task<bool> HashDeleteAsync(string key, string field) =>
             Inner.HashDeleteAsync(key, field);
 
-        public Task<bool> SetAddAsync(string key, string value) =>
-            Inner.SetAddAsync(key, value);
+        public Task<bool> SetAddAsync(string key, string value) => Inner.SetAddAsync(key, value);
 
         public Task<bool> SetRemoveAsync(string key, string value) =>
             Inner.SetRemoveAsync(key, value);
 
-        public Task<string[]> SetMembersAsync(string key) =>
-            Inner.SetMembersAsync(key);
+        public Task<string[]> SetMembersAsync(string key) => Inner.SetMembersAsync(key);
 
         public Task<long> ListLeftPushAsync(string key, string value) =>
             Inner.ListLeftPushAsync(key, value);
@@ -59,20 +55,15 @@ namespace backend.app.services.implementations
         public Task<long> ListRightPushAsync(string key, string value) =>
             Inner.ListRightPushAsync(key, value);
 
-        public Task<string?> ListLeftPopAsync(string key) =>
-            Inner.ListLeftPopAsync(key);
+        public Task<string?> ListLeftPopAsync(string key) => Inner.ListLeftPopAsync(key);
 
-        public Task<string?> ListRightPopAsync(string key) =>
-            Inner.ListRightPopAsync(key);
+        public Task<string?> ListRightPopAsync(string key) => Inner.ListRightPopAsync(key);
 
-        public Task<bool> DeleteKeyAsync(string key) =>
-            Inner.DeleteKeyAsync(key);
+        public Task<bool> DeleteKeyAsync(string key) => Inner.DeleteKeyAsync(key);
 
-        public Task<bool> KeyExistsAsync(string key) =>
-            Inner.KeyExistsAsync(key);
+        public Task<bool> KeyExistsAsync(string key) => Inner.KeyExistsAsync(key);
 
-        public Task<TimeSpan?> GetTTLAsync(string key) =>
-            Inner.GetTTLAsync(key);
+        public Task<TimeSpan?> GetTTLAsync(string key) => Inner.GetTTLAsync(key);
 
         public Task<bool> SetExpiryAsync(string key, TimeSpan expiry) =>
             Inner.SetExpiryAsync(key, expiry);
@@ -86,8 +77,7 @@ namespace backend.app.services.implementations
         public Task<Dictionary<string, string?>> GetManyAsync(IEnumerable<string> keys) =>
             Inner.GetManyAsync(keys);
 
-        public IConnectionMultiplexer GetMultiplexer() =>
-            Inner.GetMultiplexer();
+        public IConnectionMultiplexer GetMultiplexer() => Inner.GetMultiplexer();
 
         public Task<TimeSpan> PingAsync(CommandFlags flags = CommandFlags.None) =>
             Inner.PingAsync(flags);
@@ -101,11 +91,13 @@ namespace backend.app.services.implementations
         public Task<bool> SetValueXXAsync(string key, string value, TimeSpan? expiry = null) =>
             Inner.SetValueXXAsync(key, value, expiry);
 
-        public Task<string?> GetSetAsync(string key, string value) =>
-            Inner.GetSetAsync(key, value);
+        public Task<string?> GetSetAsync(string key, string value) => Inner.GetSetAsync(key, value);
 
-        public Task<long> PublishAsync(string channel, string message, CommandFlags flags = CommandFlags.None) =>
-            Inner.PublishAsync(channel, message, flags);
+        public Task<long> PublishAsync(
+            string channel,
+            string message,
+            CommandFlags flags = CommandFlags.None
+        ) => Inner.PublishAsync(channel, message, flags);
 
         public Task SubscribeAsync(string channel, Action<RedisChannel, RedisValue> handler) =>
             Inner.SubscribeAsync(channel, handler);
@@ -113,7 +105,10 @@ namespace backend.app.services.implementations
         public Task UnsubscribeAsync(string channel, Action<RedisChannel, RedisValue> handler) =>
             Inner.UnsubscribeAsync(channel, handler);
 
-        public Task<string> GetOrSetAsync(string key, Func<Task<string>> factory, TimeSpan expiry) =>
-            Inner.GetOrSetAsync(key, factory, expiry);
+        public Task<string> GetOrSetAsync(
+            string key,
+            Func<Task<string>> factory,
+            TimeSpan expiry
+        ) => Inner.GetOrSetAsync(key, factory, expiry);
     }
 }

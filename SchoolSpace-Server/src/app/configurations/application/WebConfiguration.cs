@@ -1,10 +1,7 @@
 using System.Net;
-
-using Microsoft.Extensions.Http.Resilience;
-
-using Polly;
-
 using backend.app.http;
+using Microsoft.Extensions.Http.Resilience;
+using Polly;
 
 namespace backend.app.configurations.application
 {
@@ -14,7 +11,8 @@ namespace backend.app.configurations.application
 
         public static IServiceCollection AddWebConfiguration(
             this IServiceCollection services,
-            IConfiguration config)
+            IConfiguration config
+        )
         {
             services.AddExternalApiClient(config);
             return services;
@@ -22,68 +20,84 @@ namespace backend.app.configurations.application
 
         private static void AddExternalApiClient(
             this IServiceCollection services,
-            IConfiguration config)
+            IConfiguration config
+        )
         {
-            var timeoutSeconds =
-                config.GetValue<int?>("ExternalApi:TimeoutSeconds") ?? 10;
+            var timeoutSeconds = config.GetValue<int?>("ExternalApi:TimeoutSeconds") ?? 10;
 
-            var maxRetries =
-                config.GetValue<int?>("ExternalApi:Retry:MaxAttempts") ?? 3;
+            var maxRetries = config.GetValue<int?>("ExternalApi:Retry:MaxAttempts") ?? 3;
 
-            var baseDelayMs =
-                config.GetValue<int?>("ExternalApi:Retry:BaseDelayMs") ?? 200;
+            var baseDelayMs = config.GetValue<int?>("ExternalApi:Retry:BaseDelayMs") ?? 200;
 
             services
                 .AddHttpClient<IExternalApiClient, ExternalApiClient>(client =>
                 {
                     client.Timeout = TimeSpan.FromSeconds(timeoutSeconds);
                 })
-                .AddResilienceHandler(ResiliencePipeline, (builder, context) =>
-                {
-                    var loggerFactory = context.ServiceProvider.GetRequiredService<ILoggerFactory>();
-                    var logger = loggerFactory.CreateLogger("ExternalApiClient");
-
-                    builder.AddRetry(new HttpRetryStrategyOptions
+                .AddResilienceHandler(
+                    ResiliencePipeline,
+                    (builder, context) =>
                     {
-                        MaxRetryAttempts = maxRetries,
-                        Delay = TimeSpan.FromMilliseconds(baseDelayMs),
-                        BackoffType = DelayBackoffType.Exponential,
-                        UseJitter = true,
+                        var loggerFactory =
+                            context.ServiceProvider.GetRequiredService<ILoggerFactory>();
+                        var logger = loggerFactory.CreateLogger("ExternalApiClient");
 
-                        ShouldHandle = static args =>
-                        {
-                            var outcome = args.Outcome;
+                        builder.AddRetry(
+                            new HttpRetryStrategyOptions
+                            {
+                                MaxRetryAttempts = maxRetries,
+                                Delay = TimeSpan.FromMilliseconds(baseDelayMs),
+                                BackoffType = DelayBackoffType.Exponential,
+                                UseJitter = true,
 
-                            if (outcome.Exception is HttpRequestException or TaskCanceledException)
-                                return ValueTask.FromResult(true);
+                                ShouldHandle = static args =>
+                                {
+                                    var outcome = args.Outcome;
 
-                            var resp = outcome.Result;
-                            if (resp is null) return ValueTask.FromResult(false);
+                                    if (
+                                        outcome.Exception
+                                        is HttpRequestException
+                                            or TaskCanceledException
+                                    )
+                                        return ValueTask.FromResult(true);
 
-                            if ((int)resp.StatusCode >= 500) return ValueTask.FromResult(true);
-                            if (resp.StatusCode == HttpStatusCode.RequestTimeout) return ValueTask.FromResult(true);
-                            if (resp.StatusCode == HttpStatusCode.TooManyRequests) return ValueTask.FromResult(true);
+                                    var resp = outcome.Result;
+                                    if (resp is null)
+                                        return ValueTask.FromResult(false);
 
-                            return ValueTask.FromResult(false);
-                        },
+                                    if ((int)resp.StatusCode >= 500)
+                                        return ValueTask.FromResult(true);
+                                    if (resp.StatusCode == HttpStatusCode.RequestTimeout)
+                                        return ValueTask.FromResult(true);
+                                    if (resp.StatusCode == HttpStatusCode.TooManyRequests)
+                                        return ValueTask.FromResult(true);
 
-                        OnRetry = args =>
-                        {
-                            var reason =
-                                args.Outcome.Exception?.Message ??
-                                (args.Outcome.Result is not null ? $"HTTP {(int)args.Outcome.Result.StatusCode}" : "Unknown");
+                                    return ValueTask.FromResult(false);
+                                },
 
-                            logger.LogWarning(
-                                "[ExternalApi] Retry {Attempt} after {Delay}ms — {Reason}",
-                                args.AttemptNumber,
-                                (int)args.RetryDelay.TotalMilliseconds,
-                                reason
-                            );
+                                OnRetry = args =>
+                                {
+                                    var reason =
+                                        args.Outcome.Exception?.Message
+                                        ?? (
+                                            args.Outcome.Result is not null
+                                                ? $"HTTP {(int)args.Outcome.Result.StatusCode}"
+                                                : "Unknown"
+                                        );
 
-                            return ValueTask.CompletedTask;
-                        }
-                    });
-                });
+                                    logger.LogWarning(
+                                        "[ExternalApi] Retry {Attempt} after {Delay}ms — {Reason}",
+                                        args.AttemptNumber,
+                                        (int)args.RetryDelay.TotalMilliseconds,
+                                        reason
+                                    );
+
+                                    return ValueTask.CompletedTask;
+                                },
+                            }
+                        );
+                    }
+                );
         }
     }
 }

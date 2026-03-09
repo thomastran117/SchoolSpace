@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using backend.app.models.core;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.app.configurations.resources.database
 {

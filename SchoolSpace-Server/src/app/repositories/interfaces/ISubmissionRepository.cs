@@ -1,5 +1,5 @@
-using backend.app.models.core;
 using backend.app.attributes.repository;
+using backend.app.models.core;
 
 namespace backend.app.repositories.interfaces
 {
@@ -11,8 +11,10 @@ namespace backend.app.repositories.interfaces
         Task<IEnumerable<Submission>> GetByAssignmentIdAsync(int assignmentId);
         Task<IEnumerable<Submission>> GetByUserIdAsync(int userId);
         Task<IEnumerable<Submission>> GetByUserAndAssignmentAsync(int userId, int assignmentId);
+
         [HandleMissingEntity]
         Task<Submission?> UpdateAsync(Submission submission);
+
         [HandleMissingEntity]
         Task<bool> DeleteAsync(int id);
     }

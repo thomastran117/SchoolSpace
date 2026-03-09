@@ -1,11 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
-
 using backend.app.configurations.environment;
 using backend.app.errors.http;
 using backend.app.http;
 using backend.app.models.other;
 using backend.app.services.interfaces;
-
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -47,41 +45,34 @@ namespace backend.app.services.implementations
                 ValidateIssuer = true,
                 IssuerValidator = (issuer, token, parameters) =>
                 {
-                    if (issuer.StartsWith("https://login.microsoftonline.com/")
-                        && issuer.EndsWith("/v2.0"))
+                    if (
+                        issuer.StartsWith("https://login.microsoftonline.com/")
+                        && issuer.EndsWith("/v2.0")
+                    )
                     {
                         return issuer;
                     }
 
-                    throw new SecurityTokenInvalidIssuerException(
-                        $"Invalid issuer: {issuer}");
+                    throw new SecurityTokenInvalidIssuerException($"Invalid issuer: {issuer}");
                 },
 
-                ClockSkew = TimeSpan.FromMinutes(2)
+                ClockSkew = TimeSpan.FromMinutes(2),
             };
 
-            var handler = new JwtSecurityTokenHandler
-            {
-                MapInboundClaims = false
-            };
+            var handler = new JwtSecurityTokenHandler { MapInboundClaims = false };
 
-            var principal = handler.ValidateToken(
-                microsoftToken,
-                validationParams,
-                out _
-            );
+            var principal = handler.ValidateToken(microsoftToken, validationParams, out _);
 
             var email =
-                principal.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value ??
-                principal.Claims.FirstOrDefault(c => c.Type == "email")?.Value ??
-                throw new UnauthorizedException("Missing Microsoft email claim");
+                principal.Claims.FirstOrDefault(c => c.Type == "preferred_username")?.Value
+                ?? principal.Claims.FirstOrDefault(c => c.Type == "email")?.Value
+                ?? throw new UnauthorizedException("Missing Microsoft email claim");
 
-            var name =
-                principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? email;
+            var name = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? email;
 
             var sub =
-                principal.Claims.FirstOrDefault(c => c.Type == "sub")?.Value ??
-                throw new UnauthorizedException("Missing Microsoft sub claim");
+                principal.Claims.FirstOrDefault(c => c.Type == "sub")?.Value
+                ?? throw new UnauthorizedException("Missing Microsoft sub claim");
 
             return await Task.FromResult(new OAuthUser(sub, email, name, "microsoft"));
         }

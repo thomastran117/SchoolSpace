@@ -21,5 +21,5 @@ namespace backend.main.dtos.responses.external
 
         [JsonPropertyName("error-codes")]
         public string[]? ErrorCodes { get; set; }
-    }  
+    }
 }

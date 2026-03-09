@@ -1,5 +1,4 @@
 using System.Diagnostics;
-
 using Serilog;
 using Serilog.Events;
 
@@ -12,18 +11,24 @@ namespace backend.app.configurations.application
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}")
+                .WriteTo.Console(
+                    outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}"
+                )
                 .CreateLogger();
 
             return host.UseSerilog();
         }
     }
+
     public class ResponseLoggerConfiguration
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ResponseLoggerConfiguration> _logger;
 
-        public ResponseLoggerConfiguration(RequestDelegate next, ILogger<ResponseLoggerConfiguration> logger)
+        public ResponseLoggerConfiguration(
+            RequestDelegate next,
+            ILogger<ResponseLoggerConfiguration> logger
+        )
         {
             _next = next;
             _logger = logger;
@@ -49,19 +54,20 @@ namespace backend.app.configurations.application
                 >= 300 and < 400 => ConsoleColor.Cyan,
                 >= 400 and < 500 => ConsoleColor.Yellow,
                 >= 500 => ConsoleColor.Red,
-                _ => ConsoleColor.Gray
+                _ => ConsoleColor.Gray,
             };
 
             var logMessage =
-                $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [INFO] " +
-                $"{method} {path} → {statusCode} ({responseTime} ms)";
+                $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [INFO] "
+                + $"{method} {path} → {statusCode} ({responseTime} ms)";
 
-            _logger.LogInformation("{Method} {Path} → {StatusCode} ({Elapsed} ms)",
+            _logger.LogInformation(
+                "{Method} {Path} → {StatusCode} ({Elapsed} ms)",
                 context.Request.Method,
                 context.Request.Path,
                 context.Response.StatusCode,
-                responseTime);
-
+                responseTime
+            );
 
             Console.ForegroundColor = originalColor;
         }

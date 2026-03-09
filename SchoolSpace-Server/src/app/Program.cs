@@ -1,10 +1,9 @@
-using backend.app.utilities.implementation;
-using backend.app.utilities.interfaces;
-using backend.app.configurations.security;
+using backend.app.configurations.application;
 using backend.app.configurations.resources.database;
 using backend.app.configurations.resources.redis;
-using backend.app.configurations.application;
-
+using backend.app.configurations.security;
+using backend.app.utilities.implementation;
+using backend.app.utilities.interfaces;
 using Serilog;
 
 Logger.Configure(o =>
@@ -12,7 +11,8 @@ Logger.Configure(o =>
     o.EnableFileLogging = true;
     o.MinFileLevel = backend.app.utilities.interfaces.LogLevel.Warn;
     o.LogDirectory = Path.GetFullPath(
-        Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "logs"));
+        Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "logs")
+    );
 });
 
 var builder = WebApplication.CreateBuilder(args);

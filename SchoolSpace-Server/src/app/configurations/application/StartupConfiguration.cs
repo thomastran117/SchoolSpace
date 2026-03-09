@@ -7,9 +7,9 @@ namespace backend.app.configurations.application
             builder.Configuration.AddEnvironmentVariables();
 
             var port =
-                Environment.GetEnvironmentVariable("PORT") ??
-                Environment.GetEnvironmentVariable("ASPNETCORE_PORT") ??
-                "8040";
+                Environment.GetEnvironmentVariable("PORT")
+                ?? Environment.GetEnvironmentVariable("ASPNETCORE_PORT")
+                ?? "8040";
 
             builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 

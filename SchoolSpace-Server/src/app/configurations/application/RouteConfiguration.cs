@@ -8,16 +8,23 @@ namespace backend.app.configurations.application
 
         public RoutePrefixConvention(string prefix)
         {
-            _routePrefix = new AttributeRouteModel(new Microsoft.AspNetCore.Mvc.RouteAttribute(prefix));
+            _routePrefix = new AttributeRouteModel(
+                new Microsoft.AspNetCore.Mvc.RouteAttribute(prefix)
+            );
         }
 
         public void Apply(ApplicationModel application)
         {
             foreach (var controller in application.Controllers)
             {
-                foreach (var selector in controller.Selectors.Where(s => s.AttributeRouteModel != null))
+                foreach (
+                    var selector in controller.Selectors.Where(s => s.AttributeRouteModel != null)
+                )
                 {
-                    selector.AttributeRouteModel = AttributeRouteModel.CombineAttributeRouteModel(_routePrefix, selector.AttributeRouteModel);
+                    selector.AttributeRouteModel = AttributeRouteModel.CombineAttributeRouteModel(
+                        _routePrefix,
+                        selector.AttributeRouteModel
+                    );
                 }
             }
         }

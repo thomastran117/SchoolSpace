@@ -2,7 +2,6 @@ using backend.app.attributes.repository;
 using backend.app.configurations.resources.database;
 using backend.app.models.core;
 using backend.app.repositories.interfaces;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.app.repositories.implementations
@@ -26,24 +25,24 @@ namespace backend.app.repositories.implementations
 
         public async Task<School?> GetByIdAsync(int id)
         {
-            return await _context.Schools
-                .AsNoTracking()
+            return await _context
+                .Schools.AsNoTracking()
                 .Include(s => s.Principal)
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
 
         public async Task<School?> GetByPrincipalIdAsync(int principalId)
         {
-            return await _context.Schools
-                .AsNoTracking()
+            return await _context
+                .Schools.AsNoTracking()
                 .Include(s => s.Principal)
                 .FirstOrDefaultAsync(s => s.PrincipalId == principalId);
         }
 
         public async Task<IEnumerable<School>> GetAllAsync()
         {
-            return await _context.Schools
-                .AsNoTracking()
+            return await _context
+                .Schools.AsNoTracking()
                 .Include(s => s.Principal)
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();
@@ -56,8 +55,8 @@ namespace backend.app.repositories.implementations
             if (idList.Count == 0)
                 return [];
 
-            return await _context.Schools
-                .AsNoTracking()
+            return await _context
+                .Schools.AsNoTracking()
                 .Include(s => s.Principal)
                 .Where(s => idList.Contains(s.Id))
                 .ToListAsync();
@@ -100,9 +99,7 @@ namespace backend.app.repositories.implementations
             if (idList.Count == 0)
                 return 0;
 
-            var schools = await _context.Schools
-                .Where(s => idList.Contains(s.Id))
-                .ToListAsync();
+            var schools = await _context.Schools.Where(s => idList.Contains(s.Id)).ToListAsync();
 
             foreach (var school in schools)
             {
@@ -115,8 +112,8 @@ namespace backend.app.repositories.implementations
 
         public async Task<bool> HardDeleteAsync(int id)
         {
-            var school = await _context.Schools
-                .IgnoreQueryFilters()
+            var school = await _context
+                .Schools.IgnoreQueryFilters()
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (school is null)

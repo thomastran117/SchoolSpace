@@ -20,8 +20,10 @@ namespace backend.app.configurations.application
 
             public async Task InvokeAsync(HttpContext context)
             {
-                if (!context.Request.Headers.TryGetValue(RequestIdHeader, out var existing)
-                    || string.IsNullOrWhiteSpace(existing))
+                if (
+                    !context.Request.Headers.TryGetValue(RequestIdHeader, out var existing)
+                    || string.IsNullOrWhiteSpace(existing)
+                )
                 {
                     existing = Guid.NewGuid().ToString("D");
                     context.Request.Headers[RequestIdHeader] = existing;

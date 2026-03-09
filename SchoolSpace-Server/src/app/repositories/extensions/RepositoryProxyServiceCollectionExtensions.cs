@@ -1,7 +1,6 @@
 using backend.app.attributes.repository;
 using backend.app.repositories.implementations;
 using backend.app.repositories.resilience;
-
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.app.repositories.extensions
@@ -16,20 +15,24 @@ namespace backend.app.repositories.extensions
         /// policy and optional attribute resolver for retry/missing-entity behavior.
         public static IServiceCollection AddRepositoryWithProxy<TInterface, TImpl>(
             this IServiceCollection services,
-            ServiceLifetime lifetime = ServiceLifetime.Scoped)
+            ServiceLifetime lifetime = ServiceLifetime.Scoped
+        )
             where TInterface : class
             where TImpl : class, TInterface
         {
-            services.Add(new ServiceDescriptor(
-                typeof(TInterface),
-                sp =>
-                {
-                    var target = (TImpl)ActivatorUtilities.CreateInstance(sp, typeof(TImpl));
-                    var policy = sp.GetRequiredService<IRepositoryResiliencePolicy>();
-                    var resolver = sp.GetService<IRepositoryAttributeResolver>();
-                    return RepositoryProxy<TInterface>.Create(target, policy, resolver);
-                },
-                lifetime));
+            services.Add(
+                new ServiceDescriptor(
+                    typeof(TInterface),
+                    sp =>
+                    {
+                        var target = (TImpl)ActivatorUtilities.CreateInstance(sp, typeof(TImpl));
+                        var policy = sp.GetRequiredService<IRepositoryResiliencePolicy>();
+                        var resolver = sp.GetService<IRepositoryAttributeResolver>();
+                        return RepositoryProxy<TInterface>.Create(target, policy, resolver);
+                    },
+                    lifetime
+                )
+            );
             return services;
         }
     }

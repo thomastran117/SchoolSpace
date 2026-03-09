@@ -43,7 +43,11 @@ namespace backend.app.services.interfaces
         Task<bool> SetValueNXAsync(string key, string value, TimeSpan? expiry = null);
         Task<bool> SetValueXXAsync(string key, string value, TimeSpan? expiry = null);
         Task<string?> GetSetAsync(string key, string value);
-        Task<long> PublishAsync(string channel, string message, CommandFlags flags = CommandFlags.None);
+        Task<long> PublishAsync(
+            string channel,
+            string message,
+            CommandFlags flags = CommandFlags.None
+        );
         Task SubscribeAsync(string channel, Action<RedisChannel, RedisValue> handler);
         Task UnsubscribeAsync(string channel, Action<RedisChannel, RedisValue> handler);
         Task<string> GetOrSetAsync(string key, Func<Task<string>> factory, TimeSpan expiry);

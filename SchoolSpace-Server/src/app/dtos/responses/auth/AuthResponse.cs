@@ -11,25 +11,10 @@ namespace backend.app.dtos.respones.auth
             Avatar = "placeholder";
         }
 
-        public int Id
-        {
-            get; set;
-        }
-        public string Username
-        {
-            get; set;
-        }
-        public string Role
-        {
-            get; set;
-        }
-        public string Token
-        {
-            get; set;
-        }
-        public string Avatar
-        {
-            get; set;
-        }
+        public int Id { get; set; }
+        public string Username { get; set; }
+        public string Role { get; set; }
+        public string Token { get; set; }
+        public string Avatar { get; set; }
     }
 }

@@ -2,7 +2,5 @@ using System.ComponentModel.DataAnnotations;
 
 namespace backend.app.dtos.request.auth
 {
-    public class GoogleOAuthRequest : OAuthRequest
-    {
-    }
+    public class GoogleOAuthRequest : OAuthRequest { }
 }

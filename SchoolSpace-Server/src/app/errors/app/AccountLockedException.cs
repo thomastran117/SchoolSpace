@@ -4,7 +4,8 @@ namespace backend.app.errors.app
 {
     public class AccountLockedException : ForbiddenException
     {
-        private const string DefaultMessage = "Account temporarily locked due to too many failed login attempts.";
+        private const string DefaultMessage =
+            "Account temporarily locked due to too many failed login attempts.";
 
         public AccountLockedException()
             : base(DefaultMessage) { }

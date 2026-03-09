@@ -13,7 +13,8 @@ namespace backend.app.security.configurations
 
     public static class SlidingWindowRateLimitConfig
     {
-        private const string SlidingWindowLua = @"
+        private const string SlidingWindowLua =
+            @"
             local key = KEYS[1]
             local nowMs = tonumber(ARGV[1])
             local windowMs = tonumber(ARGV[2])
@@ -37,6 +38,7 @@ namespace backend.app.security.configurations
             count = count + 1
             return { 1, count }
             ";
+
         public static IServiceCollection AddSlidingWindowRateLimit(
             this IServiceCollection services,
             SlidingWindowOptions options
@@ -65,11 +67,12 @@ namespace backend.app.security.configurations
 
             public async Task InvokeAsync(HttpContext context, RequestDelegate next)
             {
-                var id = context.User?.Identity?.IsAuthenticated == true
-                    ? context.User.FindFirst("sub")?.Value
-                        ?? context.User.FindFirst("id")?.Value
-                        ?? "auth:unknown"
-                    : $"ip:{context.Connection.RemoteIpAddress}";
+                var id =
+                    context.User?.Identity?.IsAuthenticated == true
+                        ? context.User.FindFirst("sub")?.Value
+                            ?? context.User.FindFirst("id")?.Value
+                            ?? "auth:unknown"
+                        : $"ip:{context.Connection.RemoteIpAddress}";
 
                 var key = (RedisKey)($"{_opt.KeyPrefix}{id}");
 
@@ -77,11 +80,13 @@ namespace backend.app.security.configurations
                 var windowMs = (long)_opt.Window.TotalMilliseconds;
                 var ttlMs = (long)_opt.KeyTtl.TotalMilliseconds;
 
-                var res = await _cache.EvalAsync(
-                    SlidingWindowLua,
-                    new RedisKey[] { key },
-                    new RedisValue[] { nowMs, windowMs, _opt.Limit, ttlMs }
-                ).ConfigureAwait(false);
+                var res = await _cache
+                    .EvalAsync(
+                        SlidingWindowLua,
+                        new RedisKey[] { key },
+                        new RedisValue[] { nowMs, windowMs, _opt.Limit, ttlMs }
+                    )
+                    .ConfigureAwait(false);
 
                 var arr = (RedisResult[])res;
                 var allowed = (int)arr[0] == 1;

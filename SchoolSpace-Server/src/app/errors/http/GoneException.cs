@@ -2,7 +2,6 @@ namespace backend.app.errors.http
 {
     public class GoneException : AppException
     {
-
         private const string DefaultMessage = "Resource is gone.";
         private const int code = StatusCodes.Status410Gone;
 

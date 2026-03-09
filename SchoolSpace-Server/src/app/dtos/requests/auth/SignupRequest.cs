@@ -8,5 +8,5 @@ namespace backend.app.dtos.request.auth
         [Required]
         [ValidRole]
         public required string Role { get; set; }
-    } 
+    }
 }

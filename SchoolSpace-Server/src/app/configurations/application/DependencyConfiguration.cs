@@ -1,5 +1,5 @@
-using backend.app.configurations.resources;
 using backend.app.attributes.repository;
+using backend.app.configurations.resources;
 using backend.app.repositories.extensions;
 using backend.app.repositories.implementations;
 using backend.app.repositories.interfaces;
@@ -9,7 +9,6 @@ using backend.app.services.interfaces;
 using backend.app.utilities.implementation;
 using backend.app.utilities.interfaces;
 using backend.main.Services;
-
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.app.configurations.application
@@ -29,9 +28,12 @@ namespace backend.app.configurations.application
 
                 return provider switch
                 {
-                    CaptchaProvider.Google   => ActivatorUtilities.CreateInstance<GoogleCaptchaService>(sp),
-                    CaptchaProvider.HCaptcha => ActivatorUtilities.CreateInstance<HCaptchaService>(sp),
-                    _                        => ActivatorUtilities.CreateInstance<CloudflareTurnstileCaptchaService>(sp),
+                    CaptchaProvider.Google =>
+                        ActivatorUtilities.CreateInstance<GoogleCaptchaService>(sp),
+                    CaptchaProvider.HCaptcha => ActivatorUtilities.CreateInstance<HCaptchaService>(
+                        sp
+                    ),
+                    _ => ActivatorUtilities.CreateInstance<CloudflareTurnstileCaptchaService>(sp),
                 };
             });
             services.AddTransient<IGoogleOAuthService, GoogleOAuthService>();

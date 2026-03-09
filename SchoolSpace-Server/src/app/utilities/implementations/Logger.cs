@@ -3,6 +3,7 @@ using backend.app.utilities.interfaces;
 namespace backend.app.utilities.implementation
 {
     using LogLevel = interfaces.LogLevel;
+
     public static class Logger
     {
         private static LoggerOptions _options = new();
@@ -19,11 +20,18 @@ namespace backend.app.utilities.implementation
         public static void SetInstance(ICustomLogger logger) => _instance = logger;
 
         public static void Debug(string message) => _instance?.Debug(message);
+
         public static void Info(string message) => _instance?.Info(message);
+
         public static void Warn(string message) => _instance?.Warn(message);
+
         public static void Error(string message) => _instance?.Error(message);
-        public static void Warn(Exception ex, string? message = null) => _instance?.Warn(ex, message);
-        public static void Error(Exception ex, string? message = null) => _instance?.Error(ex, message);
+
+        public static void Warn(Exception ex, string? message = null) =>
+            _instance?.Warn(ex, message);
+
+        public static void Error(Exception ex, string? message = null) =>
+            _instance?.Error(ex, message);
     }
 
     public sealed class FileLogger : ICustomLogger
@@ -47,21 +55,22 @@ namespace backend.app.utilities.implementation
         }
 
         public void Debug(string message) => Write(LogLevel.Debug, message, null);
+
         public void Info(string message) => Write(LogLevel.Info, message, null);
+
         public void Warn(string message) => Write(LogLevel.Warn, message, null);
+
         public void Error(string message) => Write(LogLevel.Error, message, null);
 
-        public void Warn(Exception ex, string? message = null)
-            => Write(LogLevel.Warn, message, ex);
+        public void Warn(Exception ex, string? message = null) => Write(LogLevel.Warn, message, ex);
 
-        public void Error(Exception ex, string? message = null)
-            => Write(LogLevel.Error, message, ex);
+        public void Error(Exception ex, string? message = null) =>
+            Write(LogLevel.Error, message, ex);
 
-        public void Log(LogLevel level, string message)
-            => Write(level, message, null);
+        public void Log(LogLevel level, string message) => Write(level, message, null);
 
-        public void Log(LogLevel level, Exception ex, string? message = null)
-            => Write(level, message, ex);
+        public void Log(LogLevel level, Exception ex, string? message = null) =>
+            Write(level, message, ex);
 
         private void Write(LogLevel level, string? message, Exception? ex)
         {
@@ -80,9 +89,7 @@ namespace backend.app.utilities.implementation
 
             WriteToConsole(timestamp, levelText, message, ex);
 
-            if (_options.EnableFileLogging &&
-                level >= _options.MinFileLevel &&
-                !_fileLoggingFailed)
+            if (_options.EnableFileLogging && level >= _options.MinFileLevel && !_fileLoggingFailed)
             {
                 TryWriteToFile(now, line);
             }
@@ -92,7 +99,8 @@ namespace backend.app.utilities.implementation
             string timestamp,
             string levelText,
             string? message,
-            Exception? ex)
+            Exception? ex
+        )
         {
             lock (_consoleLock)
             {
@@ -101,7 +109,9 @@ namespace backend.app.utilities.implementation
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write($"[{timestamp}] ");
 
-                Console.ForegroundColor = LevelColor(Enum.Parse<LogLevel>(levelText.Trim(), ignoreCase: true));
+                Console.ForegroundColor = LevelColor(
+                    Enum.Parse<LogLevel>(levelText.Trim(), ignoreCase: true)
+                );
                 Console.Write($"[{levelText}] ");
 
                 Console.ForegroundColor = ConsoleColor.White;
@@ -137,14 +147,15 @@ namespace backend.app.utilities.implementation
             }
         }
 
-        private ConsoleColor LevelColor(LogLevel level) => level switch
-        {
-            LogLevel.Debug => ConsoleColor.Gray,
-            LogLevel.Info => ConsoleColor.Cyan,
-            LogLevel.Warn => ConsoleColor.Yellow,
-            LogLevel.Error => ConsoleColor.Red,
-            _ => ConsoleColor.White
-        };
+        private ConsoleColor LevelColor(LogLevel level) =>
+            level switch
+            {
+                LogLevel.Debug => ConsoleColor.Gray,
+                LogLevel.Info => ConsoleColor.Cyan,
+                LogLevel.Warn => ConsoleColor.Yellow,
+                LogLevel.Error => ConsoleColor.Red,
+                _ => ConsoleColor.White,
+            };
 
         private string GetLogFilePath(DateTime now)
         {

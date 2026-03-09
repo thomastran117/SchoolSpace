@@ -13,6 +13,7 @@ namespace backend.app.attributes.repository
             HandleMissingEntity = handleMissingEntity;
         }
 
-        public static RepositoryMethodBehavior Default => new(noRetry: false, handleMissingEntity: false);
+        public static RepositoryMethodBehavior Default =>
+            new(noRetry: false, handleMissingEntity: false);
     }
 }

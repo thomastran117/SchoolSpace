@@ -17,7 +17,13 @@ namespace backend.app.services.implementations
         private readonly ICaptchaService _captchaService;
         private readonly ICustomLogger _logger;
 
-        public AuthService(IUserRepository userRepository, ITokenService tokenService, IOAuthService oauthService, ICaptchaService captchaService, ICustomLogger logger)
+        public AuthService(
+            IUserRepository userRepository,
+            ITokenService tokenService,
+            IOAuthService oauthService,
+            ICaptchaService captchaService,
+            ICustomLogger logger
+        )
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
@@ -26,7 +32,12 @@ namespace backend.app.services.implementations
             _logger = logger;
         }
 
-        public async Task<AuthResult?> LoginAsync(string email, string password, string captcha, bool rememberMe = false)
+        public async Task<AuthResult?> LoginAsync(
+            string email,
+            string password,
+            string captcha,
+            bool rememberMe = false
+        )
         {
             try
             {
@@ -56,9 +67,14 @@ namespace backend.app.services.implementations
             }
         }
 
-        public async Task<AuthResult?> SignupAsync(string email, string password, string role, string captcha)
+        public async Task<AuthResult?> SignupAsync(
+            string email,
+            string password,
+            string role,
+            string captcha
+        )
         {
-            try 
+            try
             {
                 if (await _userRepository.EmailExistsAsync(email))
                     throw new EmailAlreadyExistsException();
@@ -72,7 +88,7 @@ namespace backend.app.services.implementations
                     Password = hashedPassword,
                     Usertype = selectedRole,
                     Status = UserStatus.Active,
-                    Username = email
+                    Username = email,
                 };
 
                 user = await _userRepository.CreateUserAsync(user);
@@ -118,7 +134,7 @@ namespace backend.app.services.implementations
                     MicrosoftId = user.MicrosoftId,
                     GoogleId = user.GoogleId,
                     CreatedAt = user.CreatedAt,
-                    UpdatedAt = DateTime.UtcNow
+                    UpdatedAt = DateTime.UtcNow,
                 };
 
                 return await _userRepository.UpdatePartialAsync(updated) is not null;
@@ -137,15 +153,15 @@ namespace backend.app.services.implementations
         {
             try
             {
-            if (string.IsNullOrWhiteSpace(email))
-                return false;
+                if (string.IsNullOrWhiteSpace(email))
+                    return false;
 
-            var user = await _userRepository.GetUserByEmailAsync(email);
-            if (user is null)
-                return false;
+                var user = await _userRepository.GetUserByEmailAsync(email);
+                if (user is null)
+                    return false;
 
-            await _tokenService.GenerateVerificationToken(user);
-            return true;
+                await _tokenService.GenerateVerificationToken(user);
+                return true;
             }
             catch (Exception e)
             {
@@ -161,7 +177,10 @@ namespace backend.app.services.implementations
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(verificationToken) || string.IsNullOrWhiteSpace(newPassword))
+                if (
+                    string.IsNullOrWhiteSpace(verificationToken)
+                    || string.IsNullOrWhiteSpace(newPassword)
+                )
                     throw new InvalidOrExpiredVerificationTokenException();
 
                 var userId = await _tokenService.VerifyVerificationToken(verificationToken);
@@ -187,7 +206,7 @@ namespace backend.app.services.implementations
                     MicrosoftId = user.MicrosoftId,
                     GoogleId = user.GoogleId,
                     CreatedAt = user.CreatedAt,
-                    UpdatedAt = DateTime.UtcNow
+                    UpdatedAt = DateTime.UtcNow,
                 };
 
                 return await _userRepository.UpdatePartialAsync(updated) is not null;
@@ -227,7 +246,7 @@ namespace backend.app.services.implementations
                     UserId = user.Id,
                     Username = user.Username ?? user.Email,
                     Role = user.Usertype.ToString(),
-                    AvatarUrl = user.AvatarUrl
+                    AvatarUrl = user.AvatarUrl,
                 };
             }
             catch (Exception e)
@@ -273,16 +292,18 @@ namespace backend.app.services.implementations
                         await _userRepository.UpdateProviderIdsAsync(user.Id, oauthUser.Id, null);
                     else
                     {
-                        user = await _userRepository.CreateUserAsync(new User
-                        {
-                            Email = oauthUser.Email,
-                            Username = oauthUser.Email,
-                            Name = oauthUser.Name,
-                            Password = null,
-                            Usertype = UserRole.Student,
-                            Status = UserStatus.Active,
-                            GoogleId = oauthUser.Id
-                        });
+                        user = await _userRepository.CreateUserAsync(
+                            new User
+                            {
+                                Email = oauthUser.Email,
+                                Username = oauthUser.Email,
+                                Name = oauthUser.Name,
+                                Password = null,
+                                Usertype = UserRole.Student,
+                                Status = UserStatus.Active,
+                                GoogleId = oauthUser.Id,
+                            }
+                        );
                     }
                 }
 
@@ -318,16 +339,18 @@ namespace backend.app.services.implementations
                         await _userRepository.UpdateProviderIdsAsync(user.Id, null, oauthUser.Id);
                     else
                     {
-                        user = await _userRepository.CreateUserAsync(new User
-                        {
-                            Email = oauthUser.Email,
-                            Username = oauthUser.Email,
-                            Name = oauthUser.Name,
-                            Password = null,
-                            Usertype = UserRole.Student,
-                            Status = UserStatus.Active,
-                            MicrosoftId = oauthUser.Id
-                        });
+                        user = await _userRepository.CreateUserAsync(
+                            new User
+                            {
+                                Email = oauthUser.Email,
+                                Username = oauthUser.Email,
+                                Name = oauthUser.Name,
+                                Password = null,
+                                Usertype = UserRole.Student,
+                                Status = UserStatus.Active,
+                                MicrosoftId = oauthUser.Id,
+                            }
+                        );
                     }
                 }
 
@@ -360,7 +383,7 @@ namespace backend.app.services.implementations
                     UserId = user.Id,
                     Username = user.Username ?? user.Email,
                     Role = user.Usertype.ToString(),
-                    AvatarUrl = user.AvatarUrl
+                    AvatarUrl = user.AvatarUrl,
                 };
             }
             catch (Exception e)
@@ -379,7 +402,7 @@ namespace backend.app.services.implementations
             {
                 "teacher" => UserRole.Teacher,
                 "assistant" => UserRole.Admin,
-                _ => UserRole.Student
+                _ => UserRole.Student,
             };
         }
     }

@@ -5,7 +5,7 @@ namespace backend.app.utilities.interfaces
         Debug,
         Info,
         Warn,
-        Error
+        Error,
     }
 
     public sealed class LoggerOptions

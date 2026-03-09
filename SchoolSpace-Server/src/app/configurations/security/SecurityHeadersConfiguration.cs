@@ -17,30 +17,34 @@ namespace backend.app.configurations.security
 
         public static IApplicationBuilder UseSecurityHeaders(this IApplicationBuilder app)
         {
-            return app.Use(async (context, next) =>
-            {
-                context.Response.Headers[XContentTypeOptions] = "nosniff";
+            return app.Use(
+                async (context, next) =>
+                {
+                    context.Response.Headers[XContentTypeOptions] = "nosniff";
 
-                context.Response.Headers[XFrameOptions] = "DENY";
+                    context.Response.Headers[XFrameOptions] = "DENY";
 
-                context.Response.Headers[XPermittedCrossDomain] = "none";
+                    context.Response.Headers[XPermittedCrossDomain] = "none";
 
-                context.Response.Headers[ReferrerPolicy] = "strict-origin-when-cross-origin";
+                    context.Response.Headers[ReferrerPolicy] = "strict-origin-when-cross-origin";
 
-                context.Response.Headers[PermissionsPolicy] = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()";
+                    context.Response.Headers[PermissionsPolicy] =
+                        "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()";
 
-                context.Response.Headers[ContentSecurityPolicy] = "default-src 'none'; frame-ancestors 'none'";
+                    context.Response.Headers[ContentSecurityPolicy] =
+                        "default-src 'none'; frame-ancestors 'none'";
 
-                context.Response.Headers[CrossOriginOpenerPolicy] = "same-origin";
+                    context.Response.Headers[CrossOriginOpenerPolicy] = "same-origin";
 
-                context.Response.Headers[CrossOriginResourcePolicy] = "same-origin";
+                    context.Response.Headers[CrossOriginResourcePolicy] = "same-origin";
 
-                context.Response.Headers[XDnsPrefetchControl] = "off";
+                    context.Response.Headers[XDnsPrefetchControl] = "off";
 
-                context.Response.Headers[CacheControl] = "no-store";
+                    context.Response.Headers[CacheControl] = "no-store";
 
-                await next(context);
-            });
+                    await next(context);
+                }
+            );
         }
 
         public static IApplicationBuilder UseHttpsEnforcement(this IApplicationBuilder app)

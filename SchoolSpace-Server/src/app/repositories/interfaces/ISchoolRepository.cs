@@ -1,5 +1,5 @@
-using backend.app.models.core;
 using backend.app.attributes.repository;
+using backend.app.models.core;
 
 namespace backend.app.repositories.interfaces
 {
@@ -11,11 +11,14 @@ namespace backend.app.repositories.interfaces
         Task<School?> GetByPrincipalIdAsync(int principalId);
         Task<IEnumerable<School>> GetAllAsync();
         Task<List<School>> GetByIdsAsync(IEnumerable<int> ids);
+
         [HandleMissingEntity]
         Task<School?> UpdateAsync(School school);
+
         [HandleMissingEntity]
         Task<bool> DeleteAsync(int id);
         Task<int> DeleteByIdsAsync(IEnumerable<int> ids);
+
         [HandleMissingEntity]
         Task<bool> HardDeleteAsync(int id);
     }

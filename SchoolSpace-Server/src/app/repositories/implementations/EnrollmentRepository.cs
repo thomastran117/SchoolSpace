@@ -1,7 +1,6 @@
 using backend.app.configurations.resources.database;
 using backend.app.models.core;
 using backend.app.repositories.interfaces;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.app.repositories.implementations
@@ -24,15 +23,14 @@ namespace backend.app.repositories.implementations
 
         public async Task<bool> ExistsAsync(int userId, int courseId)
         {
-            return await _context.Enrollments
-                .AsNoTracking()
+            return await _context
+                .Enrollments.AsNoTracking()
                 .AnyAsync(e => e.UserId == userId && e.CourseId == courseId);
         }
 
         public async Task<bool> DeleteAsync(int userId, int courseId)
         {
-            var enrollment = await _context.Enrollments
-                .FindAsync(userId, courseId);
+            var enrollment = await _context.Enrollments.FindAsync(userId, courseId);
 
             if (enrollment is null)
                 return false;
@@ -44,8 +42,8 @@ namespace backend.app.repositories.implementations
 
         public async Task<IEnumerable<Course>> GetCoursesByUserIdAsync(int userId)
         {
-            return await _context.Enrollments
-                .AsNoTracking()
+            return await _context
+                .Enrollments.AsNoTracking()
                 .Where(e => e.UserId == userId)
                 .Include(e => e.Course)
                     .ThenInclude(c => c.Teacher)
@@ -58,8 +56,8 @@ namespace backend.app.repositories.implementations
 
         public async Task<IEnumerable<User>> GetUsersByCourseIdAsync(int courseId)
         {
-            return await _context.Enrollments
-                .AsNoTracking()
+            return await _context
+                .Enrollments.AsNoTracking()
                 .Where(e => e.CourseId == courseId)
                 .Include(e => e.User)
                 .Select(e => e.User)

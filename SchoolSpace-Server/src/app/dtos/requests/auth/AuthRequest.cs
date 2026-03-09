@@ -17,8 +17,7 @@ namespace backend.app.dtos.request.auth
         [Required]
         [ValidCaptchaToken]
         public required string Captcha { get; set; }
-        
-        public bool RememberMe { get; set; } = false;
 
+        public bool RememberMe { get; set; } = false;
     }
 }

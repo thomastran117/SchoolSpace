@@ -5,7 +5,7 @@ namespace backend.app.models.core
         Pending,
         UnderReview,
         Resolved,
-        Dismissed
+        Dismissed,
     }
 
     public class Report : ITimestamped

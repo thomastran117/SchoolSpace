@@ -13,7 +13,9 @@ public class StrongPasswordAttribute : ValidationAttribute
             return ValidationResult.Success;
 
         if (password.Length < MinimumLength)
-            return new ValidationResult($"Password must be at least {MinimumLength} characters long.");
+            return new ValidationResult(
+                $"Password must be at least {MinimumLength} characters long."
+            );
 
         if (!Regex.IsMatch(password, @"[A-Z]"))
             return new ValidationResult("Password must contain at least one uppercase letter.");

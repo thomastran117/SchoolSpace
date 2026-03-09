@@ -1,5 +1,4 @@
 using System.Reflection;
-
 using Microsoft.Extensions.Logging;
 
 namespace backend.app.attributes.repository
@@ -21,24 +20,49 @@ namespace backend.app.attributes.repository
             _logger = logger;
         }
 
-        public RepositoryMethodBehavior GetBehavior(MethodInfo interfaceMethod, MethodInfo implementationMethod, Type implementationType)
+        public RepositoryMethodBehavior GetBehavior(
+            MethodInfo interfaceMethod,
+            MethodInfo implementationMethod,
+            Type implementationType
+        )
         {
             Type interfaceType = interfaceMethod.DeclaringType!;
 
-            string? noRetryAt = FirstLevelWithAttribute<NoRetryAttribute>(interfaceMethod, implementationMethod, implementationType, interfaceType);
-            string? retryOnTransientAt = FirstLevelWithAttribute<RetryOnTransientFailureAttribute>(interfaceMethod, implementationMethod, implementationType, interfaceType);
-            string? handleMissingAt = FirstLevelWithAttribute<HandleMissingEntityAttribute>(interfaceMethod, implementationMethod, implementationType, interfaceType);
+            string? noRetryAt = FirstLevelWithAttribute<NoRetryAttribute>(
+                interfaceMethod,
+                implementationMethod,
+                implementationType,
+                interfaceType
+            );
+            string? retryOnTransientAt = FirstLevelWithAttribute<RetryOnTransientFailureAttribute>(
+                interfaceMethod,
+                implementationMethod,
+                implementationType,
+                interfaceType
+            );
+            string? handleMissingAt = FirstLevelWithAttribute<HandleMissingEntityAttribute>(
+                interfaceMethod,
+                implementationMethod,
+                implementationType,
+                interfaceType
+            );
 
             bool noRetry = noRetryAt is not null;
             bool handleMissing = handleMissingAt is not null;
 
-            if (_logger is not null && noRetryAt is not null && retryOnTransientAt is not null && noRetryAt != retryOnTransientAt)
+            if (
+                _logger is not null
+                && noRetryAt is not null
+                && retryOnTransientAt is not null
+                && noRetryAt != retryOnTransientAt
+            )
             {
                 _logger.LogWarning(
                     "Conflicting repository attributes for {Method}: NoRetry at {NoRetryLevel}, RetryOnTransientFailure at {RetryLevel}. Using NoRetry (first in precedence).",
                     $"{interfaceMethod.DeclaringType?.Name}.{interfaceMethod.Name}",
                     noRetryAt,
-                    retryOnTransientAt);
+                    retryOnTransientAt
+                );
             }
 
             return new RepositoryMethodBehavior(noRetry, handleMissing);
@@ -49,12 +73,18 @@ namespace backend.app.attributes.repository
             MethodInfo interfaceMethod,
             MethodInfo implementationMethod,
             Type implementationType,
-            Type interfaceType) where TAttr : Attribute
+            Type interfaceType
+        )
+            where TAttr : Attribute
         {
-            if (interfaceMethod.GetCustomAttribute<TAttr>() != null) return LevelInterfaceMethod;
-            if (implementationMethod.GetCustomAttribute<TAttr>() != null) return LevelImplMethod;
-            if (implementationType.GetCustomAttribute<TAttr>() != null) return LevelImplClass;
-            if (interfaceType.GetCustomAttribute<TAttr>() != null) return LevelInterface;
+            if (interfaceMethod.GetCustomAttribute<TAttr>() != null)
+                return LevelInterfaceMethod;
+            if (implementationMethod.GetCustomAttribute<TAttr>() != null)
+                return LevelImplMethod;
+            if (implementationType.GetCustomAttribute<TAttr>() != null)
+                return LevelImplClass;
+            if (interfaceType.GetCustomAttribute<TAttr>() != null)
+                return LevelInterface;
             return null;
         }
     }

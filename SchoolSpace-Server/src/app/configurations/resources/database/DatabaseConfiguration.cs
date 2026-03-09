@@ -1,5 +1,4 @@
 using backend.app.configurations.environment;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.app.configurations.resources.database
@@ -8,7 +7,8 @@ namespace backend.app.configurations.resources.database
     {
         public static IServiceCollection AddAppDatabase(
             this IServiceCollection services,
-            IConfiguration config)
+            IConfiguration config
+        )
         {
             var connectionString = EnvironmentSetting.DbConnectionString;
 
@@ -24,14 +24,14 @@ namespace backend.app.configurations.resources.database
                             maxRetryDelay: TimeSpan.FromSeconds(10),
                             errorNumbersToAdd: null
                         );
-                    });
+                    }
+                );
             });
 
             return services;
         }
 
-        public static async Task VerifyDatabaseConnectionAsync(
-            IServiceProvider serviceProvider)
+        public static async Task VerifyDatabaseConnectionAsync(IServiceProvider serviceProvider)
         {
             try
             {

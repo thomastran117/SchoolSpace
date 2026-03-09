@@ -1,7 +1,6 @@
 using backend.app.configurations.resources.database;
 using backend.app.models.core;
 using backend.app.repositories.interfaces;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.app.repositories.implementations
@@ -24,16 +23,16 @@ namespace backend.app.repositories.implementations
 
         public async Task<Assignment?> GetByIdAsync(int id)
         {
-            return await _context.Assignments
-                .AsNoTracking()
+            return await _context
+                .Assignments.AsNoTracking()
                 .Include(a => a.Course)
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
 
         public async Task<IEnumerable<Assignment>> GetByCourseIdAsync(int courseId)
         {
-            return await _context.Assignments
-                .AsNoTracking()
+            return await _context
+                .Assignments.AsNoTracking()
                 .Where(a => a.CourseId == courseId)
                 .OrderByDescending(a => a.DueDate)
                 .ToListAsync();

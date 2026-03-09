@@ -1,7 +1,6 @@
 using backend.app.configurations.resources.database;
 using backend.app.models.core;
 using backend.app.repositories.interfaces;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.app.repositories.implementations
@@ -24,8 +23,8 @@ namespace backend.app.repositories.implementations
 
         public async Task<Course?> GetByIdAsync(int id)
         {
-            return await _context.Courses
-                .AsNoTracking()
+            return await _context
+                .Courses.AsNoTracking()
                 .Include(c => c.Teacher)
                 .Include(c => c.School)
                 .FirstOrDefaultAsync(c => c.Id == id);
@@ -33,8 +32,8 @@ namespace backend.app.repositories.implementations
 
         public async Task<IEnumerable<Course>> GetAllAsync()
         {
-            return await _context.Courses
-                .AsNoTracking()
+            return await _context
+                .Courses.AsNoTracking()
                 .Include(c => c.Teacher)
                 .Include(c => c.School)
                 .OrderByDescending(c => c.CreatedAt)
@@ -48,8 +47,8 @@ namespace backend.app.repositories.implementations
             if (idList.Count == 0)
                 return [];
 
-            return await _context.Courses
-                .AsNoTracking()
+            return await _context
+                .Courses.AsNoTracking()
                 .Include(c => c.Teacher)
                 .Include(c => c.School)
                 .Where(c => idList.Contains(c.Id))
@@ -58,8 +57,8 @@ namespace backend.app.repositories.implementations
 
         public async Task<IEnumerable<Course>> GetBySchoolIdAsync(int schoolId)
         {
-            return await _context.Courses
-                .AsNoTracking()
+            return await _context
+                .Courses.AsNoTracking()
                 .Include(c => c.Teacher)
                 .Where(c => c.SchoolId == schoolId)
                 .OrderByDescending(c => c.CreatedAt)
@@ -68,8 +67,8 @@ namespace backend.app.repositories.implementations
 
         public async Task<IEnumerable<Course>> GetByTeacherIdAsync(int teacherId)
         {
-            return await _context.Courses
-                .AsNoTracking()
+            return await _context
+                .Courses.AsNoTracking()
                 .Include(c => c.School)
                 .Where(c => c.TeacherId == teacherId)
                 .OrderByDescending(c => c.CreatedAt)
@@ -112,9 +111,7 @@ namespace backend.app.repositories.implementations
             if (idList.Count == 0)
                 return 0;
 
-            var courses = await _context.Courses
-                .Where(c => idList.Contains(c.Id))
-                .ToListAsync();
+            var courses = await _context.Courses.Where(c => idList.Contains(c.Id)).ToListAsync();
 
             foreach (var course in courses)
             {
@@ -127,8 +124,8 @@ namespace backend.app.repositories.implementations
 
         public async Task<bool> HardDeleteAsync(int id)
         {
-            var course = await _context.Courses
-                .IgnoreQueryFilters()
+            var course = await _context
+                .Courses.IgnoreQueryFilters()
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (course is null)

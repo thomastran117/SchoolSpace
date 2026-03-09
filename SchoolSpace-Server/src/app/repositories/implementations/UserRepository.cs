@@ -1,7 +1,6 @@
 using backend.app.configurations.resources.database;
 using backend.app.models.core;
 using backend.app.repositories.interfaces;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.app.repositories.implementations
@@ -69,7 +68,11 @@ namespace backend.app.repositories.implementations
             return existing;
         }
 
-        public async Task<User?> UpdateProviderIdsAsync(int id, string? googleId, string? microsoftId)
+        public async Task<User?> UpdateProviderIdsAsync(
+            int id,
+            string? googleId,
+            string? microsoftId
+        )
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -98,52 +101,43 @@ namespace backend.app.repositories.implementations
 
         public async Task<User?> GetUserAsync(int id)
         {
-            return await _context.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Id == id);
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return await _context.Users
-                .AsNoTracking()
-                .OrderBy(u => u.Id)
-                .ToListAsync();
+            return await _context.Users.AsNoTracking().OrderBy(u => u.Id).ToListAsync();
         }
 
         public async Task<User?> GetUserByEmailAsync(string email)
         {
-            return await _context.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == email);
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<User?> GetUserByMicrosoftIdAsync(string microsoftId)
         {
-            return await _context.Users
-                .AsNoTracking()
+            return await _context
+                .Users.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.MicrosoftId == microsoftId);
         }
 
         public async Task<User?> GetUserByGoogleIdAsync(string googleId)
         {
-            return await _context.Users
-                .AsNoTracking()
+            return await _context
+                .Users.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.GoogleId == googleId);
         }
 
         public async Task<User?> GetUserByUsernameAsync(string username)
         {
-            return await _context.Users
-                .AsNoTracking()
+            return await _context
+                .Users.AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<IEnumerable<User>> GetUsersAsync(UserRole role)
         {
-            var query = _context.Users
-                .AsNoTracking()
-                .AsQueryable();
+            var query = _context.Users.AsNoTracking().AsQueryable();
 
             query = query.Where(u => u.Usertype == role);
 
@@ -152,9 +146,7 @@ namespace backend.app.repositories.implementations
 
         public async Task<bool> EmailExistsAsync(string email)
         {
-            return await _context.Users
-                .AsNoTracking()
-                .AnyAsync(u => u.Email == email);
+            return await _context.Users.AsNoTracking().AnyAsync(u => u.Email == email);
         }
 
         public async Task<List<User>> GetByIdsAsync(IEnumerable<int> ids)
@@ -164,8 +156,8 @@ namespace backend.app.repositories.implementations
             if (idList.Count == 0)
                 return new List<User>();
 
-            return await _context.Users
-                .AsNoTracking()
+            return await _context
+                .Users.AsNoTracking()
                 .Where(u => idList.Contains(u.Id))
                 .ToListAsync();
         }

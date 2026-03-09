@@ -1,17 +1,16 @@
 using System.Text.Json;
-
 using backend.app.dtos.responses.external;
 using backend.app.errors.http;
 using backend.app.http;
 using backend.app.services.interfaces;
-
 using Microsoft.AspNetCore.Http;
 
 namespace backend.app.services.implementations
 {
     public sealed class CloudflareTurnstileCaptchaService : ICaptchaService
     {
-        private const string SiteverifyUrl = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+        private const string SiteverifyUrl =
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
         private readonly IExternalApiClient _apiClient;
         private readonly ILogger<CloudflareTurnstileCaptchaService> _logger;
@@ -23,33 +22,42 @@ namespace backend.app.services.implementations
             IExternalApiClient apiClient,
             ILogger<CloudflareTurnstileCaptchaService> logger,
             IConfiguration config,
-            IHttpContextAccessor? httpContextAccessor = null)
+            IHttpContextAccessor? httpContextAccessor = null
+        )
         {
             _apiClient = apiClient;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
 
-            var secret = config["Turnstile:Secret"] ?? config["CLOUDFLARE_TURNSTILE_SECRET"] ?? config["TURNSTILE_SECRET"];
+            var secret =
+                config["Turnstile:Secret"]
+                ?? config["CLOUDFLARE_TURNSTILE_SECRET"]
+                ?? config["TURNSTILE_SECRET"];
             if (string.IsNullOrWhiteSpace(secret))
             {
                 throw new NotAvaliableException(
-                    "Cloudflare Turnstile secret is not configured. Set one of: Turnstile:Secret, CLOUDFLARE_TURNSTILE_SECRET, or TURNSTILE_SECRET.");
+                    "Cloudflare Turnstile secret is not configured. Set one of: Turnstile:Secret, CLOUDFLARE_TURNSTILE_SECRET, or TURNSTILE_SECRET."
+                );
             }
             _secret = secret;
         }
 
         /// <inheritdoc />
-        public async Task<bool> VerifyCaptchaAsync(string token, CancellationToken cancellationToken = default)
+        public async Task<bool> VerifyCaptchaAsync(
+            string token,
+            CancellationToken cancellationToken = default
+        )
         {
             try
             {
                 var formData = new Dictionary<string, string>
                 {
                     ["secret"] = _secret,
-                    ["response"] = token
+                    ["response"] = token,
                 };
 
-                var remoteIp = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+                var remoteIp =
+                    _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
                 if (!string.IsNullOrWhiteSpace(remoteIp))
                     formData["remoteip"] = remoteIp;
 
@@ -69,11 +77,17 @@ namespace backend.app.services.implementations
                 }
 
                 await using var stream = await resp.Content.ReadAsStreamAsync(cancellationToken);
-                var payload = await JsonSerializer.DeserializeAsync<TurnstileSiteverifyResponse>(stream, JsonOpts, cancellationToken);
+                var payload = await JsonSerializer.DeserializeAsync<TurnstileSiteverifyResponse>(
+                    stream,
+                    JsonOpts,
+                    cancellationToken
+                );
 
                 if (payload == null)
                 {
-                    _logger.LogError("[Captcha] Turnstile response deserialized to null. Allowing login (fail-open).");
+                    _logger.LogError(
+                        "[Captcha] Turnstile response deserialized to null. Allowing login (fail-open)."
+                    );
                     return true;
                 }
 
@@ -81,7 +95,9 @@ namespace backend.app.services.implementations
                 {
                     _logger.LogWarning(
                         "[Captcha] Turnstile verification failed. ErrorCodes: {ErrorCodes}",
-                        payload.ErrorCodes is not null ? string.Join(", ", payload.ErrorCodes) : "none"
+                        payload.ErrorCodes is not null
+                            ? string.Join(", ", payload.ErrorCodes)
+                            : "none"
                     );
                     return false;
                 }
@@ -90,7 +106,10 @@ namespace backend.app.services.implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[Captcha] Turnstile verification request failed. Allowing login (fail-open).");
+                _logger.LogError(
+                    ex,
+                    "[Captcha] Turnstile verification request failed. Allowing login (fail-open)."
+                );
                 return true;
             }
         }

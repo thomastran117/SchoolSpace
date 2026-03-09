@@ -14,7 +14,8 @@ namespace backend.app.security.configurations
 
     public static class TokenBucketRateLimitConfig
     {
-        private const string TokenBucketLua = @"
+        private const string TokenBucketLua =
+            @"
             local tokensKey = KEYS[1]
             local tsKey = KEYS[2]
 
@@ -74,11 +75,12 @@ namespace backend.app.security.configurations
 
             public async Task InvokeAsync(HttpContext context, RequestDelegate next)
             {
-                var id = context.User?.Identity?.IsAuthenticated == true
-                    ? context.User.FindFirst("sub")?.Value
-                        ?? context.User.FindFirst("id")?.Value
-                        ?? "auth:unknown"
-                    : $"ip:{context.Connection.RemoteIpAddress}";
+                var id =
+                    context.User?.Identity?.IsAuthenticated == true
+                        ? context.User.FindFirst("sub")?.Value
+                            ?? context.User.FindFirst("id")?.Value
+                            ?? "auth:unknown"
+                        : $"ip:{context.Connection.RemoteIpAddress}";
 
                 var keyBase = $"{_opt.KeyPrefix}{id}";
                 var tokensKey = (RedisKey)($"{keyBase}:t");
@@ -88,18 +90,20 @@ namespace backend.app.security.configurations
                 var refillPerMs = _opt.RefillPerSecond / 1000.0;
                 var ttlMs = (long)_opt.KeyTtl.TotalMilliseconds;
 
-                var res = await _cache.EvalAsync(
-                    TokenBucketLua,
-                    new RedisKey[] { tokensKey, tsKey },
-                    new RedisValue[]
-                    {
-                        nowMs,
-                        _opt.Capacity,
-                        refillPerMs,
-                        _opt.TokensPerRequest,
-                        ttlMs
-                    }
-                ).ConfigureAwait(false);
+                var res = await _cache
+                    .EvalAsync(
+                        TokenBucketLua,
+                        new RedisKey[] { tokensKey, tsKey },
+                        new RedisValue[]
+                        {
+                            nowMs,
+                            _opt.Capacity,
+                            refillPerMs,
+                            _opt.TokensPerRequest,
+                            ttlMs,
+                        }
+                    )
+                    .ConfigureAwait(false);
 
                 var arr = (RedisResult[])res;
                 var allowed = (int)arr[0] == 1;

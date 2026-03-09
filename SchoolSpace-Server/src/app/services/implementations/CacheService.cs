@@ -1,6 +1,5 @@
-using backend.app.services.interfaces;
 using backend.app.configurations.resources.redis;
-
+using backend.app.services.interfaces;
 using StackExchange.Redis;
 
 namespace backend.app.services.implementations
@@ -9,13 +8,15 @@ namespace backend.app.services.implementations
     {
         private readonly IDatabase _db;
         private readonly IConnectionMultiplexer _redis;
-        private static readonly LuaScript ReleaseLockScript = LuaScript.Prepare(@"
+        private static readonly LuaScript ReleaseLockScript = LuaScript.Prepare(
+            @"
             if redis.call('GET', KEYS[1]) == ARGV[1] then
                 return redis.call('DEL', KEYS[1])
             else
                 return 0
             end
-        ");
+        "
+        );
 
         public CacheService(RedisResource redisResource)
         {
@@ -44,22 +45,21 @@ namespace backend.app.services.implementations
             return v.HasValue ? v.ToString() : null;
         }
 
-        public Task<bool> DeleteKeyAsync(string key) =>
-            _db.KeyDeleteAsync(key);
+        public Task<bool> DeleteKeyAsync(string key) => _db.KeyDeleteAsync(key);
 
-        public Task<bool> KeyExistsAsync(string key) =>
-            _db.KeyExistsAsync(key);
+        public Task<bool> KeyExistsAsync(string key) => _db.KeyExistsAsync(key);
 
-        public Task<TimeSpan?> GetTTLAsync(string key) =>
-            _db.KeyTimeToLiveAsync(key);
+        public Task<TimeSpan?> GetTTLAsync(string key) => _db.KeyTimeToLiveAsync(key);
 
         public Task<bool> SetExpiryAsync(string key, TimeSpan expiry) =>
             _db.KeyExpireAsync(key, expiry);
+
         public Task<long> IncrementAsync(string key, long value = 1) =>
             _db.StringIncrementAsync(key, value);
 
         public Task<long> DecrementAsync(string key, long value = 1) =>
             _db.StringDecrementAsync(key, value);
+
         public Task<bool> HashSetAsync(string key, string field, string value) =>
             _db.HashSetAsync(key, field, value);
 
@@ -72,10 +72,7 @@ namespace backend.app.services.implementations
         public async Task<Dictionary<string, string>> HashGetAllAsync(string key)
         {
             var entries = await _db.HashGetAllAsync(key).ConfigureAwait(false);
-            return entries.ToDictionary(
-                e => e.Name.ToString(),
-                e => e.Value.ToString()
-            );
+            return entries.ToDictionary(e => e.Name.ToString(), e => e.Value.ToString());
         }
 
         public Task<bool> HashDeleteAsync(string key, string field) =>
@@ -84,8 +81,7 @@ namespace backend.app.services.implementations
         // ---------------------------
         // Set
         // ---------------------------
-        public Task<bool> SetAddAsync(string key, string value) =>
-            _db.SetAddAsync(key, value);
+        public Task<bool> SetAddAsync(string key, string value) => _db.SetAddAsync(key, value);
 
         public Task<bool> SetRemoveAsync(string key, string value) =>
             _db.SetRemoveAsync(key, value);
@@ -126,10 +122,11 @@ namespace backend.app.services.implementations
         public async Task<bool> ReleaseLockAsync(string key, string value)
         {
             var result = await _db.ScriptEvaluateAsync(
-                ReleaseLockScript.OriginalScript,
-                new RedisKey[] { key },
-                new RedisValue[] { value }
-            ).ConfigureAwait(false);
+                    ReleaseLockScript.OriginalScript,
+                    new RedisKey[] { key },
+                    new RedisValue[] { value }
+                )
+                .ConfigureAwait(false);
 
             return (int)result == 1;
         }
@@ -153,7 +150,6 @@ namespace backend.app.services.implementations
             return result;
         }
 
-
         public IConnectionMultiplexer GetMultiplexer() => _redis;
 
         public Task<TimeSpan> PingAsync(CommandFlags flags = CommandFlags.None) =>
@@ -162,7 +158,11 @@ namespace backend.app.services.implementations
         public Task<RedisResult> EvalAsync(string script, RedisKey[] keys, RedisValue[] values) =>
             _db.ScriptEvaluateAsync(script, keys, values);
 
-        public Task<long> PublishAsync(string channel, string message, CommandFlags flags = CommandFlags.None)
+        public Task<long> PublishAsync(
+            string channel,
+            string message,
+            CommandFlags flags = CommandFlags.None
+        )
         {
             var sub = _redis.GetSubscriber();
             return sub.PublishAsync(channel, message, flags);
@@ -180,10 +180,15 @@ namespace backend.app.services.implementations
             return sub.UnsubscribeAsync(channel, handler);
         }
 
-        public async Task<string> GetOrSetAsync(string key, Func<Task<string>> factory, TimeSpan expiry)
+        public async Task<string> GetOrSetAsync(
+            string key,
+            Func<Task<string>> factory,
+            TimeSpan expiry
+        )
         {
             var existing = await GetValueAsync(key).ConfigureAwait(false);
-            if (existing is not null) return existing;
+            if (existing is not null)
+                return existing;
 
             var created = await factory().ConfigureAwait(false);
             await SetValueAsync(key, created, expiry).ConfigureAwait(false);

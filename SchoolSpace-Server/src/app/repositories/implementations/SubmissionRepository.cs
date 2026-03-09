@@ -1,7 +1,6 @@
 using backend.app.configurations.resources.database;
 using backend.app.models.core;
 using backend.app.repositories.interfaces;
-
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.app.repositories.implementations
@@ -24,8 +23,8 @@ namespace backend.app.repositories.implementations
 
         public async Task<Submission?> GetByIdAsync(int id)
         {
-            return await _context.Submissions
-                .AsNoTracking()
+            return await _context
+                .Submissions.AsNoTracking()
                 .Include(s => s.Assignment)
                 .Include(s => s.User)
                 .FirstOrDefaultAsync(s => s.Id == id);
@@ -33,8 +32,8 @@ namespace backend.app.repositories.implementations
 
         public async Task<IEnumerable<Submission>> GetByAssignmentIdAsync(int assignmentId)
         {
-            return await _context.Submissions
-                .AsNoTracking()
+            return await _context
+                .Submissions.AsNoTracking()
                 .Include(s => s.User)
                 .Where(s => s.AssignmentId == assignmentId)
                 .OrderByDescending(s => s.CreatedAt)
@@ -43,18 +42,21 @@ namespace backend.app.repositories.implementations
 
         public async Task<IEnumerable<Submission>> GetByUserIdAsync(int userId)
         {
-            return await _context.Submissions
-                .AsNoTracking()
+            return await _context
+                .Submissions.AsNoTracking()
                 .Include(s => s.Assignment)
                 .Where(s => s.UserId == userId)
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Submission>> GetByUserAndAssignmentAsync(int userId, int assignmentId)
+        public async Task<IEnumerable<Submission>> GetByUserAndAssignmentAsync(
+            int userId,
+            int assignmentId
+        )
         {
-            return await _context.Submissions
-                .AsNoTracking()
+            return await _context
+                .Submissions.AsNoTracking()
                 .Where(s => s.UserId == userId && s.AssignmentId == assignmentId)
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();

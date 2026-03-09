@@ -26,7 +26,8 @@ namespace backend.app.implementations.Controllers
             IAuthService authService,
             IAntiforgery antiforgery,
             ICustomLogger logger,
-            ClientRequestInfo clientInfo)
+            ClientRequestInfo clientInfo
+        )
         {
             _authService = authService;
             _antiforgery = antiforgery;
@@ -35,11 +36,19 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Login(
+            [FromBody] LoginRequest request,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
-                var result = await _authService.LoginAsync(request.Email, request.Password, request.Captcha, request.RememberMe);
+                var result = await _authService.LoginAsync(
+                    request.Email,
+                    request.Password,
+                    request.Captcha,
+                    request.RememberMe
+                );
                 return BuildAuthResponse(result);
             }
             catch (Exception e)
@@ -53,11 +62,19 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPost("signup")]
-        public async Task<IActionResult> Signup([FromBody] SignupRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Signup(
+            [FromBody] SignupRequest request,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
-                var result = await _authService.SignupAsync(request.Email, request.Password, request.Role, request.Captcha);
+                var result = await _authService.SignupAsync(
+                    request.Email,
+                    request.Password,
+                    request.Role,
+                    request.Captcha
+                );
                 return BuildAuthResponse(result, StatusCodes.Status201Created);
             }
             catch (Exception e)
@@ -71,7 +88,10 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPost("verify")]
-        public async Task<IActionResult> Verify([FromQuery] string token, CancellationToken cancellationToken)
+        public async Task<IActionResult> Verify(
+            [FromQuery] string token,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -89,7 +109,10 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> ForgotPassword(
+            [FromBody] ForgotPasswordRequest request,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -107,7 +130,11 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPost("change-password")]
-        public async Task<IActionResult> ChangePassword([FromQuery] string token, [FromBody] ChangePasswordRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> ChangePassword(
+            [FromQuery] string token,
+            [FromBody] ChangePasswordRequest request,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -125,7 +152,10 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPost("unlock")]
-        public async Task<IActionResult> UnlockAccount([FromQuery] string token, CancellationToken cancellationToken)
+        public async Task<IActionResult> UnlockAccount(
+            [FromQuery] string token,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -151,7 +181,8 @@ namespace backend.app.implementations.Controllers
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(
             [FromBody] RefreshTokenRequest? request,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -172,7 +203,8 @@ namespace backend.app.implementations.Controllers
         [HttpPost("logout")]
         public async Task<IActionResult> Logout(
             [FromBody] RefreshTokenRequest? request,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -182,7 +214,14 @@ namespace backend.app.implementations.Controllers
                 if (_clientInfo.IsBrowserClient)
                     DeleteRefreshTokenCookie();
 
-                return Ok(new { message = success ? "Logged out successfully." : "Token was already invalid or missing." });
+                return Ok(
+                    new
+                    {
+                        message = success
+                            ? "Logged out successfully."
+                            : "Token was already invalid or missing.",
+                    }
+                );
             }
             catch (Exception e)
             {
@@ -200,10 +239,7 @@ namespace backend.app.implementations.Controllers
             try
             {
                 var tokens = _antiforgery.GetAndStoreTokens(HttpContext);
-                return Ok(new
-                {
-                    token = tokens.RequestToken
-                });
+                return Ok(new { token = tokens.RequestToken });
             }
             catch (Exception e)
             {
@@ -216,7 +252,10 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPost("google")]
-        public async Task<IActionResult> GoogleOAuth([FromBody] GoogleOAuthRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> GoogleOAuth(
+            [FromBody] GoogleOAuthRequest request,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -234,7 +273,10 @@ namespace backend.app.implementations.Controllers
         }
 
         [HttpPost("microsoft")]
-        public async Task<IActionResult> MicrosoftOAuth([FromBody] MicrosoftOAuthRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> MicrosoftOAuth(
+            [FromBody] MicrosoftOAuthRequest request,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -266,21 +308,27 @@ namespace backend.app.implementations.Controllers
             return request.RefreshToken;
         }
 
-        private IActionResult BuildAuthResponse(AuthResult result, int statusCode = StatusCodes.Status200OK)
+        private IActionResult BuildAuthResponse(
+            AuthResult result,
+            int statusCode = StatusCodes.Status200OK
+        )
         {
             if (_clientInfo.IsBrowserClient)
             {
                 SetRefreshTokenCookie(result.RefreshToken);
                 CsrfConfiguration.SetCsrfCookie(HttpContext, _antiforgery);
 
-                return StatusCode(statusCode, new
-                {
-                    result.AccessToken,
-                    result.UserId,
-                    result.Username,
-                    result.Role,
-                    result.AvatarUrl
-                });
+                return StatusCode(
+                    statusCode,
+                    new
+                    {
+                        result.AccessToken,
+                        result.UserId,
+                        result.Username,
+                        result.Role,
+                        result.AvatarUrl,
+                    }
+                );
             }
 
             return StatusCode(statusCode, result);
@@ -288,25 +336,32 @@ namespace backend.app.implementations.Controllers
 
         private void SetRefreshTokenCookie(string refreshToken)
         {
-            Response.Cookies.Append(RefreshTokenCookieName, refreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = Request.IsHttps,
-                SameSite = SameSiteMode.Lax,
-                Path = "/api/auth",
-                MaxAge = TimeSpan.FromDays(7)
-            });
+            Response.Cookies.Append(
+                RefreshTokenCookieName,
+                refreshToken,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = Request.IsHttps,
+                    SameSite = SameSiteMode.Lax,
+                    Path = "/api/auth",
+                    MaxAge = TimeSpan.FromDays(7),
+                }
+            );
         }
 
         private void DeleteRefreshTokenCookie()
         {
-            Response.Cookies.Delete(RefreshTokenCookieName, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = Request.IsHttps,
-                SameSite = SameSiteMode.Lax,
-                Path = "/api/auth"
-            });
+            Response.Cookies.Delete(
+                RefreshTokenCookieName,
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = Request.IsHttps,
+                    SameSite = SameSiteMode.Lax,
+                    Path = "/api/auth",
+                }
+            );
         }
     }
 }

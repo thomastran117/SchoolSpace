@@ -19,7 +19,11 @@ namespace backend.app.services.implementations
             _userRepository = userRepository;
         }
 
-        public async Task<ReportResponse?> CreateAsync(int reportedUserId, string reason, int reporterId)
+        public async Task<ReportResponse?> CreateAsync(
+            int reportedUserId,
+            string reason,
+            int reporterId
+        )
         {
             if (reporterId == reportedUserId)
                 throw new SelfReportException();
@@ -33,7 +37,7 @@ namespace backend.app.services.implementations
                 ReporterId = reporterId,
                 ReportedUserId = reportedUserId,
                 Reason = reason,
-                Status = ReportStatus.Pending
+                Status = ReportStatus.Pending,
             };
 
             report = await _reportRepository.CreateAsync(report);
@@ -68,7 +72,7 @@ namespace backend.app.services.implementations
                 Reason = existing.Reason,
                 Status = request.Status ?? existing.Status,
                 CreatedAt = existing.CreatedAt,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
             };
 
             var result = await _reportRepository.UpdateAsync(updated);
@@ -93,7 +97,7 @@ namespace backend.app.services.implementations
                 Reason = report.Reason,
                 Status = report.Status,
                 CreatedAt = report.CreatedAt,
-                UpdatedAt = report.UpdatedAt
+                UpdatedAt = report.UpdatedAt,
             };
         }
     }

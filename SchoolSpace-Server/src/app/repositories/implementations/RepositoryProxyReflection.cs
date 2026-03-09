@@ -7,12 +7,21 @@ namespace backend.app.repositories.implementations
     /// and generic execute-method resolution. Reduces proxy complexity and allows reuse/testing.
     public static class RepositoryProxyReflection
     {
-        private static readonly ConcurrentDictionary<(Type InterfaceType, Type ImplType), Dictionary<MethodInfo, MethodInfo>> MethodMapCache = new();
-        private static readonly ConcurrentDictionary<(Type ProxyBaseType, Type ResultType, bool HandleMissing), MethodInfo> ExecuteMethodCache = new();
+        private static readonly ConcurrentDictionary<
+            (Type InterfaceType, Type ImplType),
+            Dictionary<MethodInfo, MethodInfo>
+        > MethodMapCache = new();
+        private static readonly ConcurrentDictionary<
+            (Type ProxyBaseType, Type ResultType, bool HandleMissing),
+            MethodInfo
+        > ExecuteMethodCache = new();
 
         /// Returns cached method map for (interfaceType, implType) or builds and caches it.
         /// Throws InvalidOperationException if implType does not implement interfaceType or mapping fails.
-        public static Dictionary<MethodInfo, MethodInfo> GetOrBuildMethodMap(Type interfaceType, Type implType)
+        public static Dictionary<MethodInfo, MethodInfo> GetOrBuildMethodMap(
+            Type interfaceType,
+            Type implType
+        )
         {
             var key = (interfaceType, implType);
             if (MethodMapCache.TryGetValue(key, out var cached))
@@ -22,22 +31,34 @@ namespace backend.app.repositories.implementations
 
         /// Resolves the closed generic ExecuteWithPolicy or ExecuteWithPolicyAndHandleMissingEntity method.
         /// Cached per (proxyBaseType, resultType, handleMissingEntity).
-        public static MethodInfo GetOrResolveExecuteMethod(Type proxyType, Type resultType, bool handleMissingEntity)
+        public static MethodInfo GetOrResolveExecuteMethod(
+            Type proxyType,
+            Type resultType,
+            bool handleMissingEntity
+        )
         {
             Type? proxyBaseType = proxyType.BaseType;
             if (proxyBaseType is null || proxyBaseType == typeof(object))
             {
                 throw new InvalidOperationException(
-                    $"Proxy type {proxyType.Name} has no base type for method resolution.");
+                    $"Proxy type {proxyType.Name} has no base type for method resolution."
+                );
             }
 
             var key = (proxyBaseType, resultType, handleMissingEntity);
             if (ExecuteMethodCache.TryGetValue(key, out var cached))
                 return cached;
 
-            const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-            string methodName = handleMissingEntity ? "ExecuteWithPolicyAndHandleMissingEntity" : "ExecuteWithPolicy";
-            for (Type? type = proxyType; type is not null && type != typeof(object); type = type.BaseType)
+            const BindingFlags flags =
+                BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+            string methodName = handleMissingEntity
+                ? "ExecuteWithPolicyAndHandleMissingEntity"
+                : "ExecuteWithPolicy";
+            for (
+                Type? type = proxyType;
+                type is not null && type != typeof(object);
+                type = type.BaseType
+            )
             {
                 MethodInfo? method = type.GetMethod(methodName, flags);
                 if (method is not null)
@@ -47,10 +68,14 @@ namespace backend.app.repositories.implementations
                 }
             }
             throw new InvalidOperationException(
-                $"Could not find {methodName} method on proxy type hierarchy.");
+                $"Could not find {methodName} method on proxy type hierarchy."
+            );
         }
 
-        private static Dictionary<MethodInfo, MethodInfo> BuildMethodMap(Type interfaceType, Type implType)
+        private static Dictionary<MethodInfo, MethodInfo> BuildMethodMap(
+            Type interfaceType,
+            Type implType
+        )
         {
             ValidateInterfaceCompatibility(interfaceType, implType);
 
@@ -62,8 +87,10 @@ namespace backend.app.repositories.implementations
             catch (ArgumentException ex)
             {
                 throw new InvalidOperationException(
-                    $"Failed to get interface map for {interfaceType.Name} on {implType.Name}. " +
-                    "Ensure the implementation type implements the interface.", ex);
+                    $"Failed to get interface map for {interfaceType.Name} on {implType.Name}. "
+                        + "Ensure the implementation type implements the interface.",
+                    ex
+                );
             }
 
             var dict = new Dictionary<MethodInfo, MethodInfo>(map.InterfaceMethods.Length);
@@ -77,8 +104,9 @@ namespace backend.app.repositories.implementations
             if (!interfaceType.IsAssignableFrom(implType))
             {
                 throw new InvalidOperationException(
-                    $"Target type {implType.Name} does not implement interface {interfaceType.Name}. " +
-                    "Register the interface (e.g. IUserRepository) and use the proxy; do not inject the concrete type directly.");
+                    $"Target type {implType.Name} does not implement interface {interfaceType.Name}. "
+                        + "Register the interface (e.g. IUserRepository) and use the proxy; do not inject the concrete type directly."
+                );
             }
         }
     }

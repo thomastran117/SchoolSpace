@@ -4,16 +4,18 @@ namespace backend.app.errors.http
     {
         public int StatusCode { get; }
         public string? Details { get; }
-        
-        protected AppException(string message, int statusCode): base(message)
+
+        protected AppException(string message, int statusCode)
+            : base(message)
         {
             StatusCode = statusCode;
         }
 
-        protected AppException(string message, int statusCode, string details): base(message)
+        protected AppException(string message, int statusCode, string details)
+            : base(message)
         {
             StatusCode = statusCode;
             Details = details;
-        }      
+        }
     }
 }

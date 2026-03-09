@@ -15,7 +15,9 @@ public class ValidCaptchaTokenAttribute : ValidationAttribute
             return new ValidationResult("Captcha token is required.");
 
         if (token.Length < MinimumLength)
-            return new ValidationResult($"Captcha token must be at least {MinimumLength} characters.");
+            return new ValidationResult(
+                $"Captcha token must be at least {MinimumLength} characters."
+            );
 
         return ValidationResult.Success;
     }

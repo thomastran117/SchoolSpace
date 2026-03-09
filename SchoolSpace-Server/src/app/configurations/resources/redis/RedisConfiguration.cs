@@ -1,36 +1,34 @@
 using backend.app.configurations.environment;
 using backend.app.services.implementations;
 using backend.app.utilities.implementation;
-
 using Microsoft.Extensions.DependencyInjection.Extensions;
-
 using Polly;
 using Polly.Retry;
-
 using StackExchange.Redis;
 
 namespace backend.app.configurations.resources.redis
 {
     public static class RedisConfig
     {
-        private static readonly AsyncRetryPolicy _retryPolicy =
-            Policy
-                .Handle<RedisConnectionException>()
-                .Or<TimeoutException>()
-                .WaitAndRetryAsync(
-                    retryCount: 3,
-                    sleepDurationProvider: attempt =>
-                        TimeSpan.FromMilliseconds(200 * Math.Pow(2, attempt)),
-                    onRetry: (ex, delay, attempt, _) =>
-                    {
-                        Logger.Warn(
-                            $"Redis connection attempt {attempt} failed. Retrying in {delay.TotalMilliseconds} ms."
-                        );
-                    });
+        private static readonly AsyncRetryPolicy _retryPolicy = Policy
+            .Handle<RedisConnectionException>()
+            .Or<TimeoutException>()
+            .WaitAndRetryAsync(
+                retryCount: 3,
+                sleepDurationProvider: attempt =>
+                    TimeSpan.FromMilliseconds(200 * Math.Pow(2, attempt)),
+                onRetry: (ex, delay, attempt, _) =>
+                {
+                    Logger.Warn(
+                        $"Redis connection attempt {attempt} failed. Retrying in {delay.TotalMilliseconds} ms."
+                    );
+                }
+            );
 
         public static IServiceCollection AddAppRedis(
             this IServiceCollection services,
-            IConfiguration _)
+            IConfiguration _
+        )
         {
             var health = new RedisHealth();
             var noOp = new NoOpCacheService();
@@ -38,25 +36,29 @@ namespace backend.app.configurations.resources.redis
 
             try
             {
-                _retryPolicy.ExecuteAsync(async () =>
-                {
-                    var mux = await ConnectionMultiplexer.ConnectAsync(
-                        EnvironmentSetting.RedisConnection);
+                _retryPolicy
+                    .ExecuteAsync(async () =>
+                    {
+                        var mux = await ConnectionMultiplexer.ConnectAsync(
+                            EnvironmentSetting.RedisConnection
+                        );
 
-                    var db = mux.GetDatabase();
+                        var db = mux.GetDatabase();
 
-                    await db.PingAsync();
+                        await db.PingAsync();
 
-                    var resource = new RedisResource(mux);
-                    state.SwitchToRedis(new CacheService(resource));
+                        var resource = new RedisResource(mux);
+                        state.SwitchToRedis(new CacheService(resource));
 
-                    services.AddSingleton<IConnectionMultiplexer>(mux);
-                    services.AddSingleton(resource);
+                        services.AddSingleton<IConnectionMultiplexer>(mux);
+                        services.AddSingleton(resource);
 
-                    health.IsAvailable = true;
+                        health.IsAvailable = true;
 
-                    Logger.Info("Redis connection established successfully.");
-                }).GetAwaiter().GetResult();
+                        Logger.Info("Redis connection established successfully.");
+                    })
+                    .GetAwaiter()
+                    .GetResult();
             }
             catch (Exception ex)
             {

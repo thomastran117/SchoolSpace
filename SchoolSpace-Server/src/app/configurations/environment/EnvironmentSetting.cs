@@ -1,5 +1,4 @@
 using backend.app.utilities.implementation;
-
 using DotNetEnv;
 
 namespace backend.app.configurations.environment
@@ -34,15 +33,9 @@ namespace backend.app.configurations.environment
                 "Server=localhost;Port=3306;Database=database;User=root;Password=password123"
             );
 
-            _redisConnection = GetOrDefault(
-                "REDIS_URL",
-                "localhost:6379"
-            );
+            _redisConnection = GetOrDefault("REDIS_URL", "localhost:6379");
 
-            _rabbitConnection = GetOrDefault(
-                "RABBITMQ_URL",
-                "amqp://guest:guest@localhost:5672"
-            );
+            _rabbitConnection = GetOrDefault("RABBITMQ_URL", "amqp://guest:guest@localhost:5672");
 
             _jwtSecretKeyAccess = GetOrDefault(
                 "JWT_SECRET_ACCESS",
@@ -90,8 +83,11 @@ namespace backend.app.configurations.environment
                 dir = dir.Parent;
             }
 
-            Logger.Debug("No .env file found in directory hierarchy — using system environment variables.");
+            Logger.Debug(
+                "No .env file found in directory hierarchy — using system environment variables."
+            );
         }
+
         private static string? GetOptional(string key)
         {
             var val = Environment.GetEnvironmentVariable(key);
@@ -134,7 +130,7 @@ namespace backend.app.configurations.environment
             {
                 { "DB_CONNECTION_STRING", _dbConnectionString },
                 { "REDIS_CONNECTION", _redisConnection },
-                { "JWT_SECRET_KEY", _jwtSecretKeyAccess }
+                { "JWT_SECRET_KEY", _jwtSecretKeyAccess },
             };
 
             var missing = required

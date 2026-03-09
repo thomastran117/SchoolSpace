@@ -4,7 +4,7 @@ namespace backend.app.models.core
     {
         Student,
         Teacher,
-        Admin
+        Admin,
     }
 
     public enum UserStatus
@@ -26,7 +26,7 @@ namespace backend.app.models.core
         public string? AvatarUrl { get; set; }
         public string? Phone { get; set; }
         public string? MicrosoftId { get; set; }
-        public string? GoogleId{ get; set; }
+        public string? GoogleId { get; set; }
         public School? School { get; set; }
         public ICollection<Course> TaughtCourses { get; set; } = [];
         public ICollection<Enrollment> Enrollments { get; set; } = [];

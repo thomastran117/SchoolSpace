@@ -40,51 +40,64 @@ namespace backend.app.configurations.security
                     HttpOnly = false,
                     Secure = httpContext.Request.IsHttps,
                     SameSite = SameSiteMode.Lax,
-                    Path = "/"
-                });
+                    Path = "/",
+                }
+            );
         }
 
         public static IApplicationBuilder UseRefreshCsrfCookie(this IApplicationBuilder app)
         {
-            return app.Use(async (ctx, next) =>
-            {
-                var clientInfo = ctx.RequestServices.GetRequiredService<ClientRequestInfo>();
-                if (clientInfo.IsBrowserClient && IsRefreshEndpoint(ctx.Request))
+            return app.Use(
+                async (ctx, next) =>
                 {
-                    var antiforgery = ctx.RequestServices.GetRequiredService<IAntiforgery>();
-                    SetCsrfCookie(ctx, antiforgery);
-                }
+                    var clientInfo = ctx.RequestServices.GetRequiredService<ClientRequestInfo>();
+                    if (clientInfo.IsBrowserClient && IsRefreshEndpoint(ctx.Request))
+                    {
+                        var antiforgery = ctx.RequestServices.GetRequiredService<IAntiforgery>();
+                        SetCsrfCookie(ctx, antiforgery);
+                    }
 
-                await next();
-            });
+                    await next();
+                }
+            );
         }
 
         public static IApplicationBuilder UseRefreshCsrfValidation(this IApplicationBuilder app)
         {
-            return app.Use(async (ctx, next) =>
-            {
-                var clientInfo = ctx.RequestServices.GetRequiredService<ClientRequestInfo>();
-                if (clientInfo.IsBrowserClient
-                    && IsCsrfProtectedEndpoint(ctx.Request)
-                    && HttpMethods.IsPost(ctx.Request.Method))
+            return app.Use(
+                async (ctx, next) =>
                 {
-                    var antiforgery = ctx.RequestServices.GetRequiredService<IAntiforgery>();
-                    await antiforgery.ValidateRequestAsync(ctx);
-                }
+                    var clientInfo = ctx.RequestServices.GetRequiredService<ClientRequestInfo>();
+                    if (
+                        clientInfo.IsBrowserClient
+                        && IsCsrfProtectedEndpoint(ctx.Request)
+                        && HttpMethods.IsPost(ctx.Request.Method)
+                    )
+                    {
+                        var antiforgery = ctx.RequestServices.GetRequiredService<IAntiforgery>();
+                        await antiforgery.ValidateRequestAsync(ctx);
+                    }
 
-                await next();
-            });
+                    await next();
+                }
+            );
         }
 
         private static bool IsRefreshEndpoint(HttpRequest request)
         {
-            return request.Path.StartsWithSegments("/api/auth/refresh", StringComparison.OrdinalIgnoreCase);
+            return request.Path.StartsWithSegments(
+                "/api/auth/refresh",
+                StringComparison.OrdinalIgnoreCase
+            );
         }
 
         private static bool IsCsrfProtectedEndpoint(HttpRequest request)
         {
             return IsRefreshEndpoint(request)
-                || request.Path.StartsWithSegments("/api/auth/logout", StringComparison.OrdinalIgnoreCase);
+                || request.Path.StartsWithSegments(
+                    "/api/auth/logout",
+                    StringComparison.OrdinalIgnoreCase
+                );
         }
     }
 }

@@ -4,6 +4,6 @@ namespace backend.app.services.implementations
     {
         Cloudflare,
         Google,
-        HCaptcha
+        HCaptcha,
     }
 }

@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-
 using backend.app.errors.app;
 using backend.app.services.interfaces;
 using backend.app.utilities.interfaces;
@@ -23,7 +22,11 @@ namespace backend.app.services.implementations
         private readonly IEmailService _emailService;
         private readonly ICustomLogger _logger;
 
-        public LoginSecurityService(ICacheService cache, IEmailService emailService, ICustomLogger logger)
+        public LoginSecurityService(
+            ICacheService cache,
+            IEmailService emailService,
+            ICustomLogger logger
+        )
         {
             _cache = cache;
             _emailService = emailService;
@@ -51,11 +54,19 @@ namespace backend.app.services.implementations
             {
                 await LockAccountAsync(normalizedEmail);
                 await _cache.DeleteKeyAsync(key);
-                _logger.Warn($"[LoginSecurity] Account locked for {normalizedEmail} after {count} failed attempts from IP {ipAddress}.");
+                _logger.Warn(
+                    $"[LoginSecurity] Account locked for {normalizedEmail} after {count} failed attempts from IP {ipAddress}."
+                );
             }
         }
 
-        public async Task RecordSuccessfulLoginAsync(int userId, string email, string ipAddress, string clientName, string deviceType)
+        public async Task RecordSuccessfulLoginAsync(
+            int userId,
+            string email,
+            string ipAddress,
+            string clientName,
+            string deviceType
+        )
         {
             var normalizedEmail = NormalizeEmail(email);
             var failedKey = FailedAttemptsKeyPrefix + normalizedEmail;
@@ -74,14 +85,24 @@ namespace backend.app.services.implementations
 
                 if (!isFirstDevice)
                 {
-                    _logger.Info($"[LoginSecurity] New device detected for user {userId}: {fingerprint}");
+                    _logger.Info(
+                        $"[LoginSecurity] New device detected for user {userId}: {fingerprint}"
+                    );
                     try
                     {
-                        await _emailService.SendNewDeviceLoginEmailAsync(email, ipAddress, clientName, deviceType, DateTime.UtcNow);
+                        await _emailService.SendNewDeviceLoginEmailAsync(
+                            email,
+                            ipAddress,
+                            clientName,
+                            deviceType,
+                            DateTime.UtcNow
+                        );
                     }
                     catch (Exception ex)
                     {
-                        _logger.Error($"[LoginSecurity] Failed to send new device email for user {userId}: {ex.Message}");
+                        _logger.Error(
+                            $"[LoginSecurity] Failed to send new device email for user {userId}: {ex.Message}"
+                        );
                     }
                 }
             }
@@ -123,7 +144,9 @@ namespace backend.app.services.implementations
             }
             catch (Exception ex)
             {
-                _logger.Error($"[LoginSecurity] Failed to send account locked email to {normalizedEmail}: {ex.Message}");
+                _logger.Error(
+                    $"[LoginSecurity] Failed to send account locked email to {normalizedEmail}: {ex.Message}"
+                );
             }
         }
 
@@ -134,7 +157,11 @@ namespace backend.app.services.implementations
             return Convert.ToBase64String(bytes);
         }
 
-        private static string BuildFingerprint(string clientName, string deviceType, string ipAddress)
+        private static string BuildFingerprint(
+            string clientName,
+            string deviceType,
+            string ipAddress
+        )
         {
             return $"{clientName}:{deviceType}:{ipAddress}";
         }

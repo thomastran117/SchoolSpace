@@ -1,5 +1,4 @@
 using System.Text.Json;
-
 using backend.app.http;
 using backend.app.services.interfaces;
 using backend.main.dtos.responses.external;
@@ -15,28 +14,39 @@ namespace backend.app.services.implementations
         private readonly string? _captchaSecret;
         private static readonly JsonSerializerOptions JsonOpts = new(JsonSerializerDefaults.Web);
 
-        public GoogleCaptchaService(IExternalApiClient apiClient, ILogger<GoogleCaptchaService> logger, IConfiguration config)
+        public GoogleCaptchaService(
+            IExternalApiClient apiClient,
+            ILogger<GoogleCaptchaService> logger,
+            IConfiguration config
+        )
         {
             _apiClient = apiClient;
             _logger = logger;
             _captchaSecret = config["GoogleCaptcha:Secret"] ?? config["GOOGLE_CAPTCHA_SECRET"];
         }
 
-        public async Task<bool> VerifyCaptchaAsync(string token, CancellationToken cancellationToken = default)
+        public async Task<bool> VerifyCaptchaAsync(
+            string token,
+            CancellationToken cancellationToken = default
+        )
         {
             if (string.IsNullOrWhiteSpace(_captchaSecret))
             {
-                _logger.LogWarning("[Captcha] Google Captcha secret not configured. Skipping validation.");
+                _logger.LogWarning(
+                    "[Captcha] Google Captcha secret not configured. Skipping validation."
+                );
                 return true;
             }
 
             try
             {
-                using var form = new FormUrlEncodedContent(new Dictionary<string, string>
-                {
-                    ["secret"] = _captchaSecret!,
-                    ["response"] = token
-                });
+                using var form = new FormUrlEncodedContent(
+                    new Dictionary<string, string>
+                    {
+                        ["secret"] = _captchaSecret!,
+                        ["response"] = token,
+                    }
+                );
 
                 using var resp = await _apiClient.PostAsync(VerifyUrl, form, cancellationToken);
 
@@ -52,11 +62,17 @@ namespace backend.app.services.implementations
                 }
 
                 await using var stream = await resp.Content.ReadAsStreamAsync(cancellationToken);
-                var payload = await JsonSerializer.DeserializeAsync<GoogleCaptchaResponse>(stream, JsonOpts, cancellationToken);
+                var payload = await JsonSerializer.DeserializeAsync<GoogleCaptchaResponse>(
+                    stream,
+                    JsonOpts,
+                    cancellationToken
+                );
 
                 if (payload == null)
                 {
-                    _logger.LogError("[Captcha] Google response deserialized to null. Allowing login (fail-open).");
+                    _logger.LogError(
+                        "[Captcha] Google response deserialized to null. Allowing login (fail-open)."
+                    );
                     return true;
                 }
 
@@ -64,7 +80,9 @@ namespace backend.app.services.implementations
                 {
                     _logger.LogWarning(
                         "[Captcha] Captcha failed (explicit). Errors: {Errors}",
-                        payload.ErrorCodes is not null ? string.Join(",", payload.ErrorCodes) : "none"
+                        payload.ErrorCodes is not null
+                            ? string.Join(",", payload.ErrorCodes)
+                            : "none"
                     );
                     return false;
                 }
@@ -73,7 +91,10 @@ namespace backend.app.services.implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[Captcha] Verification request failed. Allowing login (fail-open).");
+                _logger.LogError(
+                    ex,
+                    "[Captcha] Verification request failed. Allowing login (fail-open)."
+                );
                 return true;
             }
         }

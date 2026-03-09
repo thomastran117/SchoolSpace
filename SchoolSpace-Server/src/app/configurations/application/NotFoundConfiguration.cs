@@ -4,25 +4,29 @@ namespace backend.app.configurations.application
     {
         public static IApplicationBuilder UseJsonNotFound(this IApplicationBuilder app)
         {
-            return app.Use(async (context, next) =>
-            {
-                await next();
-
-                if (context.Response.HasStarted)
-                    return;
-
-                if (context.Response.StatusCode == StatusCodes.Status404NotFound)
+            return app.Use(
+                async (context, next) =>
                 {
-                    context.Response.ContentType = "application/json";
+                    await next();
 
-                    await context.Response.WriteAsJsonAsync(new
+                    if (context.Response.HasStarted)
+                        return;
+
+                    if (context.Response.StatusCode == StatusCodes.Status404NotFound)
                     {
-                        error = "Resource not found",
-                        code = 404,
-                        path = context.Request.Path.Value
-                    });
+                        context.Response.ContentType = "application/json";
+
+                        await context.Response.WriteAsJsonAsync(
+                            new
+                            {
+                                error = "Resource not found",
+                                code = 404,
+                                path = context.Request.Path.Value,
+                            }
+                        );
+                    }
                 }
-            });
+            );
         }
     }
 }

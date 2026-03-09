@@ -22,7 +22,7 @@ namespace backend.app.services.implementations
             {
                 Email = request.Email,
                 Topic = request.Topic,
-                Description = request.Description
+                Description = request.Description,
             };
 
             contact = await _contactRepository.CreateAsync(contact);
@@ -52,7 +52,7 @@ namespace backend.app.services.implementations
                 Email = contact.Email,
                 Topic = contact.Topic,
                 Description = contact.Description,
-                CreatedAt = contact.CreatedAt
+                CreatedAt = contact.CreatedAt,
             };
         }
     }

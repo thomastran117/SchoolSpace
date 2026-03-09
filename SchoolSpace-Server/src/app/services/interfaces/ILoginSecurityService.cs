@@ -4,7 +4,13 @@ namespace backend.app.services.interfaces
     {
         Task EnsureAccountNotLockedAsync(string email);
         Task RecordFailedAttemptAsync(string email, string ipAddress);
-        Task RecordSuccessfulLoginAsync(int userId, string email, string ipAddress, string clientName, string deviceType);
+        Task RecordSuccessfulLoginAsync(
+            int userId,
+            string email,
+            string ipAddress,
+            string clientName,
+            string deviceType
+        );
         Task<bool> UnlockAccountAsync(string unlockToken);
     }
 }

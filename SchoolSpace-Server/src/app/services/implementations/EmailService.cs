@@ -1,7 +1,6 @@
 using backend.app.configurations.environment;
 using backend.app.services.interfaces;
 using backend.app.utilities.interfaces;
-
 using MailKit.Net.Smtp;
 using MimeKit;
 
@@ -36,7 +35,13 @@ namespace backend.app.services.implementations
             await SendEmailAsync(recipientEmail, subject, body);
         }
 
-        public async Task SendNewDeviceLoginEmailAsync(string recipientEmail, string ipAddress, string clientName, string deviceType, DateTime loginTime)
+        public async Task SendNewDeviceLoginEmailAsync(
+            string recipientEmail,
+            string ipAddress,
+            string clientName,
+            string deviceType,
+            DateTime loginTime
+        )
         {
             var subject = "SchoolSpace - New Device Login Detected";
             var body = $"""
@@ -67,9 +72,11 @@ namespace backend.app.services.implementations
             var senderEmail = EnvironmentSetting.Email;
             var senderPassword = EnvironmentSetting.Password;
 
-            if (string.IsNullOrWhiteSpace(smtpServer) ||
-                string.IsNullOrWhiteSpace(senderEmail) ||
-                string.IsNullOrWhiteSpace(senderPassword))
+            if (
+                string.IsNullOrWhiteSpace(smtpServer)
+                || string.IsNullOrWhiteSpace(senderEmail)
+                || string.IsNullOrWhiteSpace(senderPassword)
+            )
             {
                 _logger.Warn("[EmailService] SMTP not configured — skipping email send.");
                 return;
@@ -84,14 +91,20 @@ namespace backend.app.services.implementations
             using var client = new SmtpClient();
             try
             {
-                await client.ConnectAsync(smtpServer, EnvironmentSetting.SmtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                await client.ConnectAsync(
+                    smtpServer,
+                    EnvironmentSetting.SmtpPort,
+                    MailKit.Security.SecureSocketOptions.StartTls
+                );
                 await client.AuthenticateAsync(senderEmail, senderPassword);
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
             }
             catch (Exception ex)
             {
-                _logger.Error($"[EmailService] Failed to send email to {recipientEmail}: {ex.Message}");
+                _logger.Error(
+                    $"[EmailService] Failed to send email to {recipientEmail}: {ex.Message}"
+                );
             }
         }
     }

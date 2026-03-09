@@ -11,7 +11,8 @@ namespace backend.main.Services
 
         public OAuthService(
             IGoogleOAuthService googleOAuthService,
-            IMicrosoftOAuthService microsoftOAuthService)
+            IMicrosoftOAuthService microsoftOAuthService
+        )
         {
             _googleOAuthService = googleOAuthService;
             _microsoftOAuthService = microsoftOAuthService;
@@ -22,10 +23,10 @@ namespace backend.main.Services
             throw new backend.app.errors.http.NotImplementedException();
         }
 
-        public Task<OAuthUser> VerifyGoogleTokenAsync(string googleToken)
-            => _googleOAuthService.VerifyTokenAsync(googleToken);
+        public Task<OAuthUser> VerifyGoogleTokenAsync(string googleToken) =>
+            _googleOAuthService.VerifyTokenAsync(googleToken);
 
-        public Task<OAuthUser> VerifyMicrosoftTokenAsync(string microsoftToken)
-            => _microsoftOAuthService.VerifyTokenAsync(microsoftToken);
+        public Task<OAuthUser> VerifyMicrosoftTokenAsync(string microsoftToken) =>
+            _microsoftOAuthService.VerifyTokenAsync(microsoftToken);
     }
 }

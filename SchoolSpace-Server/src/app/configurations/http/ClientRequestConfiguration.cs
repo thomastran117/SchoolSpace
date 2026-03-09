@@ -4,7 +4,9 @@ namespace backend.app.configurations.application
 {
     public static class ClientRequestConfiguration
     {
-        public static IServiceCollection AddClientRequestInspection(this IServiceCollection services)
+        public static IServiceCollection AddClientRequestInspection(
+            this IServiceCollection services
+        )
         {
             services.AddScoped<ClientRequestInfo>();
             return services;
@@ -57,18 +59,31 @@ namespace backend.app.configurations.application
             if (string.IsNullOrWhiteSpace(userAgent))
                 return "Unknown";
 
-            if (userAgent.Contains("Edg/", StringComparison.OrdinalIgnoreCase)) return "Edge";
-            if (userAgent.Contains("OPR/", StringComparison.OrdinalIgnoreCase) ||
-                userAgent.Contains("Opera", StringComparison.OrdinalIgnoreCase)) return "Opera";
-            if (userAgent.Contains("Chrome/", StringComparison.OrdinalIgnoreCase)) return "Chrome";
-            if (userAgent.Contains("Safari/", StringComparison.OrdinalIgnoreCase) &&
-                !userAgent.Contains("Chrome", StringComparison.OrdinalIgnoreCase)) return "Safari";
-            if (userAgent.Contains("Firefox/", StringComparison.OrdinalIgnoreCase)) return "Firefox";
+            if (userAgent.Contains("Edg/", StringComparison.OrdinalIgnoreCase))
+                return "Edge";
+            if (
+                userAgent.Contains("OPR/", StringComparison.OrdinalIgnoreCase)
+                || userAgent.Contains("Opera", StringComparison.OrdinalIgnoreCase)
+            )
+                return "Opera";
+            if (userAgent.Contains("Chrome/", StringComparison.OrdinalIgnoreCase))
+                return "Chrome";
+            if (
+                userAgent.Contains("Safari/", StringComparison.OrdinalIgnoreCase)
+                && !userAgent.Contains("Chrome", StringComparison.OrdinalIgnoreCase)
+            )
+                return "Safari";
+            if (userAgent.Contains("Firefox/", StringComparison.OrdinalIgnoreCase))
+                return "Firefox";
 
-            if (userAgent.Contains("PostmanRuntime", StringComparison.OrdinalIgnoreCase)) return "Postman";
-            if (userAgent.Contains("curl/", StringComparison.OrdinalIgnoreCase)) return "cURL";
-            if (userAgent.Contains("axios/", StringComparison.OrdinalIgnoreCase)) return "Axios";
-            if (userAgent.Contains("HttpClient", StringComparison.OrdinalIgnoreCase)) return "HttpClient";
+            if (userAgent.Contains("PostmanRuntime", StringComparison.OrdinalIgnoreCase))
+                return "Postman";
+            if (userAgent.Contains("curl/", StringComparison.OrdinalIgnoreCase))
+                return "cURL";
+            if (userAgent.Contains("axios/", StringComparison.OrdinalIgnoreCase))
+                return "Axios";
+            if (userAgent.Contains("HttpClient", StringComparison.OrdinalIgnoreCase))
+                return "HttpClient";
 
             return userAgent.Split('/')[0].Trim();
         }
@@ -79,25 +94,33 @@ namespace backend.app.configurations.application
             if (string.IsNullOrWhiteSpace(userAgent))
                 return "Unknown";
 
-            if (userAgent.Contains("Mobi", StringComparison.OrdinalIgnoreCase) ||
-                userAgent.Contains("Android", StringComparison.OrdinalIgnoreCase) &&
-                !userAgent.Contains("Tablet", StringComparison.OrdinalIgnoreCase))
+            if (
+                userAgent.Contains("Mobi", StringComparison.OrdinalIgnoreCase)
+                || userAgent.Contains("Android", StringComparison.OrdinalIgnoreCase)
+                    && !userAgent.Contains("Tablet", StringComparison.OrdinalIgnoreCase)
+            )
                 return "Mobile";
 
-            if (userAgent.Contains("Tablet", StringComparison.OrdinalIgnoreCase) ||
-                userAgent.Contains("iPad", StringComparison.OrdinalIgnoreCase))
+            if (
+                userAgent.Contains("Tablet", StringComparison.OrdinalIgnoreCase)
+                || userAgent.Contains("iPad", StringComparison.OrdinalIgnoreCase)
+            )
                 return "Tablet";
 
-            if (userAgent.Contains("Windows", StringComparison.OrdinalIgnoreCase) ||
-                userAgent.Contains("Macintosh", StringComparison.OrdinalIgnoreCase) ||
-                userAgent.Contains("Linux", StringComparison.OrdinalIgnoreCase) &&
-                !userAgent.Contains("Android", StringComparison.OrdinalIgnoreCase))
+            if (
+                userAgent.Contains("Windows", StringComparison.OrdinalIgnoreCase)
+                || userAgent.Contains("Macintosh", StringComparison.OrdinalIgnoreCase)
+                || userAgent.Contains("Linux", StringComparison.OrdinalIgnoreCase)
+                    && !userAgent.Contains("Android", StringComparison.OrdinalIgnoreCase)
+            )
                 return "Desktop";
 
-            if (userAgent.Contains("PostmanRuntime", StringComparison.OrdinalIgnoreCase) ||
-                userAgent.Contains("curl/", StringComparison.OrdinalIgnoreCase) ||
-                userAgent.Contains("HttpClient", StringComparison.OrdinalIgnoreCase) ||
-                userAgent.Contains("axios/", StringComparison.OrdinalIgnoreCase))
+            if (
+                userAgent.Contains("PostmanRuntime", StringComparison.OrdinalIgnoreCase)
+                || userAgent.Contains("curl/", StringComparison.OrdinalIgnoreCase)
+                || userAgent.Contains("HttpClient", StringComparison.OrdinalIgnoreCase)
+                || userAgent.Contains("axios/", StringComparison.OrdinalIgnoreCase)
+            )
                 return "API Client";
 
             return "Unknown";

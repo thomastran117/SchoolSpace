@@ -8,6 +8,6 @@ namespace backend.app.dtos.request.auth
         [Required]
         [StrongPassword(MinimumLength = 8)]
         [StringLength(30)]
-        public required string Password{ get; set; }
+        public required string Password { get; set; }
     }
 }

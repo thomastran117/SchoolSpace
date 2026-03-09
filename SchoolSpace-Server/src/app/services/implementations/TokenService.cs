@@ -1,13 +1,11 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-
 using backend.app.configurations.environment;
 using backend.app.models.core;
 using backend.app.services.interfaces;
-
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace backend.app.services.implementations
 {
@@ -29,7 +27,8 @@ namespace backend.app.services.implementations
         {
             _cache = cache;
             _signingKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(EnvironmentSetting.JwtSecretKeyAccess));
+                Encoding.UTF8.GetBytes(EnvironmentSetting.JwtSecretKeyAccess)
+            );
         }
 
         public string GenerateAccessToken(User user)
@@ -38,7 +37,7 @@ namespace backend.app.services.implementations
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.Email),
-                new(ClaimTypes.Role, user.Usertype.ToString())
+                new(ClaimTypes.Role, user.Usertype.ToString()),
             };
 
             var creds = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
@@ -80,7 +79,9 @@ namespace backend.app.services.implementations
             return int.TryParse(value, out var userId) ? userId : null;
         }
 
-        public async Task<(string NewRefreshToken, int UserId)?> RotateRefreshTokenAsync(string refreshToken)
+        public async Task<(string NewRefreshToken, int UserId)?> RotateRefreshTokenAsync(
+            string refreshToken
+        )
         {
             var userId = await ValidateRefreshToken(refreshToken);
             if (userId is null)

@@ -6,6 +6,7 @@ namespace backend.app.models.other
         public string Email { get; set; }
         public string Name { get; set; }
         public string Provider { get; set; }
+
         public OAuthUser(string Id, string Email, string Name, string Provider)
         {
             this.Id = Id;
