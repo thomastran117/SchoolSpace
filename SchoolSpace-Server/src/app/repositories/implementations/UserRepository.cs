@@ -91,7 +91,6 @@ namespace backend.app.repositories.implementations
                 return false;
 
             user.Status = UserStatus.SoftDelete;
-            user.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return true;
@@ -181,7 +180,6 @@ namespace backend.app.repositories.implementations
                 return false;
 
             existing.Status = UserStatus.SoftDelete;
-            existing.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return true;

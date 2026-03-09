@@ -8,6 +8,7 @@ namespace backend.app.configurations.resources.database
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<School> Schools { get; set; } = null!;
         public DbSet<Contact> Contacts { get; set; } = null!;
+        public DbSet<Course> Courses { get; set; } = null!;
         public DbSet<Report> Reports { get; set; } = null!;
 
         public AppDatabaseContext(DbContextOptions<AppDatabaseContext> options)
@@ -17,6 +18,27 @@ namespace backend.app.configurations.resources.database
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDatabaseContext).Assembly);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var now = DateTime.UtcNow;
+
+            foreach (var entry in ChangeTracker.Entries<ITimestamped>())
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedAt = now;
+                    entry.Entity.UpdatedAt = now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Entity.UpdatedAt = now;
+                    entry.Property(nameof(ITimestamped.CreatedAt)).IsModified = false;
+                }
+            }
+
+            return base.SaveChangesAsync(cancellationToken);
         }
     }
 }

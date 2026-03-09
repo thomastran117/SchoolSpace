@@ -45,7 +45,6 @@ namespace backend.app.repositories.implementations
 
             existing.Reason = report.Reason;
             existing.Status = report.Status;
-            existing.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return existing;

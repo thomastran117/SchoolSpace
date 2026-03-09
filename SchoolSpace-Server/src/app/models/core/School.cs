@@ -7,7 +7,7 @@ namespace backend.app.models.core
         SoftDelete,
     }
 
-    public class School
+    public class School : ITimestamped
     {
         public int Id { get; set; }
         public int Name { get; set; }
@@ -17,8 +17,9 @@ namespace backend.app.models.core
         public required string ImageUrl { get; set; }
         public int TeacherNumber { get; set; } = 0;
         public int CoursesNumber { get; set; } = 0;
+        public ICollection<Course> Courses { get; set; } = [];
         public SchoolStatus Status { get; set; } = SchoolStatus.Active;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }
