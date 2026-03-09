@@ -10,6 +10,8 @@ using backend.app.utilities.implementation;
 using backend.app.utilities.interfaces;
 using backend.main.Services;
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace backend.app.configurations.application
 {
     public static class DependencyInjection
@@ -17,7 +19,21 @@ namespace backend.app.configurations.application
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddSingleton<ICacheService, ReconnectableCacheService>();
-            services.AddTransient<ICaptchaService, GoogleCaptchaService>();
+            services.AddTransient<ICaptchaService>(sp =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+                var raw = config["Captcha:Provider"] ?? config["CAPTCHA_PROVIDER"] ?? "cloudflare";
+
+                if (!Enum.TryParse<CaptchaProvider>(raw, ignoreCase: true, out var provider))
+                    provider = CaptchaProvider.Cloudflare;
+
+                return provider switch
+                {
+                    CaptchaProvider.Google   => ActivatorUtilities.CreateInstance<GoogleCaptchaService>(sp),
+                    CaptchaProvider.HCaptcha => ActivatorUtilities.CreateInstance<HCaptchaService>(sp),
+                    _                        => ActivatorUtilities.CreateInstance<CloudflareTurnstileCaptchaService>(sp),
+                };
+            });
             services.AddTransient<IGoogleOAuthService, GoogleOAuthService>();
             services.AddTransient<IMicrosoftOAuthService, MicrosoftOAuthService>();
             services.AddTransient<IOAuthService, OAuthService>();
