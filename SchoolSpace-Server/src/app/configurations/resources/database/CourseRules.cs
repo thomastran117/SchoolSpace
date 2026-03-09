@@ -16,7 +16,7 @@ namespace backend.app.configurations.resources.database
                             .IsRequired();
 
                     builder.HasOne(c => c.Teacher)
-                            .WithMany(u => u.Courses)
+                            .WithMany(u => u.TaughtCourses)
                             .HasForeignKey(c => c.TeacherId)
                             .OnDelete(DeleteBehavior.Restrict);
 

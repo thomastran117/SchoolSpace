@@ -28,7 +28,8 @@ namespace backend.app.models.core
         public string? MicrosoftId { get; set; }
         public string? GoogleId{ get; set; }
         public School? School { get; set; }
-        public ICollection<Course> Courses { get; set; } = [];
+        public ICollection<Course> TaughtCourses { get; set; } = [];
+        public ICollection<Enrollment> Enrollments { get; set; } = [];
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
