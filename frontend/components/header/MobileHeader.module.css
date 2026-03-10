@@ -1,0 +1,199 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap');
+
+/* ─── Root ──────────────────────────────────────────────── */
+.header {
+  font-family: 'Sora', sans-serif;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(110, 86, 207, 0.10);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow:
+    0 1px 0 0 rgba(110, 86, 207, 0.07),
+    0 4px 24px 0 rgba(110, 86, 207, 0.04);
+  width: 100%;
+  /* Visible on mobile only — DesktopHeader takes over above 768px */
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .header { display: none; }
+}
+
+/* ─── Top bar ───────────────────────────────────────────── */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 20px;
+}
+
+/* ─── Logo ──────────────────────────────────────────────── */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logoMark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7c5cfc 0%, #5b3fc8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(91, 63, 200, 0.3);
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f0b1e;
+  letter-spacing: -0.03em;
+}
+
+/* ─── Burger ────────────────────────────────────────────── */
+.burger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  transition: background 0.15s ease;
+}
+
+.burger:hover {
+  background: rgba(110, 86, 207, 0.07);
+}
+
+.burgerInner {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 20px;
+  height: 14px;
+}
+
+.burgerLine {
+  display: block;
+  height: 1.5px;
+  width: 100%;
+  background: #0f0b1e;
+  border-radius: 2px;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+  transform-origin: center;
+}
+
+.burgerLine.open1 { transform: rotate(45deg) translate(4.5px, 4.5px); }
+.burgerLine.open2 { opacity: 0; transform: scaleX(0); }
+.burgerLine.open3 { transform: rotate(-45deg) translate(4.5px, -4.5px); }
+
+/* ─── Slide-down drawer ─────────────────────────────────── */
+.drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+  border-top: 1px solid rgba(110, 86, 207, 0.09);
+}
+
+.drawerOpen {
+  grid-template-rows: 1fr;
+}
+
+.drawerInner {
+  overflow: hidden;
+}
+
+.drawerContent {
+  padding: 14px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ─── Drawer search ─────────────────────────────────────── */
+.drawerSearch {
+  margin-bottom: 10px;
+}
+
+/* ─── Drawer nav ────────────────────────────────────────── */
+.drawerNav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.drawerLink {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3d3552;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.drawerLink:hover {
+  color: #5b3fc8;
+  background: rgba(110, 86, 207, 0.07);
+}
+
+/* ─── Drawer actions ────────────────────────────────────── */
+.drawerActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(110, 86, 207, 0.09);
+}
+
+.drawerSignIn {
+  flex: 1;
+  text-align: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3d3552;
+  padding: 9px;
+  border-radius: 8px;
+  background: rgba(110, 86, 207, 0.06);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.drawerSignIn:hover {
+  background: rgba(110, 86, 207, 0.12);
+  color: #5b3fc8;
+}
+
+.drawerCta {
+  flex: 1;
+  text-align: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+  background: #5b3fc8;
+  padding: 9px;
+  border-radius: 8px;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(91, 63, 200, 0.3);
+  transition: background 0.15s ease;
+}
+
+.drawerCta:hover {
+  background: #4b30b0;
+}

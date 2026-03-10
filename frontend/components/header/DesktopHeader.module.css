@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap');
+
+/* ─── Root ──────────────────────────────────────────────── */
+.header {
+  font-family: 'Sora', sans-serif;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(110, 86, 207, 0.10);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow:
+    0 1px 0 0 rgba(110, 86, 207, 0.07),
+    0 4px 24px 0 rgba(110, 86, 207, 0.04);
+  width: 100%;
+  /* Hidden on mobile — MobileHeader takes over */
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .header { display: block; }
+}
+
+/* ─── Layout ────────────────────────────────────────────── */
+.inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  height: 60px;
+  gap: 12px;
+}
+
+/* ─── Logo ──────────────────────────────────────────────── */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logoMark {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #7c5cfc 0%, #5b3fc8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(91, 63, 200, 0.3);
+  flex-shrink: 0;
+}
+
+.logoText {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f0b1e;
+  letter-spacing: -0.03em;
+}
+
+/* ─── Nav ───────────────────────────────────────────────── */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.navLink {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3d3552;
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: color 0.15s ease, background 0.15s ease;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.navLink:hover {
+  color: #5b3fc8;
+  background: rgba(110, 86, 207, 0.07);
+}
+
+/* ─── Search ────────────────────────────────────────────── */
+.searchWrap {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 420px;
+}
+
+/* ─── Actions ───────────────────────────────────────────── */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.signIn {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3d3552;
+  padding: 7px 16px;
+  border-radius: 8px;
+  transition: color 0.15s ease, background 0.15s ease;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.signIn:hover {
+  color: #5b3fc8;
+  background: rgba(110, 86, 207, 0.07);
+}
+
+.cta {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+  background: #5b3fc8;
+  padding: 7px 18px;
+  border-radius: 8px;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  box-shadow:
+    0 1px 3px rgba(91, 63, 200, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.cta:hover {
+  background: #4b30b0;
+  box-shadow:
+    0 3px 10px rgba(91, 63, 200, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: translateY(-0.5px);
+}
