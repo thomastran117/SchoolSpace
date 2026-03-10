@@ -11,8 +11,8 @@ namespace backend.app.services.interfaces
             string captcha,
             bool rememberMe = false
         );
-        Task<AuthResult?> SignupAsync(string email, string password, string role, string captcha);
-        Task<bool> VerifyAsync(string verificationToken);
+        Task<bool> SignupAsync(string email, string password, string role, string captcha);
+        Task<AuthResult?> VerifyAsync(string verificationToken);
         Task<bool> ForgotPasswordAsync(string email);
         Task<bool> ChangePasswordAsync(string verificationToken, string newPassword);
         Task<AuthResult?> RefreshAsync(string refreshToken);

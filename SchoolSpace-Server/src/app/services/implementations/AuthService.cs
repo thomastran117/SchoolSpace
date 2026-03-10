@@ -15,6 +15,7 @@ namespace backend.app.services.implementations
         private readonly ITokenService _tokenService;
         private readonly IOAuthService _oauthService;
         private readonly ICaptchaService _captchaService;
+        private readonly IEmailService _emailService;
         private readonly ICustomLogger _logger;
 
         public AuthService(
@@ -67,7 +68,7 @@ namespace backend.app.services.implementations
             }
         }
 
-        public async Task<AuthResult?> SignupAsync(
+        public async Task<bool> SignupAsync(
             string email,
             string password,
             string role,
@@ -87,13 +88,15 @@ namespace backend.app.services.implementations
                     Email = email,
                     Password = hashedPassword,
                     Usertype = selectedRole,
-                    Status = UserStatus.Active,
+                    Status = UserStatus.Inactive,
                     Username = email,
                 };
 
                 user = await _userRepository.CreateUserAsync(user);
 
-                return await BuildAuthResultAsync(user);
+                await _tokenService.GenerateVerificationToken(user);
+
+                return true;
             }
             catch (Exception e)
             {
@@ -105,7 +108,7 @@ namespace backend.app.services.implementations
             }
         }
 
-        public async Task<bool> VerifyAsync(string verificationToken)
+        public async Task<AuthResult?> VerifyAsync(string verificationToken)
         {
             try
             {
@@ -137,14 +140,14 @@ namespace backend.app.services.implementations
                     UpdatedAt = DateTime.UtcNow,
                 };
 
-                return await _userRepository.UpdatePartialAsync(updated) is not null;
+                return await BuildAuthResultAsync(updated);
             }
             catch (Exception e)
             {
                 if (e is AppException)
                     throw;
 
-                _logger.Error($"[AuthService] LoginAsync failed: {e}");
+                _logger.Error($"[AuthService] VerifyAsync failed: {e}");
                 throw new InternalServerErrorException();
             }
         }
