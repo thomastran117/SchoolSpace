@@ -110,7 +110,7 @@ jobs:
               "## Stack-Specific Notes section:\n" +
               "Only include subsections relevant to what changed in the diff. Choose from:\n\n" +
 
-              "### Angular / TypeScript\n" +
+              "### React / TypeScript\n" +
               "Review for: avoid `any` types, component structure, hook correctness, prop drilling, " +
               "accessibility (a11y), and patterns suitable for a learning platform UI.\n\n" +
 
