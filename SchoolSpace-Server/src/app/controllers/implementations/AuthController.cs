@@ -69,13 +69,16 @@ namespace backend.app.implementations.Controllers
         {
             try
             {
-                var result = await _authService.SignupAsync(
+                await _authService.SignupAsync(
                     request.Email,
                     request.Password,
                     request.Role,
                     request.Captcha
                 );
-                return BuildAuthResponse(result, StatusCodes.Status201Created);
+                return StatusCode(
+                    StatusCodes.Status201Created,
+                    new { message = "Account created successfully. Please check your email to verify your account." }
+                );
             }
             catch (Exception e)
             {
